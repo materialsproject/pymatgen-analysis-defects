@@ -8,12 +8,12 @@ import os
 
 SETUP_PTH = os.path.dirname(os.path.abspath(__file__))
 
-with open(os.path.join(SETUP_PTH, "README.rst")) as f:
+with open(os.path.join(SETUP_PTH, "README.md")) as f:
     desc = f.read()
 
 
 setup(
-    name="pymatgen-analysis-myaddon",
+    name="pymatgen-analysis-defects",
     packages=find_namespace_packages(include=["pymatgen.analysis.*"]),
     version="0.0.1",
     install_requires=["pymatgen>=2022.0.3"],
@@ -22,7 +22,7 @@ setup(
     author="materials virtual lab",
     author_email="ongsp@eng.ucsd.edu",
     maintainer="materials virtual lab",
-    url="https://github.com/materialsproject/pymatgen-addon-template",
+    url="https://github.com/materialsproject/pymatgen-analysis-defects",
     license="BSD",
     description="A template for creating add-ons for pymatgen.",
     long_description=desc,
