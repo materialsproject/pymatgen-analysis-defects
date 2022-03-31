@@ -30,6 +30,7 @@ jobs:
           pip install -r requirements-ci.txt
           pip install -e .
 
+
       - name: Lint
         run: |
           pre-commit install
