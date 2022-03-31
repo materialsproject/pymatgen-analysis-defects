@@ -3,6 +3,9 @@ name: pre-commit-auto-update
 on:
   schedule:
     - cron: '0 0 1,14,28 * *'
+  push:
+    branches:
+      - main
 
 jobs:
   auto-update:
