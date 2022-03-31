@@ -1,25 +1,14 @@
 # %%
-from collections import namedtuple
 import logging
-from abc import ABCMeta, abstractmethod
-from dataclasses import dataclass
-from functools import lru_cache
-from types import NotImplementedType
+from collections import namedtuple
 from typing import List
 
 import numpy as np
-from monty.json import MontyDecoder, MSONable
-
-from pymatgen.core.composition import Composition
-from pymatgen.core.structure import PeriodicSite, Structure
-from pymatgen.core.units import kb
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-
-from pymatgen.transformations.advanced_transformations import CubicSupercellTransformation
-from pymatgen.io.ase import AseAtomsAdaptor
 from dscribe.descriptors import SOAP
-
-from pymatgen.ext.matproj import MPRester
+from monty.json import MSONable
+from pymatgen.core.structure import Structure
+from pymatgen.io.ase import AseAtomsAdaptor
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 __author__ = "Jimmy Shen"
 __copyright__ = "Copyright 2018, The Materials Project"
@@ -33,19 +22,22 @@ DUMMY_SPECIES = "Si"
 SiteVec = namedtuple("SiteVec", ["species", "site", "vec"])
 SiteGroup = namedtuple("SiteGroup", ["species", "similar_sites", "vec"])
 
+
 class DefectSiteFinder(MSONable):
     """
     Find the location of a defect with no pior knowledge
     """
+
     def __init__(self, symprec=0.01, angle_tolerance=5.0):
         """
         Args:
             symprec (float): Tolerance for symmetry finding
             angle_tolerance (float): Angle tolerance for symmetry finding
+
         """
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
-    
+
     def get_clustered_deviation_and_sites(self, defect_structure: Structure, base_structure: Structure):
         """
         Get the position of the defect in the defect structure
@@ -53,15 +45,20 @@ class DefectSiteFinder(MSONable):
             defect_structure (Structure): Defect structure
             base_structure (Structure): Base structure
         """
-        pristine_groups = get_site_groups(struct=base_structure, symprec=self.symprec, angle_tolerance=self.angle_tolerance)
+        pristine_groups = get_site_groups(
+            struct=base_structure, symprec=self.symprec, angle_tolerance=self.angle_tolerance
+        )
         defect_vecs = get_site_vecs(defect_structure)
         res = []
-        for i,v in enumerate(defect_vecs):
-            best_m, best_s, = best_match(v, pristine_groups)
+        for i, v in enumerate(defect_vecs):
+            (
+                best_m,
+                best_s,
+            ) = best_match(v, pristine_groups)
             assert v.species == best_m.species
             # print(i, np.abs(best_s - 1))
             res.append((i, np.abs(best_s - 1)))
-        
+
         res.sort(key=lambda x: x[1], reverse=True)
         deviations = [r[1] for r in res]
         bound = _get_broundary(deviations)
@@ -77,37 +74,35 @@ class DefectSiteFinder(MSONable):
         fres, fdeviations = self.get_clustered_deviation_and_sites(defect_structure, base_structure)
         positions = [defect_structure[ires[0]].frac_coords for ires in fres]
         return get_weighted_average_position(defect_structure.lattice, positions, fdeviations)
-    
+
     def get_impurity_position(self, defect_structure: Structure, base_structure: Structure):
         """
         Get the position of an impurity defect
         """
         raise NotImplementedError("Impurity positioning not implemented")
-        
+
+
 # %%
 def get_site_groups(struct, symprec=0.01, angle_tolerance=5.0) -> List[SiteGroup]:
     """
     Group the sites in the structure by symmetry and return a list of SiteGroupVec namedtuple
-    
+
     Args:
         struct (Structure): Structure
         symprec (float): Tolerance for symmetry finding
         angle_tolerance (float): Angle tolerance for symmetry finding
-    
+
     """
-    sa = SpacegroupAnalyzer(struct,symprec=symprec, angle_tolerance=angle_tolerance)
+    sa = SpacegroupAnalyzer(struct, symprec=symprec, angle_tolerance=angle_tolerance)
     sstruct = sa.get_symmetrized_structure()
     site_group = []
     groups = sstruct.equivalent_indices
     soap_vec = get_soap_vec(struct)
     for g in groups:
-        sg = SiteGroup(
-            species=sstruct[g[0]].species_string,
-            similar_sites=g,
-            vec=soap_vec[g[0]]
-        )
+        sg = SiteGroup(species=sstruct[g[0]].species_string, similar_sites=g, vec=soap_vec[g[0]])
         site_group.append(sg)
     return site_group
+
 
 def get_soap_vec(struct: Structure):
     """
@@ -125,18 +120,21 @@ def get_soap_vec(struct: Structure):
     vecs = soap_desc.create(adaptor.get_atoms(dummy_structure))
     return vecs
 
+
 def get_site_vecs(struct: Structure):
     vecs = get_soap_vec(struct)
     site_vecs = []
-    for i,site in enumerate(struct):
+    for i, site in enumerate(struct):
         site_vecs.append(SiteVec(species=site.species_string, site=site, vec=vecs[i]))
     return site_vecs
-        
+
+
 def cosine_similarity(vec1, vec2) -> float:
     """
     Cosine similarity between two vectors
     """
     return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+
 
 def best_match(sv, sgv):
     """
@@ -153,16 +151,17 @@ def best_match(sv, sgv):
             best_match = sg
     return best_match, best_similarity
 
+
 def _get_broundary(arr, n_max=16, n_skip=3):
     """
-    Assuming arr is sorted in reverse order, find the biggest value drop in arr[n_skip:n_max] 
+    Assuming arr is sorted in reverse order, find the biggest value drop in arr[n_skip:n_max]
     """
     sub_arr = np.array(arr[n_skip:n_max])
     diffs = sub_arr[1:] - sub_arr[:-1]
     return np.argmin(diffs) + n_skip + 1
 
 
-def get_weighted_average_position(lattice, frac_positions, weights = None) -> np.ndarray:
+def get_weighted_average_position(lattice, frac_positions, weights=None) -> np.ndarray:
     """
     Get the weighted average position of a set of positions in fractional coordinates.
     The algorithm starts at position with the highest weight, and gradually moves the average point
@@ -181,7 +180,7 @@ def get_weighted_average_position(lattice, frac_positions, weights = None) -> np
         weights = [1.0] * len(frac_positions)
     if len(frac_positions) != len(weights):
         raise ValueError("The number of positions and weights must be the same.")
-    
+
     # TODO: can be replaced with the zip(..., strict=True) syntax in Python 3.10
     pos_weights = list(zip(frac_positions, weights))
     pos_weights.sort(key=lambda x: x[1], reverse=True)
