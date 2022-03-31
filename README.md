@@ -1,7 +1,9 @@
 # pymatgen-analysis-defects
 
-Defect analysis extension for pymatgen.
-
+This package is a collection of tools for analyzing defects in materials.
+It currently functions as a namespace package add-on to pymatgen's existing defect analysis tools.
+Once installed the additional modules will still appear under the
+`pymatgen.analysis.defects` namespace.
 
 ## Automated code linting
 
