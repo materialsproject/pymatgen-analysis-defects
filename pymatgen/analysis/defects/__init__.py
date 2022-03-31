@@ -1,7 +1,2 @@
-# Copyright (c) Pymatgen Development Team.
-# Distributed under the terms of the MIT License.
-
-"""
-The defects package implements defect generation tools
-"""
-__path__ = __import__('pkgutil').extend_path(__path__, __name__)
+"""Addons to pymatgen.analysis.defects."""
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore

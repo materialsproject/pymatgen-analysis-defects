@@ -38,12 +38,12 @@ repos:
   rev: 3.9.2
   hooks:
   - id: flake8
-    files: ^src/
+    files: ^pymatgen/
     args:
     - --max-line-length=125
     - --extend-ignore=E203,W503,F401,RST21
     - --min-python-version=3.8.0
-    - --docstring-convention=numpy
+    - --docstring-convention=google
     - --rst-roles=class,func,ref,obj
     language_version: python3
     additional_dependencies:
@@ -62,7 +62,7 @@ repos:
   rev: v0.931
   hooks:
   - id: mypy
-    files: ^src/
+    files: ^pymatgen/
     args:
     - --no-strict-optional
     - --ignore-missing-imports
