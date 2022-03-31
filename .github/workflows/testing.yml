@@ -37,7 +37,6 @@ jobs:
           pre-commit run --all-files --show-diff-on-failure
 
   test:
-    services:
     runs-on: ubuntu-latest
     strategy:
       matrix:
