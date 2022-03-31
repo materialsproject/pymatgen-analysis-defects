@@ -1,3 +1,23 @@
 # pymatgen-analysis-defects
 
 Defect analysis extension for pymatgen.
+
+
+## Automated code linting
+
+Pymatgen-analysis-defects uses `pre-commit` to automatically lint the code.
+This is a good way to ensure that the code is clean and well-formatted.
+To install pre-commit, run the following command:
+```
+pip install pre-commit==[VERSION]
+```
+where [VERSION] is the version of `pre-commit` designated in the `requirements-ci.txt` file.
+Once installed, run the following command to install the pre-commit hooks:
+```
+pre-commit install
+```
+After installing the pre-commit hooks, you can run the following command to lint the code:
+```
+pre-commit run --all-files
+```
+Or simply commit the changes using `git commit` to automatically lint the code on any file that was modified.
