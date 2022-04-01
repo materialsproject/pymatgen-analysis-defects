@@ -67,7 +67,7 @@ jobs:
       run: pytest --cov=pymatgen --cov-report=xml
 
     - uses: codecov/codecov-action@v1
-      if: matrix.python-version == 3.8 && github.repository == 'materialsproject/ pymatgen-analysis-defects'
+      if: matrix.python-version == 3.8
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
