@@ -1,5 +1,8 @@
 # pymatgen-analysis-defects
 
+[![testing](https://github.com/materialsproject/pymatgen-analysis-defects/actions/workflows/testing.yml/badge.svg)](https://github.com/materialsproject/pymatgen-analysis-defects/actions/workflows/testing.yml)
+
+
 This package is a collection of tools for analyzing defects in materials.
 It currently functions as a namespace package add-on to pymatgen's existing defect analysis tools.
 Once installed the additional modules will still appear under the

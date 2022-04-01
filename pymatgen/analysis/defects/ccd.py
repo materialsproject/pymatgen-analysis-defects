@@ -8,8 +8,8 @@ from typing import Tuple
 
 import numpy as np
 from monty.json import MSONable
-from nonrad.nonrad import AMU2KG, ANGS2M, EV2J, HBAR
 from numpy.typing import ArrayLike
+from scipy import constants as const
 from scipy.optimize import curve_fit
 
 # Copyright (c) Pymatgen Development Team.
@@ -21,6 +21,11 @@ __maintainer__ = "Jimmy Shen"
 __email__ = "jmmshn@gmail.com"
 __date__ = "Mar 15, 2022"
 __logger = logging.getLogger(__name__)
+
+HBAR = const.hbar / const.e  # in units of eV.s
+EV2J = const.e  # 1 eV in Joules
+AMU2KG = const.physical_constants["atomic mass constant"][0]
+ANGS2M = 1e-10  # angstrom in meters
 
 
 @dataclass
