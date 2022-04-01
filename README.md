@@ -5,6 +5,17 @@ It currently functions as a namespace package add-on to pymatgen's existing defe
 Once installed the additional modules will still appear under the
 `pymatgen.analysis.defects` namespace.
 
+The additional modules provided by this package are summarized below:
+
+| Module name |                  Funtionality                   |
+|-------------|:-----------------------------------------------:|
+| `ccd`       |      configuration-coordination diagrams.       |
+| `finder`    | identify the position of defects automatically. |
+
+Note that each module is a sub-package of the `pymatgen.analysis.defects` namespace, and must be imported
+as `pymatgen.analysis.defects.[module_name]`.
+
+
 ## Automated code linting
 
 Pymatgen-analysis-defects uses `pre-commit` to automatically lint the code.
