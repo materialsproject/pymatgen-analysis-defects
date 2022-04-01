@@ -14,4 +14,6 @@ def test_ccd(test_dir):
         energies_es=(1.2, 1.0, 1.2),
         energies_gs=(1.2, 1.0, 1.2),
     )
+    # check that plot runs without error don't show
+    ccd.plot(show=False)
     assert ccd.omega_es == pytest.approx(ccd.omega_gs)
