@@ -4,11 +4,12 @@ from __future__ import annotations
 import logging
 from abc import ABCMeta, abstractmethod
 
+import numpy as np
 from monty.json import MSONable
-from pymatgen.core.structure import PeriodicSite, Structure
+from pymatgen.core.structure import Composition, PeriodicSite, Structure
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-from pymatgen.analysis.defects.supercells import get_sc_structure
+from pymatgen.analysis.defects.supercells import get_sc_fromstruct
 
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -62,19 +63,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         """
 
     @property
-    def defect_site(self):
-        """Returns the site in the structure that corresponds to the defect site."""
-        return min(
-            self.structure.get_sites_in_sphere(self.site.coords, 0.1, include_index=True),
-            key=lambda x: x[1],
-        )
-
-    @property
-    def defect_site_index(self) -> int:
-        """Get the index of the defect in the structure."""
-        return self.defect_site.index
-
-    @property
+    @abstractmethod
     def defect_structure(self) -> Structure:
         """Get the unit-cell structure representing the defect."""
 
@@ -96,7 +85,7 @@ class Defect(MSONable, metaclass=ABCMeta):
 
         return charges
 
-    def get_supercell_structure(self, sc_mat):
+    def get_supercell_structure(self, sc_mat: np.ndarray | None = None) -> Structure:
         """Generate the supercell for a defect.
 
         Args:
@@ -106,7 +95,18 @@ class Defect(MSONable, metaclass=ABCMeta):
         Returns:
             defect: defect object
         """
-        return get_sc_structure(self, sc_mat)
+        if sc_mat is None:
+            sc_mat = get_sc_fromstruct(self.structure)
+
+        sc_structure = self.structure * sc_mat
+        sc_mat_inv = np.linalg.inv(sc_mat)
+        sc_pos = np.dot(self.site.frac_coords, sc_mat_inv)
+        sc_site = PeriodicSite(self.site.species, sc_pos, sc_structure.lattice)
+
+        sc_defect = self.__class__(structure=sc_structure, site=sc_site, oxi_state=self.oxi_state)
+        sc_defect_struct = sc_defect.defect_structure
+        sc_defect_struct.remove_oxidation_states()
+        return sc_defect_struct
 
 
 class Vacancy(Defect):
@@ -124,7 +124,20 @@ class Vacancy(Defect):
         return len(equivalent_sites)
 
     @property
-    def defect_struct(self):
+    def defect_site(self):
+        """Returns the site in the structure that corresponds to the defect site."""
+        return min(
+            self.structure.get_sites_in_sphere(self.site.coords, 0.1, include_index=True),
+            key=lambda x: x[1],
+        )
+
+    @property
+    def defect_site_index(self) -> int:
+        """Get the index of the defect in the structure."""
+        return self.defect_site.index
+
+    @property
+    def defect_structure(self):
         """Returns the defect structure."""
         struct = self.structure.copy()
         struct.remove_sites([self.defect_site_index])
@@ -173,7 +186,7 @@ class Substitution(Defect):
         return len(equivalent_sites)
 
     @property
-    def defect_struct(self):
+    def defect_structure(self):
         """Returns the defect structure."""
         struct = self.structure.copy()
         struct.remove_sites([self.defect_site_index])
@@ -182,6 +195,19 @@ class Substitution(Defect):
         struct.add_oxidation_state_by_guess()
         return struct
 
+    @property
+    def defect_site(self):
+        """Returns the site in the structure that corresponds to the defect site."""
+        return min(
+            self.structure.get_sites_in_sphere(self.site.coords, 0.1, include_index=True),
+            key=lambda x: x[1],
+        )
+
+    @property
+    def defect_site_index(self) -> int:
+        """Get the index of the defect in the structure."""
+        return self.defect_site.index
+
     def get_oxi_state(self) -> float:
         """Get the oxidation state of the defect.
 
@@ -189,5 +215,33 @@ class Substitution(Defect):
             float: The oxidation state of the defect.
         """
         orig_site = self.defect_site
-        sub_site = self.defect_struct[self.defect_site_index]
+        sub_site = self.defect_structure[self.defect_site_index]
         return sub_site.specie.oxi_state - orig_site.specie.oxi_state
+
+
+class Interstitial(Defect):
+    """Class representing an interstitial defect."""
+
+    def get_multiplicity(self) -> int:
+        """Returns the multiplicity of a defect site within the structure.
+
+        This is required for concentration analysis and confirms that defect_site is a site in bulk_structure.
+        """
+        return 0
+
+    @property
+    def defect_structure(self):
+        """Returns the defect structure."""
+        struct = self.structure.copy()
+        struct.insert(0, species=self.site.species_string, coords=self.site.frac_coords)
+        return struct
+
+    def get_oxi_state(self) -> float:
+        """Get the oxidation state of the defect.
+
+        Returns:
+            float: The oxidation state of the defect.
+        """
+        comp = Composition(self.site.species_string)
+        guesses = comp.oxi_state_guesses().values()[0]
+        return max(guesses, key=abs)
