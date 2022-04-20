@@ -4,10 +4,9 @@ from __future__ import annotations
 import logging
 from abc import ABCMeta, abstractmethod
 
-import numpy as np
 from monty.json import MSONable
-from numpy.typing import ArrayLike
 from pymatgen.core.structure import PeriodicSite, Structure
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -22,21 +21,29 @@ class Defect(MSONable, metaclass=ABCMeta):
     """Abstract class for a single point defect."""
 
     def __init__(
-        self, structure: Structure, pos: ArrayLike[np.float_], charge: int = 0, multiplicity: int | None = None
+        self,
+        structure: Structure,
+        site: PeriodicSite,
+        charge: int = 0,
+        multiplicity: int | None = None,
+        oxi_state: float | None = None,
     ) -> None:
         """Initialize a defect object.
 
         Args:
             structure: The structure of the defect.
-            pos: The position of the defect.
+            site: The site
             charge: The charge of the defect.
             multiplicity: The multiplicity of the defect.
-
+            oxi_state: The oxidation state of the defect, if not specified, this will be determined automatically.
         """
         self.structure = structure
-        self.pos = pos
+        self.site = site
         self.charge = charge
         self.multiplicity = multiplicity if multiplicity is not None else self.get_multiplicity()
+        if oxi_state is None:
+            self.structure.add_oxidation_state_by_guess()
+        self.oxi_state = self.get_oxi_state() if oxi_state is None else oxi_state
 
     @abstractmethod
     def get_multiplicity(self) -> int:
@@ -46,15 +53,127 @@ class Defect(MSONable, metaclass=ABCMeta):
             int: The multiplicity of the defect.
         """
 
+    @abstractmethod
+    def get_oxi_state(self) -> float:
+        """Get the oxidation state of the defect.
+
+        Returns:
+            float: The oxidation state of the defect.
+        """
+
+    @property
+    def defect_site(self):
+        """Returns the site in the structure that corresponds to the defect site."""
+        return min(
+            self.structure.get_sites_in_sphere(self.site.coords, 0.1, include_index=True),
+            key=lambda x: x[1],
+        )
+
+    @property
+    def defect_site_index(self) -> int:
+        """Get the index of the defect in the structure."""
+        return self.defect_site.index
+
+    def potential_charge_states(self):
+        """Potential charge states for a given oxidation state.
+
+        Returns:
+            list of possible charge states
+        """
+        if self.oxi_state.is_integer():
+            oxi_state = int(self.oxi_state)
+        else:
+            raise ValueError("Oxidation state must be an integer")
+
+        if oxi_state >= 0:
+            charges = [*range(-1, oxi_state + 2)]
+        else:
+            charges = [*range(oxi_state - 1, 1)]
+
+        return charges
+
 
 class Vacancy(Defect):
     """Class representing a vacancy defect."""
 
+    def get_multiplicity(self) -> int:
+        """Returns the multiplicity of a defect site within the structure.
+
+        This is required for concentration analysis and confirms that defect_site is a site in bulk_structure.
+        """
+        sga = SpacegroupAnalyzer(self.structure)
+        periodic_struc = sga.get_symmetrized_structure()
+        defect_site = self.structure[self.defect_site_index]
+        equivalent_sites = periodic_struc.find_equivalent_sites(defect_site)
+        return len(equivalent_sites)
+
+    @property
+    def defect_struct(self):
+        """Returns the defect structure."""
+        struct = self.structure.copy()
+        struct.remove_sites([self.defect_site_index])
+        return struct
+
+    def get_oxi_state(self) -> float:
+        """Get the oxidation state of the defect.
+
+        Returns:
+            float: The oxidation state of the defect.
+        """
+        return -self.defect_site.specie.oxi_state
+
+
+class Substitution(Defect):
+    """Single-site substitutional defects."""
+
     def __init__(
-        self, structure: Structure, site: PeriodicSite, charge: int = 0, multiplicity: int | None = None
+        self,
+        structure: Structure,
+        site: PeriodicSite,
+        charge: int = 0,
+        multiplicity: int | None = None,
+        oxi_state: float | None = None,
     ) -> None:
-        """Initialize a vacancy defect object."""
-        super().__init__(structure, site, charge, multiplicity)
+        """Initialize a substitutional defect object.
+
+        The position of `site` determines the atom to be removed and the species of `site` determines the replacing species.
+
+        Args:
+            structure: The structure of the defect.
+            site: replace the nearest site with this one.
+            charge: The charge of the defect.
+            multiplicity: The multiplicity of the defect.
+            oxi_state: The oxidation state of the defect, if not specified, this will be determined automatically.
+        """
+        super().__init__(structure, site, charge, multiplicity, oxi_state)
 
     def get_multiplicity(self) -> int:
-        """Get the multiplicity of the vacancy."""
+        """Returns the multiplicity of a defect site within the structure.
+
+        This is required for concentration analysis and confirms that defect_site is a site in bulk_structure.
+        """
+        sga = SpacegroupAnalyzer(self.structure)
+        periodic_struc = sga.get_symmetrized_structure()
+        defect_site = self.structure[self.defect_site_index]
+        equivalent_sites = periodic_struc.find_equivalent_sites(defect_site)
+        return len(equivalent_sites)
+
+    @property
+    def defect_struct(self):
+        """Returns the defect structure."""
+        struct = self.structure.copy()
+        struct.remove_sites([self.defect_site_index])
+        struct.insert(self.defect_site_index, species=self.site.species_string, coords=self.site.coords)
+        struct.remove_oxidation_states()
+        struct.add_oxidation_state_by_guess()
+        return struct
+
+    def get_oxi_state(self) -> float:
+        """Get the oxidation state of the defect.
+
+        Returns:
+            float: The oxidation state of the defect.
+        """
+        orig_site = self.defect_site
+        sub_site = self.defect_struct[self.defect_site_index]
+        return sub_site.specie.oxi_state - orig_site.specie.oxi_state
