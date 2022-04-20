@@ -1,14 +1,20 @@
 """Functions for creating supercells for defect calculations."""
 
+from __future__ import annotations
+
 import logging
-from typing import List, Optional
+
+import numpy as np
+from numpy.typing import ArrayLike, NDArray
 
 # from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape
 # from pymatgen.io.ase import AseAtomsAdaptor
-from pymatgen.core import Structure
+from pymatgen.core import PeriodicSite, Structure
 from pymatgen.transformations.advanced_transformations import (
     CubicSupercellTransformation,
 )
+
+from pymatgen.analysis.defects.core import Defect
 
 __author__ = "Jimmy Shen"
 __copyright__ = "Copyright 2019, The Materials Project"
@@ -18,15 +24,13 @@ __date__ = "Feb 11, 2021"
 
 logger = logging.getLogger(__name__)
 
-# Helper functions for MigraionHop.get_sc_struture
-
 
 def get_sc_fromstruct(
     base_struct: Structure,
     min_atoms: int = 80,
     max_atoms: int = 240,
     min_length: float = 10.0,
-) -> List[List[int]]:
+) -> np.ndarray | np.array | None:
     """Generate the best supercell from a unitcell.
 
     The CubicSupercellTransformation from PMG is much faster but don't iterate over as many
@@ -44,20 +48,20 @@ def get_sc_fromstruct(
         struc_sc: Supercell that is as close to cubic as possible
     """
     m_len = min_length
-    struct_sc = None
-    while struct_sc is None:
-        struct_sc = _get_sc_from_struct_pmg(base_struct, min_atoms, max_atoms, m_len)
+    sc_mat = None
+    while sc_mat is None:
+        sc_mat = _get_sc(base_struct, min_atoms, max_atoms, m_len)
         max_atoms += 1
-    return struct_sc
+    return sc_mat
 
 
-def _get_sc_from_struct_pmg(
+def _get_sc(
     base_struct: Structure,
     min_atoms: int = 80,
     max_atoms: int = 240,
     min_length: float = 10.0,
-) -> Optional[List[List[int]]]:
-    """Generate the best supercell from a unitcell using the pymatgen CubicSupercellTransformation.
+) -> np.ndarray | None:
+    """Generate the best supercell from a unit cell using the pymatgen CubicSupercellTransformation.
 
     Args:
         base_struct: structure of the unit cell
@@ -75,3 +79,22 @@ def _get_sc_from_struct_pmg(
     except BaseException:
         return None
     return cst.transformation_matrix
+
+
+def get_sc_structure(defect: Defect, sc_mat: NDArray | ArrayLike) -> Structure:
+    """Generate the supercell for a defect.
+
+    Args:
+        defect: defect object
+        sc_mat: supercell matrix
+
+    Returns:
+        defect: defect object
+    """
+    sc_structure = defect.structure * sc_mat
+    sc_mat_inv = np.linalg.inv(sc_mat)
+    sc_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
+    sc_site = PeriodicSite(defect.site.species_and_occu, sc_pos, sc_structure.lattice)
+
+    sc_defect = defect.__class__(structure=sc_structure, site=sc_site, oxi_state=defect.oxi_state)
+    return sc_defect.defect_structure

@@ -8,6 +8,8 @@ from monty.json import MSONable
 from pymatgen.core.structure import PeriodicSite, Structure
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
+from pymatgen.analysis.defects.supercells import get_sc_structure
+
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
 __maintainer__ = "Jimmy Shen @jmmshn"
@@ -24,7 +26,6 @@ class Defect(MSONable, metaclass=ABCMeta):
         self,
         structure: Structure,
         site: PeriodicSite,
-        charge: int = 0,
         multiplicity: int | None = None,
         oxi_state: float | None = None,
     ) -> None:
@@ -39,7 +40,6 @@ class Defect(MSONable, metaclass=ABCMeta):
         """
         self.structure = structure
         self.site = site
-        self.charge = charge
         self.multiplicity = multiplicity if multiplicity is not None else self.get_multiplicity()
         if oxi_state is None:
             self.structure.add_oxidation_state_by_guess()
@@ -74,6 +74,10 @@ class Defect(MSONable, metaclass=ABCMeta):
         """Get the index of the defect in the structure."""
         return self.defect_site.index
 
+    @property
+    def defect_structure(self) -> Structure:
+        """Get the unit-cell structure representing the defect."""
+
     def potential_charge_states(self):
         """Potential charge states for a given oxidation state.
 
@@ -91,6 +95,18 @@ class Defect(MSONable, metaclass=ABCMeta):
             charges = [*range(oxi_state - 1, 1)]
 
         return charges
+
+    def get_supercell_structure(self, sc_mat):
+        """Generate the supercell for a defect.
+
+        Args:
+            defect: defect object
+            sc_mat: supercell matrix
+
+        Returns:
+            defect: defect object
+        """
+        return get_sc_structure(self, sc_mat)
 
 
 class Vacancy(Defect):
@@ -130,7 +146,6 @@ class Substitution(Defect):
         self,
         structure: Structure,
         site: PeriodicSite,
-        charge: int = 0,
         multiplicity: int | None = None,
         oxi_state: float | None = None,
     ) -> None:
@@ -141,11 +156,10 @@ class Substitution(Defect):
         Args:
             structure: The structure of the defect.
             site: replace the nearest site with this one.
-            charge: The charge of the defect.
             multiplicity: The multiplicity of the defect.
             oxi_state: The oxidation state of the defect, if not specified, this will be determined automatically.
         """
-        super().__init__(structure, site, charge, multiplicity, oxi_state)
+        super().__init__(structure, site, multiplicity, oxi_state)
 
     def get_multiplicity(self) -> int:
         """Returns the multiplicity of a defect site within the structure.
