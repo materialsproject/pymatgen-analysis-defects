@@ -5,16 +5,10 @@ from __future__ import annotations
 import logging
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
 
 # from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape
 # from pymatgen.io.ase import AseAtomsAdaptor
-from pymatgen.core import PeriodicSite, Structure
-from pymatgen.transformations.advanced_transformations import (
-    CubicSupercellTransformation,
-)
-
-from pymatgen.analysis.defects.core import Defect
+from pymatgen.core import Structure
 
 __author__ = "Jimmy Shen"
 __copyright__ = "Copyright 2019, The Materials Project"
@@ -72,6 +66,10 @@ def _get_sc(
     Returns:
         3x3 matrix: supercell matrix
     """
+    from pymatgen.transformations.advanced_transformations import (
+        CubicSupercellTransformation,
+    )
+
     cst = CubicSupercellTransformation(min_atoms=min_atoms, max_atoms=max_atoms, min_length=min_length)
 
     try:
@@ -79,22 +77,3 @@ def _get_sc(
     except BaseException:
         return None
     return cst.transformation_matrix
-
-
-def get_sc_structure(defect: Defect, sc_mat: NDArray | ArrayLike) -> Structure:
-    """Generate the supercell for a defect.
-
-    Args:
-        defect: defect object
-        sc_mat: supercell matrix
-
-    Returns:
-        defect: defect object
-    """
-    sc_structure = defect.structure * sc_mat
-    sc_mat_inv = np.linalg.inv(sc_mat)
-    sc_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
-    sc_site = PeriodicSite(defect.site.species_and_occu, sc_pos, sc_structure.lattice)
-
-    sc_defect = defect.__class__(structure=sc_structure, site=sc_site, oxi_state=defect.oxi_state)
-    return sc_defect.defect_structure
