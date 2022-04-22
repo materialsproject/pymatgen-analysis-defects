@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import logging
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 import numpy as np
 from monty.json import MSONable
 from pymatgen.core.structure import Composition, PeriodicSite, Structure
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+from pymatgen.symmetry.structure import SymmetrizedStructure
 
 from pymatgen.analysis.defects.supercells import get_sc_fromstruct
 
@@ -28,6 +29,8 @@ class Defect(MSONable, metaclass=ABCMeta):
         site: PeriodicSite,
         multiplicity: int | None = None,
         oxi_state: float | None = None,
+        symprec: float = 0.01,
+        angle_tolerance: float = 5,
     ) -> None:
         """Initialize a defect object.
 
@@ -37,6 +40,8 @@ class Defect(MSONable, metaclass=ABCMeta):
             charge: The charge of the defect.
             multiplicity: The multiplicity of the defect.
             oxi_state: The oxidation state of the defect, if not specified, this will be determined automatically.
+            symprec: Tolerance for symmetry finding.
+            angle_tolerance: Angle tolerance for symmetry finding.
         """
         self.structure = structure
         self.site = site
@@ -44,6 +49,8 @@ class Defect(MSONable, metaclass=ABCMeta):
         if oxi_state is None:
             self.structure.add_oxidation_state_by_guess()
         self.oxi_state = self.get_oxi_state() if oxi_state is None else oxi_state
+        self.symprec = symprec
+        self.angle_tolerance = angle_tolerance
 
     @abstractmethod
     def get_multiplicity(self) -> int:
@@ -61,8 +68,7 @@ class Defect(MSONable, metaclass=ABCMeta):
             float: The oxidation state of the defect.
         """
 
-    @property
-    @abstractmethod
+    @abstractproperty
     def defect_structure(self) -> Structure:
         """Get the unit-cell structure representing the defect."""
 
@@ -107,6 +113,15 @@ class Defect(MSONable, metaclass=ABCMeta):
         sc_defect_struct.remove_oxidation_states()
         return sc_defect_struct
 
+    @property
+    def symmetrized_structure(self) -> SymmetrizedStructure:
+        """Returns the multiplicity of a defect site within the structure.
+
+        This is required for concentration analysis and confirms that defect_site is a site in bulk_structure.
+        """
+        sga = SpacegroupAnalyzer(self.structure, symprec=self.symprec, angle_tolerance=self.angle_tolerance)
+        return sga.get_symmetrized_structure()
+
 
 class Vacancy(Defect):
     """Class representing a vacancy defect."""
@@ -116,10 +131,9 @@ class Vacancy(Defect):
 
         This is required for concentration analysis and confirms that defect_site is a site in bulk_structure.
         """
-        sga = SpacegroupAnalyzer(self.structure)
-        periodic_struc = sga.get_symmetrized_structure()
+        symm_struct = self.symmetrized_structure
         defect_site = self.structure[self.defect_site_index]
-        equivalent_sites = periodic_struc.find_equivalent_sites(defect_site)
+        equivalent_sites = symm_struct.find_equivalent_sites(defect_site)
         return len(equivalent_sites)
 
     @property
@@ -149,6 +163,10 @@ class Vacancy(Defect):
             float: The oxidation state of the defect.
         """
         return -self.defect_site.specie.oxi_state
+
+    def __repr__(self) -> str:
+        """Representation of a vacancy defect."""
+        return "HELLOW"
 
 
 class Substitution(Defect):
