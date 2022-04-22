@@ -11,10 +11,9 @@ import numpy as np
 from pymatgen.core import Structure
 
 __author__ = "Jimmy Shen"
-__copyright__ = "Copyright 2019, The Materials Project"
-__maintainer__ = "Jimmy Shen"
-__email__ = "jmmshn@gmail.com"
-__date__ = "Feb 11, 2021"
+__copyright__ = "Copyright 2022, The Materials Project"
+__maintainer__ = "Jimmy Shen @jmmshn"
+__date__ = "Feb 11, 2022"
 
 logger = logging.getLogger(__name__)
 

@@ -1,4 +1,4 @@
-"""Base classes representing defects."""
+"""Classes representing defects."""
 from __future__ import annotations
 
 import logging
@@ -14,7 +14,6 @@ from pymatgen.analysis.defects.supercells import get_sc_fromstruct
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
 __maintainer__ = "Jimmy Shen @jmmshn"
-__status__ = "Development"
 __date__ = "Mar 15, 2022"
 
 logger = logging.getLogger(__name__)
