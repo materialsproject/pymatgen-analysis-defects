@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 
 import numpy as np
 from monty.json import MSONable
-from pymatgen.core.structure import Composition, PeriodicSite, Structure
+from pymatgen.core import Composition, PeriodicSite, Species, Structure
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.symmetry.structure import SymmetrizedStructure
 
@@ -49,6 +49,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         self.angle_tolerance = angle_tolerance
         self.multiplicity = multiplicity if multiplicity is not None else self.get_multiplicity()
         if oxi_state is None:
+            # TODO this step might take time so wrap it in a timer
             self.structure.add_oxidation_state_by_guess()
         self.oxi_state = self.get_oxi_state() if oxi_state is None else oxi_state
 
@@ -68,11 +69,15 @@ class Defect(MSONable, metaclass=ABCMeta):
             float: The oxidation state of the defect.
         """
 
+    @abstractmethod
+    def __repr__(self) -> str:
+        """Representation of the defect."""
+
     @abstractproperty
     def defect_structure(self) -> Structure:
         """Get the unit-cell structure representing the defect."""
 
-    def potential_charge_states(self):
+    def get_charge_states(self):
         """Potential charge states for a given oxidation state.
 
         Returns:
@@ -86,7 +91,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         if oxi_state >= 0:
             charges = [*range(-1, oxi_state + 2)]
         else:
-            charges = [*range(oxi_state - 1, 1)]
+            charges = [*range(oxi_state - 1, 2)]
 
         return charges
 
@@ -114,7 +119,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         if dummy_species is not None:
             dummy_pos = np.dot(self.site.frac_coords, sc_mat_inv)
             dummy_pos = np.mod(dummy_pos, 1)
-            sc_defect_struct.insert(0, dummy_species, dummy_pos)
+            sc_defect_struct.insert(len(sc_structure), dummy_species, dummy_pos)
 
         return sc_defect_struct
 
@@ -144,10 +149,13 @@ class Vacancy(Defect):
     @property
     def defect_site(self):
         """Returns the site in the structure that corresponds to the defect site."""
-        return min(
+        res = min(
             self.structure.get_sites_in_sphere(self.site.coords, 0.1, include_index=True),
             key=lambda x: x[1],
         )
+        if len(res) == 0:
+            raise ValueError("No site found in structure")
+        return res
 
     @property
     def defect_site_index(self) -> int:
@@ -156,7 +164,7 @@ class Vacancy(Defect):
 
     @property
     def defect_structure(self):
-        """Returns the defect structure."""
+        """Returns the defect structure with the proper oxidation state."""
         struct = self.structure.copy()
         struct.remove_sites([self.defect_site_index])
         return struct
@@ -212,11 +220,13 @@ class Substitution(Defect):
     @property
     def defect_structure(self):
         """Returns the defect structure."""
-        struct = self.structure.copy()
+        struct: Structure = self.structure.copy()
+        rm_oxi = struct.sites[self.defect_site_index].specie.oxi_state
         struct.remove_sites([self.defect_site_index])
-        struct.insert(self.defect_site_index, species=self.site.species_string, coords=self.site.coords)
-        struct.remove_oxidation_states()
-        struct.add_oxidation_state_by_guess()
+        sub_states = self.site.specie.icsd_oxidation_states
+        sub_oxi = min(sub_states, key=lambda x: abs(x - rm_oxi))
+        sub_specie = Species(self.site.specie.symbol, sub_oxi)
+        struct.insert(self.defect_site_index, species=sub_specie, coords=np.mod(self.site.frac_coords, 1))
         return struct
 
     @property
@@ -242,6 +252,12 @@ class Substitution(Defect):
         sub_site = self.defect_structure[self.defect_site_index]
         return sub_site.specie.oxi_state - orig_site.specie.oxi_state
 
+    def __repr__(self) -> str:
+        """Representation of a vacancy defect."""
+        rm_species = self.defect_site.species_string
+        sub_species = self.site.species_string
+        return f"{sub_species} subsitituted on the {rm_species} site at at site #{self.defect_site_index}"
+
 
 class Interstitial(Defect):
     """Class representing an interstitial defect."""
@@ -257,7 +273,7 @@ class Interstitial(Defect):
     def defect_structure(self):
         """Returns the defect structure."""
         struct = self.structure.copy()
-        struct.insert(0, species=self.site.species_string, coords=self.site.frac_coords)
+        struct.insert(0, species=self.site.species_string, coords=np.mod(self.site.frac_coords, 1))
         return struct
 
     def get_oxi_state(self) -> float:
