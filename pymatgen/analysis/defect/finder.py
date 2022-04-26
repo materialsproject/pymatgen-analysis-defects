@@ -13,9 +13,8 @@ from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 __author__ = "Jimmy Shen"
-__copyright__ = "Copyright 2018, The Materials Project"
-__maintainer__ = "Jimmy Shen"
-__email__ = "jmmshn@gmail.com"
+__copyright__ = "Copyright 2022, The Materials Project"
+__maintainer__ = "Jimmy Shen @jmmshn"
 __date__ = "Jan 24, 2022"
 
 logger = logging.getLogger(__name__)

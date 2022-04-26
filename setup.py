@@ -9,7 +9,7 @@ module_dir = Path(__file__).resolve().parent
 
 with open(module_dir / "README.md") as f:
     long_description = f.read()
-
+print(find_namespace_packages(include=["pymatgen.analysis.*"]))
 setup(
     name="pymatgen-analysis-defects",
     packages=find_namespace_packages(include=["pymatgen.analysis.*"]),
