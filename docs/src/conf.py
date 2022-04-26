@@ -11,7 +11,7 @@ import sys
 # typing.TYPE_CHECKING = True
 
 sys.path.insert(0, os.path.abspath("../../"))
-from pymatgen.analysis.defects import __version__
+from pymatgen.analysis.defect import __version__
 
 # -- Project information -----------------------------------------------------
 
