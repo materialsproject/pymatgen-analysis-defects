@@ -3,10 +3,11 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
+from typing import Dict
 
 import numpy as np
 from monty.json import MSONable
-from pymatgen.core import Composition, PeriodicSite, Species, Structure
+from pymatgen.core import Element, PeriodicSite, Species, Structure
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.symmetry.structure import SymmetrizedStructure
 
@@ -76,6 +77,14 @@ class Defect(MSONable, metaclass=ABCMeta):
     @abstractproperty
     def defect_structure(self) -> Structure:
         """Get the unit-cell structure representing the defect."""
+
+    @abstractproperty
+    def element_changes(self) -> Dict[Element, int]:
+        """Get the species changes of the defect.
+
+        Returns:
+            Dict[Element, int]: The species changes of the defect.
+        """
 
     def get_charge_states(self):
         """Potential charge states for a given oxidation state.
@@ -169,6 +178,15 @@ class Vacancy(Defect):
         struct.remove_sites([self.defect_site_index])
         return struct
 
+    @property
+    def element_changes(self) -> Dict[Element, int]:
+        """Get the species changes of the vacancy defect.
+
+        Returns:
+            Dict[Element, int]: The species changes of the defect.
+        """
+        return {self.structure.sites[self.defect_site_index].specie.element: -1}
+
     def get_oxi_state(self) -> float:
         """Get the oxidation state of the defect.
 
@@ -242,6 +260,18 @@ class Substitution(Defect):
         """Get the index of the defect in the structure."""
         return self.defect_site.index
 
+    @property
+    def element_changes(self) -> Dict[Element, int]:
+        """Get the species changes of the substitution defect.
+
+        Returns:
+            Dict[Element, int]: The species changes of the defect.
+        """
+        return {
+            self.structure.sites[self.defect_site_index].specie.element: -1,
+            self.site.specie: +1,
+        }
+
     def get_oxi_state(self) -> float:
         """Get the oxidation state of the defect.
 
@@ -257,31 +287,3 @@ class Substitution(Defect):
         rm_species = self.defect_site.species_string
         sub_species = self.site.species_string
         return f"{sub_species} subsitituted on the {rm_species} site at at site #{self.defect_site_index}"
-
-
-class Interstitial(Defect):
-    """Class representing an interstitial defect."""
-
-    def get_multiplicity(self) -> int:
-        """Returns the multiplicity of a defect site within the structure.
-
-        This is required for concentration analysis and confirms that defect_site is a site in bulk_structure.
-        """
-        return 0
-
-    @property
-    def defect_structure(self):
-        """Returns the defect structure."""
-        struct = self.structure.copy()
-        struct.insert(0, species=self.site.species_string, coords=np.mod(self.site.frac_coords, 1))
-        return struct
-
-    def get_oxi_state(self) -> float:
-        """Get the oxidation state of the defect.
-
-        Returns:
-            float: The oxidation state of the defect.
-        """
-        comp = Composition(self.site.species_string)
-        guesses = comp.oxi_state_guesses().values()[0]
-        return max(guesses, key=abs)
