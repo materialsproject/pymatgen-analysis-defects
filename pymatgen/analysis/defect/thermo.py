@@ -1,12 +1,12 @@
-"""Classes and methods related to thermodynamics and energy."""
 from __future__ import annotations
+
+"""Classes and methods related to thermodynamics and energy."""
 
 import logging
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Tuple
 
 from monty.json import MSONable
-from numpy.typing import ArrayLike
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.core import Element, Structure
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
@@ -35,16 +35,26 @@ class DefectEntry(MSONable):
     """
 
     # TODO: Ignore corrections until EVERYTHING else is working.
-    defect_type: str
     defect: Defect
-    structure: Structure
     charge_state: int
     energy: float
-    entry_id: object
+    entry_id: object | None = None
+    num_sites: int = None
+    structure: Structure | None = None
+
+    def __post_init__(self):
+        if self.structure is not None:
+            if self.num_sites is not None and self.num_sites != self.structure.num_sites:
+                raise ValueError(
+                    f"The number of atoms in the structure ({self.structure.num_sites}) does not match the number of atoms ({self.num_sites})"
+                )
+            self.num_sites = len(self.structure)
+        elif self.num_sites is None:
+            raise ValueError("Must specify either structure or num_sites")
 
 
 @dataclass
-class FormationEnergy(MSONable):
+class FormationEnergyDiagram(MSONable):
     """Formation energy."""
 
     bulk_entry: ComputedStructureEntry
@@ -54,15 +64,15 @@ class FormationEnergy(MSONable):
     bulk_locpot: Locpot | None = None
     defect_locpots: Iterable[Locpot] | None = None
 
-    def formation_energy(self, fermi_level: float | ArrayLike, dep_elt: Element) -> tuple[float, float]:
-        """Compute the formation energy.
+    def vbm_formation_energy(self, defect_entry: DefectEntry, dep_elt: Element) -> tuple[float, float]:
+        """Compute the formation energy at the VBM.
 
         Args:
-            fermi_level:
-                Fermi level.
+            defect_entry:
+                the defect entry for which the formation energy is computed.
             dep_elt:
                 the dependent element for which the chemical potential is computed
-                from the energy of the stable phase at the target composition
+                from the energy of the stable phase at the target composition.
 
         Returns:
             float:
@@ -70,7 +80,7 @@ class FormationEnergy(MSONable):
             float:
                 Formation energy for the situation where the dependent element is abundant.
         """
-        formation_en = self.defect_entry.energy - self.bulk_entry.energy + self.vbm - fermi_level
+        formation_en = defect_entry.energy - self.bulk_entry.energy + self.vbm
         formation_en += self.correction
         defect: Defect = self.defect_entries[0].defect
         el_change = defect.element_changes
@@ -107,7 +117,8 @@ class FormationEnergy(MSONable):
         if self.phase_digram is None:
             raise RuntimeError("Phase diagram is not available.")
         pd = ensure_stable_bulk(self.phase_digram, self.bulk_entry)
-        chem_pots = pd.getmu_vertices_stability_phase(self.bulk_entry.composition, Element("O"))
+        print(pd)
+        chem_pots = pd.getmu_vertices_stability_phase(self.bulk_entry.composition, dep_elt)
         dep_elt_poor = max(chem_pots, key=lambda x: x[dep_elt])
         dep_elt_rich = min(chem_pots, key=lambda x: x[dep_elt])
         return dep_elt_poor, dep_elt_rich
