@@ -117,7 +117,6 @@ class FormationEnergyDiagram(MSONable):
         if self.phase_digram is None:
             raise RuntimeError("Phase diagram is not available.")
         pd = ensure_stable_bulk(self.phase_digram, self.bulk_entry)
-        print(pd)
         chem_pots = pd.getmu_vertices_stability_phase(self.bulk_entry.composition, dep_elt)
         dep_elt_poor = max(chem_pots, key=lambda x: x[dep_elt])
         dep_elt_rich = min(chem_pots, key=lambda x: x[dep_elt])
