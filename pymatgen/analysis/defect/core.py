@@ -75,6 +75,10 @@ class Defect(MSONable, metaclass=ABCMeta):
         """Representation of the defect."""
 
     @abstractproperty
+    def name(self) -> str:
+        """Name of the defect."""
+
+    @abstractproperty
     def defect_structure(self) -> Structure:
         """Get the unit-cell structure representing the defect."""
 
@@ -154,6 +158,11 @@ class Vacancy(Defect):
         defect_site = self.structure[self.defect_site_index]
         equivalent_sites = symm_struct.find_equivalent_sites(defect_site)
         return len(equivalent_sites)
+
+    @property
+    def name(self) -> str:
+        """Name of the defect."""
+        return f"Va_{get_element(self.defect_site.specie)}"
 
     @property
     def defect_site(self):
@@ -236,6 +245,11 @@ class Substitution(Defect):
         return len(equivalent_sites)
 
     @property
+    def name(self) -> str:
+        """Name of the defect."""
+        return f"{get_element(self.site.specie)}_{get_element(self.defect_site.specie)}"
+
+    @property
     def defect_structure(self):
         """Returns the defect structure."""
         struct: Structure = self.structure.copy()
@@ -287,3 +301,10 @@ class Substitution(Defect):
         rm_species = self.defect_site.species_string
         sub_species = self.site.species_string
         return f"{sub_species} subsitituted on the {rm_species} site at at site #{self.defect_site_index}"
+
+
+def get_element(sp_el: Species | Element) -> Element:
+    """Get the element from a species or element."""
+    if isinstance(sp_el, Species):
+        return sp_el.element
+    return sp_el
