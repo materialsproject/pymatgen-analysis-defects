@@ -108,18 +108,22 @@ class Defect(MSONable, metaclass=ABCMeta):
 
         return charges
 
-    def get_supercell_structure(self, sc_mat: np.ndarray | None = None, dummy_species: str | None = None) -> Structure:
+    def get_supercell_structure(
+        self, sc_mat: np.ndarray | None = None, dummy_species: str | None = None, **kwargs
+    ) -> Structure:
         """Generate the supercell for a defect.
 
         Args:
             defect: defect object
             sc_mat: supercell matrix
+            dummy_species: dummy species to highlight the defect position (for visualization)
+            kwargs: kwargs for `CubicSupercellTransformation`
 
         Returns:
             defect: defect object
         """
         if sc_mat is None:
-            sc_mat = get_sc_fromstruct(self.structure)
+            sc_mat = get_sc_fromstruct(self.structure, **kwargs)
 
         sc_structure = self.structure * sc_mat
         sc_mat_inv = np.linalg.inv(sc_mat)

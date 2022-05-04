@@ -80,8 +80,10 @@ class FormationEnergyDiagram(MSONable):
             float:
                 Formation energy for the situation where the dependent element is abundant.
         """
-        formation_en = defect_entry.energy - self.bulk_entry.energy + self.vbm
-        formation_en += self.correction
+        formation_en = (
+            defect_entry.energy - self.bulk_entry.energy + defect_entry.charge_state * self.vbm + self.correction
+        )
+
         defect: Defect = self.defect_entries[0].defect
         el_change = defect.element_changes
         el_poor_chempot, el_rich_chempot = self.critical_chemical_potential(dep_elt)
@@ -91,6 +93,7 @@ class FormationEnergyDiagram(MSONable):
         for key, factor in el_change.items():
             elt_poor_res += el_poor_chempot[key] * factor
             elt_rich_res += el_rich_chempot[key] * factor
+
         return elt_poor_res, elt_rich_res
 
     @property
