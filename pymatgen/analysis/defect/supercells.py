@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 
 import numpy as np
+from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
 
 # from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape
 # from pymatgen.io.ase import AseAtomsAdaptor
@@ -43,12 +44,37 @@ def get_sc_fromstruct(
     m_len = min_length
     sc_mat = None
     while sc_mat is None:
-        sc_mat = _get_sc(base_struct, min_atoms, max_atoms, m_len)
+        sc_mat = _cubic_cell(base_struct, min_atoms, max_atoms, m_len)
         max_atoms += 1
     return sc_mat
 
 
-def _get_sc(
+def get_matched_structure_mapping(uc_struct: Structure, sc_struct: Structure, sm: StructureMatcher | None = None):
+    """
+    Get the mapping from the inserted structure onto the base structure,
+    assuming that the inserted structure sans the working ion is some kind
+    of SC of the base.
+
+    Args:
+        uc_struct: host structure, smaller cell
+        sc_struct: bigger cell
+        sm: StructureMatcher instance
+    Returns:
+        sc_m : supercell matrix to apply to s1 to get s2
+        total-t : translation to apply on s1 * sc_m to get s2
+    """
+    if sm is None:
+        sm = StructureMatcher(primitive_cell=False, comparator=ElementComparator())
+    s1, s2 = sm._process_species([uc_struct, sc_struct])
+    fu, _ = sm._get_supercell_size(s1, s2)
+    try:
+        val, dist, sc_m, total_t, mapping = sm._strict_match(s1, s2, fu=fu, s1_supercell=True)
+    except TypeError:
+        return None
+    return sc_m, total_t
+
+
+def _cubic_cell(
     base_struct: Structure,
     min_atoms: int = 80,
     max_atoms: int = 240,
