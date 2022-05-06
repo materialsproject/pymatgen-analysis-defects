@@ -8,7 +8,7 @@ from typing import Dict, Iterable, List, Tuple
 
 from monty.json import MSONable
 from pymatgen.analysis.phase_diagram import PhaseDiagram
-from pymatgen.core import Element, Structure
+from pymatgen.core import Element
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
 from pymatgen.io.vasp.outputs import Locpot
 
@@ -20,37 +20,20 @@ class DefectEntry(MSONable):
     """Data for completed defect supercell calculation.
 
     Attributes:
-        defect_type:
-            Type of the defect (e.g. vacancy, substitution, etc.)
         defect:
             The defect object used to generate the supercell.
-        structure:
-            The supercell structure used to simulate the defect.
         charge_state:
             The charge state of the defect.
-        energy:
-            The total energy of the defect supercell.
-        entry_id:
-            The unique identifier for the defect entry.
+        sc_entry:
+            The ComputedStructureEntry for the supercell.
+        corrections:
+            A dictionary of corrections to the energy.
     """
 
-    # TODO: Ignore corrections until EVERYTHING else is working.
     defect: Defect
     charge_state: int
-    energy: float
-    entry_id: object | None = None
-    num_sites: int = None
-    structure: Structure | None = None
-
-    def __post_init__(self):
-        if self.structure is not None:
-            if self.num_sites is not None and self.num_sites != self.structure.num_sites:
-                raise ValueError(
-                    f"The number of atoms in the structure ({self.structure.num_sites}) does not match the number of atoms ({self.num_sites})"
-                )
-            self.num_sites = len(self.structure)
-        elif self.num_sites is None:
-            raise ValueError("Must specify either structure or num_sites")
+    sc_entry: ComputedStructureEntry
+    corrections: Dict[str, float] = None
 
 
 @dataclass
@@ -81,7 +64,10 @@ class FormationEnergyDiagram(MSONable):
                 Formation energy for the situation where the dependent element is abundant.
         """
         formation_en = (
-            defect_entry.energy - self.bulk_entry.energy + defect_entry.charge_state * self.vbm + self.correction
+            defect_entry.sc_entry.energy
+            - self.bulk_entry.energy
+            + defect_entry.charge_state * self.vbm
+            + self.correction
         )
 
         defect: Defect = self.defect_entries[0].defect
