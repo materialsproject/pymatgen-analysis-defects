@@ -64,10 +64,7 @@ class FormationEnergyDiagram(MSONable):
                 Formation energy for the situation where the dependent element is abundant.
         """
         formation_en = (
-            defect_entry.sc_entry.energy
-            - self.bulk_entry.energy
-            + defect_entry.charge_state * self.vbm
-            + self.correction
+            defect_entry.energy - self.bulk_entry.energy + defect_entry.charge_state * self.vbm + self.correction
         )
 
         defect: Defect = self.defect_entries[0].defect
