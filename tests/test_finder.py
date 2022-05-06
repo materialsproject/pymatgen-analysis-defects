@@ -1,4 +1,4 @@
-def test1(test_dir):
+def test_defect_finder(test_dir):
     from pymatgen.core import IStructure
 
     from pymatgen.analysis.defect.finder import DefectSiteFinder
