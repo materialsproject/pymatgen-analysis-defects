@@ -7,6 +7,7 @@ from typing import Dict
 
 import numpy as np
 from monty.json import MSONable
+from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.core import Element, PeriodicSite, Species, Structure
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.symmetry.structure import SymmetrizedStructure
@@ -148,6 +149,13 @@ class Defect(MSONable, metaclass=ABCMeta):
         """
         sga = SpacegroupAnalyzer(self.structure, symprec=self.symprec, angle_tolerance=self.angle_tolerance)
         return sga.get_symmetrized_structure()
+
+    def __eq__(self, __o: object) -> bool:
+        """Equality operator."""
+        if not isinstance(__o, Defect):
+            raise TypeError("Can only compare Defects to Defects")
+        sm = StructureMatcher(comparator=ElementComparator())
+        return sm.fit(self.defect_structure, __o.defect_structure)
 
 
 class Vacancy(Defect):
