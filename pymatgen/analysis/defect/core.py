@@ -218,7 +218,7 @@ class Vacancy(Defect):
 
     def __repr__(self) -> str:
         """Representation of a vacancy defect."""
-        vac_species = self.defect_site.species_string
+        vac_species = get_element(self.defect_site.specie)
         return f"{vac_species} Vacancy defect at site #{self.defect_site_index}"
 
 
@@ -310,8 +310,8 @@ class Substitution(Defect):
 
     def __repr__(self) -> str:
         """Representation of a vacancy defect."""
-        rm_species = self.defect_site.species_string
-        sub_species = self.site.species_string
+        rm_species = get_element(self.defect_site.specie)
+        sub_species = get_element(self.site.specie)
         return f"{sub_species} subsitituted on the {rm_species} site at at site #{self.defect_site_index}"
 
 
