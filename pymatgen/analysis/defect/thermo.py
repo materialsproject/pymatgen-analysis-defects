@@ -35,6 +35,9 @@ class DefectEntry(MSONable):
     sc_entry: ComputedStructureEntry
     corrections: Dict[str, float] = None
 
+    def __post_init__(self):
+        self.charge_state = int(self.charge_state)
+
 
 @dataclass
 class FormationEnergyDiagram(MSONable):
@@ -64,7 +67,10 @@ class FormationEnergyDiagram(MSONable):
                 Formation energy for the situation where the dependent element is abundant.
         """
         formation_en = (
-            defect_entry.energy - self.bulk_entry.energy + defect_entry.charge_state * self.vbm + self.correction
+            defect_entry.sc_entry.energy
+            - self.bulk_entry.energy
+            + float(defect_entry.charge_state) * self.vbm
+            + self.correction
         )
 
         defect: Defect = self.defect_entries[0].defect
