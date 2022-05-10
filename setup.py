@@ -12,7 +12,7 @@ with open(module_dir / "README.md") as f:
 setup(
     name="pymatgen-analysis-defects",
     packages=find_namespace_packages(include=["pymatgen.analysis.*"]),
-    version="0.0.1",
+    version="0.0.2",
     install_requires=["pymatgen>=2022.2.3"],
     extras_require={},
     package_data={},
