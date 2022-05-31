@@ -19,7 +19,7 @@ from pymatgen.analysis.defect.utils import (
 )
 
 __author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
-__copyright__ = "Copyright 2022, Thee Materials Project"
+__copyright__ = "Copyright 2022, Trehee Materials Project"
 __maintainer__ = "Jimmy-Xuan Shen"
 __email__ = "jmmshn@gmail.com"
 
