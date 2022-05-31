@@ -53,10 +53,6 @@ repos:
   hooks:
   - id: mypy
     files: ^src/
-    additional_dependencies:
-    - tokenize-rt==4.1.0
-    - types-pkg_resources==0.1.2
-    - types-paramiko
 - repo: https://github.com/codespell-project/codespell
   rev: v2.1.0
   hooks:
