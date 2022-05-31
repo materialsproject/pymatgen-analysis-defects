@@ -7,6 +7,7 @@ from abc import abstractmethod
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
+from monty.json import MSONable
 from scipy import stats
 
 from pymatgen.analysis.defect.utils import (

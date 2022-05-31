@@ -52,7 +52,10 @@ repos:
   rev: v0.942
   hooks:
   - id: mypy
-    files: ^src/
+    files: ^pymatgen/
+    additional_dependencies:
+    - tokenize-rt==4.1.0
+    - types-pkg_resources==0.1.2
 - repo: https://github.com/codespell-project/codespell
   rev: v2.1.0
   hooks:
