@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, List, Tuple
 
 from monty.json import MSONable
 from pymatgen.analysis.phase_diagram import PhaseDiagram
@@ -26,6 +26,8 @@ class DefectEntry(MSONable):
             The charge state of the defect.
         sc_entry:
             The ComputedStructureEntry for the supercell.
+        locpot:
+            The Locpot object for the supercell.
         corrections:
             A dictionary of corrections to the energy.
     """
@@ -33,10 +35,12 @@ class DefectEntry(MSONable):
     defect: Defect
     charge_state: int
     sc_entry: ComputedStructureEntry
-    corrections: Dict[str, float] = None
+    locpot: Locpot | None = None
+    corrections: Dict[str, float] | None = None
 
     def __post_init__(self):
         self.charge_state = int(self.charge_state)
+        self.corrections = {} if self.corrections is None else self.corrections
 
 
 @dataclass
@@ -48,7 +52,6 @@ class FormationEnergyDiagram(MSONable):
     vbm: float
     phase_digram: PhaseDiagram
     bulk_locpot: Locpot | None = None
-    defect_locpots: Iterable[Locpot] | None = None
 
     def __post_init__(self):
         # reconstruct the phase diagram with the bulk entry
