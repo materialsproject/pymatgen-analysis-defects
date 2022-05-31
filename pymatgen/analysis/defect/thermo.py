@@ -46,9 +46,14 @@ class FormationEnergyDiagram(MSONable):
     bulk_entry: ComputedStructureEntry
     defect_entries: List[DefectEntry]
     vbm: float
-    phase_digram: PhaseDiagram | None = None
+    phase_digram: PhaseDiagram
     bulk_locpot: Locpot | None = None
     defect_locpots: Iterable[Locpot] | None = None
+
+    def __post_init__(self):
+        # reconstruct the phase diagram with the bulk entry
+        entries = self.phase_digram.stable_entries | {self.bulk_entry}
+        self.phase_digram = PhaseDiagram(entries)
 
     def vbm_formation_energy(self, defect_entry: DefectEntry, dep_elt: Element) -> tuple[float, float]:
         """Compute the formation energy at the VBM.
