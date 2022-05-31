@@ -10,7 +10,7 @@ Once installed the additional modules will still appear under the
 
 The additional modules provided by this package are summarized below:
 
-| Module name |                  Funtionality                   |
+| Module name |                  Functionality                  |
 |-------------|:-----------------------------------------------:|
 | `ccd`       |      configuration-coordination diagrams.       |
 | `finder`    | identify the position of defects automatically. |
