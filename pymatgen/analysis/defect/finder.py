@@ -1,4 +1,4 @@
-"""Defect position indentification without prior knowledge."""
+"""Defect position identification without prior knowledge."""
 import logging
 import warnings
 from collections import namedtuple
