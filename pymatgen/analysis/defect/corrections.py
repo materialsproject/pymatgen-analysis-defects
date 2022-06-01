@@ -75,9 +75,9 @@ class FreysoldtCorrection(MSONable):
         Returns:
             FreysoldtCorrection values as a dictionary
         """
-        list_axis_grid = np.array([*map(defect_entry.defect_locpot.get_axis_grid, [0, 1, 2])])
-        list_defect_plnr_avg_esp = np.array([*map(defect_entry.defect_locpot.get_average_along_axis, [0, 1, 2])])
-        list_bulk_plnr_avg_esp = np.array([*map(defect_entry.bulk_locpot.get_average_along_axis, [0, 1, 2])])
+        list_axis_grid = [*map(defect_entry.defect_locpot.get_axis_grid, [0, 1, 2])]
+        list_defect_plnr_avg_esp = [*map(defect_entry.defect_locpot.get_average_along_axis, [0, 1, 2])]
+        list_bulk_plnr_avg_esp = [*map(defect_entry.bulk_locpot.get_average_along_axis, [0, 1, 2])]
         list_axes = range(len(list_axis_grid))
 
         lattice = defect_entry.sc_entry.structure.lattice.copy()
