@@ -1,9 +1,4 @@
-# Copyright (c) Pymatgen Development Team.
-# Distributed under the terms of the MIT License.
-
-"""
-Utilities for defects module.
-"""
+"""Utilities for defects module."""
 
 import logging
 import math
@@ -43,24 +38,26 @@ for cn, di in cn_opt_params.items():
 
 
 class QModel(MSONable):
-    """
-    Model for the defect charge distribution.
+    """Model for the defect charge distribution.
+
     A combination of exponential tail and gaussian distribution is used
     (see Freysoldt (2011), DOI: 10.1002/pssb.201046289 )
+
     q_model(r) = q [x exp(-r/gamma) + (1-x) exp(-r^2/beta^2)]
-            without normalization constants
+    without normalization constants
+
     By default, gaussian distribution with 1 Bohr width is assumed.
     If defect charge is more delocalized, exponential tail is suggested.
     """
 
     def __init__(self, beta=1.0, expnorm=0.0, gamma=1.0):
-        """
+        """Initialize the model.
+
         Args:
             beta: Gaussian decay constant. Default value is 1 Bohr.
-                  When delocalized (eg. diamond), 2 Bohr is more appropriate.
+                When delocalized (eg. diamond), 2 Bohr is more appropriate.
             expnorm: Weight for the exponential tail in the range of [0-1].
-                     Default is 0.0 indicating no tail .
-                     For delocalized charges ideal value is around 0.54-0.6.
+                Default is 0.0 indicating no tail. For delocalized charges ideal value is around 0.54-0.6.
             gamma: Exponential decay constant
         """
         self.beta = beta
@@ -73,9 +70,10 @@ class QModel(MSONable):
             raise ValueError("Please supply exponential decay constant.")
 
     def rho_rec(self, g2):
-        """
-        Reciprocal space model charge value
-        for input squared reciprocal vector.
+        """Reciprocal space model charge value.
+
+        Reciprocal space model charge value, for input squared reciprocal vector.
+
         Args:
             g2: Square of reciprocal vector
 
@@ -86,17 +84,17 @@ class QModel(MSONable):
 
     @property
     def rho_rec_limit0(self):
-        """
-        Reciprocal space model charge value
-        close to reciprocal vector 0 .
+        """Reciprocal space model charge value.
+
+        Close to reciprocal vector 0 .
         rho_rec(g->0) -> 1 + rho_rec_limit0 * g^2
         """
         return -2 * self.gamma2 * self.expnorm - 0.25 * self.beta2 * (1 - self.expnorm)
 
 
 def eV_to_k(energy):
-    """
-    Convert energy to reciprocal vector magnitude k via hbar*k^2/2m
+    """Convert energy to reciprocal vector magnitude k via hbar*k^2/2m.
+
     Args:
         a: Energy in eV.
 
@@ -107,9 +105,12 @@ def eV_to_k(energy):
 
 
 def genrecip(a1, a2, a3, encut):
-    """
+    """Generate reciprocal lattice vectors within the energy cutoff.
+
     Args:
-        a1, a2, a3: lattice vectors in bohr
+        a1: Lattice vector a (in Bohrs)
+        a2: Lattice vector b (in Bohrs)
+        a3: Lattice vector c (in Bohrs)
         encut: energy cut off in eV
     Returns:
         reciprocal lattice vectors with energy less than encut
@@ -145,9 +146,11 @@ def genrecip(a1, a2, a3, encut):
 
 
 def generate_reciprocal_vectors_squared(a1, a2, a3, encut):
-    """
+    """Generate Reciprocal vectors squared.
+
     Generate reciprocal vector magnitudes within the cutoff along the specified
     lattice vectors.
+
     Args:
         a1: Lattice vector a (in Bohrs)
         a2: Lattice vector b (in Bohrs)
@@ -163,9 +166,7 @@ def generate_reciprocal_vectors_squared(a1, a2, a3, encut):
 
 
 def converge(f, step, tol, max_h):
-    """
-    simple newton iteration based convergence function
-    """
+    """Simple newton iteration based convergence function."""
     g = f(0)
     dx = 10000
     h = step
