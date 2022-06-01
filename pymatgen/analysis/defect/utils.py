@@ -160,3 +160,21 @@ def generate_reciprocal_vectors_squared(a1, a2, a3, encut):
     """
     for vec in genrecip(a1, a2, a3, encut):
         yield np.dot(vec, vec)
+
+
+def converge(f, step, tol, max_h):
+    """
+    simple newton iteration based convergence function
+    """
+    g = f(0)
+    dx = 10000
+    h = step
+    while dx > tol:
+        g2 = f(h)
+        dx = abs(g - g2)
+        g = g2
+        h += step
+
+        if h > max_h:
+            raise Exception(f"Did not converge before {h}")
+    return g
