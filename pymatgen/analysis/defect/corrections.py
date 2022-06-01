@@ -22,7 +22,7 @@ from pymatgen.analysis.defect.utils import (
     hart_to_ev,
 )
 
-__author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
+__author__ = "Danny Broberg, Shyam Dwaraknath, Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
 __maintainer__ = "Jimmy-Xuan Shen"
 __email__ = "jmmshn@gmail.com"
@@ -83,7 +83,6 @@ class FreysoldtCorrection(MSONable):
         lattice = defect_entry.sc_entry.structure.lattice.copy()
 
         q = defect_entry.charge_state
-        print(q)
         es_corr = self.perform_es_corr(lattice, q)
 
         pot_corr_tracker = []
