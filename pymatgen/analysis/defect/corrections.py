@@ -1,15 +1,17 @@
-"""Defect corrections methods"""
+"""Defect corrections."""
+
 from __future__ import annotations
 
 import logging
-from abc import abstractmethod
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
-from monty.json import MSONable
+from numpy.typing import ArrayLike, NDArray
 from scipy import stats
 
+from pymatgen.analysis.defect.thermo import DefectEntry
 from pymatgen.analysis.defect.utils import (
     QModel,
     ang_to_bohr,
@@ -27,69 +29,35 @@ __email__ = "jmmshn@gmail.com"
 _logger = logging.getLogger(__name__)
 
 
-class DefectCorrection(MSONable):
-    """
-    A Correction class modeled off the computed entry correction format
-    """
+class FreysoldtCorrection:
+    """A class for FreysoldtCorrection class.
 
-    @abstractmethod
-    def get_correction(self, entry):
-        """
-        Returns correction for a single entry.
-        Args:
-            entry: A DefectEntry object.
-        Returns:
-            A single dictionary with the format
-            correction_name: energy_correction
-        Raises:
-            CompatibilityError if entry is not compatible.
-        """
-        return
+    Note: This class should NEVER be serialized since bulk locpot is shared between the different
+    defect entries.
 
-    def correct_entry(self, entry):
-        """
-        Corrects a single entry.
-        Args:
-            entry: A DefectEntry object.
-        Returns:
-            An processed entry.
-        Raises:
-            CompatibilityError if entry is not compatible.
-        """
-        entry.correction.update(self.get_correction(entry))
-        return entry
-
-
-class FreysoldtCorrection(DefectCorrection):
-    """
-    A class for FreysoldtCorrection class. Largely adapted from PyCDT code
+    Largely adapted from PyCDT code
     If this correction is used, please reference Freysoldt's original paper.
     doi: 10.1103/PhysRevLett.102.016402
     """
 
     def __init__(
         self,
-        dielectric_const,
-        q_model=None,
-        energy_cutoff=520,
-        madetol=0.0001,
-        axis=None,
+        dielectric_const: float | NDArray,
+        q_model: Optional[QModel] = None,
+        energy_cutoff: float = 520,
+        mad_tol: float = 0.0001,
     ):
-        """
-        Initializes the FreysoldtCorrection class
+        """Initializes the FreysoldtCorrection class.
+
         Args:
-            dielectric_const (float or 3x3 matrix): Dielectric constant for the structure
-            q_model (QModel): instantiated QModel object or None.
-                Uses default parameters to instantiate QModel if None supplied
-            energy_cutoff (int): Maximum energy in eV in reciprocal space to perform
-                integration for potential correction.
-            madeltol(float): Convergence criteria for the Madelung energy for potential correction
-            axis (int): Axis to calculate correction.
-                If axis is None, then averages over all three axes is performed.
+        dielectric_const: Dielectric constant of the material.
+        q_model: A QModel object. ...
+        energy_cutoff: Maximum energy in eV in reciprocal space to perform integration for potential correction.
+        mad_tol:Convergence criteria for the Madelung energy for potential correction
         """
         self.q_model = QModel() if not q_model else q_model
         self.energy_cutoff = energy_cutoff
-        self.madetol = madetol
+        self.mad_tol = mad_tol
         self.dielectric_const = dielectric_const
 
         if isinstance(dielectric_const, (int, float)):
@@ -97,61 +65,28 @@ class FreysoldtCorrection(DefectCorrection):
         else:
             self.dielectric = float(np.mean(np.diag(dielectric_const)))
 
-        self.axis = axis
+        self.metadata: dict = {"pot_plot_data": {}, "pot_corr_uncertainty_md": {}}
 
-        self.metadata = {"pot_plot_data": {}, "pot_corr_uncertainty_md": {}}
+    def get_correction(self, defect_entry: DefectEntry, defect_frac_coords: ArrayLike):
+        """Gets the Freysoldt correction for a defect entry.
 
-    def get_correction(self, entry):
-        """
-        Gets the Freysoldt correction for a defect entry
         Args:
-            entry (DefectEntry): defect entry to compute Freysoldt correction on.
-                Requires following keys to exist in DefectEntry.parameters dict:
-                    axis_grid (3 x NGX where NGX is the length of the NGX grid
-                    in the x,y and z axis directions. Same length as planar
-                    average lists):
-                        A list of 3 numpy arrays which contain the Cartesian axis
-                        values (in angstroms) that correspond to each planar avg
-                        potential supplied.
-                    bulk_planar_averages (3 x NGX where NGX is the length of
-                    the NGX grid in the x,y and z axis directions.):
-                        A list of 3 numpy arrays which contain the planar averaged
-                        electrostatic potential for the bulk supercell.
-                    defect_planar_averages (3 x NGX where NGX is the length of
-                    the NGX grid in the x,y and z axis directions.):
-                        A list of 3 numpy arrays which contain the planar averaged
-                        electrostatic potential for the defective supercell.
-                    initial_defect_structure (Structure) structure corresponding to
-                        initial defect supercell structure (uses Lattice for charge correction)
-                    defect_frac_sc_coords (3 x 1 array) Fractional coordinates of
-                        defect location in supercell structure
+            defect_entry (DefectEntry): defect entry to compute Freysoldt correction on.
+            defect_frac_coords (ArrayLike): fractional coordinates of the defect.
+
         Returns:
             FreysoldtCorrection values as a dictionary
         """
+        list_axis_grid = np.array([*map(defect_entry.defect_locpot.get_axis_grid, [0, 1, 2])])
+        list_defect_plnr_avg_esp = np.array([*map(defect_entry.defect_locpot.get_average_along_axis, [0, 1, 2])])
+        list_bulk_plnr_avg_esp = np.array([*map(defect_entry.bulk_locpot.get_average_along_axis, [0, 1, 2])])
+        list_axes = range(len(list_axis_grid))
 
-        if self.axis is None:
-            list_axis_grid = np.array(entry.parameters["axis_grid"], dtype=object)
-            list_bulk_plnr_avg_esp = np.array(entry.parameters["bulk_planar_averages"], dtype=object)
-            list_defect_plnr_avg_esp = np.array(entry.parameters["defect_planar_averages"], dtype=object)
-            list_axes = range(len(list_axis_grid))
-        else:
-            list_axes = np.array(self.axis)
-            list_axis_grid, list_bulk_plnr_avg_esp, list_defect_plnr_avg_esp = (
-                [],
-                [],
-                [],
-            )
-            for ax in list_axes:
-                list_axis_grid.append(np.array(entry.parameters["axis_grid"][ax]))
-                list_bulk_plnr_avg_esp.append(np.array(entry.parameters["bulk_planar_averages"][ax]))
-                list_defect_plnr_avg_esp.append(np.array(entry.parameters["defect_planar_averages"][ax]))
+        lattice = defect_entry.sc_entry.structure.lattice.copy()
 
-        lattice = entry.parameters["initial_defect_structure"].lattice.copy()
-        defect_frac_coords = entry.parameters["defect_frac_sc_coords"]
-
-        q = entry.defect.charge
-
-        es_corr = self.perform_es_corr(lattice, entry.charge)
+        q = defect_entry.charge_state
+        print(q)
+        es_corr = self.perform_es_corr(lattice, q)
 
         pot_corr_tracker = []
 
@@ -163,7 +98,7 @@ class FreysoldtCorrection(DefectCorrection):
                 pureavg,
                 defavg,
                 lattice,
-                entry.charge,
+                q,
                 defect_frac_coords,
                 axis,
                 widthsample=1.0,
@@ -172,8 +107,8 @@ class FreysoldtCorrection(DefectCorrection):
 
         pot_corr = np.mean(pot_corr_tracker)
 
-        entry.parameters["freysoldt_meta"] = dict(self.metadata)
-        entry.parameters["potalign"] = pot_corr / (-q) if q else 0.0
+        # defect_entry.parameters["freysoldt_meta"] = dict(self.metadata)
+        # defect_entry.parameters["potalign"] = pot_corr / (-q) if q else 0.0
 
         return {
             "freysoldt_electrostatic": es_corr,
@@ -181,12 +116,13 @@ class FreysoldtCorrection(DefectCorrection):
         }
 
     def perform_es_corr(self, lattice, q, step=1e-4):
-        """
-        Perform Electrostatic Freysoldt Correction
+        """Perform Electrostatic Freysoldt Correction.
+
         Args:
             lattice: Pymatgen lattice object
             q (int): Charge of defect
             step (float): step size for numerical integration
+
         Return:
             Electrostatic Point Charge contribution to Freysoldt Correction (float)
         """
@@ -209,10 +145,10 @@ class FreysoldtCorrection(DefectCorrection):
             eper += (q**2) * 4 * round(np.pi, 6) * self.q_model.rho_rec_limit0 / vol
             return eper
 
-        eiso = converge(e_iso, 5, self.madetol, self.energy_cutoff)
+        eiso = converge(e_iso, 5, self.mad_tol, self.energy_cutoff)
         _logger.debug("Eisolated : %f", round(eiso, 5))
 
-        eper = converge(e_per, 5, self.madetol, self.energy_cutoff)
+        eper = converge(e_per, 5, self.mad_tol, self.energy_cutoff)
 
         _logger.info("Eperiodic : %f hartree", round(eper, 5))
         _logger.info("difference (periodic-iso) is %f hartree", round(eper - eiso, 6))
@@ -233,28 +169,29 @@ class FreysoldtCorrection(DefectCorrection):
         axis,
         widthsample=1.0,
     ):
-        """
-        For performing planar averaging potential alignment
+        """For performing planar averaging potential alignment.
+
         Args:
-             axis_grid (1 x NGX where NGX is the length of the NGX grid
-                    in the axis direction. Same length as pureavg list):
-                        A numpy array which contain the Cartesian axis
-                        values (in angstroms) that correspond to each planar avg
-                        potential supplied.
-             pureavg (1 x NGX where NGX is the length of the NGX grid in
-                    the axis direction.):
-                        A numpy array for the planar averaged
-                        electrostatic potential of the bulk supercell.
-             defavg (1 x NGX where NGX is the length of the NGX grid in
-                    the axis direction.):
-                        A numpy array for the planar averaged
-                        electrostatic potential of the defect supercell.
-             lattice: Pymatgen Lattice object of the defect supercell
-             q (float or int): charge of the defect
-             defect_frac_position: Fracitional Coordinates of the defect in the supercell
-             axis (int): axis for performing the freysoldt correction on
-             widthsample (float): width (in Angstroms) of the region in between defects
+            axis_grid (1 x NGX where NGX is the length of the NGX grid
+                in the axis direction. Same length as pureavg list):
+                    A numpy array which contain the Cartesian axis
+                    values (in angstroms) that correspond to each planar avg
+                    potential supplied.
+            pureavg (1 x NGX where NGX is the length of the NGX grid in
+                the axis direction.):
+                    A numpy array for the planar averaged
+                    electrostatic potential of the bulk supercell.
+            defavg (1 x NGX where NGX is the length of the NGX grid in
+                the axis direction.):
+                A numpy array for the planar averaged
+                electrostatic potential of the defect supercell.
+            lattice: Pymatgen Lattice object of the defect supercell
+                q (float or int): charge of the defect
+                defect_frac_position: Fracitional Coordinates of the defect in the supercell
+                axis (int): axis for performing the freysoldt correction on
+                widthsample (float): width (in Angstroms) of the region in between defects
                 where the potential alignment correction is averaged. Default is 1 Angstrom.
+
         Returns:
             Potential Alignment contribution to Freysoldt Correction (float)
         """
@@ -294,7 +231,7 @@ class FreysoldtCorrection(DefectCorrection):
         # Get the real space potential by performing a  fft and grabbing the imaginary portion
         v_R = np.fft.fft(v_G)
 
-        if abs(np.imag(v_R).max()) > self.madetol:
+        if abs(np.imag(v_R).max()) > self.mad_tol:
             raise Exception("imaginary part found to be %s", repr(np.imag(v_R).max()))
         v_R /= lattice.volume * ang_to_bohr**3
         v_R = np.real(v_R) * hart_to_ev
@@ -339,15 +276,17 @@ class FreysoldtCorrection(DefectCorrection):
         return self.pot_corr
 
     def plot(self, axis, title=None, saved=False):
-        """
-        Plots the planar average electrostatic potential against the Long range and
+        """Plot the planar average electrostatic potential.
+
+        Plot the planar average electrostatic potential against the Long range and
         short range models from Freysoldt. Must run perform_pot_corr or get_correction
         (to load metadata) before this can be used.
+
         Args:
-             axis (int): axis to plot
-             title (str): Title to be given to plot. Default is no title.
-             saved (bool): Whether to save file or not. If False then returns plot
-                object. If True then saves plot as   str(title) + "FreyplnravgPlot.pdf"
+            axis (int): axis to plot
+            title (str): Title to be given to plot. Default is no title.
+            saved (bool): Whether to save file or not. If False then returns plot object.
+            If True then saves plot as   str(title) + "FreyplnravgPlot.pdf"
         """
         if not self.metadata["pot_plot_data"]:
             raise ValueError("Cannot plot potential alignment before running correction!")

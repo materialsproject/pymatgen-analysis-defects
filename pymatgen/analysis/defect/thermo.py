@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Classes and methods related to thermodynamics and energy."""
+
+from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
@@ -26,8 +26,12 @@ class DefectEntry(MSONable):
             The charge state of the defect.
         sc_entry:
             The ComputedStructureEntry for the supercell.
-        locpot:
+        defect_locpot:
             The Locpot object for the supercell.
+        bulk_locpot:
+            The Locpot of the bulk supercell, note that since the locpot object is mutable,
+            different defect entries can share the same bulk_locpot object.
+            (Take care to not modify this object.)
         corrections:
             A dictionary of corrections to the energy.
     """
@@ -35,10 +39,12 @@ class DefectEntry(MSONable):
     defect: Defect
     charge_state: int
     sc_entry: ComputedStructureEntry
-    locpot: Locpot | None = None
+    defect_locpot: Locpot | None = None
+    bulk_locpot: Locpot | None = None
     corrections: Dict[str, float] | None = None
 
     def __post_init__(self):
+        """Post-initialization."""
         self.charge_state = int(self.charge_state)
         self.corrections = {} if self.corrections is None else self.corrections
 
@@ -54,6 +60,7 @@ class FormationEnergyDiagram(MSONable):
     bulk_locpot: Locpot | None = None
 
     def __post_init__(self):
+        """Post-initialization."""
         # reconstruct the phase diagram with the bulk entry
         entries = self.phase_digram.stable_entries | {self.bulk_entry}
         self.phase_digram = PhaseDiagram(entries)
