@@ -8,6 +8,7 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
+from monty.json import MSONable
 from numpy.typing import ArrayLike, NDArray
 from scipy import stats
 
@@ -29,11 +30,8 @@ __email__ = "jmmshn@gmail.com"
 _logger = logging.getLogger(__name__)
 
 
-class FreysoldtCorrection:
+class FreysoldtCorrection(MSONable):
     """A class for FreysoldtCorrection class.
-
-    Note: This class should NEVER be serialized since bulk locpot is shared between the different
-    defect entries.
 
     Largely adapted from PyCDT code
     If this correction is used, please reference Freysoldt's original paper.

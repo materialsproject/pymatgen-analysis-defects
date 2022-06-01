@@ -14,6 +14,13 @@ from pymatgen.io.vasp.outputs import Locpot
 
 from pymatgen.analysis.defect.core import Defect
 
+__author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
+__copyright__ = "Copyright 2022, The Materials Project"
+__maintainer__ = "Jimmy-Xuan Shen"
+__email__ = "jmmshn@gmail.com"
+
+_logger = logging.getLogger(__name__)
+
 
 @dataclass
 class DefectEntry(MSONable):
