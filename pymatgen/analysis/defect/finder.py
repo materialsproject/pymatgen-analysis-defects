@@ -95,8 +95,21 @@ class DefectSiteFinder(MSONable):
         return get_weighted_average_position(defect_structure.lattice, positions, distortions)
 
     def get_impurity_position(self, defect_structure: Structure, base_structure: Structure):
-        """Get the position of an impurity defect."""
-        raise NotImplementedError("Impurity positioning not implemented")
+        """Get the position of an impurity defect.
+
+        Look at all sites with impurity atoms, and take the average of the positions of the sites.
+
+        Args:
+            defect_structure: Relaxed structure containing the defect
+            base_structure: Pristine structure without the defect
+
+        Returns:
+            ArrayLike: Position of the defect in the defect structure
+        """
+        # get the pbc average position of all sites not in the base structure
+        base_species = {site.species_string for site in base_structure}
+        impurity_sites = [*filter(lambda x: x.species_string not in base_species, defect_structure)]
+        return get_weighted_average_position(defect_structure.lattice, [s.frac_coords for s in impurity_sites])
 
 
 # %%
