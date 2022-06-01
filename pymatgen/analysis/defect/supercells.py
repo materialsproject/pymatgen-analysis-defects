@@ -11,12 +11,12 @@ from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatc
 # from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.core import Structure
 
-__author__ = "Jimmy Shen"
+__author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
-__maintainer__ = "Jimmy Shen @jmmshn"
-__date__ = "Feb 11, 2022"
+__maintainer__ = "Jimmy-Xuan Shen"
+__email__ = "jmmshn@gmail.com"
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def get_sc_fromstruct(
@@ -50,10 +50,9 @@ def get_sc_fromstruct(
 
 
 def get_matched_structure_mapping(uc_struct: Structure, sc_struct: Structure, sm: StructureMatcher | None = None):
-    """
-    Get the mapping from the inserted structure onto the base structure,
-    assuming that the inserted structure sans the working ion is some kind
-    of SC of the base.
+    """Get the mapping of the supercell to the unit cell.
+
+    Get the mapping from the supercell defect structure onto the base structure,
 
     Args:
         uc_struct: host structure, smaller cell
@@ -61,7 +60,7 @@ def get_matched_structure_mapping(uc_struct: Structure, sc_struct: Structure, sm
         sm: StructureMatcher instance
     Returns:
         sc_m : supercell matrix to apply to s1 to get s2
-        total-t : translation to apply on s1 * sc_m to get s2
+        total_t : translation to apply on s1 * sc_m to get s2
     """
     if sm is None:
         sm = StructureMatcher(primitive_cell=False, comparator=ElementComparator())
