@@ -4,15 +4,19 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from monty.json import MSONable
+from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.core import Element
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
 from pymatgen.io.vasp.outputs import Locpot
+from scipy.spatial import ConvexHull
 
 from pymatgen.analysis.defect.core import Defect
+from pymatgen.analysis.defect.corrections import FreysoldtCorrection
+from pymatgen.analysis.defect.finder import DefectSiteFinder
 
 __author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -46,14 +50,55 @@ class DefectEntry(MSONable):
     defect: Defect
     charge_state: int
     sc_entry: ComputedStructureEntry
-    defect_locpot: Locpot | None = None
-    bulk_locpot: Locpot | None = None
-    corrections: Dict[str, float] | None = None
+    sc_defect_fpos: Optional[ArrayLike] = None
+    corrections: Optional[Dict[str, float]] = None
+
+    def add_locpots(self, bulk_locpot: Locpot, defect_locpot: Locpot):
+        """Add the bulk and defect locpot to the defect entry.
+
+        Since we only need the correction values to reconstruct the defect entry
+        and the Locpot objects are only used to compute the corrections once,
+        it should not be serialized.
+        Additionally, since the locpot object are mutable, different defect entries
+        can share the same bulk_locpot object which also makes it a bad idea to serialize.
+        """
+        self.bulk_locpot = bulk_locpot
+        self.defect_locpot = defect_locpot
+
+        # get the defect position that should be used for freysoldt correction
+        # if it is not already provided
+        if self.sc_defect_fpos is None:
+            finder = DefectSiteFinder()
+            self.sc_defect_fpos = finder.get_defect_fpos(
+                defect_structure=self.defect_locpot.structure,
+                base_structure=self.bulk_locpot.structure,
+            )
 
     def __post_init__(self):
         """Post-initialization."""
         self.charge_state = int(self.charge_state)
-        self.corrections = {} if self.corrections is None else self.corrections
+        self.corrections: dict = {} if self.corrections is None else self.corrections
+
+    def _has_locpots(self):
+        """Check if the bulk and defect locpots are available."""
+        return all([hasattr(self, attr) for attr in ["bulk_locpot", "defect_locpot"]])
+
+    def get_freysoldt_correction(self, dielectric_const: float | NDArray):
+        """Calculate the Freysoldt correction.
+
+        Returns:
+            The Freysoldt correction.
+        """
+        if not self._has_locpots():
+            raise ValueError("Locpots are not available. Please add them using the `add_locpots` method.")
+        fc = FreysoldtCorrection(dielectric_const=dielectric_const)
+        fc_correction = fc.get_correction(defect_entry=self, defect_frac_coords=self.sc_defect_fpos)
+        self.corrections.update(fc_correction)  # type: ignore
+
+    @property
+    def corrected_energy(self):
+        """The energy of the defect entry with all corrections applied."""
+        return self.sc_entry.energy + sum(self.corrections.values())
 
 
 @dataclass
@@ -89,10 +134,7 @@ class FormationEnergyDiagram(MSONable):
                 Formation energy for the situation where the dependent element is abundant.
         """
         formation_en = (
-            defect_entry.sc_entry.energy
-            - self.bulk_entry.energy
-            + float(defect_entry.charge_state) * self.vbm
-            + self.correction
+            defect_entry.corrected_energy - self.bulk_entry.energy + float(defect_entry.charge_state) * self.vbm
         )
 
         defect: Defect = self.defect_entries[0].defect
@@ -106,11 +148,6 @@ class FormationEnergyDiagram(MSONable):
             elt_rich_res += el_rich_chempot[key] * factor
 
         return elt_poor_res, elt_rich_res
-
-    @property
-    def correction(self) -> float:
-        """The correction to the formation energy: Example finite-size corrections."""
-        return 0
 
     def critical_chemical_potential(self, dep_elt: Element) -> Tuple[Dict[Element, float], Dict[Element, float]]:
         """Compute the critical chemical potentials.
@@ -160,3 +197,81 @@ def ensure_stable_bulk(pd: PhaseDiagram, bulk_entry: ComputedEntry) -> PhaseDiag
         stable_entry = ComputedEntry(bulk_entry.composition, bulk_entry.energy - e_above_hull - SMALL_NUM)
         pd = PhaseDiagram([stable_entry] + pd.all_entries)
     return pd
+
+
+def get_transitions(lines: list[tuple[float, float]]) -> list[tuple[float, float]]:
+    """Get the "transition" points in a list of lines.
+
+    Given a list of lines represented as (m, b) pairs sorted in order of decreasing m.
+    A "transition" point is a point where adjacent lines in the list intersect.
+    i.e. intersection points (x_i, y_i) where line i intersects line i+1
+
+    Args:
+        lines: (m, b) format for each line
+
+    Returns:
+        List[List[float]]:
+            List of intersection points.
+    """
+    # make sure the lines are sorted by decreasing slope
+    lines = sorted(lines, key=lambda x: x[0], reverse=True)
+    x_transitions = []
+    for i, (m1, b1) in enumerate(lines[:-1]):
+        m2, b2 = lines[i + 1]
+        if m1 == m2:
+            raise ValueError("The slopes (charge states) of the set of lines should be distinct.")
+        x_transitions.append(((b2 - b1) / (m1 - m2), (m1 * b2 - m2 * b1) / (m1 - m2)))
+    return x_transitions
+
+
+def get_lower_envelope(lines):
+    """Get the lower envelope of the formation energy.
+
+    The lines are returned with decreasing slope.
+
+    Args:
+        lines: (m, b) format for each line
+
+    Returns:
+        List[List[float]]:
+            List of intersection points.
+    """
+    dual_points = [(m, -b) for m, b in lines]
+    upper_hull = get_upper_hull(dual_points)
+    lower_envelope = [(m, -b) for m, b in upper_hull]
+    return lower_envelope
+
+
+def get_upper_hull(points: ArrayLike) -> List[ArrayLike]:
+    """Get the upper hull of a set of points in 2D.
+
+    Args:
+        points:
+            List of points in 2D.
+
+    Returns:
+        List[(float, float)]:
+            Vertices in the upper hull given from right to left.
+
+    """
+    hull = ConvexHull(points)
+    vertices = hull.vertices
+
+    # the vertices are returned in counter-clockwise order
+    # so we just need to loop over the ring and get the portion
+    # between the rightmost and leftmost points
+    right_most_idx = max(vertices, key=lambda x: points[x, 0])
+    left_most_idx = min(vertices, key=lambda x: points[x, 0])
+    seen_right_most = False
+    upper_hull = []
+
+    # loop over the vertices twice
+    for i in vertices.tolist() + vertices.tolist():
+        if i == right_most_idx:
+            seen_right_most = True
+        if seen_right_most:
+            xi, yi = points[i]
+            upper_hull.append((xi, yi))
+        if seen_right_most and i == left_most_idx:
+            break
+    return upper_hull
