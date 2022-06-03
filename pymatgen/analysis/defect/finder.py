@@ -37,16 +37,80 @@ class DefectSiteFinder(MSONable):
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
 
+    def get_defect_fpos(self, defect_structure: Structure, base_structure: Structure) -> ArrayLike:
+        """Get the position of a defect in the pristine structure.
+
+        Args:
+            defect_structure: Relaxed structure containing the defect
+            base_structure: Structure for the pristine cell
+
+        Returns:
+            ArrayLike: Position of the defect in the pristine structure (in fractional coordinates)
+        """
+        if self._is_impurity(defect_structure, base_structure):
+            return self.get_impurity_position(defect_structure, base_structure)
+        else:
+            return self.get_native_defect_position(defect_structure, base_structure)
+
+    def _is_impurity(self, defect_structure: Structure, base_structure: Structure) -> bool:
+        """Check if the defect structure is an impurity.
+
+        Args:
+            defect_structure: Structure containing the defect
+            base_structure: Structure for the pristine cell
+
+        Returns:
+            bool: True if the defect structure is an impurity
+        """
+        # check if the defect structure is an impurity
+        base_species = {site.species_string for site in base_structure}
+        defect_species = {site.species_string for site in defect_structure}
+        return len(defect_species - base_species) > 0
+
+    def get_native_defect_position(self, defect_structure: Structure, base_structure: Structure) -> ArrayLike:
+        """Get the position of a native defect in the defect structure.
+
+        Args:
+            defect_structure: Relaxed structure containing the defect
+            base_structure: Pristine structure without the defect
+
+        Returns:
+            ArrayLike: Position of the defect in the defect structure (in fractional coordinates)
+        """
+        distored_sites, distortions = list(zip(*self.get_most_distorted_sites(defect_structure, base_structure)))
+        positions = [defect_structure[isite].frac_coords for isite in distored_sites]
+        return get_weighted_average_position(defect_structure.lattice, positions, distortions)
+
+    def get_impurity_position(self, defect_structure: Structure, base_structure: Structure):
+        """Get the position of an impurity defect.
+
+        Look at all sites with impurity atoms, and take the average of the positions of the sites.
+
+        Args:
+            defect_structure: Relaxed structure containing the defect
+            base_structure: Pristine structure without the defect
+
+        Returns:
+            ArrayLike: Position of the defect in the defect structure
+        """
+        # get the pbc average position of all sites not in the base structure
+        base_species = {site.species_string for site in base_structure}
+        impurity_sites = [*filter(lambda x: x.species_string not in base_species, defect_structure)]
+        return get_weighted_average_position(defect_structure.lattice, [s.frac_coords for s in impurity_sites])
+
     def get_most_distorted_sites(
         self, defect_structure: Structure, base_structure: Structure
     ) -> List[Tuple[int, float]]:
-        """Identify the set of sites with the most deviation from the prestine.
+        """Identify the set of sites with the most deviation from the pristine.
 
         Performs the following steps:
 
         1. For each site in the defect structure, find the closest site in the pristine structure.
         2. Then, compute a distortion field based on SOAP vectors.
-        3. Filter the most distorted sites (sort -> )
+        3. Filter the most distorted sites:
+            - sort largest to smallest distortion
+            - look at the diff in the sorted list
+            - use the biggest value drop as the cutoff
 
         Args:
             defect_structure: Relaxed structure containing the defect
@@ -79,37 +143,6 @@ class DefectSiteFinder(MSONable):
         deviations = [r[1] for r in res]
         bound = _get_broundary(deviations)
         return res[:bound]
-
-    def get_native_defect_position(self, defect_structure: Structure, base_structure: Structure) -> ArrayLike:
-        """Get the position of a native defect in the defect structure.
-
-        Args:
-            defect_structure: Relaxed structure containing the defect
-            base_structure: Pristine structure without the defect
-
-        Returns:
-            ArrayLike: Position of the defect in the defect structure
-        """
-        distored_sites, distortions = list(zip(*self.get_most_distorted_sites(defect_structure, base_structure)))
-        positions = [defect_structure[isite].frac_coords for isite in distored_sites]
-        return get_weighted_average_position(defect_structure.lattice, positions, distortions)
-
-    def get_impurity_position(self, defect_structure: Structure, base_structure: Structure):
-        """Get the position of an impurity defect.
-
-        Look at all sites with impurity atoms, and take the average of the positions of the sites.
-
-        Args:
-            defect_structure: Relaxed structure containing the defect
-            base_structure: Pristine structure without the defect
-
-        Returns:
-            ArrayLike: Position of the defect in the defect structure
-        """
-        # get the pbc average position of all sites not in the base structure
-        base_species = {site.species_string for site in base_structure}
-        impurity_sites = [*filter(lambda x: x.species_string not in base_species, defect_structure)]
-        return get_weighted_average_position(defect_structure.lattice, [s.frac_coords for s in impurity_sites])
 
 
 # %%
