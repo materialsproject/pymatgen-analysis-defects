@@ -71,7 +71,7 @@ class ConfigurationCoordinateDiagram(MSONable):
 
         Perform the following:
             - convert fields to numpy arrays
-            - referece the gs to zero and es to dE
+            - reference the gs to zero and es to dE
             - compute the frequencies of the harmonic oscillators defined by curves
         """
         self.Q_gs = np.array(self.Q_gs)
