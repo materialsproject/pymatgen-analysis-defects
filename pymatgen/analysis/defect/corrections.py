@@ -12,7 +12,6 @@ from monty.json import MSONable
 from numpy.typing import ArrayLike, NDArray
 from scipy import stats
 
-from pymatgen.analysis.defect.thermo import DefectEntry
 from pymatgen.analysis.defect.utils import (
     QModel,
     ang_to_bohr,
@@ -65,7 +64,7 @@ class FreysoldtCorrection(MSONable):
 
         self.metadata: dict = {"pot_plot_data": {}, "pot_corr_uncertainty_md": {}}
 
-    def get_correction(self, defect_entry: DefectEntry, defect_frac_coords: ArrayLike):
+    def get_correction(self, defect_entry, defect_frac_coords: ArrayLike):
         """Gets the Freysoldt correction for a defect entry.
 
         Args:
