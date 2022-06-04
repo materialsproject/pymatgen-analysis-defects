@@ -5,17 +5,18 @@ from __future__ import annotations
 import logging
 
 import numpy as np
+from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
 
 # from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape
 # from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.core import Structure
 
-__author__ = "Jimmy Shen"
+__author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
-__maintainer__ = "Jimmy Shen @jmmshn"
-__date__ = "Feb 11, 2022"
+__maintainer__ = "Jimmy-Xuan Shen"
+__email__ = "jmmshn@gmail.com"
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def get_sc_fromstruct(
@@ -43,12 +44,36 @@ def get_sc_fromstruct(
     m_len = min_length
     sc_mat = None
     while sc_mat is None:
-        sc_mat = _get_sc(base_struct, min_atoms, max_atoms, m_len)
+        sc_mat = _cubic_cell(base_struct, min_atoms, max_atoms, m_len)
         max_atoms += 1
     return sc_mat
 
 
-def _get_sc(
+def get_matched_structure_mapping(uc_struct: Structure, sc_struct: Structure, sm: StructureMatcher | None = None):
+    """Get the mapping of the supercell to the unit cell.
+
+    Get the mapping from the supercell defect structure onto the base structure,
+
+    Args:
+        uc_struct: host structure, smaller cell
+        sc_struct: bigger cell
+        sm: StructureMatcher instance
+    Returns:
+        sc_m : supercell matrix to apply to s1 to get s2
+        total_t : translation to apply on s1 * sc_m to get s2
+    """
+    if sm is None:
+        sm = StructureMatcher(primitive_cell=False, comparator=ElementComparator())
+    s1, s2 = sm._process_species([uc_struct, sc_struct])
+    fu, _ = sm._get_supercell_size(s1, s2)
+    try:
+        val, dist, sc_m, total_t, mapping = sm._strict_match(s1, s2, fu=fu, s1_supercell=True)
+    except TypeError:
+        return None
+    return sc_m, total_t
+
+
+def _cubic_cell(
     base_struct: Structure,
     min_atoms: int = 80,
     max_atoms: int = 240,
