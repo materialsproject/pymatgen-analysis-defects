@@ -260,8 +260,8 @@ def get_upper_hull(points: ArrayLike) -> List[ArrayLike]:
     # the vertices are returned in counter-clockwise order
     # so we just need to loop over the ring and get the portion
     # between the rightmost and leftmost points
-    right_most_idx = max(vertices, key=lambda x: points[x, 0])
-    left_most_idx = min(vertices, key=lambda x: points[x, 0])
+    right_most_idx = max(vertices, key=lambda x: points[x][0])
+    left_most_idx = min(vertices, key=lambda x: points[x][0])
     seen_right_most = False
     upper_hull = []
 
