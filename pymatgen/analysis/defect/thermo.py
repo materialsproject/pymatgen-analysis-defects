@@ -54,20 +54,20 @@ class DefectEntry(MSONable):
     sc_defect_frac_coords: Optional[ArrayLike] = None
     corrections: Optional[Dict[str, float]] = None
 
-    def add_locpots(self, bulk_locpot: Locpot, defect_locpot: Locpot):
-        """Add the bulk and defect locpot to the defect entry.
+    # def add_locpots(self, bulk_locpot: Locpot, defect_locpot: Locpot):
+    #     """Add the bulk and defect locpot to the defect entry.
 
-        Since we only need the correction values to reconstruct the defect entry
-        and the Locpot objects are only used to compute the corrections once,
-        it should not be serialized.
-        Additionally, since the locpot object are mutable, different defect entries
-        can share the same bulk_locpot object which also makes it a bad idea to serialize.
-        """
-        self.bulk_locpot = bulk_locpot
-        self.defect_locpot = defect_locpot
+    #     Since we only need the correction values to reconstruct the defect entry
+    #     and the Locpot objects are only used to compute the corrections once,
+    #     it should not be serialized.
+    #     Additionally, since the locpot object are mutable, different defect entries
+    #     can share the same bulk_locpot object which also makes it a bad idea to serialize.
+    #     """
+    #     self.bulk_locpot = bulk_locpot
+    #     self.defect_locpot = defect_locpot
 
-        # get the defect position that should be used for freysoldt correction
-        # if it is not already provided
+    # get the defect position that should be used for freysoldt correction
+    # if it is not already provided
 
     def __post_init__(self):
         """Post-initialization."""
@@ -129,14 +129,13 @@ class FormationEnergyDiagram(MSONable):
     bulk_entry: ComputedStructureEntry
     defect_entries: List[DefectEntry]
     vbm: float
-    phase_digram: PhaseDiagram
-    bulk_locpot: Locpot | None = None
+    phase_diagram: PhaseDiagram
 
     def __post_init__(self):
         """Post-initialization."""
         # reconstruct the phase diagram with the bulk entry
-        entries = self.phase_digram.stable_entries | {self.bulk_entry}
-        self.phase_digram = PhaseDiagram(entries)
+        entries = self.phase_diagram.stable_entries | {self.bulk_entry}
+        self.phase_diagram = PhaseDiagram(entries)
 
     def vbm_formation_energy(self, defect_entry: DefectEntry, dep_elt: Element) -> tuple[float, float]:
         """Compute the formation energy at the VBM.
@@ -186,13 +185,35 @@ class FormationEnergyDiagram(MSONable):
                 chemical potentials for the chase where the dep_elt is is abundant.
                 (e.g. O-rich growth conditions)
         """
-        if self.phase_digram is None:
+        if self.phase_diagram is None:
             raise RuntimeError("Phase diagram is not available.")
-        pd = ensure_stable_bulk(self.phase_digram, self.bulk_entry)
+        pd = ensure_stable_bulk(self.phase_diagram, self.bulk_entry)
         chem_pots = pd.getmu_vertices_stability_phase(self.bulk_entry.composition, dep_elt)
         dep_elt_poor = max(chem_pots, key=lambda x: x[dep_elt])
         dep_elt_rich = min(chem_pots, key=lambda x: x[dep_elt])
         return dep_elt_poor, dep_elt_rich
+
+    def lower_envelope(self, dep_elt: Element):
+        """Compute the lower envelope of the formation energy diagram."""
+        lines_elt_poor = []
+        lines_elt_rich = []
+        for defect_entry in self.defect_entries:
+            elt_poor, elt_rich = self.vbm_formation_energy(defect_entry, dep_elt)
+            lines_elt_poor.append((float(defect_entry.charge_state), elt_poor))
+            lines_elt_rich.append((float(defect_entry.charge_state), elt_rich))
+
+        trans_elt_poor = get_transitions(lines=lines_elt_poor)
+        trans_elt_rich = get_transitions(lines=lines_elt_rich)
+        return {
+            "elt_poor": {
+                "fermi_level": [l[0] for l in trans_elt_poor],
+                "formation_energy": [l[1] for l in trans_elt_poor],
+            },
+            "elt_rich": {
+                "fermi_level": [l[0] for l in trans_elt_rich],
+                "formation_energy": [l[1] for l in trans_elt_rich],
+            },
+        }
 
 
 def ensure_stable_bulk(pd: PhaseDiagram, bulk_entry: ComputedEntry) -> PhaseDiagram:
