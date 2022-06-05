@@ -15,7 +15,7 @@ from pymatgen.io.vasp.outputs import Locpot
 from scipy.spatial import ConvexHull
 
 from pymatgen.analysis.defect.core import Defect
-from pymatgen.analysis.defect.corrections import FreysoldtCorrection
+from pymatgen.analysis.defect.corrections import get_correction
 from pymatgen.analysis.defect.finder import DefectSiteFinder
 
 __author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
@@ -50,7 +50,8 @@ class DefectEntry(MSONable):
     defect: Defect
     charge_state: int
     sc_entry: ComputedStructureEntry
-    sc_defect_fpos: Optional[ArrayLike] = None
+    dielectic: float | NDArray = None
+    sc_defect_frac_coords: Optional[ArrayLike] = None
     corrections: Optional[Dict[str, float]] = None
 
     def add_locpots(self, bulk_locpot: Locpot, defect_locpot: Locpot):
@@ -67,33 +68,53 @@ class DefectEntry(MSONable):
 
         # get the defect position that should be used for freysoldt correction
         # if it is not already provided
-        if self.sc_defect_fpos is None:
-            finder = DefectSiteFinder()
-            self.sc_defect_fpos = finder.get_defect_fpos(
-                defect_structure=self.defect_locpot.structure,
-                base_structure=self.bulk_locpot.structure,
-            )
 
     def __post_init__(self):
         """Post-initialization."""
         self.charge_state = int(self.charge_state)
         self.corrections: dict = {} if self.corrections is None else self.corrections
 
-    def _has_locpots(self):
-        """Check if the bulk and defect locpots are available."""
-        return all([hasattr(self, attr) for attr in ["bulk_locpot", "defect_locpot"]])
-
-    def get_freysoldt_correction(self, dielectric_const: float | NDArray):
+    def get_freysoldt_correction(self, defect_locpot: Locpot, bulk_locpot: Locpot, **kwargs):
         """Calculate the Freysoldt correction.
 
+        Updates the corrections dictionary with the Freysoldt correction
+        and returns the planar averaged potential data for plotting.
+
+        Args:
+            defect_locpot:
+                The Locpot object for the defect supercell.
+            bulk_locpot:
+                The Locpot object for the bulk supercell.
+            kwargs:
+                Additional keyword arguments for the get_correction method.
+
         Returns:
-            The Freysoldt correction.
+            dict:
+                The plotting data to analyze the planar averaged electrostatic potential
+                in the three periodic lattice directions.
+
+
         """
-        if not self._has_locpots():
-            raise ValueError("Locpots are not available. Please add them using the `add_locpots` method.")
-        fc = FreysoldtCorrection(dielectric_const=dielectric_const)
-        fc_correction = fc.get_correction(defect_entry=self, defect_frac_coords=self.sc_defect_fpos)
-        self.corrections.update(fc_correction)  # type: ignore
+        if self.sc_defect_frac_coords is None:
+            finder = DefectSiteFinder()
+            defect_fpos = finder.get_defect_fpos(
+                defect_structure=defect_locpot.structure,
+                base_structure=bulk_locpot.structure,
+            )
+        else:
+            defect_fpos = self.sc_defect_frac_coords
+
+        frey_corr, plot_data = get_correction(
+            q=self.charge_state,
+            dielectric=self.dielectic,
+            defect_locpot=defect_locpot,
+            bulk_locpot=bulk_locpot,
+            defect_frac_coords=defect_fpos,
+            **kwargs,
+        )
+
+        self.corrections.update(frey_corr)  # type: ignore
+        return plot_data
 
     @property
     def corrected_energy(self):
