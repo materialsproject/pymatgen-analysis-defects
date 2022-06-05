@@ -171,7 +171,7 @@ def get_correction(
     q_model: Optional[QModel] = None,
     step: float = 1e-4,
 ):
-    """Gets the Freysoldt correction for a defect entry.
+    """Gets the Freysoldt correcttion for a defect entry.
 
     Get the Freysoldt correction for a defect. The result is given
     as a dictionary with the following keys:
