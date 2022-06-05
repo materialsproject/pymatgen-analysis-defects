@@ -9,3 +9,10 @@ def test_lower_envelope():
     lower_envelope = get_lower_envelope(lines)
     assert lower_envelope == lower_envelope_ref
     assert get_transitions(lower_envelope) == transitions_ref
+
+
+def test_free_energy(vasp_Mg_Ga, defect_Mg_Ga):
+    data = vasp_Mg_Ga
+
+    bulk_entry = data["bulk_sc"]["vasprun"].get_computed_entry(inc_structure=True)
+    data["bulk_sc"]["locpot"]
