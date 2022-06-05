@@ -1,4 +1,11 @@
-from pymatgen.analysis.defect.thermo import get_lower_envelope, get_transitions
+import pytest
+
+from pymatgen.analysis.defect.corrections import plot_plnr_avg
+from pymatgen.analysis.defect.thermo import (
+    DefectEntry,
+    get_lower_envelope,
+    get_transitions,
+)
 
 
 def test_lower_envelope():
@@ -11,7 +18,42 @@ def test_lower_envelope():
     assert get_transitions(lower_envelope) == transitions_ref
 
 
-def test_free_energy(vasp_Mg_Ga, defect_Mg_Ga):
+def test_defect_entry(data_Mg_Ga, defect_Mg_Ga):
+    bulk_locpot = data_Mg_Ga["bulk_sc"]["locpot"]
+
+    def get_data(q):
+        computed_entry = data_Mg_Ga[f"q={q}"]["vasprun"].get_computed_entry(inc_structure=True)
+        defect_locpot = data_Mg_Ga[f"q={q}"]["locpot"]
+
+        def_entry = DefectEntry(defect=defect_Mg_Ga, charge_state=q, sc_entry=computed_entry, dielectric=14)
+        plot_data = def_entry.get_freysoldt_correction(defect_locpot=defect_locpot, bulk_locpot=bulk_locpot)
+        return def_entry, plot_data
+
+    def_entry, plot_data = get_data(0)
+    assert def_entry.corrections["freysoldt_electrostatic"] == pytest.approx(0.00, abs=1e-4)
+    assert def_entry.corrections["freysoldt_potential_alignment"] == pytest.approx(0.00, abs=1e-4)
+
+    def_entry, plot_data = get_data(-2)
+    assert def_entry.corrections["freysoldt_electrostatic"] > 0
+    assert def_entry.corrections["freysoldt_potential_alignment"] > 0
+
+    def_entry, plot_data = get_data(1)
+    assert def_entry.corrections["freysoldt_electrostatic"] > 0
+    assert def_entry.corrections["freysoldt_potential_alignment"] < 0
+
+    plot_plnr_avg(plot_data[0])
+
+
+def test_free_energy(data_Mg_Ga, defect_Mg_Ga):
+    def get_data(q):
+        computed_entry = data_Mg_Ga[f"q={q}"]["vasprun"].get_computed_entry(inc_structure=True)
+        defect_locpot = data_Mg_Ga[f"q={q}"]["locpot"]
+        bulk_locpot = data_Mg_Ga["bulk_sc"]["locpot"]
+
+        def_entry = DefectEntry(defect=defect_Mg_Ga, charge_state=q, sc_entry=computed_entry, dielectric=14)
+        plot_data = def_entry.get_freysoldt_correction(defect_locpot=defect_locpot, bulk_locpot=bulk_locpot)
+        return def_entry, plot_data
+
     data = vasp_Mg_Ga
 
     bulk_entry = data["bulk_sc"]["vasprun"].get_computed_entry(inc_structure=True)

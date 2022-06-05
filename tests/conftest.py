@@ -29,7 +29,7 @@ def defect_Mg_Ga(gan_struct):
 
 
 @pytest.fixture(scope="session")
-def vasp_Mg_Ga(test_dir):
+def data_Mg_Ga(test_dir):
     """
     Get the data in the following format:
     {
