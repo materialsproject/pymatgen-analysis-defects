@@ -50,7 +50,7 @@ class DefectEntry(MSONable):
     defect: Defect
     charge_state: int
     sc_entry: ComputedStructureEntry
-    dielectic: float | NDArray = None
+    dielectric: float | NDArray
     sc_defect_frac_coords: Optional[ArrayLike] = None
     corrections: Optional[Dict[str, float]] = None
 
@@ -106,7 +106,7 @@ class DefectEntry(MSONable):
 
         frey_corr, plot_data = get_correction(
             q=self.charge_state,
-            dielectric=self.dielectic,
+            dielectric=self.dielectric,
             defect_locpot=defect_locpot,
             bulk_locpot=bulk_locpot,
             defect_frac_coords=defect_fpos,
