@@ -45,16 +45,15 @@ def test_defect_entry(data_Mg_Ga, defect_Mg_Ga):
 
 
 def test_free_energy(data_Mg_Ga, defect_Mg_Ga):
+    bulk_locpot = data_Mg_Ga["bulk_sc"]["locpot"]
+
     def get_data(q):
         computed_entry = data_Mg_Ga[f"q={q}"]["vasprun"].get_computed_entry(inc_structure=True)
         defect_locpot = data_Mg_Ga[f"q={q}"]["locpot"]
-        bulk_locpot = data_Mg_Ga["bulk_sc"]["locpot"]
 
         def_entry = DefectEntry(defect=defect_Mg_Ga, charge_state=q, sc_entry=computed_entry, dielectric=14)
         plot_data = def_entry.get_freysoldt_correction(defect_locpot=defect_locpot, bulk_locpot=bulk_locpot)
         return def_entry, plot_data
 
-    data = vasp_Mg_Ga
-
-    bulk_entry = data["bulk_sc"]["vasprun"].get_computed_entry(inc_structure=True)
-    data["bulk_sc"]["locpot"]
+    bulk_entry = data_Mg_Ga["bulk_sc"]["vasprun"].get_computed_entry(inc_structure=True)
+    bulk_locpot = data_Mg_Ga["bulk_sc"]["locpot"]

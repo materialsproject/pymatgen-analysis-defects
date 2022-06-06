@@ -204,6 +204,7 @@ class FormationEnergyDiagram(MSONable):
 
         trans_elt_poor = get_transitions(lines=lines_elt_poor)
         trans_elt_rich = get_transitions(lines=lines_elt_rich)
+
         return {
             "elt_poor": {
                 "fermi_level": [l[0] for l in trans_elt_poor],
