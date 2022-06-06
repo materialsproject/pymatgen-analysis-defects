@@ -295,7 +295,7 @@ class Substitution(Defect):
         """
         return {
             self.structure.sites[self.defect_site_index].specie.element: -1,
-            self.site.specie: +1,
+            self.site.specie.element: +1,
         }
 
     def get_oxi_state(self) -> float:
