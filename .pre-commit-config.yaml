@@ -59,5 +59,9 @@ repos:
   rev: v2.1.0
   hooks:
   - id: codespell
-    stages: [commit, commit-msg]
+    name: codespell
+    description: Checks for common misspellings in text files.
+    entry: codespell
+    language: python
+    types: [text]
     args: [--ignore-words-list, 'titel,statics,ba,nd,te']

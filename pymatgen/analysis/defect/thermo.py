@@ -15,7 +15,7 @@ from pymatgen.io.vasp.outputs import Locpot
 from scipy.spatial import ConvexHull
 
 from pymatgen.analysis.defect.core import Defect
-from pymatgen.analysis.defect.corrections import FreysoldtCorrection
+from pymatgen.analysis.defect.corrections import get_correction
 from pymatgen.analysis.defect.finder import DefectSiteFinder
 
 __author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
@@ -50,50 +50,71 @@ class DefectEntry(MSONable):
     defect: Defect
     charge_state: int
     sc_entry: ComputedStructureEntry
-    sc_defect_fpos: Optional[ArrayLike] = None
+    dielectric: float | NDArray
+    sc_defect_frac_coords: Optional[ArrayLike] = None
     corrections: Optional[Dict[str, float]] = None
 
-    def add_locpots(self, bulk_locpot: Locpot, defect_locpot: Locpot):
-        """Add the bulk and defect locpot to the defect entry.
+    # def add_locpots(self, bulk_locpot: Locpot, defect_locpot: Locpot):
+    #     """Add the bulk and defect locpot to the defect entry.
 
-        Since we only need the correction values to reconstruct the defect entry
-        and the Locpot objects are only used to compute the corrections once,
-        it should not be serialized.
-        Additionally, since the locpot object are mutable, different defect entries
-        can share the same bulk_locpot object which also makes it a bad idea to serialize.
-        """
-        self.bulk_locpot = bulk_locpot
-        self.defect_locpot = defect_locpot
+    #     Since we only need the correction values to reconstruct the defect entry
+    #     and the Locpot objects are only used to compute the corrections once,
+    #     it should not be serialized.
+    #     Additionally, since the locpot object are mutable, different defect entries
+    #     can share the same bulk_locpot object which also makes it a bad idea to serialize.
+    #     """
+    #     self.bulk_locpot = bulk_locpot
+    #     self.defect_locpot = defect_locpot
 
-        # get the defect position that should be used for freysoldt correction
-        # if it is not already provided
-        if self.sc_defect_fpos is None:
-            finder = DefectSiteFinder()
-            self.sc_defect_fpos = finder.get_defect_fpos(
-                defect_structure=self.defect_locpot.structure,
-                base_structure=self.bulk_locpot.structure,
-            )
+    # get the defect position that should be used for freysoldt correction
+    # if it is not already provided
 
     def __post_init__(self):
         """Post-initialization."""
         self.charge_state = int(self.charge_state)
         self.corrections: dict = {} if self.corrections is None else self.corrections
 
-    def _has_locpots(self):
-        """Check if the bulk and defect locpots are available."""
-        return all([hasattr(self, attr) for attr in ["bulk_locpot", "defect_locpot"]])
-
-    def get_freysoldt_correction(self, dielectric_const: float | NDArray):
+    def get_freysoldt_correction(self, defect_locpot: Locpot, bulk_locpot: Locpot, **kwargs):
         """Calculate the Freysoldt correction.
 
+        Updates the corrections dictionary with the Freysoldt correction
+        and returns the planar averaged potential data for plotting.
+
+        Args:
+            defect_locpot:
+                The Locpot object for the defect supercell.
+            bulk_locpot:
+                The Locpot object for the bulk supercell.
+            kwargs:
+                Additional keyword arguments for the get_correction method.
+
         Returns:
-            The Freysoldt correction.
+            dict:
+                The plotting data to analyze the planar averaged electrostatic potential
+                in the three periodic lattice directions.
+
+
         """
-        if not self._has_locpots():
-            raise ValueError("Locpots are not available. Please add them using the `add_locpots` method.")
-        fc = FreysoldtCorrection(dielectric_const=dielectric_const)
-        fc_correction = fc.get_correction(defect_entry=self, defect_frac_coords=self.sc_defect_fpos)
-        self.corrections.update(fc_correction)  # type: ignore
+        if self.sc_defect_frac_coords is None:
+            finder = DefectSiteFinder()
+            defect_fpos = finder.get_defect_fpos(
+                defect_structure=defect_locpot.structure,
+                base_structure=bulk_locpot.structure,
+            )
+        else:
+            defect_fpos = self.sc_defect_frac_coords
+
+        frey_corr, plot_data = get_correction(
+            q=self.charge_state,
+            dielectric=self.dielectric,
+            defect_locpot=defect_locpot,
+            bulk_locpot=bulk_locpot,
+            defect_frac_coords=defect_fpos,
+            **kwargs,
+        )
+
+        self.corrections.update(frey_corr)  # type: ignore
+        return plot_data
 
     @property
     def corrected_energy(self):
@@ -108,14 +129,13 @@ class FormationEnergyDiagram(MSONable):
     bulk_entry: ComputedStructureEntry
     defect_entries: List[DefectEntry]
     vbm: float
-    phase_digram: PhaseDiagram
-    bulk_locpot: Locpot | None = None
+    phase_diagram: PhaseDiagram
 
     def __post_init__(self):
         """Post-initialization."""
         # reconstruct the phase diagram with the bulk entry
-        entries = self.phase_digram.stable_entries | {self.bulk_entry}
-        self.phase_digram = PhaseDiagram(entries)
+        entries = self.phase_diagram.stable_entries | {self.bulk_entry}
+        self.phase_diagram = PhaseDiagram(entries)
 
     def vbm_formation_energy(self, defect_entry: DefectEntry, dep_elt: Element) -> tuple[float, float]:
         """Compute the formation energy at the VBM.
@@ -165,13 +185,36 @@ class FormationEnergyDiagram(MSONable):
                 chemical potentials for the chase where the dep_elt is is abundant.
                 (e.g. O-rich growth conditions)
         """
-        if self.phase_digram is None:
+        if self.phase_diagram is None:
             raise RuntimeError("Phase diagram is not available.")
-        pd = ensure_stable_bulk(self.phase_digram, self.bulk_entry)
+        pd = ensure_stable_bulk(self.phase_diagram, self.bulk_entry)
         chem_pots = pd.getmu_vertices_stability_phase(self.bulk_entry.composition, dep_elt)
         dep_elt_poor = max(chem_pots, key=lambda x: x[dep_elt])
         dep_elt_rich = min(chem_pots, key=lambda x: x[dep_elt])
         return dep_elt_poor, dep_elt_rich
+
+    def lower_envelope(self, dep_elt: Element):
+        """Compute the lower envelope of the formation energy diagram."""
+        lines_elt_poor = []
+        lines_elt_rich = []
+        for defect_entry in self.defect_entries:
+            elt_poor, elt_rich = self.vbm_formation_energy(defect_entry, dep_elt)
+            lines_elt_poor.append((float(defect_entry.charge_state), elt_poor))
+            lines_elt_rich.append((float(defect_entry.charge_state), elt_rich))
+
+        trans_elt_poor = get_transitions(lines=lines_elt_poor)
+        trans_elt_rich = get_transitions(lines=lines_elt_rich)
+
+        return {
+            "elt_poor": {
+                "fermi_level": [l[0] for l in trans_elt_poor],
+                "formation_energy": [l[1] for l in trans_elt_poor],
+            },
+            "elt_rich": {
+                "fermi_level": [l[0] for l in trans_elt_rich],
+                "formation_energy": [l[1] for l in trans_elt_rich],
+            },
+        }
 
 
 def ensure_stable_bulk(pd: PhaseDiagram, bulk_entry: ComputedEntry) -> PhaseDiagram:
