@@ -270,7 +270,10 @@ def get_transitions(lines: list[tuple[float, float]]) -> list[tuple[float, float
 def get_lower_envelope(lines):
     """Get the lower envelope of the formation energy.
 
-    The lines are returned with decreasing slope.
+    Based on the fact that the lower envelope of the lines is
+    given by the upper convex hull of the points (m, -b) as shown in:
+    https://www.cs.umd.edu/class/spring2020/cmsc754/Lects/lect06-duality.pdf
+    Note: The lines are returned with decreasing slope.
 
     Args:
         lines: (m, b) format for each line
