@@ -87,7 +87,9 @@ class SubstitutionGenerator(DefectGenerator):
             if el_str not in self.substitutions.keys():
                 continue
             new_element = self.substitutions[el_str]
-            sub_site = PeriodicSite(new_element, site.frac_coords, self.structure.lattice, properties=site.properties)
+            sub_site = PeriodicSite(
+                Species(new_element), site.frac_coords, self.structure.lattice, properties=site.properties
+            )
             yield Substitution(self.structure, sub_site)
 
 
