@@ -268,6 +268,8 @@ class Substitution(Defect):
         rm_oxi = struct.sites[self.defect_site_index].specie.oxi_state
         struct.remove_sites([self.defect_site_index])
         sub_states = self.site.specie.icsd_oxidation_states
+        if len(sub_states) == 0:
+            sub_states = self.site.specie.oxidation_states
         sub_oxi = min(sub_states, key=lambda x: abs(x - rm_oxi))
         sub_specie = Species(self.site.specie.symbol, sub_oxi)
         struct.insert(self.defect_site_index, species=sub_specie, coords=np.mod(self.site.frac_coords, 1))
