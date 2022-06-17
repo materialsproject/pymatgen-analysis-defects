@@ -301,7 +301,7 @@ def get_stability_region_cdd(phase_diagram: PhaseDiagram, composition: Compositi
             a_ = [-n_ for n_ in a_]
         ineqs.append([b_] + a_)
 
-    ineq_mat: cdd.Matrix = cdd.Matrix(ineqs, number_type="float")
+    ineq_mat = cdd.Matrix(ineqs, number_type="float")
     ineq_mat.rep_type = cdd.RepType.INEQUALITY
 
     poly = cdd.Polyhedron(ineq_mat)
