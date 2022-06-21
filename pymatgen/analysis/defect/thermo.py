@@ -4,12 +4,16 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from itertools import groupby
 from typing import Dict, List, Optional, Tuple
 
+import cdd
+import numpy as np
+from monty.dev import deprecated
 from monty.json import MSONable
 from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.phase_diagram import PhaseDiagram
-from pymatgen.core import Element
+from pymatgen.core import Composition, Element
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
 from pymatgen.io.vasp.outputs import Locpot
 from scipy.spatial import ConvexHull
@@ -53,21 +57,6 @@ class DefectEntry(MSONable):
     dielectric: float | NDArray
     sc_defect_frac_coords: Optional[ArrayLike] = None
     corrections: Optional[Dict[str, float]] = None
-
-    # def add_locpots(self, bulk_locpot: Locpot, defect_locpot: Locpot):
-    #     """Add the bulk and defect locpot to the defect entry.
-
-    #     Since we only need the correction values to reconstruct the defect entry
-    #     and the Locpot objects are only used to compute the corrections once,
-    #     it should not be serialized.
-    #     Additionally, since the locpot object are mutable, different defect entries
-    #     can share the same bulk_locpot object which also makes it a bad idea to serialize.
-    #     """
-    #     self.bulk_locpot = bulk_locpot
-    #     self.defect_locpot = defect_locpot
-
-    # get the defect position that should be used for freysoldt correction
-    # if it is not already provided
 
     def __post_init__(self):
         """Post-initialization."""
@@ -159,7 +148,7 @@ class FormationEnergyDiagram(MSONable):
 
         defect: Defect = self.defect_entries[0].defect
         el_change = defect.element_changes
-        el_poor_chempot, el_rich_chempot = self.critical_chemical_potential(dep_elt)
+        el_poor_chempot, el_rich_chempot = self.critical_chemical_potential_cdd(dep_elt)
 
         elt_poor_res = formation_en
         elt_rich_res = formation_en
@@ -169,8 +158,11 @@ class FormationEnergyDiagram(MSONable):
 
         return elt_poor_res, elt_rich_res
 
-    def critical_chemical_potential(self, dep_elt: Element) -> Tuple[Dict[Element, float], Dict[Element, float]]:
+    @deprecated
+    def critical_chemical_potential_pmg(self, dep_elt: Element) -> Tuple[Dict[Element, float], Dict[Element, float]]:
         """Compute the critical chemical potentials.
+
+        Using existing code in pymatgen.analysis.phase_diagram.
 
         Args:
             dep_elt:
@@ -187,34 +179,92 @@ class FormationEnergyDiagram(MSONable):
         """
         if self.phase_diagram is None:
             raise RuntimeError("Phase diagram is not available.")
+        if dep_elt not in self.bulk_entry.composition:
+            raise ValueError(f"{dep_elt} is not in the bulk composition.")
         pd = ensure_stable_bulk(self.phase_diagram, self.bulk_entry)
         chem_pots = pd.getmu_vertices_stability_phase(self.bulk_entry.composition, dep_elt)
-        dep_elt_poor = max(chem_pots, key=lambda x: x[dep_elt])
-        dep_elt_rich = min(chem_pots, key=lambda x: x[dep_elt])
+        dep_elt_poor = min(chem_pots, key=lambda x: x[dep_elt])
+        dep_elt_rich = max(chem_pots, key=lambda x: x[dep_elt])
         return dep_elt_poor, dep_elt_rich
 
-    def lower_envelope(self, dep_elt: Element):
-        """Compute the lower envelope of the formation energy diagram."""
+    def critical_chemical_potential_cdd(self, dep_elt: Element) -> Tuple[Dict[Element, float], Dict[Element, float]]:
+        """Compute the critical chemical potentials.
+
+        Using the PyCDD library
+
+        Args:
+            dep_elt:
+                the dependent element for which the chemical potential is computed
+                from the energy of the stable phase at the target composition
+
+        Returns:
+            Dict[Element, float]:
+                chemical potentials for the chase where the dep_elt is is rare.
+                (e.g. O-poor growth conditions)
+            Dict[Element, float]:
+                chemical potentials for the chase where the dep_elt is is abundant.
+                (e.g. O-rich growth conditions)
+        """
+        if self.phase_diagram is None:
+            raise RuntimeError("Phase diagram is not available.")
+        if dep_elt not in self.bulk_entry.composition:
+            raise ValueError(f"{dep_elt} is not in the bulk composition.")
+        pd = ensure_stable_bulk(self.phase_diagram, self.bulk_entry)
+        vertices = get_stability_region_cdd(self.phase_diagram, self.bulk_entry.composition)
+        valid_elements = self.bulk_entry.composition.elements
+
+        # sort and group by the chemical potential of the dependent element
+        def key_func(d):
+            return round(d[dep_elt], 3)
+
+        groups = groupby(sorted(vertices, key=key_func), key=key_func)
+
+        # within each group, find the furthest away point from origin
+        def get_furthest(vertices):
+            def get_bulk_elt_coords(vertex):
+                return [v for k, v in vertex.items() if k in valid_elements]
+
+            return max(vertices, key=lambda x: np.linalg.norm(get_bulk_elt_coords(x)))
+
+        furthest_in_group = [get_furthest(g) for _, g in groups]
+
+        # return the most negative ()
+        absolute_energy = {el: pd.get_hull_energy(Composition(str(el))) for el in pd.elements}
+
+        def get_energy(vertex):
+            return {k: v + absolute_energy[k] for k, v in vertex.items()}
+
+        dep_elt_poor = get_energy(furthest_in_group[0])
+        dep_elt_rich = get_energy(furthest_in_group[-1])
+        return dep_elt_poor, dep_elt_rich
+
+    def formation_energy_lines(self, dep_elt: Element, lower_env_only: bool = False) -> tuple:
+        """Compute lines that represent the formation energy for each charge state.
+
+        Args:
+            dep_elt:
+                the dependent element for which the chemical potential is computed
+                from the energy of the stable phase at the target composition
+            lower_env_only:
+                if True, only the lines representing the lower envelope are returned
+
+        Returns:
+            lines_poor:
+                List of the (m, b) representation of the formation energy for the different
+                charge states (q=m) where the dependent element is rare.
+            lines_rich:
+                List of the (m, b) representation of the formation energy for the different
+                charge states (q=m) where the dependent element is abundant.
+        """
         lines_elt_poor = []
         lines_elt_rich = []
         for defect_entry in self.defect_entries:
             elt_poor, elt_rich = self.vbm_formation_energy(defect_entry, dep_elt)
-            lines_elt_poor.append((float(defect_entry.charge_state), elt_poor))
-            lines_elt_rich.append((float(defect_entry.charge_state), elt_rich))
-
-        trans_elt_poor = get_transitions(lines=lines_elt_poor)
-        trans_elt_rich = get_transitions(lines=lines_elt_rich)
-
-        return {
-            "elt_poor": {
-                "fermi_level": [l[0] for l in trans_elt_poor],
-                "formation_energy": [l[1] for l in trans_elt_poor],
-            },
-            "elt_rich": {
-                "fermi_level": [l[0] for l in trans_elt_rich],
-                "formation_energy": [l[1] for l in trans_elt_rich],
-            },
-        }
+            lines_elt_poor.append((int(defect_entry.charge_state), elt_poor))
+            lines_elt_rich.append((int(defect_entry.charge_state), elt_rich))
+        if not lower_env_only:
+            return lines_elt_poor, lines_elt_rich
+        return get_lower_envelope(lines_elt_poor), get_lower_envelope(lines_elt_rich)
 
 
 def ensure_stable_bulk(pd: PhaseDiagram, bulk_entry: ComputedEntry) -> PhaseDiagram:
@@ -240,6 +290,73 @@ def ensure_stable_bulk(pd: PhaseDiagram, bulk_entry: ComputedEntry) -> PhaseDiag
         stable_entry = ComputedEntry(bulk_entry.composition, bulk_entry.energy - e_above_hull - SMALL_NUM)
         pd = PhaseDiagram([stable_entry] + pd.all_entries)
     return pd
+
+
+def get_stability_region_cdd(phase_diagram: PhaseDiagram, composition: Composition, return_ineq: bool = False):
+    """Get the compositional stability boundary.
+
+    Calculate the vertices of the stability region of a given composition.
+    We define the stability region as the intersection of all half-spaces where:
+        - the desired composition is stable
+        - all other compositions are unstable
+    The vertices are calculated using the double-description method implemented in pyCDD.
+
+    Args:
+        phase_diagram:
+            Phase diagram, only need the hull data so it can be constructed from stable entries.
+        composition:
+            The target composition that must be stable
+        return_ineq:
+            Whether to return the list of inequalities that defines the stability region.
+
+    Returns:
+        list:
+            The vertices of the stability region.
+        list(tuple): (Optional, if return_ineq is True)
+            The matrix of the stability region. Each row represents
+    """
+    el_keys = sorted(phase_diagram.elements)
+    stable_comps = {ient.composition.reduced_formula for ient in phase_diagram.stable_entries}
+
+    if composition.reduced_formula not in stable_comps:
+        raise RuntimeError("Composition needs to be a stable entry of the phase diagram.")
+
+    ineqs = []
+    for ient in phase_diagram.stable_entries:
+        a_ = [-ient.composition[k] for k in el_keys]
+        b_ = phase_diagram.get_form_energy(ient)
+        # need A x <= b
+        # input phase form: >= H(Phase)
+        # all other phases do not form: <= H(Phase)
+        if ient.composition.reduced_composition == composition.reduced_composition:
+            b_ = -b_
+            a_ = [-n_ for n_ in a_]
+        ineqs.append([b_] + a_)
+
+    ineq_mat = cdd.Matrix(ineqs, number_type="float")
+    ineq_mat.rep_type = cdd.RepType.INEQUALITY
+
+    poly = cdd.Polyhedron(ineq_mat)
+
+    ext = poly.get_generators()
+    res = []
+    for a, *b in ext:
+        if a == 1:
+            res.append(dict(zip(el_keys, b)))
+
+    if return_ineq:
+        ineq_dicts = []
+
+        def get_row_dict(row):
+            frow = {"energy": row[0]}
+            frow.update(dict(zip(el_keys, row[1:])))
+            return frow
+
+        for row in ineq_mat:
+            ineq_dicts.append(get_row_dict(row))
+        return res, ineq_dicts
+
+    return res
 
 
 def get_transitions(lines: list[tuple[float, float]]) -> list[tuple[float, float]]:
@@ -270,14 +387,17 @@ def get_transitions(lines: list[tuple[float, float]]) -> list[tuple[float, float
 def get_lower_envelope(lines):
     """Get the lower envelope of the formation energy.
 
-    The lines are returned with decreasing slope.
+    Based on the fact that the lower envelope of the lines is
+    given by the upper convex hull of the points (m, -b) as shown in:
+    https://www.cs.umd.edu/class/spring2020/cmsc754/Lects/lect06-duality.pdf
+    Note: The lines are returned with decreasing slope.
 
     Args:
         lines: (m, b) format for each line
 
     Returns:
         List[List[float]]:
-            List of intersection points.
+            List lines that make up the lower envelope.
     """
     dual_points = [(m, -b) for m, b in lines]
     upper_hull = get_upper_hull(dual_points)
