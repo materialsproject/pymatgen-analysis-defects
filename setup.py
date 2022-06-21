@@ -13,7 +13,10 @@ setup(
     name="pymatgen-analysis-defects",
     packages=find_namespace_packages(include=["pymatgen.analysis.*"]),
     version="0.0.2",
-    install_requires=["pymatgen>=2022.2.3"],
+    install_requires=[
+        "pymatgen>=2022.2.3" "dscribe>=1.2.1",
+        "pycddlib>=2.1.6",
+    ],
     extras_require={},
     package_data={},
     author="Jimmy Shen",
