@@ -4,16 +4,14 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from itertools import groupby
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional
 
-import cdd
 import numpy as np
-from monty.dev import deprecated
 from monty.json import MSONable
 from numpy.typing import ArrayLike, NDArray
+from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
 from pymatgen.analysis.phase_diagram import PhaseDiagram
-from pymatgen.core import Composition, Element
+from pymatgen.core import Composition
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
 from pymatgen.io.vasp.outputs import Locpot
 from scipy.spatial import ConvexHull
@@ -41,12 +39,12 @@ class DefectEntry(MSONable):
             The charge state of the defect.
         sc_entry:
             The ComputedStructureEntry for the supercell.
-        defect_locpot:
-            The Locpot object for the supercell.
-        bulk_locpot:
-            The Locpot of the bulk supercell, note that since the locpot object is mutable,
-            different defect entries can share the same bulk_locpot object.
-            (Take care to not modify this object.)
+        dielectric:
+            The dielectric tensor or constant for the bulk material.
+        sc_defect_frac_coords:
+            The fractional coordinates of the defect in the supercell.
+            If None, structures attributes of the locpot file will be used to automatically determine
+            the defect location.
         corrections:
             A dictionary of corrections to the energy.
     """
@@ -118,153 +116,154 @@ class FormationEnergyDiagram(MSONable):
     bulk_entry: ComputedStructureEntry
     defect_entries: List[DefectEntry]
     vbm: float
-    phase_diagram: PhaseDiagram
+    pd_entries: list[ComputedEntry]
+    band_gap: Optional[float] = None
 
     def __post_init__(self):
-        """Post-initialization."""
-        # reconstruct the phase diagram with the bulk entry
-        entries = self.phase_diagram.stable_entries | {self.bulk_entry}
-        self.phase_diagram = PhaseDiagram(entries)
+        """Post-initialization.
 
-    def vbm_formation_energy(self, defect_entry: DefectEntry, dep_elt: Element) -> tuple[float, float]:
+        - Reconstruct the phase diagram with the bulk entry
+        - Make sure that the bulk entry is stable
+        - create the chemical potential diagram using only the formation energies
+        """
+        pd_ = PhaseDiagram(self.pd_entries)
+        entries = pd_.stable_entries | {self.bulk_entry}
+        pd_ = PhaseDiagram(entries)
+        self.phase_diagram = ensure_stable_bulk(pd_, self.bulk_entry)
+
+        entries = []
+        for entry in self.phase_diagram.stable_entries:
+            d_ = entry.as_dict()
+            d_["energy"] = self.phase_diagram.get_form_energy(entry)
+            entries.append(ComputedEntry.from_dict(d_))
+
+        self.chempot_diagram = ChemicalPotentialDiagram(entries)
+        self.chempot_limits = self.chempot_diagram.domains[self.bulk_entry.composition.reduced_formula]
+        boundary_value = self.chempot_diagram.default_min_limit
+        self.chempot_limits = self.chempot_limits[~np.any(self.chempot_limits == boundary_value, axis=1)]
+
+        self.el_change = self.defect_entries[0].defect.element_changes
+        self.dft_energies = {
+            el: self.phase_diagram.get_hull_energy_per_atom(Composition(str(el))) for el in self.phase_diagram.elements
+        }
+
+    def _parse_chempots(self, chempots: dict | ArrayLike) -> dict:
+        """Parse the chemical potentials.
+
+        Make sure that the chemical potential is represented as a dictionary.
+            { Element: float }
+
+        Args:
+            chempots:
+                A dictionary or list of chemical potentials.
+                If a list, use the element order from self.chempot_diagram.elements.
+
+        Returns:
+            dict:
+                A dictionary of chemical potentials.
+        """
+        if not isinstance(chempots, dict):
+            chempots = {el: chempots[i] for i, el in enumerate(self.chempot_diagram.elements)}
+        return chempots
+
+    def _vbm_formation_energy(self, defect_entry: DefectEntry, chempots: dict | Iterable) -> float:
         """Compute the formation energy at the VBM.
+
+        Compute the formation energy at the VBM (essentially the y-intercept)
+        for a given defect entry and set of chemical potentials.
 
         Args:
             defect_entry:
-                the defect entry for which the formation energy is computed.
-            dep_elt:
-                the dependent element for which the chemical potential is computed
-                from the energy of the stable phase at the target composition.
+                The defect entry for which the formation energy is computed.
+            chem_pots:
+                A dictionary of chemical potentials for each element.
 
         Returns:
             float:
-                Formation energy for the situation where the dependent element is rare.
-            float:
-                Formation energy for the situation where the dependent element is abundant.
+                The formation energy at the VBM.
         """
+        chempots = self._parse_chempots(chempots)
+        en_change = sum([(self.dft_energies[el] + chempots[el]) * fac for el, fac in self.el_change.items()])
         formation_en = (
-            defect_entry.corrected_energy - self.bulk_entry.energy + float(defect_entry.charge_state) * self.vbm
+            defect_entry.corrected_energy - (self.bulk_entry.energy + en_change) + self.vbm * defect_entry.charge_state
         )
+        return formation_en
 
-        defect: Defect = self.defect_entries[0].defect
-        el_change = defect.element_changes
-        el_poor_chempot, el_rich_chempot = self.critical_chemical_potential_cdd(dep_elt)
-
-        elt_poor_res = formation_en
-        elt_rich_res = formation_en
-        for key, factor in el_change.items():
-            elt_poor_res += el_poor_chempot[key] * factor
-            elt_rich_res += el_rich_chempot[key] * factor
-
-        return elt_poor_res, elt_rich_res
-
-    @deprecated
-    def critical_chemical_potential_pmg(self, dep_elt: Element) -> Tuple[Dict[Element, float], Dict[Element, float]]:
-        """Compute the critical chemical potentials.
-
-        Using existing code in pymatgen.analysis.phase_diagram.
-
-        Args:
-            dep_elt:
-                the dependent element for which the chemical potential is computed
-                from the energy of the stable phase at the target composition
+    def get_limit_formation_energies(self, compute_lower_hull: bool = True):
+        """Compute the formation energy diagram for all chemical potential limits.
 
         Returns:
-            Dict[Element, float]:
-                chemical potentials for the chase where the dep_elt is is rare.
-                (e.g. O-poor growth conditions)
-            Dict[Element, float]:
-                chemical potentials for the chase where the dep_elt is is abundant.
-                (e.g. O-rich growth conditions)
+            List containing the formation energy at each chemical potential limit.
         """
-        if self.phase_diagram is None:
-            raise RuntimeError("Phase diagram is not available.")
-        if dep_elt not in self.bulk_entry.composition:
-            raise ValueError(f"{dep_elt} is not in the bulk composition.")
-        pd = ensure_stable_bulk(self.phase_diagram, self.bulk_entry)
-        chem_pots = pd.getmu_vertices_stability_phase(self.bulk_entry.composition, dep_elt)
-        dep_elt_poor = min(chem_pots, key=lambda x: x[dep_elt])
-        dep_elt_rich = max(chem_pots, key=lambda x: x[dep_elt])
-        return dep_elt_poor, dep_elt_rich
+        res = []
+        for vertex in self.chempot_limits:
+            limit_dict = dict(zip(self.chempot_diagram.elements, vertex))
+            lines = self._get_lines(limit_dict)
+            if compute_lower_hull:
+                lines = get_lower_envelope(lines)
+            res.append(lines)
+        return lines
 
-    def critical_chemical_potential_cdd(self, dep_elt: Element) -> Tuple[Dict[Element, float], Dict[Element, float]]:
-        """Compute the critical chemical potentials.
-
-        Using the PyCDD library
+    def _get_lines(self, chempots: dict) -> list[tuple[float, float]]:
+        """Get the lines for the formation energy diagram.
 
         Args:
-            dep_elt:
-                the dependent element for which the chemical potential is computed
-                from the energy of the stable phase at the target composition
+            chempot_dict:
+                A dictionary of the chemical potentials (referenced to the elements) representations
+                a vertex of the stability region of the chemical potential diagram.
 
         Returns:
-            Dict[Element, float]:
-                chemical potentials for the chase where the dep_elt is is rare.
-                (e.g. O-poor growth conditions)
-            Dict[Element, float]:
-                chemical potentials for the chase where the dep_elt is is abundant.
-                (e.g. O-rich growth conditions)
+            list[tuple[float, float]]:
+                List of the slope and intercept of the lines for the formation energy diagram.
         """
-        if self.phase_diagram is None:
-            raise RuntimeError("Phase diagram is not available.")
-        if dep_elt not in self.bulk_entry.composition:
-            raise ValueError(f"{dep_elt} is not in the bulk composition.")
-        pd = ensure_stable_bulk(self.phase_diagram, self.bulk_entry)
-        vertices = get_stability_region_cdd(self.phase_diagram, self.bulk_entry.composition)
-        valid_elements = self.bulk_entry.composition.elements
+        chempots = self._parse_chempots(chempots)
+        lines = []
+        for def_ent in self.defect_entries:
+            b = self._vbm_formation_energy(def_ent, chempots)
+            m = float(def_ent.charge_state)
+            lines.append((m, b))
+        return lines
 
-        # sort and group by the chemical potential of the dependent element
-        def key_func(d):
-            return round(d[dep_elt], 3)
+    def get_transitions(
+        self, chempots: dict, x_min: float = 0, x_max: float | None = None
+    ) -> list[tuple[float, float]]:
+        """Get the transition levels for the formation energy diagram.
 
-        groups = groupby(sorted(vertices, key=key_func), key=key_func)
-
-        # within each group, find the furthest away point from origin
-        def get_furthest(vertices):
-            def get_bulk_elt_coords(vertex):
-                return [v for k, v in vertex.items() if k in valid_elements]
-
-            return max(vertices, key=lambda x: np.linalg.norm(get_bulk_elt_coords(x)))
-
-        furthest_in_group = [get_furthest(g) for _, g in groups]
-
-        # return the most negative ()
-        absolute_energy = {el: pd.get_hull_energy(Composition(str(el))) for el in pd.elements}
-
-        def get_energy(vertex):
-            return {k: v + absolute_energy[k] for k, v in vertex.items()}
-
-        dep_elt_poor = get_energy(furthest_in_group[0])
-        dep_elt_rich = get_energy(furthest_in_group[-1])
-        return dep_elt_poor, dep_elt_rich
-
-    def formation_energy_lines(self, dep_elt: Element, lower_env_only: bool = False) -> tuple:
-        """Compute lines that represent the formation energy for each charge state.
+        Get all of the kinks in the formation energy diagram.
+        The points at the VBM and CBM are given by the first and last point respectively.
 
         Args:
-            dep_elt:
-                the dependent element for which the chemical potential is computed
-                from the energy of the stable phase at the target composition
-            lower_env_only:
-                if True, only the lines representing the lower envelope are returned
+            chempot_dict:
+                A dictionary of the chemical potentials (referenced to the elements) representations
+                a vertex of the stability region of the chemical potential diagram.
 
         Returns:
-            lines_poor:
-                List of the (m, b) representation of the formation energy for the different
-                charge states (q=m) where the dependent element is rare.
-            lines_rich:
-                List of the (m, b) representation of the formation energy for the different
-                charge states (q=m) where the dependent element is abundant.
+            list[tuple[float, float]]:
+                Transition levels and the formation energy at each transition level.
+                The first and last points are the intercepts with the VBM and CBM respectively.
         """
-        lines_elt_poor = []
-        lines_elt_rich = []
-        for defect_entry in self.defect_entries:
-            elt_poor, elt_rich = self.vbm_formation_energy(defect_entry, dep_elt)
-            lines_elt_poor.append((int(defect_entry.charge_state), elt_poor))
-            lines_elt_rich.append((int(defect_entry.charge_state), elt_rich))
-        if not lower_env_only:
-            return lines_elt_poor, lines_elt_rich
-        return get_lower_envelope(lines_elt_poor), get_lower_envelope(lines_elt_rich)
+        chempots = self._parse_chempots(chempots)
+        if x_max is None:
+            x_max = getattr(self, "band_gap")
+        lines = self._get_lines(chempots)
+        lines = get_lower_envelope(lines)
+        return get_transitions(lines, x_min, x_max)
+
+    def _get_formation_energy(self, fermi_level: float, chempot_dict: dict):
+        """Get the formation energy at a given Fermi level.
+
+        Linearly interpolate between the transition levels.
+
+        Args:
+            fermi_level:
+                The Fermi level at which the formation energy is computed.
+
+        Returns:
+            The formation energy at the given Fermi level.
+        """
+        transitions = np.array(self.get_transitions(chempot_dict, x_min=-100, x_max=100))
+        # linearly interpolate between the set of points
+        return np.interp(fermi_level, transitions[:, 0], transitions[:, 1])
 
 
 def ensure_stable_bulk(pd: PhaseDiagram, bulk_entry: ComputedEntry) -> PhaseDiagram:
@@ -292,74 +291,7 @@ def ensure_stable_bulk(pd: PhaseDiagram, bulk_entry: ComputedEntry) -> PhaseDiag
     return pd
 
 
-def get_stability_region_cdd(phase_diagram: PhaseDiagram, composition: Composition, return_ineq: bool = False):
-    """Get the compositional stability boundary.
-
-    Calculate the vertices of the stability region of a given composition.
-    We define the stability region as the intersection of all half-spaces where:
-        - the desired composition is stable
-        - all other compositions are unstable
-    The vertices are calculated using the double-description method implemented in pyCDD.
-
-    Args:
-        phase_diagram:
-            Phase diagram, only need the hull data so it can be constructed from stable entries.
-        composition:
-            The target composition that must be stable
-        return_ineq:
-            Whether to return the list of inequalities that defines the stability region.
-
-    Returns:
-        list:
-            The vertices of the stability region.
-        list(tuple): (Optional, if return_ineq is True)
-            The matrix of the stability region. Each row represents
-    """
-    el_keys = sorted(phase_diagram.elements)
-    stable_comps = {ient.composition.reduced_formula for ient in phase_diagram.stable_entries}
-
-    if composition.reduced_formula not in stable_comps:
-        raise RuntimeError("Composition needs to be a stable entry of the phase diagram.")
-
-    ineqs = []
-    for ient in phase_diagram.stable_entries:
-        a_ = [-ient.composition[k] for k in el_keys]
-        b_ = phase_diagram.get_form_energy(ient)
-        # need A x <= b
-        # input phase form: >= H(Phase)
-        # all other phases do not form: <= H(Phase)
-        if ient.composition.reduced_composition == composition.reduced_composition:
-            b_ = -b_
-            a_ = [-n_ for n_ in a_]
-        ineqs.append([b_] + a_)
-
-    ineq_mat = cdd.Matrix(ineqs, number_type="float")
-    ineq_mat.rep_type = cdd.RepType.INEQUALITY
-
-    poly = cdd.Polyhedron(ineq_mat)
-
-    ext = poly.get_generators()
-    res = []
-    for a, *b in ext:
-        if a == 1:
-            res.append(dict(zip(el_keys, b)))
-
-    if return_ineq:
-        ineq_dicts = []
-
-        def get_row_dict(row):
-            frow = {"energy": row[0]}
-            frow.update(dict(zip(el_keys, row[1:])))
-            return frow
-
-        for row in ineq_mat:
-            ineq_dicts.append(get_row_dict(row))
-        return res, ineq_dicts
-
-    return res
-
-
-def get_transitions(lines: list[tuple[float, float]]) -> list[tuple[float, float]]:
+def get_transitions(lines: list[tuple[float, float]], x_min: float, x_max: float) -> list[tuple[float, float]]:
     """Get the "transition" points in a list of lines.
 
     Given a list of lines represented as (m, b) pairs sorted in order of decreasing m.
@@ -368,20 +300,31 @@ def get_transitions(lines: list[tuple[float, float]]) -> list[tuple[float, float
 
     Args:
         lines: (m, b) format for each line
+        x_min: minimum x value
+        x_max: maximum x value
 
     Returns:
         List[List[float]]:
-            List of intersection points.
+            List of intersection points, including the boundary points at x_min and x_max.
     """
     # make sure the lines are sorted by decreasing slope
     lines = sorted(lines, key=lambda x: x[0], reverse=True)
-    x_transitions = []
+    transitions = [(x_min, lines[0][0] * x_min + lines[0][1])]
     for i, (m1, b1) in enumerate(lines[:-1]):
         m2, b2 = lines[i + 1]
         if m1 == m2:
             raise ValueError("The slopes (charge states) of the set of lines should be distinct.")
-        x_transitions.append(((b2 - b1) / (m1 - m2), (m1 * b2 - m2 * b1) / (m1 - m2)))
-    return x_transitions
+        nx, ny = ((b2 - b1) / (m1 - m2), (m1 * b2 - m2 * b1) / (m1 - m2))
+        if nx < x_min:
+            transitions = [(x_min, m2 * x_min + b2)]
+        elif nx > x_max:
+            transitions.append((x_max, m1 * x_max + b1))
+            break
+        else:
+            transitions.append((nx, ny))
+    else:
+        transitions.append((x_max, lines[-1][0] * x_max + lines[-1][1]))
+    return transitions
 
 
 def get_lower_envelope(lines):
