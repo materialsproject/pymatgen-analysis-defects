@@ -4,16 +4,22 @@
 [![codecov](https://codecov.io/gh/materialsproject/pymatgen-analysis-defects/branch/main/graph/badge.svg?token=FOKXRCZTXZ)](https://codecov.io/gh/materialsproject/pymatgen-analysis-defects)
 
 This package is a collection of tools for analyzing defects in materials.
-It currently functions as a namespace package add-on to pymatgen's existing defect analysis tools.
-Once installed the additional modules will still appear under the
-`pymatgen.analysis.defects` namespace.
+It is meant to replace the older `pymatgen.analysis.defects` modules.
+The code is currently installed at `pymatgen.analysis.defect` (no `s`)
+but will be moved to `pymatgen.analysis.defects` in the future.
 
-The additional modules provided by this package are summarized below:
+The modules provided by this package are summarized below:
 
-| Module name |                  Functionality                  |
-|-------------|:-----------------------------------------------:|
-| `ccd`       |      configuration-coordination diagrams.       |
-| `finder`    | identify the position of defects automatically. |
+| Module name   |                        Functionality                         |
+|---------------|:------------------------------------------------------------:|
+| `ccd`         |             configuration-coordination diagrams.             |
+| `core`        | abstract definition of a defect (unit cell) + (defect site). |
+| `corrections` |         corrections to the defect formation energy.          |
+| `finder`      |       identify the position of defects automatically.        |
+| `generators`  |     analyze bulk crystal symmetry to generator defects.      |
+| `supercells`  |   code to generate supercells for simulating the defects.    |
+| `thermo`      |            formation energy diagram definitions.             |
+| `utils`       |                   miscellaneous utilities.                   |
 
 Note that each module is a sub-package of the `pymatgen.analysis.defects` namespace, and must be imported
 as `pymatgen.analysis.defects.[module_name]`.
