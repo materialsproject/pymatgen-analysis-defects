@@ -38,7 +38,7 @@ def test_defect_entry2(defect_entries_Mg_Ga):
     plot_plnr_avg(plot_data[0][1])
 
 
-def test_free_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
+def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
     bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
     bulk_bs = bulk_vasprun.get_band_structure()
     vbm = bulk_bs.get_vbm()["energy"]
@@ -46,20 +46,34 @@ def test_free_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
     defect_entries, plot_data = defect_entries_Mg_Ga
 
     def_ent_list = list(defect_entries.values())
+
     fed = FormationEnergyDiagram(
-        bulk_entry=bulk_entry, defect_entries=def_ent_list, vbm=vbm, pd_entries=stable_entries_Mg_Ga_N
+        bulk_entry=bulk_entry,
+        defect_entries=def_ent_list,
+        vbm=vbm,
+        pd_entries=stable_entries_Mg_Ga_N,
+        inc_inf_value=True,
     )
+    assert len(fed.chempot_limits) == 4
+
+    fed = FormationEnergyDiagram(
+        bulk_entry=bulk_entry,
+        defect_entries=def_ent_list,
+        vbm=vbm,
+        pd_entries=stable_entries_Mg_Ga_N,
+        inc_inf_value=False,
+    )
+    assert len(fed.chempot_limits) == 2
 
     # check that the shape of the formation energy diagram does not change
-    cp_dict = fed._parse_chempots(fed.chempot_limits[0])
+    cp_dict = fed.chempot_limits[0]
     form_en = np.array(fed.get_transitions(cp_dict, 0, 5))
     x_ref = form_en[:, 0]
     y_ref = form_en[:, 1]
     y_ref = y_ref - y_ref.min()
 
     for point in fed.chempot_limits:
-        cp_dict = fed._parse_chempots(point)
-        form_en = np.array(fed.get_transitions(cp_dict, 0, 5))
+        form_en = np.array(fed.get_transitions(point, 0, 5))
         x = form_en[:, 0]
         y = form_en[:, 1]
         y = y - y.min()

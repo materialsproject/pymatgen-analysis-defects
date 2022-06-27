@@ -1,4 +1,4 @@
-"""Defect corrections."""
+"""Defect corrections module."""
 
 from __future__ import annotations
 
@@ -8,8 +8,7 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
-from monty.json import MSONable
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import ArrayLike
 from pymatgen.io.vasp.outputs import Locpot
 from scipy import stats
 
@@ -22,7 +21,7 @@ from pymatgen.analysis.defect.utils import (
     hart_to_ev,
 )
 
-__author__ = "Danny Broberg, Shyam Dwaraknath, Jimmy-Xuan Shen"
+__author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
 __copyright__ = "Copyright 2022, The Materials Project"
 __maintainer__ = "Jimmy-Xuan Shen"
 __email__ = "jmmshn@gmail.com"
@@ -30,134 +29,9 @@ __email__ = "jmmshn@gmail.com"
 _logger = logging.getLogger(__name__)
 
 
-class FreysoldtCorrection(MSONable):
-    """A class for FreysoldtCorrection class.
-
-    Largely adapted from PyCDT code
-    If this correction is used, please reference Freysoldt's original paper.
-    doi: 10.1103/PhysRevLett.102.016402
-    """
-
-    def __init__(
-        self,
-        dielectric_const: float | NDArray,
-        q_model: Optional[QModel] = None,
-        energy_cutoff: float = 520,
-        mad_tol: float = 0.0001,
-    ):
-        """Initializes the FreysoldtCorrection class.
-
-        Args:
-        dielectric_const: Dielectric constant of the material.
-        q_model: A QModel object. ...
-        energy_cutoff: Maximum energy in eV in reciprocal space to perform integration for potential correction.
-        mad_tol:Convergence criteria for the Madelung energy for potential correction
-        """
-        self.q_model = QModel() if not q_model else q_model
-        self.energy_cutoff = energy_cutoff
-        self.mad_tol = mad_tol
-        self.dielectric_const = dielectric_const
-
-        if isinstance(dielectric_const, (int, float)):
-            self.dielectric = float(dielectric_const)
-        else:
-            self.dielectric = float(np.mean(np.diag(dielectric_const)))
-
-        self.metadata: dict = {"pot_plot_data": {}, "pot_corr_uncertainty_md": {}}
-
-    def get_correction(self, defect_entry, defect_frac_coords: ArrayLike):
-        """Gets the Freysoldt correction for a defect entry.
-
-        Args:
-            defect_entry (DefectEntry): defect entry to compute Freysoldt correction on.
-            defect_frac_coords (ArrayLike): fractional coordinates of the defect.
-
-        Returns:
-            FreysoldtCorrection values as a dictionary
-        """
-        list_axis_grid = [*map(defect_entry.defect_locpot.get_axis_grid, [0, 1, 2])]
-        list_defect_plnr_avg_esp = [*map(defect_entry.defect_locpot.get_average_along_axis, [0, 1, 2])]
-        list_bulk_plnr_avg_esp = [*map(defect_entry.bulk_locpot.get_average_along_axis, [0, 1, 2])]
-        list_axes = range(len(list_axis_grid))
-
-        lattice = defect_entry.sc_entry.structure.lattice.copy()
-
-        q = defect_entry.charge_state
-        es_corr = self.perform_es_corr(lattice, q)
-
-        pot_corr_tracker = []
-
-        for x, pureavg, defavg, axis in zip(
-            list_axis_grid, list_bulk_plnr_avg_esp, list_defect_plnr_avg_esp, list_axes
-        ):
-            tmp_pot_corr = self.perform_pot_corr(
-                x,
-                pureavg,
-                defavg,
-                lattice,
-                q,
-                defect_frac_coords,
-                axis,
-                widthsample=1.0,
-            )
-            pot_corr_tracker.append(tmp_pot_corr)
-
-        pot_corr = np.mean(pot_corr_tracker)
-
-        # defect_entry.parameters["freysoldt_meta"] = dict(self.metadata)
-        # defect_entry.parameters["potalign"] = pot_corr / (-q) if q else 0.0
-
-        return {
-            "freysoldt_electrostatic": es_corr,
-            "freysoldt_potential_alignment": pot_corr,
-        }
-
-
-def plot_plnr_avg(plot_data, title=None, saved=False):
-    """Plot the planar average electrostatic potential.
-
-    Plot the planar average electrostatic potential against the Long range and
-    short range models from Freysoldt. Must run perform_pot_corr or get_correction
-    (to load metadata) before this can be used.
-
-    Args:
-        plot_data (dict): Dictionary of FreysoldtCorrection metadata.
-        title (str): Title to be given to plot. Default is no title.
-        saved (bool): Whether to save file or not. If False then returns plot object.
-        If True then saves plot as   str(title) + "FreyplnravgPlot.pdf"
-    """
-    if not plot_data["pot_plot_data"]:
-        raise ValueError("Cannot plot potential alignment before running correction!")
-
-    x = plot_data["pot_plot_data"]["x"]
-    v_R = plot_data["pot_plot_data"]["Vr"]
-    dft_diff = plot_data["pot_plot_data"]["dft_diff"]
-    final_shift = plot_data["pot_plot_data"]["final_shift"]
-    check = plot_data["pot_plot_data"]["check"]
-
-    plt.figure()
-    plt.clf()
-    plt.plot(x, v_R, c="green", zorder=1, label="long range from model")
-    plt.plot(x, dft_diff, c="red", label="DFT locpot diff")
-    plt.plot(x, final_shift, c="blue", label="short range (aligned)")
-
-    tmpx = [x[i] for i in range(check[0], check[1])]
-    plt.fill_between(tmpx, -100, 100, facecolor="red", alpha=0.15, label="sampling region")
-
-    plt.xlim(round(x[0]), round(x[-1]))
-    ymin = min(min(v_R), min(dft_diff), min(final_shift))
-    ymax = max(max(v_R), max(dft_diff), max(final_shift))
-    plt.ylim(-0.2 + ymin, 0.2 + ymax)
-    plt.xlabel(r"distance along axis ($\AA$)", fontsize=15)
-    plt.ylabel("Potential (V)", fontsize=15)
-    plt.legend(loc=9)
-    plt.axhline(y=0, linewidth=0.2, color="black")
-    plt.title(str(title) + " defect potential", fontsize=18)
-    plt.xlim(0, max(x))
-    if saved:
-        plt.savefig(str(title) + "FreyplnravgPlot.pdf")
-        return None
-    return plt
+"""
+Adapted from the original code by Danny and Shyam but made to be functional instead of object oriented.
+"""
 
 
 def get_correction(
@@ -432,3 +306,50 @@ def perform_pot_corr(
     }
 
     return pot_corr, metadata
+
+
+def plot_plnr_avg(plot_data, title=None, saved=False):
+    """Plot the planar average electrostatic potential.
+
+    Plot the planar average electrostatic potential against the Long range and
+    short range models from Freysoldt. Must run perform_pot_corr or get_correction
+    (to load metadata) before this can be used.
+
+    Args:
+        plot_data (dict): Dictionary of FreysoldtCorrection metadata.
+        title (str): Title to be given to plot. Default is no title.
+        saved (bool): Whether to save file or not. If False then returns plot object.
+        If True then saves plot as   str(title) + "FreyplnravgPlot.pdf"
+    """
+    if not plot_data["pot_plot_data"]:
+        raise ValueError("Cannot plot potential alignment before running correction!")
+
+    x = plot_data["pot_plot_data"]["x"]
+    v_R = plot_data["pot_plot_data"]["Vr"]
+    dft_diff = plot_data["pot_plot_data"]["dft_diff"]
+    final_shift = plot_data["pot_plot_data"]["final_shift"]
+    check = plot_data["pot_plot_data"]["check"]
+
+    plt.figure()
+    plt.clf()
+    plt.plot(x, v_R, c="green", zorder=1, label="long range from model")
+    plt.plot(x, dft_diff, c="red", label="DFT locpot diff")
+    plt.plot(x, final_shift, c="blue", label="short range (aligned)")
+
+    tmpx = [x[i] for i in range(check[0], check[1])]
+    plt.fill_between(tmpx, -100, 100, facecolor="red", alpha=0.15, label="sampling region")
+
+    plt.xlim(round(x[0]), round(x[-1]))
+    ymin = min(min(v_R), min(dft_diff), min(final_shift))
+    ymax = max(max(v_R), max(dft_diff), max(final_shift))
+    plt.ylim(-0.2 + ymin, 0.2 + ymax)
+    plt.xlabel(r"distance along axis ($\AA$)", fontsize=15)
+    plt.ylabel("Potential (V)", fontsize=15)
+    plt.legend(loc=9)
+    plt.axhline(y=0, linewidth=0.2, color="black")
+    plt.title(str(title) + " defect potential", fontsize=18)
+    plt.xlim(0, max(x))
+    if saved:
+        plt.savefig(str(title) + "FreyplnravgPlot.pdf")
+        return None
+    return plt
