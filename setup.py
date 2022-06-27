@@ -16,7 +16,6 @@ setup(
     install_requires=[
         "pymatgen>=2022.2.3",
         "dscribe>=1.2.1",
-        "pycddlib>=2.1.6",
     ],
     extras_require={},
     package_data={},
