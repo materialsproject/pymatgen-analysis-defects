@@ -15,7 +15,7 @@ def test_lower_envelope():
     transitions_ref = [(-4, -4), (-1.4, 3.8), (1, -1)]
     lower_envelope = get_lower_envelope(lines)
     assert lower_envelope == lower_envelope_ref
-    assert get_transitions(lower_envelope) == transitions_ref
+    assert get_transitions(lower_envelope, -5, 2) == [(-5, -8)] + transitions_ref + [(2, -6)]
 
 
 def test_defect_entry(data_Mg_Ga, defect_Mg_Ga):

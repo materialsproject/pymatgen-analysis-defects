@@ -129,7 +129,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         sc_structure = self.structure * sc_mat
         sc_mat_inv = np.linalg.inv(sc_mat)
         sc_pos = np.dot(self.site.frac_coords, sc_mat_inv)
-        sc_site = PeriodicSite(self.site.species, sc_pos, sc_structure.lattice)
+        sc_site = PeriodicSite(self.site.specie, sc_pos, sc_structure.lattice)
 
         sc_defect = self.__class__(structure=sc_structure, site=sc_site, oxi_state=self.oxi_state)
         sc_defect_struct = sc_defect.defect_structure
