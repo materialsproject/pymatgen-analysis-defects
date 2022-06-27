@@ -1,3 +1,2 @@
 pymatgen>=2022.3.22
 dscribe>=1.2.1
-pycddlib>=2.1.6
