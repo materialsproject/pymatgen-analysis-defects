@@ -55,7 +55,7 @@ def main(filename: str) -> None:
         else:
             cp_point = clickData["points"][0]
             chempot = [cp_point["x"], cp_point["y"], cp_point["z"]]
-            cp_dict = fed.chempot_diagram._parase_chempots(chempot)
+            cp_dict = fed._parase_chempots(chempot)
             form_en = np.array(fed.get_transitions(cp_dict, 0, 5))
 
             form_en_plot = px.line(x=form_en[:, 0], y=form_en[:, 1])
