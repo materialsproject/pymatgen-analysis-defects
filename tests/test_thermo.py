@@ -1,8 +1,9 @@
+import numpy as np
 import pytest
 
 from pymatgen.analysis.defect.corrections import plot_plnr_avg
 from pymatgen.analysis.defect.thermo import (
-    DefectEntry,
+    FormationEnergyDiagram,
     get_lower_envelope,
     get_transitions,
 )
@@ -18,42 +19,49 @@ def test_lower_envelope():
     assert get_transitions(lower_envelope, -5, 2) == [(-5, -8)] + transitions_ref + [(2, -6)]
 
 
-def test_defect_entry(data_Mg_Ga, defect_Mg_Ga):
-    bulk_locpot = data_Mg_Ga["bulk_sc"]["locpot"]
+def test_defect_entry2(defect_entries_Mg_Ga):
+    defect_entries, plot_data = defect_entries_Mg_Ga
 
-    def get_data(q):
-        computed_entry = data_Mg_Ga[f"q={q}"]["vasprun"].get_computed_entry(inc_structure=True)
-        defect_locpot = data_Mg_Ga[f"q={q}"]["locpot"]
-
-        def_entry = DefectEntry(defect=defect_Mg_Ga, charge_state=q, sc_entry=computed_entry, dielectric=14)
-        plot_data = def_entry.get_freysoldt_correction(defect_locpot=defect_locpot, bulk_locpot=bulk_locpot)
-        return def_entry, plot_data
-
-    def_entry, plot_data = get_data(0)
+    def_entry = defect_entries[0]
     assert def_entry.corrections["freysoldt_electrostatic"] == pytest.approx(0.00, abs=1e-4)
     assert def_entry.corrections["freysoldt_potential_alignment"] == pytest.approx(0.00, abs=1e-4)
 
-    def_entry, plot_data = get_data(-2)
+    def_entry = defect_entries[-2]
     assert def_entry.corrections["freysoldt_electrostatic"] > 0
     assert def_entry.corrections["freysoldt_potential_alignment"] > 0
 
-    def_entry, plot_data = get_data(1)
+    def_entry = defect_entries[1]
     assert def_entry.corrections["freysoldt_electrostatic"] > 0
     assert def_entry.corrections["freysoldt_potential_alignment"] < 0
 
-    plot_plnr_avg(plot_data[0])
+    # test that the plotting code runs
+    plot_plnr_avg(plot_data[0][1])
 
 
-def test_free_energy(data_Mg_Ga, defect_Mg_Ga):
-    bulk_locpot = data_Mg_Ga["bulk_sc"]["locpot"]
+def test_free_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
+    bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
+    bulk_bs = bulk_vasprun.get_band_structure()
+    vbm = bulk_bs.get_vbm()["energy"]
+    bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
+    defect_entries, plot_data = defect_entries_Mg_Ga
 
-    def get_data(q):
-        computed_entry = data_Mg_Ga[f"q={q}"]["vasprun"].get_computed_entry(inc_structure=True)
-        defect_locpot = data_Mg_Ga[f"q={q}"]["locpot"]
+    def_ent_list = list(defect_entries.values())
+    fed = FormationEnergyDiagram(
+        bulk_entry=bulk_entry, defect_entries=def_ent_list, vbm=vbm, pd_entries=stable_entries_Mg_Ga_N
+    )
 
-        def_entry = DefectEntry(defect=defect_Mg_Ga, charge_state=q, sc_entry=computed_entry, dielectric=14)
-        plot_data = def_entry.get_freysoldt_correction(defect_locpot=defect_locpot, bulk_locpot=bulk_locpot)
-        return def_entry, plot_data
+    # check that the shape of the formation energy diagram does not change
+    cp_dict = fed._parse_chempots(fed.chempot_limits[0])
+    form_en = np.array(fed.get_transitions(cp_dict, 0, 5))
+    x_ref = form_en[:, 0]
+    y_ref = form_en[:, 1]
+    y_ref = y_ref - y_ref.min()
 
-    bulk_entry = data_Mg_Ga["bulk_sc"]["vasprun"].get_computed_entry(inc_structure=True)
-    bulk_locpot = data_Mg_Ga["bulk_sc"]["locpot"]
+    for point in fed.chempot_limits:
+        cp_dict = fed._parse_chempots(point)
+        form_en = np.array(fed.get_transitions(cp_dict, 0, 5))
+        x = form_en[:, 0]
+        y = form_en[:, 1]
+        y = y - y.min()
+        assert np.allclose(x, x_ref)
+        assert np.allclose(y, y_ref)
