@@ -111,13 +111,37 @@ class DefectEntry(MSONable):
 
 @dataclass
 class FormationEnergyDiagram(MSONable):
-    """Formation energy."""
+    """Formation energy.
+
+    Attributes:
+        bulk_entry:
+            The bulk computed entry to get the total energy of the bulk supercell.
+        defect_entries:
+            The list of defect entries for the different charge states.
+            The finite-size correction should already be applied to these.
+        pd_entries:
+            The list of entries used to construct the phase diagram and chemical potential diagram.
+            They will be used to determine the stability region of the bulk crystal.
+        vbm:
+            The VBM of the bulk crystal.
+        band_gap:
+            The band gap of the bulk crystal.
+        inc_inf_value:
+            Since the stability region is sometimes unbounded, example:
+            Mn_Ga in GaN, the chemical potential of Mn is does not affect the stability of GaN.
+            A artificial value is used to help the half-space intersection algorithm.
+            If True these boundary points at infinity are ignored.
+            This is justified since these tend to be the substitutional elements which
+            should not have very negative chemical potential.
+
+    """
 
     bulk_entry: ComputedStructureEntry
     defect_entries: List[DefectEntry]
-    vbm: float
     pd_entries: list[ComputedEntry]
+    vbm: float
     band_gap: Optional[float] = None
+    inc_inf_value: bool = True
 
     def __post_init__(self):
         """Post-initialization.
@@ -138,9 +162,12 @@ class FormationEnergyDiagram(MSONable):
             entries.append(ComputedEntry.from_dict(d_))
 
         self.chempot_diagram = ChemicalPotentialDiagram(entries)
-        self.chempot_limits = self.chempot_diagram.domains[self.bulk_entry.composition.reduced_formula]
-        boundary_value = self.chempot_diagram.default_min_limit
-        self.chempot_limits = self.chempot_limits[~np.any(self.chempot_limits == boundary_value, axis=1)]
+        chempot_limits = self.chempot_diagram.domains[self.bulk_entry.composition.reduced_formula]
+        if self.inc_inf_value:
+            self._chempot_limits_arr = chempot_limits
+        else:
+            boundary_value = self.chempot_diagram.default_min_limit
+            self._chempot_limits_arr = chempot_limits[~np.any(chempot_limits == boundary_value, axis=1)]
 
         self.el_change = self.defect_entries[0].defect.element_changes
         self.dft_energies = {
@@ -189,20 +216,13 @@ class FormationEnergyDiagram(MSONable):
         )
         return formation_en
 
-    def get_limit_formation_energies(self, compute_lower_hull: bool = True):
-        """Compute the formation energy diagram for all chemical potential limits.
-
-        Returns:
-            List containing the formation energy at each chemical potential limit.
-        """
+    @property
+    def chempot_limits(self):
+        """Return the chemical potential limits in dictionary format."""
         res = []
-        for vertex in self.chempot_limits:
-            limit_dict = dict(zip(self.chempot_diagram.elements, vertex))
-            lines = self._get_lines(limit_dict)
-            if compute_lower_hull:
-                lines = get_lower_envelope(lines)
-            res.append(lines)
-        return lines
+        for vertex in self._chempot_limits_arr:
+            res.append(dict(zip(self.chempot_diagram.elements, vertex)))
+        return res
 
     def _get_lines(self, chempots: dict) -> list[tuple[float, float]]:
         """Get the lines for the formation energy diagram.
