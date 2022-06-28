@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from pymatgen.analysis.defect.corrections import plot_plnr_avg
-from pymatgen.analysis.defect.thermo import (
+from pymatgen.analysis.defects2.corrections import plot_plnr_avg
+from pymatgen.analysis.defects2.thermo import (
     FormationEnergyDiagram,
     get_lower_envelope,
     get_transitions,
