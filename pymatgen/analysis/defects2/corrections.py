@@ -9,9 +9,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from numpy.typing import ArrayLike
-from pymatgen.io.vasp.outputs import Locpot
-from scipy import stats
-
 from pymatgen.analysis.defect.utils import (
     QModel,
     ang_to_bohr,
@@ -20,6 +17,8 @@ from pymatgen.analysis.defect.utils import (
     generate_reciprocal_vectors_squared,
     hart_to_ev,
 )
+from pymatgen.io.vasp.outputs import Locpot
+from scipy import stats
 
 __author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
 __copyright__ = "Copyright 2022, The Materials Project"
