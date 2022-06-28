@@ -5,7 +5,7 @@
 
 This package is a collection of tools for analyzing defects in materials.
 It is meant to replace the older `pymatgen.analysis.defects` modules.
-The code is currently installed at `pymatgen.analysis.defect` (no `s`)
+The code is currently installed at `pymatgen.analysis.defects2`.
 but will be moved to `pymatgen.analysis.defects` in the future.
 
 The modules provided by this package are summarized below:
@@ -20,6 +20,3 @@ The modules provided by this package are summarized below:
 | `supercells`  |   code to generate supercells for simulating the defects.    |
 | `thermo`      |            formation energy diagram definitions.             |
 | `utils`       |                   miscellaneous utilities.                   |
-
-Note that each module is a sub-package of the `pymatgen.analysis.defects` namespace, and must be imported
-as `pymatgen.analysis.defects.[module_name]`.
