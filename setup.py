@@ -25,6 +25,9 @@ setup(
     license="BSD",
     description="Add-ons to pymatgen for defect analysis.",
     long_description=long_description,
+    setuptools_git_versioning={
+        "enabled": True,
+    },
     keywords=["pymatgen"],
     classifiers=[
         "Programming Language :: Python :: 3",
