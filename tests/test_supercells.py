@@ -1,6 +1,6 @@
 import numpy as np
 
-from pymatgen.analysis.defect.supercells import (
+from pymatgen.analysis.defects2.supercells import (
     get_matched_structure_mapping,
     get_sc_fromstruct,
 )
