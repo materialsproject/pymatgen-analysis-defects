@@ -5,9 +5,10 @@ from abc import ABCMeta, abstractmethod
 from typing import Iterable
 
 from monty.json import MSONable
-from pymatgen.analysis.defect.core import Defect, Substitution, Vacancy
 from pymatgen.core import Element, PeriodicSite, Species, Structure
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+
+from pymatgen.analysis.defects2.core import Defect, Substitution, Vacancy
 
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"

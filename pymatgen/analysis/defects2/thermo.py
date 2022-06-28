@@ -10,14 +10,15 @@ import numpy as np
 from monty.json import MSONable
 from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
-from pymatgen.analysis.defect.core import Defect
-from pymatgen.analysis.defect.corrections import get_correction
-from pymatgen.analysis.defect.finder import DefectSiteFinder
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.core import Composition
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
 from pymatgen.io.vasp.outputs import Locpot
 from scipy.spatial import ConvexHull
+
+from pymatgen.analysis.defects2.core import Defect
+from pymatgen.analysis.defects2.corrections import get_correction
+from pymatgen.analysis.defects2.finder import DefectSiteFinder
 
 __author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
 __copyright__ = "Copyright 2022, The Materials Project"
