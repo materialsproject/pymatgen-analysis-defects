@@ -7,11 +7,12 @@ from typing import Dict
 
 import numpy as np
 from monty.json import MSONable
-from pymatgen.analysis.defect.supercells import get_sc_fromstruct
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.core import Element, PeriodicSite, Species, Structure
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.symmetry.structure import SymmetrizedStructure
+
+from pymatgen.analysis.defects2.supercells import get_sc_fromstruct
 
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
