@@ -1,8 +1,5 @@
-from pymatgen.analysis.defects2.core import Substitution, Vacancy
-from pymatgen.analysis.defects2.generators import (
-    SubstitutionGenerator,
-    VacancyGenerator,
-)
+from pymatgen.analysis.defects.core import Substitution, Vacancy
+from pymatgen.analysis.defects.generators import SubstitutionGenerator, VacancyGenerator
 
 
 def test_generators(gan_struct):

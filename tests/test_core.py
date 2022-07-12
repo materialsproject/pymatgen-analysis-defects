@@ -1,6 +1,6 @@
 from pymatgen.core.periodic_table import Specie
 
-from pymatgen.analysis.defects2.core import PeriodicSite, Substitution, Vacancy
+from pymatgen.analysis.defects.core import PeriodicSite, Substitution, Vacancy
 
 
 def test_vacancy(gan_struct):
