@@ -13,7 +13,7 @@ setup(
     name="pymatgen-analysis-defects",
     packages=find_namespace_packages(include=["pymatgen.analysis.*"]),
     install_requires=[
-        "pymatgen>=2022.2.3",
+        "pymatgen @ git+https://github.com/jmmshn/pymatgen@replace_defects#egg=pymatgen",
         "dscribe>=1.2.1",
     ],
     extras_require={},
