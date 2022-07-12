@@ -1,7 +1,7 @@
 def test_defect_finder(test_dir):
     from pymatgen.core import IStructure
 
-    from pymatgen.analysis.defects2.finder import DefectSiteFinder
+    from pymatgen.analysis.defects.finder import DefectSiteFinder
 
     base = IStructure.from_file(test_dir / "GaN.vasp")
 

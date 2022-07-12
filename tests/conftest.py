@@ -7,8 +7,8 @@ from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Specie
 from pymatgen.io.vasp import Locpot, Vasprun
 
-from pymatgen.analysis.defects2.core import PeriodicSite, Substitution
-from pymatgen.analysis.defects2.thermo import DefectEntry
+from pymatgen.analysis.defects.core import PeriodicSite, Substitution
+from pymatgen.analysis.defects.thermo import DefectEntry
 
 
 @pytest.fixture(scope="session")

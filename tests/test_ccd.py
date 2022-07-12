@@ -2,7 +2,7 @@ import pytest
 
 
 def test_ccd(test_dir):
-    from pymatgen.analysis.defects2.ccd import ConfigurationCoordinateDiagram
+    from pymatgen.analysis.defects.ccd import ConfigurationCoordinateDiagram
 
     ccd = ConfigurationCoordinateDiagram(
         charge_gs=0,
