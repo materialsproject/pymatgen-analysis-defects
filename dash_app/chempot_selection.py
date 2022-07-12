@@ -18,7 +18,9 @@ def main(filename: str) -> None:
         Draw the chemical potentia plot
         """
         cpd = fed.chempot_diagram
-        cpd.limits = {Element("Mn"): [-4, 0]}
+        def_set = set(fed.chempot_diagram.elements) - {Element("Ga"), Element("O")}
+        def_el = next(iter(def_set))
+        cpd.limits = {def_el: [-4, 0]}
         cpd = cpd.from_dict(cpd.as_dict())
 
         fig = cpd.get_plot(formulas_to_draw=[bulk_formula])
