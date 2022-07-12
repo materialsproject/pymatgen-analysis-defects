@@ -7,7 +7,7 @@ from setuptools import find_namespace_packages, setup
 
 module_dir = Path(__file__).resolve().parent
 
-with open(module_dir / "README.md") as f:
+with open(module_dir / "README.rst") as f:
     long_description = f.read()
 setup(
     name="pymatgen-analysis-defects",
