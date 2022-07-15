@@ -12,19 +12,30 @@ from pymatgen.analysis.defects.thermo import (
 def test_lower_envelope():
     # Test the lower envelope and transition code with a simple example
     lines = [[4, 12], [-1, 3], [-5, 4], [-2, 1], [3, 8], [-4, 14], [2, 12], [3, 8]]
-    lower_envelope_ref = [(4, 12), (3, 8), (-2, 1), (-5, 4)]  # answer from visual inspection (ordered)
+    lower_envelope_ref = [
+        (4, 12),
+        (3, 8),
+        (-2, 1),
+        (-5, 4),
+    ]  # answer from visual inspection (ordered)
     transitions_ref = [(-4, -4), (-1.4, 3.8), (1, -1)]
     lower_envelope = get_lower_envelope(lines)
     assert lower_envelope == lower_envelope_ref
-    assert get_transitions(lower_envelope, -5, 2) == [(-5, -8)] + transitions_ref + [(2, -6)]
+    assert get_transitions(lower_envelope, -5, 2) == [(-5, -8)] + transitions_ref + [
+        (2, -6)
+    ]
 
 
 def test_defect_entry2(defect_entries_Mg_Ga):
     defect_entries, plot_data = defect_entries_Mg_Ga
 
     def_entry = defect_entries[0]
-    assert def_entry.corrections["freysoldt_electrostatic"] == pytest.approx(0.00, abs=1e-4)
-    assert def_entry.corrections["freysoldt_potential_alignment"] == pytest.approx(0.00, abs=1e-4)
+    assert def_entry.corrections["freysoldt_electrostatic"] == pytest.approx(
+        0.00, abs=1e-4
+    )
+    assert def_entry.corrections["freysoldt_potential_alignment"] == pytest.approx(
+        0.00, abs=1e-4
+    )
 
     def_entry = defect_entries[-2]
     assert def_entry.corrections["freysoldt_electrostatic"] > 0
@@ -79,3 +90,16 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
         y = y - y.min()
         assert np.allclose(x, x_ref)
         assert np.allclose(y, y_ref)
+
+    # test the constructor with materials project phase diagram
+    atomic_entries = list(
+        filter(lambda x: len(x.composition.elements) == 1, stable_entries_Mg_Ga_N)
+    )
+    fed = FormationEnergyDiagram.with_phase_diagram_from_matproj(
+        bulk_entry=bulk_entry,
+        defect_entries=def_ent_list,
+        atomic_entries=atomic_entries,
+        vbm=vbm,
+        inc_inf_value=False,
+    )
+    assert len(fed.chempot_limits) == 2
