@@ -49,7 +49,9 @@ class Defect(MSONable, metaclass=ABCMeta):
         self.site = site
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
-        self.multiplicity = multiplicity if multiplicity is not None else self.get_multiplicity()
+        self.multiplicity = (
+            multiplicity if multiplicity is not None else self.get_multiplicity()
+        )
         if oxi_state is None:
             # TODO this step might take time so wrap it in a timer
             self.structure.add_oxidation_state_by_guess()
@@ -110,7 +112,10 @@ class Defect(MSONable, metaclass=ABCMeta):
         return charges
 
     def get_supercell_structure(
-        self, sc_mat: np.ndarray | None = None, dummy_species: str | None = None, **kwargs
+        self,
+        sc_mat: np.ndarray | None = None,
+        dummy_species: str | None = None,
+        **kwargs,
     ) -> Structure:
         """Generate the supercell for a defect.
 
@@ -131,7 +136,9 @@ class Defect(MSONable, metaclass=ABCMeta):
         sc_pos = np.dot(self.site.frac_coords, sc_mat_inv)
         sc_site = PeriodicSite(self.site.specie, sc_pos, sc_structure.lattice)
 
-        sc_defect = self.__class__(structure=sc_structure, site=sc_site, oxi_state=self.oxi_state)
+        sc_defect = self.__class__(
+            structure=sc_structure, site=sc_site, oxi_state=self.oxi_state
+        )
         sc_defect_struct = sc_defect.defect_structure
         sc_defect_struct.remove_oxidation_states()
         if dummy_species is not None:
@@ -147,7 +154,9 @@ class Defect(MSONable, metaclass=ABCMeta):
 
         This is required for concentration analysis and confirms that defect_site is a site in bulk_structure.
         """
-        sga = SpacegroupAnalyzer(self.structure, symprec=self.symprec, angle_tolerance=self.angle_tolerance)
+        sga = SpacegroupAnalyzer(
+            self.structure, symprec=self.symprec, angle_tolerance=self.angle_tolerance
+        )
         return sga.get_symmetrized_structure()
 
     def __eq__(self, __o: object) -> bool:
@@ -180,7 +189,9 @@ class Vacancy(Defect):
     def defect_site(self):
         """Returns the site in the structure that corresponds to the defect site."""
         res = min(
-            self.structure.get_sites_in_sphere(self.site.coords, 0.1, include_index=True),
+            self.structure.get_sites_in_sphere(
+                self.site.coords, 0.1, include_index=True
+            ),
             key=lambda x: x[1],
         )
         if len(res) == 0:
@@ -272,14 +283,20 @@ class Substitution(Defect):
             sub_states = self.site.specie.oxidation_states
         sub_oxi = min(sub_states, key=lambda x: abs(x - rm_oxi))
         sub_specie = Species(self.site.specie.symbol, sub_oxi)
-        struct.insert(self.defect_site_index, species=sub_specie, coords=np.mod(self.site.frac_coords, 1))
+        struct.insert(
+            self.defect_site_index,
+            species=sub_specie,
+            coords=np.mod(self.site.frac_coords, 1),
+        )
         return struct
 
     @property
     def defect_site(self):
         """Returns the site in the structure that corresponds to the defect site."""
         return min(
-            self.structure.get_sites_in_sphere(self.site.coords, 0.1, include_index=True),
+            self.structure.get_sites_in_sphere(
+                self.site.coords, 0.1, include_index=True
+            ),
             key=lambda x: x[1],
         )
 

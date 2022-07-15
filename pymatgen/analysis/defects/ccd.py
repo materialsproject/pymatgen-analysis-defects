@@ -165,7 +165,9 @@ def _get_omega(
     return HBAR * popt[0] * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG))
 
 
-def _fit_parabola(Q: ArrayLike, energy: ArrayLike, Q0: float, E0: float) -> Tuple[float, float, float]:
+def _fit_parabola(
+    Q: ArrayLike, energy: ArrayLike, Q0: float, E0: float
+) -> Tuple[float, float, float]:
     """Fit the parabola to the data."""
 
     def f(Q, omega):
