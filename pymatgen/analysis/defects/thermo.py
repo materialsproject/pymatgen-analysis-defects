@@ -61,7 +61,9 @@ class DefectEntry(MSONable):
         self.charge_state = int(self.charge_state)
         self.corrections: dict = {} if self.corrections is None else self.corrections
 
-    def get_freysoldt_correction(self, defect_locpot: Locpot, bulk_locpot: Locpot, **kwargs):
+    def get_freysoldt_correction(
+        self, defect_locpot: Locpot, bulk_locpot: Locpot, **kwargs
+    ):
         """Calculate the Freysoldt correction.
 
         Updates the corrections dictionary with the Freysoldt correction
@@ -162,17 +164,161 @@ class FormationEnergyDiagram(MSONable):
             entries.append(ComputedEntry.from_dict(d_))
 
         self.chempot_diagram = ChemicalPotentialDiagram(entries)
-        chempot_limits = self.chempot_diagram.domains[self.bulk_entry.composition.reduced_formula]
+        chempot_limits = self.chempot_diagram.domains[
+            self.bulk_entry.composition.reduced_formula
+        ]
         if self.inc_inf_value:
             self._chempot_limits_arr = chempot_limits
         else:
             boundary_value = self.chempot_diagram.default_min_limit
-            self._chempot_limits_arr = chempot_limits[~np.any(chempot_limits == boundary_value, axis=1)]
+            self._chempot_limits_arr = chempot_limits[
+                ~np.any(chempot_limits == boundary_value, axis=1)
+            ]
 
         self.el_change = self.defect_entries[0].defect.element_changes
         self.dft_energies = {
-            el: self.phase_diagram.get_hull_energy_per_atom(Composition(str(el))) for el in self.phase_diagram.elements
+            el: self.phase_diagram.get_hull_energy_per_atom(Composition(str(el)))
+            for el in self.phase_diagram.elements
         }
+
+    @classmethod
+    def with_phase_diagram(
+        cls,
+        bulk_entry: ComputedEntry,
+        defect_entries: List[DefectEntry],
+        atomic_entries: list[ComputedEntry],
+        phase_diagram: PhaseDiagram,
+        vbm: float,
+        **kwargs,
+    ):
+        """Create a FormationEnergyDiagram object using the stability information from a separately constructed phase diagram.
+
+        As long as the atomic phase energies are computed using the same settings as the defect supercell calculations,
+        the method used to determine the enthalpy of formation of the different competing phases is not important.
+        As such, we can use the enthalpy of formation of from any phase diagram (e.g. the ones that include experimental corrections)
+        to determine the formation energy.
+
+        Args:
+            bulk_entry:
+                The bulk computed entry to get the total energy of the bulk supercell.
+            defect_entries:
+                The list of defect entries for the different charge states.
+                The finite-size correction should already be applied to these.
+            atomic_entries:
+                The list of entries used to construct the phase diagram and chemical potential diagram.
+                They will be used to determine the stability region of the bulk crystal.
+            phase_diagram:
+                A separately computed phase diagram.
+            vbm:
+                The VBM of the bulk crystal.
+            band_gap:
+                The band gap of the bulk crystal.
+            inc_inf_value:
+                Since the stability region is sometimes unbounded, example:
+                Mn_Ga in GaN, the chemical potential of Mn is does not affect the stability of GaN.
+                A artificial value is used to help the half-space intersection algorithm.
+                If True these boundary points at infinity are ignored.
+                This is justified since these tend to be the substitutional elements which
+                should not have very negative chemical potential.
+
+        Returns:
+            FormationEnergyDiagram:
+                The FormationEnergyDiagram object.
+        """
+
+        def get_interp_en(entry: ComputedEntry):
+            """Get the interpolated energy of an entry."""
+            e_dict = dict()
+            for e in atomic_entries:
+                if len(e.composition.elements) != 1:
+                    raise ValueError("Only single-element entries should be provided.")
+                e_dict[e.composition.elements[0]] = e.energy_per_atom
+
+            return sum(
+                entry.composition[el] * e_dict[el] for el in entry.composition.elements
+            )
+
+        adjusted_entries = []
+
+        for entry in phase_diagram.stable_entries:
+            d_ = dict(
+                energy=get_interp_en(entry) + phase_diagram.get_form_energy(entry),
+                composition=entry.composition,
+                entry_id=entry.entry_id,
+                correction=entry.correction,
+            )
+            adjusted_entries.append(ComputedEntry.from_dict(d_))
+
+        return cls(
+            bulk_entry=bulk_entry,
+            defect_entries=defect_entries,
+            pd_entries=adjusted_entries,
+            vbm=vbm,
+            **kwargs,
+        )
+
+    @classmethod
+    def with_phase_diagram_from_matproj(
+        cls,
+        bulk_entry: ComputedEntry,
+        defect_entries: List[DefectEntry],
+        atomic_entries: list[ComputedEntry],
+        vbm: float,
+        api_key: str | None = None,
+        **kwargs,
+    ):
+        """Create a FormationEnergyDiagram object using the stability information from a separately constructed phase diagram.
+
+        As long as the atomic phase energies are computed using the same settings as the defect supercell calculations,
+        the method used to determine the enthalpy of formation of the different competing phases is not important.
+        As such, we can use the enthalpy of formation of from any phase diagram (e.g. the ones that include experimental corrections)
+        to determine the formation energy.
+
+        Args:
+            bulk_entry:
+                The bulk computed entry to get the total energy of the bulk supercell.
+            defect_entries:
+                The list of defect entries for the different charge states.
+                The finite-size correction should already be applied to these.
+            atomic_entries:
+                The list of entries used to construct the phase diagram and chemical potential diagram.
+                They will be used to determine the stability region of the bulk crystal.
+            vbm:
+                The VBM of the bulk crystal.
+            api_key:
+                The api key to access the materials project database.  If None, the key from your `~/.pmgrc.yaml` file will be used.
+            band_gap:
+                The band gap of the bulk crystal.
+            inc_inf_value:
+                Since the stability region is sometimes unbounded, example:
+                Mn_Ga in GaN, the chemical potential of Mn is does not affect the stability of GaN.
+                A artificial value is used to help the half-space intersection algorithm.
+                If True these boundary points at infinity are ignored.
+                This is justified since these tend to be the substitutional elements which
+                should not have very negative chemical potential.
+
+        Returns:
+            FormationEnergyDiagram:
+                The FormationEnergyDiagram object.
+        """
+        from pymatgen.ext.matproj import MPRester
+
+        need_elements = set(bulk_entry.composition.elements) | set(
+            defect_entries[0].sc_entry.composition.elements
+        )
+        chemsys = "-".join(sorted(map(str, need_elements)))
+        ents = MPRester(api_key).get_entries_in_chemsys(
+            chemsys, additional_criteria={"e_above_hull": {"$lte": 0.001}}
+        )
+        phase_diagrams = PhaseDiagram(ents)
+        return cls.with_phase_diagram(
+            bulk_entry,
+            defect_entries,
+            atomic_entries,
+            phase_diagrams,
+            vbm=vbm,
+            **kwargs,
+        )
 
     def _parse_chempots(self, chempots: dict | ArrayLike) -> dict:
         """Parse the chemical potentials.
@@ -190,10 +336,14 @@ class FormationEnergyDiagram(MSONable):
                 A dictionary of chemical potentials.
         """
         if not isinstance(chempots, dict):
-            chempots = {el: chempots[i] for i, el in enumerate(self.chempot_diagram.elements)}
+            chempots = {
+                el: chempots[i] for i, el in enumerate(self.chempot_diagram.elements)
+            }
         return chempots
 
-    def _vbm_formation_energy(self, defect_entry: DefectEntry, chempots: dict | Iterable) -> float:
+    def _vbm_formation_energy(
+        self, defect_entry: DefectEntry, chempots: dict | Iterable
+    ) -> float:
         """Compute the formation energy at the VBM.
 
         Compute the formation energy at the VBM (essentially the y-intercept)
@@ -210,9 +360,16 @@ class FormationEnergyDiagram(MSONable):
                 The formation energy at the VBM.
         """
         chempots = self._parse_chempots(chempots)
-        en_change = sum([(self.dft_energies[el] + chempots[el]) * fac for el, fac in self.el_change.items()])
+        en_change = sum(
+            [
+                (self.dft_energies[el] + chempots[el]) * fac
+                for el, fac in self.el_change.items()
+            ]
+        )
         formation_en = (
-            defect_entry.corrected_energy - (self.bulk_entry.energy + en_change) + self.vbm * defect_entry.charge_state
+            defect_entry.corrected_energy
+            - (self.bulk_entry.energy + en_change)
+            + self.vbm * defect_entry.charge_state
         )
         return formation_en
 
@@ -281,37 +438,47 @@ class FormationEnergyDiagram(MSONable):
         Returns:
             The formation energy at the given Fermi level.
         """
-        transitions = np.array(self.get_transitions(chempot_dict, x_min=-100, x_max=100))
+        transitions = np.array(
+            self.get_transitions(chempot_dict, x_min=-100, x_max=100)
+        )
         # linearly interpolate between the set of points
         return np.interp(fermi_level, transitions[:, 0], transitions[:, 1])
 
 
-def ensure_stable_bulk(pd: PhaseDiagram, bulk_entry: ComputedEntry) -> PhaseDiagram:
-    """Ensure the bulk is stable.
+def ensure_stable_bulk(
+    pd: PhaseDiagram, entry: ComputedEntry, use_pd_energy: bool = True
+) -> PhaseDiagram:
+    """Added entry to phase diagram and ensure that it is stable.
+
+    Create a fake entry in the phase diagram with the same id as the supplied ``entry``
+    but with energy just below the convex hull and return the updated phase diagram.
+
+    Note: This is done regardless of whether the entry is stable or not,
+    so we are effectively only using the energy from the phase diagram and ignoring
+    the energy of supplied entry.
 
     Args:
         pd:
             Phase diagram.
-        bulk_entry:
-            Bulk entry.
+        entry:
+            entry to be added
 
     Returns:
         PhaseDiagram:
             Modified Phase diagram.
     """
     SMALL_NUM = 1e-8
-    e_above_hull = pd.get_e_above_hull(bulk_entry)
-    if e_above_hull > 0:
-        logging.warning(
-            f"Bulk entry is unstable. E above hull: {e_above_hull}\n"
-            f"Adding a fake entry just below the hull to get estimates of the chemical potentials."
-        )
-        stable_entry = ComputedEntry(bulk_entry.composition, bulk_entry.energy - e_above_hull - SMALL_NUM)
-        pd = PhaseDiagram([stable_entry] + pd.all_entries)
+    e_above_hull = pd.get_e_above_hull(entry)
+    stable_entry = ComputedEntry(
+        entry.composition, entry.energy - e_above_hull - SMALL_NUM
+    )
+    pd = PhaseDiagram([stable_entry] + pd.all_entries)
     return pd
 
 
-def get_transitions(lines: list[tuple[float, float]], x_min: float, x_max: float) -> list[tuple[float, float]]:
+def get_transitions(
+    lines: list[tuple[float, float]], x_min: float, x_max: float
+) -> list[tuple[float, float]]:
     """Get the "transition" points in a list of lines.
 
     Given a list of lines represented as (m, b) pairs sorted in order of decreasing m.
@@ -333,7 +500,9 @@ def get_transitions(lines: list[tuple[float, float]], x_min: float, x_max: float
     for i, (m1, b1) in enumerate(lines[:-1]):
         m2, b2 = lines[i + 1]
         if m1 == m2:
-            raise ValueError("The slopes (charge states) of the set of lines should be distinct.")
+            raise ValueError(
+                "The slopes (charge states) of the set of lines should be distinct."
+            )
         nx, ny = ((b2 - b1) / (m1 - m2), (m1 * b2 - m2 * b1) / (m1 - m2))
         if nx < x_min:
             transitions = [(x_min, m2 * x_min + b2)]
