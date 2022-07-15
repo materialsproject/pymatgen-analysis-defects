@@ -37,7 +37,9 @@ class DefectSiteFinder(MSONable):
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
 
-    def get_defect_fpos(self, defect_structure: Structure, base_structure: Structure) -> ArrayLike:
+    def get_defect_fpos(
+        self, defect_structure: Structure, base_structure: Structure
+    ) -> ArrayLike:
         """Get the position of a defect in the pristine structure.
 
         Args:
@@ -52,7 +54,9 @@ class DefectSiteFinder(MSONable):
         else:
             return self.get_native_defect_position(defect_structure, base_structure)
 
-    def _is_impurity(self, defect_structure: Structure, base_structure: Structure) -> bool:
+    def _is_impurity(
+        self, defect_structure: Structure, base_structure: Structure
+    ) -> bool:
         """Check if the defect structure is an impurity.
 
         Args:
@@ -67,7 +71,9 @@ class DefectSiteFinder(MSONable):
         defect_species = {site.species_string for site in defect_structure}
         return len(defect_species - base_species) > 0
 
-    def get_native_defect_position(self, defect_structure: Structure, base_structure: Structure) -> ArrayLike:
+    def get_native_defect_position(
+        self, defect_structure: Structure, base_structure: Structure
+    ) -> ArrayLike:
         """Get the position of a native defect in the defect structure.
 
         Args:
@@ -77,11 +83,17 @@ class DefectSiteFinder(MSONable):
         Returns:
             ArrayLike: Position of the defect in the defect structure (in fractional coordinates)
         """
-        distored_sites, distortions = list(zip(*self.get_most_distorted_sites(defect_structure, base_structure)))
+        distored_sites, distortions = list(
+            zip(*self.get_most_distorted_sites(defect_structure, base_structure))
+        )
         positions = [defect_structure[isite].frac_coords for isite in distored_sites]
-        return get_weighted_average_position(defect_structure.lattice, positions, distortions)
+        return get_weighted_average_position(
+            defect_structure.lattice, positions, distortions
+        )
 
-    def get_impurity_position(self, defect_structure: Structure, base_structure: Structure):
+    def get_impurity_position(
+        self, defect_structure: Structure, base_structure: Structure
+    ):
         """Get the position of an impurity defect.
 
         Look at all sites with impurity atoms, and take the average of the positions of the sites.
@@ -95,8 +107,12 @@ class DefectSiteFinder(MSONable):
         """
         # get the pbc average position of all sites not in the base structure
         base_species = {site.species_string for site in base_structure}
-        impurity_sites = [*filter(lambda x: x.species_string not in base_species, defect_structure)]
-        return get_weighted_average_position(defect_structure.lattice, [s.frac_coords for s in impurity_sites])
+        impurity_sites = [
+            *filter(lambda x: x.species_string not in base_species, defect_structure)
+        ]
+        return get_weighted_average_position(
+            defect_structure.lattice, [s.frac_coords for s in impurity_sites]
+        )
 
     def get_most_distorted_sites(
         self, defect_structure: Structure, base_structure: Structure
@@ -164,7 +180,9 @@ def get_site_groups(struct, symprec=0.01, angle_tolerance=5.0) -> List[SiteGroup
     groups = sstruct.equivalent_indices
     soap_vec = get_soap_vec(struct)
     for g in groups:
-        sg = SiteGroup(species=sstruct[g[0]].species_string, similar_sites=g, vec=soap_vec[g[0]])
+        sg = SiteGroup(
+            species=sstruct[g[0]].species_string, similar_sites=g, vec=soap_vec[g[0]]
+        )
         site_groups.append(sg)
     return site_groups
 

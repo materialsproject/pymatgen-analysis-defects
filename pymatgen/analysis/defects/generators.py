@@ -51,7 +51,9 @@ class VacancyGenerator(DefectGenerator):
         """
         super().__init__(structure)
         all_species = [*map(str, structure.composition.elements)]
-        self.rm_species = [*map(str, rm_species)] if rm_species is not None else all_species
+        self.rm_species = (
+            [*map(str, rm_species)] if rm_species is not None else all_species
+        )
 
     def generate_defects(self) -> Iterable[Defect]:
         """Generate the vacancy objects."""
@@ -88,7 +90,10 @@ class SubstitutionGenerator(DefectGenerator):
                 continue
             new_element = self.substitutions[el_str]
             sub_site = PeriodicSite(
-                Species(new_element), site.frac_coords, self.structure.lattice, properties=site.properties
+                Species(new_element),
+                site.frac_coords,
+                self.structure.lattice,
+                properties=site.properties,
             )
             yield Substitution(self.structure, sub_site)
 
