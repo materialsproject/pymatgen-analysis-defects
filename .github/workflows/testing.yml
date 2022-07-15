@@ -42,6 +42,9 @@ jobs:
       matrix:
         python-version: [ 3.8, 3.9 ]
 
+    env:
+      PMG_MAPI_KEY: ${{ secrets.PMG_MAPI_KEY }}
+
     steps:
     - uses: actions/checkout@v2.3.4
 

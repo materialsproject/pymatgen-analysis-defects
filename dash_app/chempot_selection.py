@@ -35,10 +35,16 @@ def main(filename: str) -> None:
     app.layout = html.Div(
         className="row",
         children=[
-            html.H1("Select chemical potential limit to obtain the formation energy diagram."),
+            html.H1(
+                "Select chemical potential limit to obtain the formation energy diagram."
+            ),
             html.Div(
                 children=[
-                    dcc.Graph(id="chempot", figure=chempot_plot("Ga2O3"), style={"display": "inline-block"}),
+                    dcc.Graph(
+                        id="chempot",
+                        figure=chempot_plot("Ga2O3"),
+                        style={"display": "inline-block"},
+                    ),
                     dcc.Graph(id="formation-en", style={"display": "inline-block"}),
                 ]
             ),
