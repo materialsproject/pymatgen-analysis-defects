@@ -231,7 +231,9 @@ class FormationEnergyDiagram(MSONable):
             e_dict = dict()
             for e in atomic_entries:
                 if len(e.composition.elements) != 1:
-                    raise ValueError("Only single-element entries should be provided.")
+                    raise ValueError(
+                        "Only single-element entries should be provided."
+                    )  # pragma: no cover
                 e_dict[e.composition.elements[0]] = e.energy_per_atom
 
             return sum(
@@ -502,7 +504,7 @@ def get_transitions(
         if m1 == m2:
             raise ValueError(
                 "The slopes (charge states) of the set of lines should be distinct."
-            )
+            )  # pragma: no cover
         nx, ny = ((b2 - b1) / (m1 - m2), (m1 * b2 - m2 * b1) / (m1 - m2))
         if nx < x_min:
             transitions = [(x_min, m2 * x_min + b2)]
