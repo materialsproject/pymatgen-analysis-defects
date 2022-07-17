@@ -1,2 +1,0 @@
-pymatgen>=2022.7.15
-dscribe>=1.2.1
