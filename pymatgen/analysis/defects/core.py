@@ -49,9 +49,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         self.site = site
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
-        self.multiplicity = (
-            multiplicity if multiplicity is not None else self.get_multiplicity()
-        )
+        self.multiplicity = multiplicity if multiplicity is not None else self.get_multiplicity()
         if oxi_state is None:
             # TODO this step might take time so wrap it in a timer
             self.structure.add_oxidation_state_by_guess()
@@ -136,9 +134,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         sc_pos = np.dot(self.site.frac_coords, sc_mat_inv)
         sc_site = PeriodicSite(self.site.specie, sc_pos, sc_structure.lattice)
 
-        sc_defect = self.__class__(
-            structure=sc_structure, site=sc_site, oxi_state=self.oxi_state
-        )
+        sc_defect = self.__class__(structure=sc_structure, site=sc_site, oxi_state=self.oxi_state)
         sc_defect_struct = sc_defect.defect_structure
         sc_defect_struct.remove_oxidation_states()
         if dummy_species is not None:
@@ -154,9 +150,7 @@ class Defect(MSONable, metaclass=ABCMeta):
 
         This is required for concentration analysis and confirms that defect_site is a site in bulk_structure.
         """
-        sga = SpacegroupAnalyzer(
-            self.structure, symprec=self.symprec, angle_tolerance=self.angle_tolerance
-        )
+        sga = SpacegroupAnalyzer(self.structure, symprec=self.symprec, angle_tolerance=self.angle_tolerance)
         return sga.get_symmetrized_structure()
 
     def __eq__(self, __o: object) -> bool:
@@ -189,9 +183,7 @@ class Vacancy(Defect):
     def defect_site(self):
         """Returns the site in the structure that corresponds to the defect site."""
         res = min(
-            self.structure.get_sites_in_sphere(
-                self.site.coords, 0.1, include_index=True
-            ),
+            self.structure.get_sites_in_sphere(self.site.coords, 0.1, include_index=True),
             key=lambda x: x[1],
         )
         if len(res) == 0:
@@ -246,7 +238,8 @@ class Substitution(Defect):
     ) -> None:
         """Initialize a substitutional defect object.
 
-        The position of `site` determines the atom to be removed and the species of `site` determines the replacing species.
+        The position of `site` determines the atom to be removed and the species of
+        `site` determines the replacing species.
 
         Args:
             structure: The structure of the defect.
@@ -294,9 +287,7 @@ class Substitution(Defect):
     def defect_site(self):
         """Returns the site in the structure that corresponds to the defect site."""
         return min(
-            self.structure.get_sites_in_sphere(
-                self.site.coords, 0.1, include_index=True
-            ),
+            self.structure.get_sites_in_sphere(self.site.coords, 0.1, include_index=True),
             key=lambda x: x[1],
         )
 

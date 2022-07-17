@@ -68,17 +68,11 @@ def defect_entries_Mg_Ga(data_Mg_Ga, defect_Mg_Ga):
     bulk_locpot = data_Mg_Ga["bulk_sc"]["locpot"]
 
     def get_data(q):
-        computed_entry = data_Mg_Ga[f"q={q}"]["vasprun"].get_computed_entry(
-            inc_structure=True
-        )
+        computed_entry = data_Mg_Ga[f"q={q}"]["vasprun"].get_computed_entry(inc_structure=True)
         defect_locpot = data_Mg_Ga[f"q={q}"]["locpot"]
 
-        def_entry = DefectEntry(
-            defect=defect_Mg_Ga, charge_state=q, sc_entry=computed_entry, dielectric=14
-        )
-        plot_data = def_entry.get_freysoldt_correction(
-            defect_locpot=defect_locpot, bulk_locpot=bulk_locpot
-        )
+        def_entry = DefectEntry(defect=defect_Mg_Ga, charge_state=q, sc_entry=computed_entry, dielectric=14)
+        plot_data = def_entry.get_freysoldt_correction(defect_locpot=defect_locpot, bulk_locpot=bulk_locpot)
         return def_entry, plot_data
 
     defect_entries = dict()

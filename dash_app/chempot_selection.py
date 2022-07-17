@@ -35,9 +35,7 @@ def main(filename: str) -> None:
     app.layout = html.Div(
         className="row",
         children=[
-            html.H1(
-                "Select chemical potential limit to obtain the formation energy diagram."
-            ),
+            html.H1("Select chemical potential limit to obtain the formation energy diagram."),
             html.Div(
                 children=[
                     dcc.Graph(

@@ -15,6 +15,4 @@ def test_supercells(gan_struct):
     sc_mat2, _ = get_matched_structure_mapping(uc, sc)
     assert sc_mat2.shape == (3, 3)
     sc2 = uc * sc_mat2
-    np.testing.assert_allclose(
-        sc.lattice.abc, sc2.lattice.abc
-    )  # the sc_mat can be reconstructed from the sc
+    np.testing.assert_allclose(sc.lattice.abc, sc2.lattice.abc)  # the sc_mat can be reconstructed from the sc

@@ -21,21 +21,15 @@ def test_lower_envelope():
     transitions_ref = [(-4, -4), (-1.4, 3.8), (1, -1)]
     lower_envelope = get_lower_envelope(lines)
     assert lower_envelope == lower_envelope_ref
-    assert get_transitions(lower_envelope, -5, 2) == [(-5, -8)] + transitions_ref + [
-        (2, -6)
-    ]
+    assert get_transitions(lower_envelope, -5, 2) == [(-5, -8)] + transitions_ref + [(2, -6)]
 
 
 def test_defect_entry2(defect_entries_Mg_Ga):
     defect_entries, plot_data = defect_entries_Mg_Ga
 
     def_entry = defect_entries[0]
-    assert def_entry.corrections["freysoldt_electrostatic"] == pytest.approx(
-        0.00, abs=1e-4
-    )
-    assert def_entry.corrections["freysoldt_potential_alignment"] == pytest.approx(
-        0.00, abs=1e-4
-    )
+    assert def_entry.corrections["freysoldt_electrostatic"] == pytest.approx(0.00, abs=1e-4)
+    assert def_entry.corrections["freysoldt_potential_alignment"] == pytest.approx(0.00, abs=1e-4)
 
     def_entry = defect_entries[-2]
     assert def_entry.corrections["freysoldt_electrostatic"] > 0
@@ -92,9 +86,7 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
         assert np.allclose(y, y_ref)
 
     # test the constructor with materials project phase diagram
-    atomic_entries = list(
-        filter(lambda x: len(x.composition.elements) == 1, stable_entries_Mg_Ga_N)
-    )
+    atomic_entries = list(filter(lambda x: len(x.composition.elements) == 1, stable_entries_Mg_Ga_N))
     fed = FormationEnergyDiagram.with_phase_diagram_from_matproj(
         bulk_entry=bulk_entry,
         defect_entries=def_ent_list,

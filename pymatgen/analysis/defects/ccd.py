@@ -42,7 +42,8 @@ class ConfigurationCoordinateDiagram(MSONable):
     Attributes:
         charge_gs (int): The charge of the ground state.
         charge_es (int): The charge of the excited state.
-        dQ (float): The configurational difference between the relaxed structures of the ground state and the excited state.
+        dQ (float): The configurational difference between the relaxed structures of the
+            ground state and the excited state.
         dE (float): The energy difference between the ground state and the excited state.
         Q_gs (ArrayLike): The list of the configurational coordinates of the ground state.
         Q_es (ArrayLike): The list of the configurational coordinates of the excited state.
@@ -165,9 +166,7 @@ def _get_omega(
     return HBAR * popt[0] * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG))
 
 
-def _fit_parabola(
-    Q: ArrayLike, energy: ArrayLike, Q0: float, E0: float
-) -> Tuple[float, float, float]:
+def _fit_parabola(Q: ArrayLike, energy: ArrayLike, Q0: float, E0: float) -> Tuple[float, float, float]:
     """Fit the parabola to the data."""
 
     def f(Q, omega):

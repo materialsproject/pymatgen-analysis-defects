@@ -49,9 +49,7 @@ def get_sc_fromstruct(
     return sc_mat
 
 
-def get_matched_structure_mapping(
-    uc_struct: Structure, sc_struct: Structure, sm: StructureMatcher | None = None
-):
+def get_matched_structure_mapping(uc_struct: Structure, sc_struct: Structure, sm: StructureMatcher | None = None):
     """Get the mapping of the supercell to the unit cell.
 
     Get the mapping from the supercell defect structure onto the base structure,
@@ -69,9 +67,7 @@ def get_matched_structure_mapping(
     s1, s2 = sm._process_species([uc_struct, sc_struct])
     fu, _ = sm._get_supercell_size(s1, s2)
     try:
-        val, dist, sc_m, total_t, mapping = sm._strict_match(
-            s1, s2, fu=fu, s1_supercell=True
-        )
+        val, dist, sc_m, total_t, mapping = sm._strict_match(s1, s2, fu=fu, s1_supercell=True)
     except TypeError:
         return None
     return sc_m, total_t
@@ -98,9 +94,7 @@ def _cubic_cell(
         CubicSupercellTransformation,
     )
 
-    cst = CubicSupercellTransformation(
-        min_atoms=min_atoms, max_atoms=max_atoms, min_length=min_length
-    )
+    cst = CubicSupercellTransformation(min_atoms=min_atoms, max_atoms=max_atoms, min_length=min_length)
 
     try:
         cst.apply_transformation(base_struct)
