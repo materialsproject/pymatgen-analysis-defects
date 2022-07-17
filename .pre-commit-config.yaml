@@ -35,10 +35,15 @@ repos:
   rev: 3.9.2
   hooks:
   - id: flake8
+    entry: pflake8
     files: ^pymatgen/
     additional_dependencies:
+    - pyproject-flake8==v0.0.1a4
+    - flake8-bugbear==22.4.25
     - flake8-typing-imports==1.10.1
     - flake8-docstrings==1.6.0
+    - flake8-rst-docstrings==0.2.3
+    - flake8-rst==0.8.0
 
 - repo: https://github.com/pre-commit/pygrep-hooks
   rev: v1.9.0
