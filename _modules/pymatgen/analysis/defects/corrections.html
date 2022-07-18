@@ -1,0 +1,638 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
+
+    <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
+        <title>pymatgen.analysis.defects.corrections - pymatgen-analysis-defects</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --admonition-font-size: 92%;
+  --admonition-title-font-size: 92%;
+  --font-stack: Lato,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
+  --font-size--small: 92%;
+  --font-size--small--2: 87.5%;
+  --font-size--small--3: 87.5%;
+  --font-size--small--4: 87.5%;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-font-size: 92%;
+  --admonition-title-font-size: 92%;
+  --font-stack: Lato,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
+  --font-size--small: 92%;
+  --font-size--small--2: 87.5%;
+  --font-size--small--3: 87.5%;
+  --font-size--small--4: 87.5%;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --admonition-font-size: 92%;
+  --admonition-title-font-size: 92%;
+  --font-stack: Lato,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
+  --font-size--small: 92%;
+  --font-size--small--2: 87.5%;
+  --font-size--small--3: 87.5%;
+  --font-size--small--4: 87.5%;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">pymatgen-analysis-defects</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
+  
+  
+  <span class="sidebar-brand-text">pymatgen-analysis-defects</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Introduction</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../reference/root.html">API</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../reference/core.html">core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../reference/ccd.html">ccd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../reference/corrections.html">corrections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../reference/finder.html">finder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../reference/generators.html">generators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../reference/thermo.html">thermo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../reference/utils.html">utils</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../genindex.html">Index</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for pymatgen.analysis.defects.corrections</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Defect corrections module.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.outputs</span> <span class="kn">import</span> <span class="n">Locpot</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">QModel</span><span class="p">,</span>
+    <span class="n">ang_to_bohr</span><span class="p">,</span>
+    <span class="n">converge</span><span class="p">,</span>
+    <span class="n">eV_to_k</span><span class="p">,</span>
+    <span class="n">generate_reciprocal_vectors_squared</span><span class="p">,</span>
+    <span class="n">hart_to_ev</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2022, The Materials Project&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Jimmy-Xuan Shen&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;jmmshn@gmail.com&quot;</span>
+
+<span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Adapted from the original code by Danny and Shyam.</span>
+<span class="sd">Rewritten to be functional instead of object oriented.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="get_correction"><a class="viewcode-back" href="../../../../reference/corrections.html#pymatgen.analysis.defects.corrections.get_correction">[docs]</a><span class="k">def</span> <span class="nf">get_correction</span><span class="p">(</span>
+    <span class="n">q</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">dielectric</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">defect_locpot</span><span class="p">:</span> <span class="n">Locpot</span><span class="p">,</span>
+    <span class="n">bulk_locpot</span><span class="p">:</span> <span class="n">Locpot</span><span class="p">,</span>
+    <span class="n">defect_frac_coords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">energy_cutoff</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">520</span><span class="p">,</span>
+    <span class="n">mad_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span>
+    <span class="n">q_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">QModel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the Freysoldt correction for a defect entry.</span>
+
+<span class="sd">    Get the Freysoldt correction for a defect. The result is given</span>
+<span class="sd">    as a dictionary with the following keys:</span>
+<span class="sd">    - &quot;freysoldt_electrostatic&quot;: the electrostatic portion of the correction</span>
+<span class="sd">    - &quot;freysoldt_potential_alignment&quot;: the potential alignment portion of the correction</span>
+
+<span class="sd">    The second return value is a dictionary used to plot the planar average</span>
+<span class="sd">    electrostatic potential (used for debugging).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        q:</span>
+<span class="sd">            Charge state of defect</span>
+<span class="sd">        dielectric:</span>
+<span class="sd">            Dielectric constant of bulk</span>
+<span class="sd">        defect_locpot:</span>
+<span class="sd">            Locpot of defect</span>
+<span class="sd">        bulk_locpot:</span>
+<span class="sd">            Locpot of bulk</span>
+<span class="sd">        defect_frac_coords:</span>
+<span class="sd">            Fractional coordinates of the defect.</span>
+<span class="sd">        energy_cutoff:</span>
+<span class="sd">            Maximum energy in eV in reciprocal space to perform integration</span>
+<span class="sd">        mad_tol:</span>
+<span class="sd">            Convergence criteria for the Madelung energy for potential correction</span>
+<span class="sd">        q_model:</span>
+<span class="sd">            QModel object to use for Freysoldt correction. If None, then uses default</span>
+<span class="sd">        step:</span>
+<span class="sd">            Step size for numerical integration.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Freysoldt correction values as a dictionary</span>
+<span class="sd">        dict: Plot data for planar average electrostatic potential.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># dielectric has to be a float</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dielectric</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="n">dielectric</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">dielectric</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dielectric</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">dielectric</span><span class="p">)))</span>
+
+    <span class="n">q_model</span> <span class="o">=</span> <span class="n">QModel</span><span class="p">()</span> <span class="k">if</span> <span class="n">q_model</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">q_model</span>
+
+    <span class="n">list_axis_grid</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="n">defect_locpot</span><span class="o">.</span><span class="n">get_axis_grid</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])]</span>
+    <span class="n">list_defect_plnr_avg_esp</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="n">defect_locpot</span><span class="o">.</span><span class="n">get_average_along_axis</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])]</span>
+    <span class="n">list_bulk_plnr_avg_esp</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="n">bulk_locpot</span><span class="o">.</span><span class="n">get_average_along_axis</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])]</span>
+    <span class="n">list_axes</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_axis_grid</span><span class="p">))</span>
+
+    <span class="n">lattice</span> <span class="o">=</span> <span class="n">defect_locpot</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">es_corr</span> <span class="o">=</span> <span class="n">perform_es_corr</span><span class="p">(</span>
+        <span class="n">lattice</span><span class="o">=</span><span class="n">lattice</span><span class="p">,</span>
+        <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span>
+        <span class="n">dielectric</span><span class="o">=</span><span class="n">dielectric</span><span class="p">,</span>
+        <span class="n">q_model</span><span class="o">=</span><span class="n">q_model</span><span class="p">,</span>
+        <span class="n">energy_cutoff</span><span class="o">=</span><span class="n">energy_cutoff</span><span class="p">,</span>
+        <span class="n">mad_tol</span><span class="o">=</span><span class="n">mad_tol</span><span class="p">,</span>
+        <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">pot_corrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">plot_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">pureavg</span><span class="p">,</span> <span class="n">defavg</span><span class="p">,</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+        <span class="n">list_axis_grid</span><span class="p">,</span> <span class="n">list_bulk_plnr_avg_esp</span><span class="p">,</span> <span class="n">list_defect_plnr_avg_esp</span><span class="p">,</span> <span class="n">list_axes</span>
+    <span class="p">):</span>
+        <span class="n">tmp_pot_corr</span><span class="p">,</span> <span class="n">md</span> <span class="o">=</span> <span class="n">perform_pot_corr</span><span class="p">(</span>
+            <span class="n">axis_grid</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+            <span class="n">pureavg</span><span class="o">=</span><span class="n">pureavg</span><span class="p">,</span>
+            <span class="n">defavg</span><span class="o">=</span><span class="n">defavg</span><span class="p">,</span>
+            <span class="n">lattice</span><span class="o">=</span><span class="n">lattice</span><span class="p">,</span>
+            <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span>
+            <span class="n">defect_frac_coords</span><span class="o">=</span><span class="n">defect_frac_coords</span><span class="p">,</span>
+            <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span>
+            <span class="n">dielectric</span><span class="o">=</span><span class="n">dielectric</span><span class="p">,</span>
+            <span class="n">q_model</span><span class="o">=</span><span class="n">q_model</span><span class="p">,</span>
+            <span class="n">mad_tol</span><span class="o">=</span><span class="n">mad_tol</span><span class="p">,</span>
+            <span class="n">widthsample</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">pot_corrs</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_pot_corr</span>
+        <span class="n">plot_data</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">=</span> <span class="n">md</span>
+
+    <span class="c1"># defect_entry.parameters[&quot;freysoldt_meta&quot;] = dict(self.metadata)</span>
+    <span class="c1"># defect_entry.parameters[&quot;potalign&quot;] = pot_corr / (-q) if q else 0.0</span>
+    <span class="n">pot_corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">pot_corrs</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+    <span class="n">frey_corr</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;freysoldt_electrostatic&quot;</span><span class="p">:</span> <span class="n">es_corr</span><span class="p">,</span>
+        <span class="s2">&quot;freysoldt_potential_alignment&quot;</span><span class="p">:</span> <span class="n">pot_corr</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">frey_corr</span><span class="p">,</span> <span class="n">plot_data</span></div>
+
+
+<div class="viewcode-block" id="perform_es_corr"><a class="viewcode-back" href="../../../../reference/corrections.html#pymatgen.analysis.defects.corrections.perform_es_corr">[docs]</a><span class="k">def</span> <span class="nf">perform_es_corr</span><span class="p">(</span>
+    <span class="n">lattice</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">dielectric</span><span class="p">,</span> <span class="n">q_model</span><span class="p">,</span> <span class="n">energy_cutoff</span><span class="o">=</span><span class="mi">520</span><span class="p">,</span> <span class="n">mad_tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mf">1e-4</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Perform Electrostatic Freysoldt Correction.</span>
+
+<span class="sd">    Perform the electrostatic Freysoldt correction for a defect.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lattice: Pymatgen lattice object</span>
+<span class="sd">        q: Charge of defect</span>
+<span class="sd">        dielectric: Dielectric constant of bulk</span>
+<span class="sd">        q_model: QModel object to use for Freysoldt correction. If None, uses default</span>
+<span class="sd">        energy_cutoff: Maximum energy in eV in reciprocal space to perform integration</span>
+<span class="sd">        mad_tol: Convergence criteria for the Madelung energy for potential correction</span>
+<span class="sd">        step: Step size for numerical integration</span>
+
+<span class="sd">    Return:</span>
+<span class="sd">        float:</span>
+<span class="sd">            Electrostatic Point Charge contribution to Freysoldt Correction (float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s2">&quot;Running Freysoldt 2011 PC calculation (should be equivalent to sxdefectalign)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;defect lattice constants are (in angstroms)&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">lattice</span><span class="o">.</span><span class="n">abc</span><span class="p">))</span>
+
+    <span class="p">[</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">]</span> <span class="o">=</span> <span class="n">ang_to_bohr</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lattice</span><span class="o">.</span><span class="n">get_cartesian_coords</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;In atomic units, lat consts are (in bohr):&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">([</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">]))</span>
+    <span class="n">vol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">))</span>  <span class="c1"># vol in bohr^3</span>
+
+    <span class="k">def</span> <span class="nf">e_iso</span><span class="p">(</span><span class="n">encut</span><span class="p">):</span>
+        <span class="n">gcut</span> <span class="o">=</span> <span class="n">eV_to_k</span><span class="p">(</span><span class="n">encut</span><span class="p">)</span>  <span class="c1"># gcut is in units of 1/A</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">scipy</span><span class="o">.</span><span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">q_model</span><span class="o">.</span><span class="n">rho_rec</span><span class="p">(</span><span class="n">g</span> <span class="o">*</span> <span class="n">g</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">gcut</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="o">*</span> <span class="p">(</span><span class="n">q</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">e_per</span><span class="p">(</span><span class="n">encut</span><span class="p">):</span>
+        <span class="n">eper</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">g2</span> <span class="ow">in</span> <span class="n">generate_reciprocal_vectors_squared</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">,</span> <span class="n">encut</span><span class="p">):</span>
+            <span class="n">eper</span> <span class="o">+=</span> <span class="p">(</span><span class="n">q_model</span><span class="o">.</span><span class="n">rho_rec</span><span class="p">(</span><span class="n">g2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">g2</span>
+        <span class="n">eper</span> <span class="o">*=</span> <span class="p">(</span><span class="n">q</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="n">vol</span>
+        <span class="n">eper</span> <span class="o">+=</span> <span class="p">(</span><span class="n">q</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="o">*</span> <span class="n">q_model</span><span class="o">.</span><span class="n">rho_rec_limit0</span> <span class="o">/</span> <span class="n">vol</span>
+        <span class="k">return</span> <span class="n">eper</span>
+
+    <span class="n">eiso</span> <span class="o">=</span> <span class="n">converge</span><span class="p">(</span><span class="n">e_iso</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">mad_tol</span><span class="p">,</span> <span class="n">energy_cutoff</span><span class="p">)</span>
+    <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Eisolated : </span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">eiso</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+    <span class="n">eper</span> <span class="o">=</span> <span class="n">converge</span><span class="p">(</span><span class="n">e_per</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">mad_tol</span><span class="p">,</span> <span class="n">energy_cutoff</span><span class="p">)</span>
+
+    <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Eperiodic : </span><span class="si">%f</span><span class="s2"> hartree&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">eper</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;difference (periodic-iso) is </span><span class="si">%f</span><span class="s2"> hartree&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">eper</span> <span class="o">-</span> <span class="n">eiso</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;difference in (eV) is </span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">((</span><span class="n">eper</span> <span class="o">-</span> <span class="n">eiso</span><span class="p">)</span> <span class="o">*</span> <span class="n">hart_to_ev</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+    <span class="n">es_corr</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">eiso</span> <span class="o">-</span> <span class="n">eper</span><span class="p">)</span> <span class="o">/</span> <span class="n">dielectric</span> <span class="o">*</span> <span class="n">hart_to_ev</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Defect Correction without alignment </span><span class="si">%f</span><span class="s2"> (eV): &quot;</span><span class="p">,</span> <span class="n">es_corr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">es_corr</span></div>
+
+
+<div class="viewcode-block" id="perform_pot_corr"><a class="viewcode-back" href="../../../../reference/corrections.html#pymatgen.analysis.defects.corrections.perform_pot_corr">[docs]</a><span class="k">def</span> <span class="nf">perform_pot_corr</span><span class="p">(</span>
+    <span class="n">axis_grid</span><span class="p">,</span>
+    <span class="n">pureavg</span><span class="p">,</span>
+    <span class="n">defavg</span><span class="p">,</span>
+    <span class="n">lattice</span><span class="p">,</span>
+    <span class="n">q</span><span class="p">,</span>
+    <span class="n">defect_frac_coords</span><span class="p">,</span>
+    <span class="n">axis</span><span class="p">,</span>
+    <span class="n">dielectric</span><span class="p">,</span>
+    <span class="n">q_model</span><span class="p">,</span>
+    <span class="n">mad_tol</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span>
+    <span class="n">widthsample</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;For performing planar averaging potential alignment.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        axis_grid (1 x NGX where NGX is the length of the NGX grid</span>
+<span class="sd">            in the axis direction. Same length as pureavg list):</span>
+<span class="sd">                A numpy array which contain the Cartesian axis</span>
+<span class="sd">                values (in angstroms) that correspond to each planar avg</span>
+<span class="sd">                potential supplied.</span>
+<span class="sd">        pureavg (1 x NGX where NGX is the length of the NGX grid in</span>
+<span class="sd">            the axis direction.):</span>
+<span class="sd">                A numpy array for the planar averaged</span>
+<span class="sd">                electrostatic potential of the bulk supercell.</span>
+<span class="sd">        defavg (1 x NGX where NGX is the length of the NGX grid in</span>
+<span class="sd">            the axis direction.):</span>
+<span class="sd">            A numpy array for the planar averaged</span>
+<span class="sd">            electrostatic potential of the defect supercell.</span>
+<span class="sd">        lattice: Pymatgen Lattice object of the defect supercell</span>
+<span class="sd">        q (float or int): charge of the defect</span>
+<span class="sd">        defect_frac_position: Fracitional Coordinates of the defect in the supercell</span>
+<span class="sd">        axis (int): axis for performing the freysoldt correction on</span>
+<span class="sd">        widthsample (float): width (in Angstroms) of the region in between defects</span>
+<span class="sd">        where the potential alignment correction is averaged. Default is 1 Angstrom.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Potential Alignment contribution to Freysoldt Correction (float)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;run Freysoldt potential alignment method for axis &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">axis</span><span class="p">))</span>
+    <span class="n">nx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">axis_grid</span><span class="p">)</span>
+
+    <span class="c1"># shift these planar averages to have defect at origin</span>
+    <span class="n">axfracval</span> <span class="o">=</span> <span class="n">defect_frac_coords</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+    <span class="n">axbulkval</span> <span class="o">=</span> <span class="n">axfracval</span> <span class="o">*</span> <span class="n">lattice</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">axbulkval</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">axbulkval</span> <span class="o">+=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">axbulkval</span> <span class="o">&gt;</span> <span class="n">lattice</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="n">axis</span><span class="p">]:</span>
+        <span class="n">axbulkval</span> <span class="o">-=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">axbulkval</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nx</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">axbulkval</span> <span class="o">&lt;</span> <span class="n">axis_grid</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="k">break</span>
+        <span class="n">rollind</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">axis_grid</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span>
+        <span class="n">pureavg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">pureavg</span><span class="p">,</span> <span class="n">rollind</span><span class="p">)</span>
+        <span class="n">defavg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">defavg</span><span class="p">,</span> <span class="n">rollind</span><span class="p">)</span>
+
+    <span class="c1"># if not self._silence:</span>
+    <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;calculating lr part along planar avg axis&quot;</span><span class="p">)</span>
+    <span class="n">reci_latt</span> <span class="o">=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">reciprocal_lattice</span>
+    <span class="n">dg</span> <span class="o">=</span> <span class="n">reci_latt</span><span class="o">.</span><span class="n">abc</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+    <span class="n">dg</span> <span class="o">/=</span> <span class="n">ang_to_bohr</span>  <span class="c1"># convert to bohr to do calculation in atomic units</span>
+
+    <span class="c1"># Build background charge potential with defect at origin</span>
+    <span class="n">v_G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axis_grid</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;c16&quot;</span><span class="p">))</span>
+    <span class="n">v_G</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="o">-</span><span class="n">q</span> <span class="o">/</span> <span class="n">dielectric</span> <span class="o">*</span> <span class="n">q_model</span><span class="o">.</span><span class="n">rho_rec_limit0</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">nx</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">nx</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">nx</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="n">dg</span>
+    <span class="n">g2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">g</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">v_G</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="p">(</span><span class="n">dielectric</span> <span class="o">*</span> <span class="n">g2</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="n">q</span> <span class="o">*</span> <span class="n">q_model</span><span class="o">.</span><span class="n">rho_rec</span><span class="p">(</span><span class="n">g2</span><span class="p">)</span>
+    <span class="n">v_G</span><span class="p">[</span><span class="n">nx</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">nx</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="k">else</span> <span class="n">v_G</span><span class="p">[</span><span class="n">nx</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1"># Get the real space potential via fft and grabbing the imaginary portion</span>
+    <span class="n">v_R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">v_G</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">v_R</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">&gt;</span> <span class="n">mad_tol</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;imaginary part found to be </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">v_R</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()))</span>
+    <span class="n">v_R</span> <span class="o">/=</span> <span class="n">lattice</span><span class="o">.</span><span class="n">volume</span> <span class="o">*</span> <span class="n">ang_to_bohr</span><span class="o">**</span><span class="mi">3</span>
+    <span class="n">v_R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">v_R</span><span class="p">)</span> <span class="o">*</span> <span class="n">hart_to_ev</span>
+
+    <span class="c1"># get correction</span>
+    <span class="n">short</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">defavg</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pureavg</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v_R</span><span class="p">)</span>
+    <span class="n">checkdis</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">widthsample</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">axis_grid</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">axis_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">mid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">short</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">tmppot</span> <span class="o">=</span> <span class="p">[</span><span class="n">short</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mid</span> <span class="o">-</span> <span class="n">checkdis</span><span class="p">,</span> <span class="n">mid</span> <span class="o">+</span> <span class="n">checkdis</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;shifted defect position on axis (</span><span class="si">%s</span><span class="s2">) to origin&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">axbulkval</span><span class="p">))</span>
+    <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+        <span class="s2">&quot;means sampling region is (</span><span class="si">%f</span><span class="s2">,</span><span class="si">%f</span><span class="s2">)&quot;</span><span class="p">,</span>
+        <span class="n">axis_grid</span><span class="p">[</span><span class="n">mid</span> <span class="o">-</span> <span class="n">checkdis</span><span class="p">],</span>
+        <span class="n">axis_grid</span><span class="p">[</span><span class="n">mid</span> <span class="o">+</span> <span class="n">checkdis</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">C</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">tmppot</span><span class="p">)</span>
+    <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;C = </span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+    <span class="n">final_shift</span> <span class="o">=</span> <span class="p">[</span><span class="n">short</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">C</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">v_R</span><span class="p">))]</span>
+    <span class="n">v_R</span> <span class="o">=</span> <span class="p">[</span><span class="n">elmnt</span> <span class="o">-</span> <span class="n">C</span> <span class="k">for</span> <span class="n">elmnt</span> <span class="ow">in</span> <span class="n">v_R</span><span class="p">]</span>
+
+    <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;C value is averaged to be </span><span class="si">%f</span><span class="s2"> eV &quot;</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+    <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s2">&quot;Potentital alignment energy correction (-q*delta V):  </span><span class="si">%f</span><span class="s2"> (eV)&quot;</span><span class="p">,</span> <span class="o">-</span><span class="n">q</span> <span class="o">*</span> <span class="n">C</span>
+    <span class="p">)</span>
+    <span class="n">pot_corr</span> <span class="o">=</span> <span class="o">-</span><span class="n">q</span> <span class="o">*</span> <span class="n">C</span>
+
+    <span class="c1"># log plotting data:</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;pot_plot_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;Vr&quot;</span><span class="p">:</span> <span class="n">v_R</span><span class="p">,</span>
+        <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">axis_grid</span><span class="p">,</span>
+        <span class="s2">&quot;dft_diff&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">defavg</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pureavg</span><span class="p">),</span>
+        <span class="s2">&quot;final_shift&quot;</span><span class="p">:</span> <span class="n">final_shift</span><span class="p">,</span>
+        <span class="s2">&quot;check&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">mid</span> <span class="o">-</span> <span class="n">checkdis</span><span class="p">,</span> <span class="n">mid</span> <span class="o">+</span> <span class="n">checkdis</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="p">}</span>
+
+    <span class="c1"># log uncertainty:</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;pot_corr_uncertainty_md&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;stats&quot;</span><span class="p">:</span> <span class="n">stats</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">tmppot</span><span class="p">)</span><span class="o">.</span><span class="n">_asdict</span><span class="p">(),</span>
+        <span class="s2">&quot;potcorr&quot;</span><span class="p">:</span> <span class="o">-</span><span class="n">q</span> <span class="o">*</span> <span class="n">C</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">pot_corr</span><span class="p">,</span> <span class="n">metadata</span></div>
+
+
+<div class="viewcode-block" id="plot_plnr_avg"><a class="viewcode-back" href="../../../../reference/corrections.html#pymatgen.analysis.defects.corrections.plot_plnr_avg">[docs]</a><span class="k">def</span> <span class="nf">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">saved</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot the planar average electrostatic potential.</span>
+
+<span class="sd">    Plot the planar average electrostatic potential against the Long range and</span>
+<span class="sd">    short range models from Freysoldt. Must run perform_pot_corr or get_correction</span>
+<span class="sd">    (to load metadata) before this can be used.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        plot_data (dict): Dictionary of FreysoldtCorrection metadata.</span>
+<span class="sd">        title (str): Title to be given to plot. Default is no title.</span>
+<span class="sd">        saved (bool): Whether to save file or not. If False then returns plot object.</span>
+<span class="sd">        If True then saves plot as   str(title) + &quot;FreyplnravgPlot.pdf&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plot_data</span><span class="p">[</span><span class="s2">&quot;pot_plot_data&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot plot potential alignment before running correction!&quot;</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">plot_data</span><span class="p">[</span><span class="s2">&quot;pot_plot_data&quot;</span><span class="p">][</span><span class="s2">&quot;x&quot;</span><span class="p">]</span>
+    <span class="n">v_R</span> <span class="o">=</span> <span class="n">plot_data</span><span class="p">[</span><span class="s2">&quot;pot_plot_data&quot;</span><span class="p">][</span><span class="s2">&quot;Vr&quot;</span><span class="p">]</span>
+    <span class="n">dft_diff</span> <span class="o">=</span> <span class="n">plot_data</span><span class="p">[</span><span class="s2">&quot;pot_plot_data&quot;</span><span class="p">][</span><span class="s2">&quot;dft_diff&quot;</span><span class="p">]</span>
+    <span class="n">final_shift</span> <span class="o">=</span> <span class="n">plot_data</span><span class="p">[</span><span class="s2">&quot;pot_plot_data&quot;</span><span class="p">][</span><span class="s2">&quot;final_shift&quot;</span><span class="p">]</span>
+    <span class="n">check</span> <span class="o">=</span> <span class="n">plot_data</span><span class="p">[</span><span class="s2">&quot;pot_plot_data&quot;</span><span class="p">][</span><span class="s2">&quot;check&quot;</span><span class="p">]</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">v_R</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;long range from model&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dft_diff</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;DFT locpot diff&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">final_shift</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;short range (aligned)&quot;</span><span class="p">)</span>
+
+    <span class="n">tmpx</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">check</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">check</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+        <span class="n">tmpx</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;sampling region&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">ymin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">v_R</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">dft_diff</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">final_shift</span><span class="p">))</span>
+    <span class="n">ymax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">v_R</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">dft_diff</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">final_shift</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span> <span class="o">+</span> <span class="n">ymin</span><span class="p">,</span> <span class="mf">0.2</span> <span class="o">+</span> <span class="n">ymax</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;distance along axis ($\AA$)&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Potential (V)&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">title</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; defect potential&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">saved</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">title</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;FreyplnravgPlot.pdf&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">plt</span></div>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022, Jimmy-Xuan Shen
+            </div>
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/scripts/furo.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    </body>
+</html>
