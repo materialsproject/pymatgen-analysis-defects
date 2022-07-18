@@ -26,9 +26,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-ci.txt
-          pip install -e .
+          pip install -e .[strict]
+          pip install -e .[dev]
           pre-commit install
 
 
@@ -62,9 +61,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r requirements-ci.txt
-        pip install -e .
+        pip install -e .[strict]
 
     - name: Test
       run: pytest --cov=pymatgen --cov-report=xml
