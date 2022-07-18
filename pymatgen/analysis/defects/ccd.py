@@ -43,6 +43,7 @@ class ConfigurationCoordinateDiagram(MSONable):
     state.
 
     Attributes:
+        charge_gs (int): The charge of the ground state.
         charge_es (int): The charge of the excited state.
         dQ (float): The configurational difference between the relaxed structures of the
             ground state and the excited state.
@@ -59,8 +60,6 @@ class ConfigurationCoordinateDiagram(MSONable):
     """
 
     charge_gs: int
-    """The charge of the ground state."""
-
     charge_es: int
     # distortions in units of [amu^{1/2} Angstrom]
     dQ: float
