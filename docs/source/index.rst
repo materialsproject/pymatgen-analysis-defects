@@ -18,5 +18,3 @@ Introduction
 
 .. mdinclude:: ../../README.rst
    :start-line: 7
-
-
