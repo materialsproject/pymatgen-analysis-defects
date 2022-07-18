@@ -41,7 +41,8 @@ class Defect(MSONable, metaclass=ABCMeta):
             site: The site
             charge: The charge of the defect.
             multiplicity: The multiplicity of the defect.
-            oxi_state: The oxidation state of the defect, if not specified, this will be determined automatically.
+            oxi_state: The oxidation state of the defect, if not specified,
+            this will be determined automatically.
             symprec: Tolerance for symmetry finding.
             angle_tolerance: Angle tolerance for symmetry finding.
         """
@@ -49,7 +50,9 @@ class Defect(MSONable, metaclass=ABCMeta):
         self.site = site
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
-        self.multiplicity = multiplicity if multiplicity is not None else self.get_multiplicity()
+        self.multiplicity = (
+            multiplicity if multiplicity is not None else self.get_multiplicity()
+        )
         if oxi_state is None:
             # TODO this step might take time so wrap it in a timer
             self.structure.add_oxidation_state_by_guess()
@@ -120,7 +123,8 @@ class Defect(MSONable, metaclass=ABCMeta):
         Args:
             defect: defect object
             sc_mat: supercell matrix
-            dummy_species: dummy species to highlight the defect position (for visualization)
+            dummy_species: dummy species to highlight the defect position
+            (for visualization)
             kwargs: kwargs for `CubicSupercellTransformation`
 
         Returns:
@@ -134,7 +138,9 @@ class Defect(MSONable, metaclass=ABCMeta):
         sc_pos = np.dot(self.site.frac_coords, sc_mat_inv)
         sc_site = PeriodicSite(self.site.specie, sc_pos, sc_structure.lattice)
 
-        sc_defect = self.__class__(structure=sc_structure, site=sc_site, oxi_state=self.oxi_state)
+        sc_defect = self.__class__(
+            structure=sc_structure, site=sc_site, oxi_state=self.oxi_state
+        )
         sc_defect_struct = sc_defect.defect_structure
         sc_defect_struct.remove_oxidation_states()
         if dummy_species is not None:
@@ -148,9 +154,12 @@ class Defect(MSONable, metaclass=ABCMeta):
     def symmetrized_structure(self) -> SymmetrizedStructure:
         """Returns the multiplicity of a defect site within the structure.
 
-        This is required for concentration analysis and confirms that defect_site is a site in bulk_structure.
+        This is required for concentration analysis and confirms that defect_site is a
+        site in bulk_structure.
         """
-        sga = SpacegroupAnalyzer(self.structure, symprec=self.symprec, angle_tolerance=self.angle_tolerance)
+        sga = SpacegroupAnalyzer(
+            self.structure, symprec=self.symprec, angle_tolerance=self.angle_tolerance
+        )
         return sga.get_symmetrized_structure()
 
     def __eq__(self, __o: object) -> bool:
@@ -167,7 +176,8 @@ class Vacancy(Defect):
     def get_multiplicity(self) -> int:
         """Returns the multiplicity of a defect site within the structure.
 
-        This is required for concentration analysis and confirms that defect_site is a site in bulk_structure.
+        This is required for concentration analysis and confirms that defect_site is
+        a site in bulk_structure.
         """
         symm_struct = self.symmetrized_structure
         defect_site = self.structure[self.defect_site_index]
@@ -183,7 +193,9 @@ class Vacancy(Defect):
     def defect_site(self):
         """Returns the site in the structure that corresponds to the defect site."""
         res = min(
-            self.structure.get_sites_in_sphere(self.site.coords, 0.1, include_index=True),
+            self.structure.get_sites_in_sphere(
+                self.site.coords, 0.1, include_index=True
+            ),
             key=lambda x: x[1],
         )
         if len(res) == 0:
@@ -245,14 +257,16 @@ class Substitution(Defect):
             structure: The structure of the defect.
             site: replace the nearest site with this one.
             multiplicity: The multiplicity of the defect.
-            oxi_state: The oxidation state of the defect, if not specified, this will be determined automatically.
+            oxi_state: The oxidation state of the defect, if not specified,
+            this will be determined automatically.
         """
         super().__init__(structure, site, multiplicity, oxi_state, **kwargs)
 
     def get_multiplicity(self) -> int:
         """Returns the multiplicity of a defect site within the structure.
 
-        This is required for concentration analysis and confirms that defect_site is a site in bulk_structure.
+        This is required for concentration analysis and confirms that defect_site is
+        a site in bulk_structure.
         """
         sga = SpacegroupAnalyzer(self.structure)
         periodic_struc = sga.get_symmetrized_structure()
@@ -287,7 +301,9 @@ class Substitution(Defect):
     def defect_site(self):
         """Returns the site in the structure that corresponds to the defect site."""
         return min(
-            self.structure.get_sites_in_sphere(self.site.coords, 0.1, include_index=True),
+            self.structure.get_sites_in_sphere(
+                self.site.coords, 0.1, include_index=True
+            ),
             key=lambda x: x[1],
         )
 
@@ -322,7 +338,10 @@ class Substitution(Defect):
         """Representation of a vacancy defect."""
         rm_species = get_element(self.defect_site.specie)
         sub_species = get_element(self.site.specie)
-        return f"{sub_species} subsitituted on the {rm_species} site at at site #{self.defect_site_index}"
+        return (
+            f"{sub_species} subsitituted on the {rm_species} site at "
+            f"at site #{self.defect_site_index}"
+        )
 
 
 def get_element(sp_el: Species | Element) -> Element:

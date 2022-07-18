@@ -36,7 +36,10 @@ class DefectGenerator(MSONable, metaclass=ABCMeta):
 
     @abstractmethod
     def generate_defects(self) -> Iterable[Defect]:
-        """Generate a list of symmetry-distinct site objects, the yield their corresponding defect objects."""
+        """
+        Generate a list of symmetry-distinct site objects, the yield their corresponding
+        defect objects.
+        """
 
 
 class VacancyGenerator(DefectGenerator):
@@ -51,7 +54,9 @@ class VacancyGenerator(DefectGenerator):
         """
         super().__init__(structure)
         all_species = [*map(str, structure.composition.elements)]
-        self.rm_species = [*map(str, rm_species)] if rm_species is not None else all_species
+        self.rm_species = (
+            [*map(str, rm_species)] if rm_species is not None else all_species
+        )
 
     def generate_defects(self) -> Iterable[Defect]:
         """Generate the vacancy objects."""

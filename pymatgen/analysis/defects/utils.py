@@ -16,7 +16,10 @@ try:
 except ImportError:
     peak_local_max_found = False
 
-__author__ = "Danny Broberg, Shyam Dwaraknath, Bharat Medasani, Nils Zimmermann, Geoffroy Hautier"
+__author__ = (
+    "Danny Broberg, Shyam Dwaraknath, Bharat Medasani, Nils Zimmermann, "
+    "Geoffroy Hautier"
+)
 __copyright__ = "Copyright 2014, The Materials Project"
 __version__ = "1.0"
 __maintainer__ = "Danny Broberg, Shyam Dwaraknath"
@@ -57,7 +60,8 @@ class QModel(MSONable):
             beta: Gaussian decay constant. Default value is 1 Bohr.
                 When delocalized (eg. diamond), 2 Bohr is more appropriate.
             expnorm: Weight for the exponential tail in the range of [0-1].
-                Default is 0.0 indicating no tail. For delocalized charges ideal value is around 0.54-0.6.
+                Default is 0.0 indicating no tail. For delocalized charges ideal value
+                is around 0.54-0.6.
             gamma: Exponential decay constant
         """
         self.beta = beta
@@ -80,7 +84,9 @@ class QModel(MSONable):
         Returns:
             Charge density at the reciprocal vector magnitude
         """
-        return self.expnorm / np.sqrt(1 + self.gamma2 * g2) + (1 - self.expnorm) * np.exp(-0.25 * self.beta2 * g2)
+        return self.expnorm / np.sqrt(1 + self.gamma2 * g2) + (
+            1 - self.expnorm
+        ) * np.exp(-0.25 * self.beta2 * g2)
 
     @property
     def rho_rec_limit0(self):

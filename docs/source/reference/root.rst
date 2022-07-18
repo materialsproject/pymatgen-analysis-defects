@@ -2,7 +2,7 @@ pymatgen.analysis.defects
 =========================
 
 .. toctree::
-   :caption: Documentaiton for each module
+   :caption: Documentation for each module
    :maxdepth: -1
 
    core <core>
@@ -11,4 +11,4 @@ pymatgen.analysis.defects
    finder <finder>
    generators <generators>
    thermo <thermo>
-   utils <utils>   
+   utils <utils>

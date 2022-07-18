@@ -30,7 +30,8 @@ _logger = logging.getLogger(__name__)
 
 
 """
-Adapted from the original code by Danny and Shyam but made to be functional instead of object oriented.
+Adapted from the original code by Danny and Shyam.
+Rewritten to be functional instead of object oriented.
 """
 
 
@@ -109,7 +110,9 @@ def get_correction(
     pot_corrs = dict()
     plot_data = dict()
 
-    for x, pureavg, defavg, axis in zip(list_axis_grid, list_bulk_plnr_avg_esp, list_defect_plnr_avg_esp, list_axes):
+    for x, pureavg, defavg, axis in zip(
+        list_axis_grid, list_bulk_plnr_avg_esp, list_defect_plnr_avg_esp, list_axes
+    ):
         tmp_pot_corr, md = perform_pot_corr(
             axis_grid=x,
             pureavg=pureavg,
@@ -136,7 +139,9 @@ def get_correction(
     return frey_corr, plot_data
 
 
-def perform_es_corr(lattice, q, dielectric, q_model, energy_cutoff=520, mad_tol=1e-4, step=1e-4) -> float:
+def perform_es_corr(
+    lattice, q, dielectric, q_model, energy_cutoff=520, mad_tol=1e-4, step=1e-4
+) -> float:
     """Perform Electrostatic Freysoldt Correction.
 
     Perform the electrostatic Freysoldt correction for a defect.
@@ -145,7 +150,7 @@ def perform_es_corr(lattice, q, dielectric, q_model, energy_cutoff=520, mad_tol=
         lattice: Pymatgen lattice object
         q: Charge of defect
         dielectric: Dielectric constant of bulk
-        q_model: QModel object to use for Freysoldt correction. If None, then uses default
+        q_model: QModel object to use for Freysoldt correction. If None, uses default
         energy_cutoff: Maximum energy in eV in reciprocal space to perform integration
         mad_tol: Convergence criteria for the Madelung energy for potential correction
         step: Step size for numerical integration
@@ -154,7 +159,9 @@ def perform_es_corr(lattice, q, dielectric, q_model, energy_cutoff=520, mad_tol=
         float:
             Electrostatic Point Charge contribution to Freysoldt Correction (float)
     """
-    _logger.info("Running Freysoldt 2011 PC calculation (should be equivalent to sxdefectalign)")
+    _logger.info(
+        "Running Freysoldt 2011 PC calculation (should be equivalent to sxdefectalign)"
+    )
     _logger.debug("defect lattice constants are (in angstroms)" + str(lattice.abc))
 
     [a1, a2, a3] = ang_to_bohr * np.array(lattice.get_cartesian_coords(1))
@@ -163,7 +170,11 @@ def perform_es_corr(lattice, q, dielectric, q_model, energy_cutoff=520, mad_tol=
 
     def e_iso(encut):
         gcut = eV_to_k(encut)  # gcut is in units of 1/A
-        return scipy.integrate.quad(lambda g: q_model.rho_rec(g * g) ** 2, step, gcut)[0] * (q**2) / np.pi
+        return (
+            scipy.integrate.quad(lambda g: q_model.rho_rec(g * g) ** 2, step, gcut)[0]
+            * (q**2)
+            / np.pi
+        )
 
     def e_per(encut):
         eper = 0
@@ -259,7 +270,7 @@ def perform_pot_corr(
     v_G[1:] = 4 * np.pi / (dielectric * g2) * -q * q_model.rho_rec(g2)
     v_G[nx // 2] = 0 if not (nx % 2) else v_G[nx // 2]
 
-    # Get the real space potential by performing a  fft and grabbing the imaginary portion
+    # Get the real space potential via fft and grabbing the imaginary portion
     v_R = np.fft.fft(v_G)
 
     if abs(np.imag(v_R).max()) > mad_tol:
@@ -286,7 +297,9 @@ def perform_pot_corr(
     v_R = [elmnt - C for elmnt in v_R]
 
     _logger.info("C value is averaged to be %f eV ", C)
-    _logger.info("Potentital alignment energy correction (-q*delta V):  %f (eV)", -q * C)
+    _logger.info(
+        "Potentital alignment energy correction (-q*delta V):  %f (eV)", -q * C
+    )
     pot_corr = -q * C
 
     # log plotting data:
@@ -337,7 +350,9 @@ def plot_plnr_avg(plot_data, title=None, saved=False):
     plt.plot(x, final_shift, c="blue", label="short range (aligned)")
 
     tmpx = [x[i] for i in range(check[0], check[1])]
-    plt.fill_between(tmpx, -100, 100, facecolor="red", alpha=0.15, label="sampling region")
+    plt.fill_between(
+        tmpx, -100, 100, facecolor="red", alpha=0.15, label="sampling region"
+    )
 
     plt.xlim(round(x[0]), round(x[-1]))
     ymin = min(min(v_R), min(dft_diff), min(final_shift))
