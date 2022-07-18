@@ -63,7 +63,7 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
         defect_entries=def_ent_list,
         vbm=vbm,
         pd_entries=stable_entries_Mg_Ga_N,
-        inc_inf_value=True,
+        inc_inf_values=True,
     )
     assert len(fed.chempot_limits) == 4
 
@@ -72,7 +72,7 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
         defect_entries=def_ent_list,
         vbm=vbm,
         pd_entries=stable_entries_Mg_Ga_N,
-        inc_inf_value=False,
+        inc_inf_values=False,
     )
     assert len(fed.chempot_limits) == 2
 
@@ -100,6 +100,6 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
         defect_entries=def_ent_list,
         atomic_entries=atomic_entries,
         vbm=vbm,
-        inc_inf_value=False,
+        inc_inf_values=False,
     )
     assert len(fed.chempot_limits) == 2
