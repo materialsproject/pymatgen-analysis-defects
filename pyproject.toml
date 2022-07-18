@@ -43,7 +43,7 @@ docs = [
 
 phonons = ["phonopy>=1.10.8"]
 strict = [
-  "pymatgen@git+https://github.com/materialsproject/pymatgen.git",
+  "pymatgen@git+https://github.com/materialsproject/pymatgen.git@master",
   "dscribe==1.2.1",
 ]
 tests = [
