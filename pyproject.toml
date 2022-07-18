@@ -58,7 +58,7 @@ repository = "https://github.com/hackingmaterials/pymatgen-analysis-defects"
 
 [tool.setuptools.packages.find]
 exclude = ["tests"]
-where = ["pymatgen"]
+where = ["./"]
 
 [tool.versioningit.vcs]
 default-tag = "0.0.1"
