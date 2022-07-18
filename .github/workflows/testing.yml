@@ -62,6 +62,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -e .[strict]
+        pip install -e .[tests]
 
     - name: Test
       run: pytest --cov=pymatgen --cov-report=xml
@@ -71,3 +72,29 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
+
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install pandoc
+        run: sudo apt-get install pandoc
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          pip install -e .[strict]
+          pip install -e .[docs]
+      - name: Build
+        run: sphinx-build docs/source docs_build
+
+      - name: Deploy
+          uses: peaceiris/actions-gh-pages@v3
+          with:
+            deploy_key: ${{ secrets.GITHUB_TOKEN }}
+            publish_dir: ./docs_build
