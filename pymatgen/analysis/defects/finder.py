@@ -31,13 +31,15 @@ class DefectSiteFinder(MSONable):
         """Configure the behavior of the defect site finder.
 
         Args:
-            symprec (float): Symmetry tolerance parameter passed to SpacegroupAnalyzer
-            angle_tolerance (float): Angle tolerance parameter passed to SpacegroupAnalyzer
+            symprec (float): Symmetry tolerance parameter for SpacegroupAnalyzer
+            angle_tolerance (float): Angle tolerance parameter for SpacegroupAnalyzer
         """
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
 
-    def get_defect_fpos(self, defect_structure: Structure, base_structure: Structure) -> ArrayLike:
+    def get_defect_fpos(
+        self, defect_structure: Structure, base_structure: Structure
+    ) -> ArrayLike:
         """Get the position of a defect in the pristine structure.
 
         Args:
@@ -45,14 +47,17 @@ class DefectSiteFinder(MSONable):
             base_structure: Structure for the pristine cell
 
         Returns:
-            ArrayLike: Position of the defect in the pristine structure (in fractional coordinates)
+            ArrayLike: Position of the defect in the pristine structure
+            (in fractional coordinates)
         """
         if self._is_impurity(defect_structure, base_structure):
             return self.get_impurity_position(defect_structure, base_structure)
         else:
             return self.get_native_defect_position(defect_structure, base_structure)
 
-    def _is_impurity(self, defect_structure: Structure, base_structure: Structure) -> bool:
+    def _is_impurity(
+        self, defect_structure: Structure, base_structure: Structure
+    ) -> bool:
         """Check if the defect structure is an impurity.
 
         Args:
@@ -67,7 +72,9 @@ class DefectSiteFinder(MSONable):
         defect_species = {site.species_string for site in defect_structure}
         return len(defect_species - base_species) > 0
 
-    def get_native_defect_position(self, defect_structure: Structure, base_structure: Structure) -> ArrayLike:
+    def get_native_defect_position(
+        self, defect_structure: Structure, base_structure: Structure
+    ) -> ArrayLike:
         """Get the position of a native defect in the defect structure.
 
         Args:
@@ -75,16 +82,24 @@ class DefectSiteFinder(MSONable):
             base_structure: Pristine structure without the defect
 
         Returns:
-            ArrayLike: Position of the defect in the defect structure (in fractional coordinates)
+            ArrayLike: Position of the defect in the defect structure
+            (in fractional coordinates)
         """
-        distored_sites, distortions = list(zip(*self.get_most_distorted_sites(defect_structure, base_structure)))
+        distored_sites, distortions = list(
+            zip(*self.get_most_distorted_sites(defect_structure, base_structure))
+        )
         positions = [defect_structure[isite].frac_coords for isite in distored_sites]
-        return get_weighted_average_position(defect_structure.lattice, positions, distortions)
+        return get_weighted_average_position(
+            defect_structure.lattice, positions, distortions
+        )
 
-    def get_impurity_position(self, defect_structure: Structure, base_structure: Structure):
+    def get_impurity_position(
+        self, defect_structure: Structure, base_structure: Structure
+    ):
         """Get the position of an impurity defect.
 
-        Look at all sites with impurity atoms, and take the average of the positions of the sites.
+        Look at all sites with impurity atoms, and take the average of the positions of
+        the sites.
 
         Args:
             defect_structure: Relaxed structure containing the defect
@@ -95,8 +110,12 @@ class DefectSiteFinder(MSONable):
         """
         # get the pbc average position of all sites not in the base structure
         base_species = {site.species_string for site in base_structure}
-        impurity_sites = [*filter(lambda x: x.species_string not in base_species, defect_structure)]
-        return get_weighted_average_position(defect_structure.lattice, [s.frac_coords for s in impurity_sites])
+        impurity_sites = [
+            *filter(lambda x: x.species_string not in base_species, defect_structure)
+        ]
+        return get_weighted_average_position(
+            defect_structure.lattice, [s.frac_coords for s in impurity_sites]
+        )
 
     def get_most_distorted_sites(
         self, defect_structure: Structure, base_structure: Structure
@@ -105,7 +124,8 @@ class DefectSiteFinder(MSONable):
 
         Performs the following steps:
 
-        1. For each site in the defect structure, find the closest site in the pristine structure.
+        1. For each site in the defect structure, find the closest site in the
+            pristine structure.
         2. Then, compute a distortion field based on SOAP vectors.
         3. Filter the most distorted sites:
             - sort largest to smallest distortion
@@ -133,8 +153,8 @@ class DefectSiteFinder(MSONable):
             ) = best_match(v, pristine_groups)
             if v.species != best_m.species:
                 warnings.warn(
-                    "The species of a site in the distorted structure is different from the species of the "
-                    "closest pristine site."
+                    "The species of a site in the distorted structure is different "
+                    "from the species of the closest pristine site."
                 )
 
             res.append((i, np.abs(best_s - 1)))
@@ -147,7 +167,10 @@ class DefectSiteFinder(MSONable):
 
 # %%
 def get_site_groups(struct, symprec=0.01, angle_tolerance=5.0) -> List[SiteGroup]:
-    """Group the sites in the structure by symmetry and return a list of SiteGroup namedtuple.
+    """Group the sites in the structure by symmetry
+
+    Group the sites in the structure by symmetry and return a
+    list of ``SiteGroup`` namedtuples.
 
     Args:
         struct: Structure object to be analyzed
@@ -155,7 +178,8 @@ def get_site_groups(struct, symprec=0.01, angle_tolerance=5.0) -> List[SiteGroup
         angle_tolerance: Angle tolerance passed to SpacegroupAnalyzer
 
     Returns:
-        List[SiteGroup]: List of SiteGroup namedtuples representing groups of symmetrically equivalent sites
+        List[SiteGroup]: List of SiteGroup namedtuples representing groups of
+        symmetrically equivalent sites
 
     """
     sa = SpacegroupAnalyzer(struct, symprec=symprec, angle_tolerance=angle_tolerance)
@@ -164,7 +188,9 @@ def get_site_groups(struct, symprec=0.01, angle_tolerance=5.0) -> List[SiteGroup
     groups = sstruct.equivalent_indices
     soap_vec = get_soap_vec(struct)
     for g in groups:
-        sg = SiteGroup(species=sstruct[g[0]].species_string, similar_sites=g, vec=soap_vec[g[0]])
+        sg = SiteGroup(
+            species=sstruct[g[0]].species_string, similar_sites=g, vec=soap_vec[g[0]]
+        )
         site_groups.append(sg)
     return site_groups
 
@@ -176,7 +202,8 @@ def get_soap_vec(struct: Structure) -> NDArray:
         struct: Structure object to compute the SOAP vector for
 
     Returns:
-        NDArray: SOAP vector for each site in the structure, shape (n_sites, n_soap_features)
+        NDArray: SOAP vector for each site in the structure,
+            shape (n_sites, n_soap_features)
     """
     adaptor = AseAtomsAdaptor()
     species_ = [str(el) for el in struct.composition.elements]
@@ -207,8 +234,8 @@ def best_match(sv: SiteVec, sgs: List[SiteGroup]) -> Tuple[SiteGroup, float]:
 
     Args:
         sv: SiteVec namedtuples representing a site in the defect structure
-        sgs: List of SiteGroup namedtuples representing groups of symmetrically equivalent sites in the
-            pristine structure
+        sgs: List of SiteGroup namedtuples representing groups of
+        symmetrically equivalent sites in the pristine structure
 
     Returns:
         SiteGroup: The group that represents the best match for `sv`
@@ -230,20 +257,24 @@ def best_match(sv: SiteVec, sgs: List[SiteGroup]) -> Tuple[SiteGroup, float]:
 
 
 def _get_broundary(arr, n_max=16, n_skip=3):
-    """Assuming arr is sorted in reverse order, find the biggest value drop in arr[n_skip:n_max]."""
+    """
+    Assuming arr is sorted in reverse order,
+    find the biggest value drop in arr[n_skip:n_max].
+    """
     sub_arr = np.array(arr[n_skip:n_max])
     diffs = sub_arr[1:] - sub_arr[:-1]
     return np.argmin(diffs) + n_skip + 1
 
 
 def get_weighted_average_position(lattice, frac_positions, weights=None) -> NDArray:
-    """Get the weighted average position of a set of positions in fractional coordinates.
+    """Get the weighted average position of a set of positions in frac coordinates.
 
-    The algorithm starts at position with the highest weight, and gradually moves the average point
-    by finding the closest image of each additional position to the average point.
-    This can be used to find the center of mass of a group of sites in a molecule in CH3NH3PbI3
-    (Note: Since the average positions in periodic system is not unique, this algorithm only works if the collection
-    of positions is significantly smaller than the unit cell.)
+    The algorithm starts at position with the highest weight, and gradually moves
+    the average point by finding the closest image of each additional position to the
+    average point. This can be used to find the center of mass of a group of sites in a
+    molecule in CH3NH3PbI3 (Note: Since the average positions in periodic system is not
+    unique, this algorithm only works if the collection of positions is significantly
+    smaller than the unit cell.)
 
     Args:
         frac_positions (3xN array-like): The positions to average.

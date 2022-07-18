@@ -111,4 +111,3 @@ html_theme_options = {
     },
 }
 html_title = "pymatgen-analysis-defects"
-
