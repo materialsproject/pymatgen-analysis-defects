@@ -1,9 +1,20 @@
-Welcome to pymatgen-analysis-defects's documentation!
-=====================================================
+.. toctree::
+   :caption: Getting Started
+   :hidden:
 
-Some words.
+   Introduction <self>
 
 .. toctree::
-   :maxdepth: 1
+   :caption: Reference
+   :maxdepth: -1
+   :hidden:
 
-   modules
+   API <reference/root>
+   genindex
+
+============
+Introduction
+============
+
+.. mdinclude:: ../../README.rst
+   :start-line: 7
