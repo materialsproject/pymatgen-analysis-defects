@@ -46,7 +46,7 @@ def get_correction(
     q_model: Optional[QModel] = None,
     step: float = 1e-4,
 ):
-    """Gets the Freysoldt correcttion for a defect entry.
+    """Gets the Freysoldt correction for a defect entry.
 
     Get the Freysoldt correction for a defect. The result is given
     as a dictionary with the following keys:
@@ -77,10 +77,8 @@ def get_correction(
             Step size for numerical integration.
 
     Returns:
-        dict:
-            Freysoldt correction values as a dictionary
-        dict:
-            Plot data for planar average electrostatic potential.
+        dict: Freysoldt correction values as a dictionary
+        dict: Plot data for planar average electrostatic potential.
     """
     # dielectric has to be a float
     if isinstance(dielectric, (int, float)):
