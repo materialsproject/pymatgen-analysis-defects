@@ -70,3 +70,8 @@ repos:
     language: python
     types: [text]
     args: [--ignore-words-list, 'titel,statics,ba,nd,te']
+- repo: https://github.com/kynan/nbstripout
+  rev: 0.3.9
+  hooks:
+    - id: nbstripout
+      args: ["--keep-output"]

@@ -58,6 +58,23 @@ exclude_patterns = ["Thumbs.db", ".DS_Store", "test*.py"]
 # The suffix(es) of source filenames.
 source_suffix = [".rst", ".md"]
 
+# Ensure env.metadata[env.docname]['nbsphinx-link-target'] points relative to repo root:
+nbsphinx_link_target_root = os.path.join(__file__, "..", "..")
+
+nbsphinx_prolog = r"""
+{% if env.metadata[env.docname]['nbsphinx-link-target'] %}
+{% set docpath = env.metadata[env.docname]['nbsphinx-link-target'] %}
+{% else %}
+{% set docpath = env.doc2path(env.docname, base='docs/source/') %}
+{% endif %}
+.. only:: html
+    .. role:: raw-html(raw)
+        :format: html
+    .. nbinfo::
+        This page is available as a Jupyter notebook: `{{ docpath }}`__.
+    __ https://github.com/materialsproject/jobflow/tree/main/{{ docpath }}"""
+
+
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
