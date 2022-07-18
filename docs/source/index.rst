@@ -10,11 +10,13 @@
    :hidden:
 
    API <reference/root>
+   Tutorials <tutorials>
    genindex
 
-============
 Introduction
 ============
 
 .. mdinclude:: ../../README.rst
    :start-line: 7
+
+
