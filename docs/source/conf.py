@@ -31,47 +31,84 @@ author = "Jimmy-Xuan Shen"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
-    "autoapi.extension",
-    "sphinx_autodoc_typehints",
     "sphinx.ext.viewcode",
-    "sphinx.ext.autosectionlabel",
+    "sphinx_autodoc_typehints",
+    "m2r2",
+    "nbsphinx",
+    "nbsphinx_link",
 ]
 
-# Extension settings
-napoleon_google_docstring = True
-napoleon_include_init_with_doc = False
-napoleon_include_private_with_doc = False
-napoleon_include_special_with_doc = False
-napoleon_use_admonition_for_examples = False
-napoleon_use_admonition_for_notes = False
-napoleon_use_admonition_for_references = False
-napoleon_use_ivar = False
-napoleon_use_param = True
-napoleon_use_rtype = True
-autoapi_dirs = ["../../pymatgen"]
-autoapi_ignore = [
-    "*_version.py",
-]
-autoapi_options = ["members", "undoc-members", "show-inheritance"]
-autoapi_add_toctree_entry = False
-autoapi_python_class_content = "class"
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = ["Thumbs.db", ".DS_Store", "test*.py"]
 
+# use type hints
+# autodoc_typehints = "description"
+# autoclass_content = "class"
+
+# better napoleon support
+# napoleon_use_param = True
+# napoleon_use_rtype = True
+# napoleon_use_ivar = True
+
+# The suffix(es) of source filenames.
+source_suffix = [".rst", ".md"]
+
+# List of patterns, relative to source directory, that match files and
+# directories to ignore when looking for source files.
+# This pattern also affects html_static_path and html_extra_path.
+exclude_patterns = []
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
+
+# hide sphinx footer
+html_show_sphinx = False
+html_show_sourcelink = False
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
+fonts = [
+    "Lato",
+    "-apple-system",
+    "BlinkMacSystemFont",
+    "Segoe UI",
+    "Helvetica",
+    "Arial",
+    "sans-serif",
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+]
 html_static_path = ["_static"]
+html_css_files = ["custom.css"]
+html_theme_options = {
+    "light_css_variables": {
+        "admonition-font-size": "92%",
+        "admonition-title-font-size": "92%",
+        "font-stack": ",".join(fonts),
+        "font-size--small": "92%",
+        "font-size--small--2": "87.5%",
+        "font-size--small--3": "87.5%",
+        "font-size--small--4": "87.5%",
+    },
+    "dark_css_variables": {
+        "admonition-font-size": "92%",
+        "admonition-title-font-size": "92%",
+        "font-stack": ",".join(fonts),
+        "font-size--small": "92%",
+        "font-size--small--2": "87.5%",
+        "font-size--small--3": "87.5%",
+        "font-size--small--4": "87.5%",
+    },
+}
+html_title = "pymatgen-analysis-defects"
+
