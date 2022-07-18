@@ -2,7 +2,8 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Index" href="../genindex.html" /><link rel="prev" title="pymatgen.analysis.defects.thermo" href="thermo.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Index" href="../genindex.html" /><link rel="prev" title="pymatgen.analysis.defects.thermo" href="thermo.html" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
         <title>pymatgen.analysis.defects.utils - pymatgen-analysis-defects</title>
@@ -225,7 +226,7 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="module-pymatgen.analysis.defects.utils">
+          <section id="module-pymatgen.analysis.defects.utils">
 <span id="pymatgen-analysis-defects-utils"></span><h1>pymatgen.analysis.defects.utils<a class="headerlink" href="#module-pymatgen.analysis.defects.utils" title="Permalink to this heading">#</a></h1>
 <p>Utilities for defects module.</p>
 <dl class="py class">
@@ -245,10 +246,10 @@ If defect charge is more delocalized, exponential tail is suggested.</p>
 <dd><p>Reciprocal space model charge value.</p>
 <p>Reciprocal space model charge value, for input squared reciprocal vector.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>g2</strong> – Square of reciprocal vector</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Charge density at the reciprocal vector magnitude</p>
 </dd>
 </dl>
@@ -275,10 +276,10 @@ rho_rec(g-&gt;0) -&gt; 1 + rho_rec_limit0 * g^2</p>
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">eV_to_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#eV_to_k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.eV_to_k" title="Permalink to this definition">#</a></dt>
 <dd><p>Convert energy to reciprocal vector magnitude k via hbar*k^2/2m.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>a</strong> – Energy in eV.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>(double) Reciprocal vector magnitude (units of 1/Bohr).</p>
 </dd>
 </dl>
@@ -291,7 +292,7 @@ rho_rec(g-&gt;0) -&gt; 1 + rho_rec_limit0 * g^2</p>
 <p>Generate reciprocal vector magnitudes within the cutoff along the specified
 lattice vectors.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>a1</strong> – Lattice vector a (in Bohrs)</p></li>
 <li><p><strong>a2</strong> – Lattice vector b (in Bohrs)</p></li>
@@ -299,7 +300,7 @@ lattice vectors.</p>
 <li><p><strong>encut</strong> – Reciprocal vector energy cutoff</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>[[g1^2], [g2^2], …] Square of reciprocal vectors (1/Bohr)^2
 determined by a1, a2, a3 and whose magntidue is less than gcut^2.</p>
 </dd>
@@ -311,7 +312,7 @@ determined by a1, a2, a3 and whose magntidue is less than gcut^2.</p>
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">genrecip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encut</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#genrecip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.genrecip" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate reciprocal lattice vectors within the energy cutoff.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>a1</strong> – Lattice vector a (in Bohrs)</p></li>
 <li><p><strong>a2</strong> – Lattice vector b (in Bohrs)</p></li>
@@ -319,13 +320,13 @@ determined by a1, a2, a3 and whose magntidue is less than gcut^2.</p>
 <li><p><strong>encut</strong> – energy cut off in eV</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>reciprocal lattice vectors with energy less than encut</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
         </article>
       </div>

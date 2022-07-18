@@ -2,7 +2,8 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="pymatgen.analysis.defects.utils" href="utils.html" /><link rel="prev" title="pymatgen.analysis.defects.generators" href="generators.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="pymatgen.analysis.defects.utils" href="utils.html" /><link rel="prev" title="pymatgen.analysis.defects.generators" href="generators.html" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
         <title>pymatgen.analysis.defects.thermo - pymatgen-analysis-defects</title>
@@ -225,7 +226,7 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="module-pymatgen.analysis.defects.thermo">
+          <section id="module-pymatgen.analysis.defects.thermo">
 <span id="pymatgen-analysis-defects-thermo"></span><h1>pymatgen.analysis.defects.thermo<a class="headerlink" href="#module-pymatgen.analysis.defects.thermo" title="Permalink to this heading">#</a></h1>
 <p>Classes and methods related to thermodynamics and energy.</p>
 <dl class="py class">
@@ -238,7 +239,7 @@
 <span class="sig-name descname"><span class="pre">defect</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry.defect" title="Permalink to this definition">#</a></dt>
 <dd><p>The defect object used to generate the supercell.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="core.html#pymatgen.analysis.defects.core.Defect" title="pymatgen.analysis.defects.core.Defect">Defect</a></p>
 </dd>
 </dl>
@@ -249,7 +250,7 @@
 <span class="sig-name descname"><span class="pre">charge_state</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry.charge_state" title="Permalink to this definition">#</a></dt>
 <dd><p>The charge state of the defect.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
 </dd>
 </dl>
@@ -260,7 +261,7 @@
 <span class="sig-name descname"><span class="pre">sc_entry</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry.sc_entry" title="Permalink to this definition">#</a></dt>
 <dd><p>The ComputedStructureEntry for the supercell.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>ComputedStructureEntry</p>
 </dd>
 </dl>
@@ -271,7 +272,7 @@
 <span class="sig-name descname"><span class="pre">dielectric</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry.dielectric" title="Permalink to this definition">#</a></dt>
 <dd><p>The dielectric tensor or constant for the bulk material.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float | NDArray</p>
 </dd>
 </dl>
@@ -284,7 +285,7 @@
 If None, structures attributes of the locpot file will be used to
 automatically determine the defect location.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Optional[ArrayLike]</p>
 </dd>
 </dl>
@@ -295,7 +296,7 @@ automatically determine the defect location.</p>
 <span class="sig-name descname"><span class="pre">corrections</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry.corrections" title="Permalink to this definition">#</a></dt>
 <dd><p>A dictionary of corrections to the energy.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Optional[Dict[str, float]]</p>
 </dd>
 </dl>
@@ -314,18 +315,18 @@ automatically determine the defect location.</p>
 <p>Updates the corrections dictionary with the Freysoldt correction
 and returns the planar averaged potential data for plotting.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>defect_locpot</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Locpot</span></code>) – The Locpot object for the defect supercell.</p></li>
 <li><p><strong>bulk_locpot</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Locpot</span></code>) – The Locpot object for the bulk supercell.</p></li>
 <li><p><strong>kwargs</strong> – Additional keyword arguments for the get_correction method.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The plotting data to analyze the planar averaged electrostatic potential
 in the three periodic lattice directions.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
@@ -343,7 +344,7 @@ in the three periodic lattice directions.</p>
 <span class="sig-name descname"><span class="pre">bulk_entry</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.bulk_entry" title="Permalink to this definition">#</a></dt>
 <dd><p>The bulk computed entry to get the total energy of the bulk supercell.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pymatgen.entries.computed_entries.ComputedStructureEntry</p>
 </dd>
 </dl>
@@ -355,7 +356,7 @@ in the three periodic lattice directions.</p>
 <dd><p>The list of defect entries for the different charge states.
 The finite-size correction should already be applied to these.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List[<a class="reference internal" href="#pymatgen.analysis.defects.thermo.DefectEntry" title="pymatgen.analysis.defects.thermo.DefectEntry">pymatgen.analysis.defects.thermo.DefectEntry</a>]</p>
 </dd>
 </dl>
@@ -368,7 +369,7 @@ The finite-size correction should already be applied to these.</p>
 potential diagram. They will be used to determine the stability region
 of the bulk crystal.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list[pymatgen.entries.computed_entries.ComputedEntry]</p>
 </dd>
 </dl>
@@ -379,7 +380,7 @@ of the bulk crystal.</p>
 <span class="sig-name descname"><span class="pre">vbm</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.vbm" title="Permalink to this definition">#</a></dt>
 <dd><p>The VBM of the bulk crystal.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -390,7 +391,7 @@ of the bulk crystal.</p>
 <span class="sig-name descname"><span class="pre">band_gap</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.band_gap" title="Permalink to this definition">#</a></dt>
 <dd><p>The band gap of the bulk crystal.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Optional[float]</p>
 </dd>
 </dl>
@@ -408,7 +409,7 @@ A artificial value is needed to help the half-space intersection algorithm.
 This can be justified since these tend to be the substitutional elements
 which should not have very negative chemical potential.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
@@ -428,17 +429,17 @@ which should not have very negative chemical potential.</p>
 The points at the VBM and CBM are given by the first and last
 point respectively.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>chempot_dict</strong> – A dictionary of the chemical potentials (referenced to the elements)
 representations a vertex of the stability region of the chemical
 potential diagram.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Transition levels and the formation energy at each transition level.
 The first and last points are the intercepts with the
 VBM and CBM respectively.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list[tuple[float, float]]</p>
 </dd>
 </dl>
@@ -455,7 +456,7 @@ As such, we can use the enthalpy of formation of from any phase diagram
 (e.g. the ones that include experimental corrections) to determine the
 formation energy.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>bulk_entry</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ComputedEntry</span></code>) – The bulk computed entry to get the total energy of the bulk supercell.</p></li>
 <li><p><strong>defect_entries</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#pymatgen.analysis.defects.thermo.DefectEntry" title="pymatgen.analysis.defects.thermo.DefectEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefectEntry</span></code></a>]) – The list of defect entries for the different charge states.
@@ -470,10 +471,10 @@ of the bulk crystal.</p></li>
 the chemical potential limits.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The FormationEnergyDiagram object.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram" title="pymatgen.analysis.defects.thermo.FormationEnergyDiagram">FormationEnergyDiagram</a></p>
 </dd>
 </dl>
@@ -492,7 +493,7 @@ As such, we can use the enthalpy of formation of from any phase diagram
 (e.g. the ones that include experimental corrections) to determine the
 formation energy.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>bulk_entry</strong> (<em>ComputedEntry</em>) – The bulk computed entry to get the total energy of the bulk supercell.</p></li>
 <li><p><strong>defect_entries</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pymatgen.analysis.defects.thermo.DefectEntry" title="pymatgen.analysis.defects.thermo.DefectEntry"><em>DefectEntry</em></a><em>]</em>) – The list of defect entries for the different charge states.
@@ -508,10 +509,10 @@ If None, the key from your <cite>~/.pmgrc.yaml</cite> file will be used.</p></li
 the chemical potential limits.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The FormationEnergyDiagram object.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram" title="pymatgen.analysis.defects.thermo.FormationEnergyDiagram">FormationEnergyDiagram</a></p>
 </dd>
 </dl>
@@ -529,16 +530,16 @@ but with energy just below the convex hull and return the updated phase diagram.
 so we are effectively only using the energy from the phase diagram and ignoring
 the energy of supplied entry.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>pd</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PhaseDiagram</span></code>) – Phase diagram.</p></li>
 <li><p><strong>entry</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ComputedEntry</span></code>) – entry to be added</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Modified Phase diagram.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>PhaseDiagram</p>
 </dd>
 </dl>
@@ -553,13 +554,13 @@ given by the upper convex hull of the points (m, -b) as shown in:
 <a class="reference external" href="https://www.cs.umd.edu/class/spring2020/cmsc754/Lects/lect06-duality.pdf">https://www.cs.umd.edu/class/spring2020/cmsc754/Lects/lect06-duality.pdf</a>
 Note: The lines are returned with decreasing slope.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>lines</strong> – (m, b) format for each line</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List lines that make up the lower envelope.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List[List[float]]</p>
 </dd>
 </dl>
@@ -573,18 +574,18 @@ Note: The lines are returned with decreasing slope.</p>
 A “transition” point is a point where adjacent lines in the list intersect.
 i.e. intersection points (x_i, y_i) where line i intersects line i+1</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>lines</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – (m, b) format for each line</p></li>
 <li><p><strong>x_min</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – minimum x value</p></li>
 <li><p><strong>x_max</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – maximum x value</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List of intersection points, including the boundary points at
 x_min and x_max.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List[List[float]]</p>
 </dd>
 </dl>
@@ -595,19 +596,19 @@ x_min and x_max.</p>
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.thermo.</span></span><span class="sig-name descname"><span class="pre">get_upper_hull</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#get_upper_hull"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.get_upper_hull" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the upper hull of a set of points in 2D.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>points</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]]]], <code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>]]], <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>]]]], <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>]]]]], <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>]]], <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>]]]], <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>]]]]]]) – List of points in 2D.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>points</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">_NestedSequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_NestedSequence</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>]]]) – List of points in 2D.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Vertices in the upper hull given from right to left.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List[(float, float)]</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
         </article>
       </div>

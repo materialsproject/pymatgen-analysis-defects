@@ -2,7 +2,8 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="pymatgen.analysis.defects.ccd" href="ccd.html" /><link rel="prev" title="pymatgen.analysis.defects" href="root.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="pymatgen.analysis.defects.ccd" href="ccd.html" /><link rel="prev" title="pymatgen.analysis.defects" href="root.html" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
         <title>pymatgen.analysis.defects.core - pymatgen-analysis-defects</title>
@@ -225,7 +226,7 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="module-pymatgen.analysis.defects.core">
+          <section id="module-pymatgen.analysis.defects.core">
 <span id="pymatgen-analysis-defects-core"></span><h1>pymatgen.analysis.defects.core<a class="headerlink" href="#module-pymatgen.analysis.defects.core" title="Permalink to this heading">#</a></h1>
 <p>Classes representing defects.</p>
 <dl class="py class">
@@ -238,7 +239,7 @@
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">defect_structure</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Structure</span></em><a class="headerlink" href="#pymatgen.analysis.defects.core.Defect.defect_structure" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the unit-cell structure representing the defect.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code></p>
 </dd>
 </dl>
@@ -249,10 +250,10 @@
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_changes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Element</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pymatgen.analysis.defects.core.Defect.element_changes" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the species changes of the defect.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The species changes of the defect.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dict[Element, int]</p>
 </dd>
 </dl>
@@ -263,7 +264,7 @@
 <span class="sig-name descname"><span class="pre">get_charge_states</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#Defect.get_charge_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.Defect.get_charge_states" title="Permalink to this definition">#</a></dt>
 <dd><p>Potential charge states for a given oxidation state.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of possible charge states</p>
 </dd>
 </dl>
@@ -274,10 +275,10 @@
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_multiplicity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#Defect.get_multiplicity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.Defect.get_multiplicity" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the multiplicity of the defect.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The multiplicity of the defect.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>int</p>
 </dd>
 </dl>
@@ -288,10 +289,10 @@
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_oxi_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#Defect.get_oxi_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.Defect.get_oxi_state" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the oxidation state of the defect.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The oxidation state of the defect.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>float</p>
 </dd>
 </dl>
@@ -302,7 +303,7 @@
 <span class="sig-name descname"><span class="pre">get_supercell_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sc_mat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dummy_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#Defect.get_supercell_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.Defect.get_supercell_structure" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate the supercell for a defect.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>defect</strong> – defect object</p></li>
 <li><p><strong>sc_mat</strong> (<em>np.ndarray</em><em> | </em><em>None</em>) – supercell matrix</p></li>
@@ -311,10 +312,10 @@
 <li><p><strong>kwargs</strong> – kwargs for <cite>CubicSupercellTransformation</cite></p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>defect object</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>defect</p>
 </dd>
 </dl>
@@ -325,7 +326,7 @@
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pymatgen.analysis.defects.core.Defect.name" title="Permalink to this definition">#</a></dt>
 <dd><p>Name of the defect.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
 </dd>
 </dl>
@@ -338,7 +339,7 @@
 <p>This is required for concentration analysis and confirms that defect_site is a
 site in bulk_structure.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">SymmetrizedStructure</span></code></p>
 </dd>
 </dl>
@@ -362,7 +363,7 @@ site in bulk_structure.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">defect_site_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pymatgen.analysis.defects.core.Substitution.defect_site_index" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the index of the defect in the structure.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
 </dd>
 </dl>
@@ -379,10 +380,10 @@ site in bulk_structure.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_changes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Element</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pymatgen.analysis.defects.core.Substitution.element_changes" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the species changes of the substitution defect.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The species changes of the defect.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dict[Element, int]</p>
 </dd>
 </dl>
@@ -395,7 +396,7 @@ site in bulk_structure.</p>
 <p>This is required for concentration analysis and confirms that defect_site is
 a site in bulk_structure.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
 </dd>
 </dl>
@@ -406,10 +407,10 @@ a site in bulk_structure.</p>
 <span class="sig-name descname"><span class="pre">get_oxi_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#Substitution.get_oxi_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.Substitution.get_oxi_state" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the oxidation state of the defect.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The oxidation state of the defect.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>float</p>
 </dd>
 </dl>
@@ -420,7 +421,7 @@ a site in bulk_structure.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pymatgen.analysis.defects.core.Substitution.name" title="Permalink to this definition">#</a></dt>
 <dd><p>Name of the defect.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
 </dd>
 </dl>
@@ -444,7 +445,7 @@ a site in bulk_structure.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">defect_site_index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pymatgen.analysis.defects.core.Vacancy.defect_site_index" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the index of the defect in the structure.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
 </dd>
 </dl>
@@ -461,10 +462,10 @@ a site in bulk_structure.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_changes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Element</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pymatgen.analysis.defects.core.Vacancy.element_changes" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the species changes of the vacancy defect.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The species changes of the defect.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dict[Element, int]</p>
 </dd>
 </dl>
@@ -477,7 +478,7 @@ a site in bulk_structure.</p>
 <p>This is required for concentration analysis and confirms that defect_site is
 a site in bulk_structure.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
 </dd>
 </dl>
@@ -488,10 +489,10 @@ a site in bulk_structure.</p>
 <span class="sig-name descname"><span class="pre">get_oxi_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#Vacancy.get_oxi_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.Vacancy.get_oxi_state" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the oxidation state of the defect.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The oxidation state of the defect.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>float</p>
 </dd>
 </dl>
@@ -502,7 +503,7 @@ a site in bulk_structure.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pymatgen.analysis.defects.core.Vacancy.name" title="Permalink to this definition">#</a></dt>
 <dd><p>Name of the defect.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
 </dd>
 </dl>
@@ -515,13 +516,13 @@ a site in bulk_structure.</p>
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.core.</span></span><span class="sig-name descname"><span class="pre">get_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sp_el</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#get_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.get_element" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the element from a species or element.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Element</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
         </article>
       </div>

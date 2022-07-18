@@ -2,7 +2,8 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="pymatgen.analysis.defects.generators" href="generators.html" /><link rel="prev" title="pymatgen.analysis.defects.corrections" href="corrections.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="pymatgen.analysis.defects.generators" href="generators.html" /><link rel="prev" title="pymatgen.analysis.defects.corrections" href="corrections.html" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
         <title>pymatgen.analysis.defects.finder - pymatgen-analysis-defects</title>
@@ -225,7 +226,7 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="module-pymatgen.analysis.defects.finder">
+          <section id="module-pymatgen.analysis.defects.finder">
 <span id="pymatgen-analysis-defects-finder"></span><h1>pymatgen.analysis.defects.finder<a class="headerlink" href="#module-pymatgen.analysis.defects.finder" title="Permalink to this heading">#</a></h1>
 <p>Defect position identification without prior knowledge.</p>
 <dl class="py class">
@@ -238,17 +239,17 @@
 <span class="sig-name descname"><span class="pre">get_defect_fpos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defect_structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_structure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#DefectSiteFinder.get_defect_fpos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.DefectSiteFinder.get_defect_fpos" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the position of a defect in the pristine structure.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>defect_structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – Relaxed structure containing the defect</p></li>
 <li><p><strong>base_structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – Structure for the pristine cell</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Position of the defect in the pristine structure
 (in fractional coordinates)</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>ArrayLike</p>
 </dd>
 </dl>
@@ -261,16 +262,16 @@
 <p>Look at all sites with impurity atoms, and take the average of the positions of
 the sites.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>defect_structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – Relaxed structure containing the defect</p></li>
 <li><p><strong>base_structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – Pristine structure without the defect</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Position of the defect in the defect structure</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>ArrayLike</p>
 </dd>
 </dl>
@@ -299,16 +300,16 @@ the sites.</p>
 </li>
 </ol>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>defect_structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – Relaxed structure containing the defect</p></li>
 <li><p><strong>base_structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – Structure for the pristine cell</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List of (site index, distortion) pairs</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List[Tuple[int, float]]</p>
 </dd>
 </dl>
@@ -319,17 +320,17 @@ the sites.</p>
 <span class="sig-name descname"><span class="pre">get_native_defect_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defect_structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_structure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#DefectSiteFinder.get_native_defect_position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.DefectSiteFinder.get_native_defect_position" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the position of a native defect in the defect structure.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>defect_structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – Relaxed structure containing the defect</p></li>
 <li><p><strong>base_structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – Pristine structure without the defect</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Position of the defect in the defect structure
 (in fractional coordinates)</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>ArrayLike</p>
 </dd>
 </dl>
@@ -390,18 +391,18 @@ the sites.</p>
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">best_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#best_match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.best_match" title="Permalink to this definition">#</a></dt>
 <dd><p>Find the best match for a site in the defect structure.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sv</strong> (<a class="reference internal" href="#pymatgen.analysis.defects.finder.SiteVec" title="pymatgen.analysis.defects.finder.SiteVec"><code class="xref py py-class docutils literal notranslate"><span class="pre">SiteVec</span></code></a>) – SiteVec namedtuples representing a site in the defect structure</p></li>
 <li><p><strong>sgs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#pymatgen.analysis.defects.finder.SiteGroup" title="pymatgen.analysis.defects.finder.SiteGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SiteGroup</span></code></a>]) – List of SiteGroup namedtuples representing groups of</p></li>
 <li><p><strong>structure</strong> (<em>symmetrically equivalent sites in the pristine</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The group that represents the best match for <cite>sv</cite>
 float: The cosine similarity between <cite>sv</cite> and the best match</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pymatgen.analysis.defects.finder.SiteGroup" title="pymatgen.analysis.defects.finder.SiteGroup">SiteGroup</a></p>
 </dd>
 </dl>
@@ -412,7 +413,7 @@ float: The cosine similarity between <cite>sv</cite> and the best match</p>
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">cosine_similarity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#cosine_similarity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.cosine_similarity" title="Permalink to this definition">#</a></dt>
 <dd><p>Cosine similarity between two vectors.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
 </dd>
 </dl>
@@ -425,18 +426,18 @@ float: The cosine similarity between <cite>sv</cite> and the best match</p>
 <p>Group the sites in the structure by symmetry and return a
 list of <code class="docutils literal notranslate"><span class="pre">SiteGroup</span></code> namedtuples.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>struct</strong> – Structure object to be analyzed</p></li>
 <li><p><strong>symprec</strong> – Symmetry precision passed to SpacegroupAnalyzer</p></li>
 <li><p><strong>angle_tolerance</strong> – Angle tolerance passed to SpacegroupAnalyzer</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List of SiteGroup namedtuples representing groups of
 symmetrically equivalent sites</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List[<a class="reference internal" href="#pymatgen.analysis.defects.finder.SiteGroup" title="pymatgen.analysis.defects.finder.SiteGroup">SiteGroup</a>]</p>
 </dd>
 </dl>
@@ -453,17 +454,17 @@ symmetrically equivalent sites</p>
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">get_soap_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">struct</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#get_soap_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.get_soap_vec" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the SOAP vector for each site in the structure.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>struct</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – Structure object to compute the SOAP vector for</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><dl class="simple">
 <dt>SOAP vector for each site in the structure,</dt><dd><p>shape (n_sites, n_soap_features)</p>
 </dd>
 </dl>
 </p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>NDArray</p>
 </dd>
 </dl>
@@ -480,22 +481,22 @@ molecule in CH3NH3PbI3 (Note: Since the average positions in periodic system is 
 unique, this algorithm only works if the collection of positions is significantly
 smaller than the unit cell.)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>frac_positions</strong> (<em>3xN array-like</em>) – The positions to average.</p></li>
 <li><p><strong>weights</strong> (<em>1xN array-like</em>) – The weights of the positions.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>NDArray</strong></p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(3x1 array): The weighted average position in fractional coordinates.</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
         </article>
       </div>
