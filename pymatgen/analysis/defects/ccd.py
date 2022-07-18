@@ -27,6 +27,8 @@ EV2J = const.e  # 1 eV in Joules
 AMU2KG = const.physical_constants["atomic mass constant"][0]
 ANGS2M = 1e-10  # angstrom in meters
 
+__all__ = ["ConfigurationCoordinateDiagram", "get_dQ"]
+
 
 @dataclass
 class ConfigurationCoordinateDiagram(MSONable):
@@ -35,18 +37,21 @@ class ConfigurationCoordinateDiagram(MSONable):
     Based on the NONRAD code:
         M. E. Turiansky et al.: Comput. Phys. Commun. 267, 108056 (2021).
 
-    Since configuration coordinate diagrams always represent some kind of a process in a defect.
-    We will call one state `gs` for ground state and another state `es` for excited state.
-    The ground state is always lower in energy than the excited state.
+    Since configuration coordinate diagrams always represent some kind of a process
+    in a defect. We will call one state `gs` for ground state and another state `es`
+    for excited state.  The ground state is always lower in energy than the excited
+    state.
 
     Attributes:
-        charge_gs (int): The charge of the ground state.
         charge_es (int): The charge of the excited state.
         dQ (float): The configurational difference between the relaxed structures of the
             ground state and the excited state.
-        dE (float): The energy difference between the ground state and the excited state.
-        Q_gs (ArrayLike): The list of the configurational coordinates of the ground state.
-        Q_es (ArrayLike): The list of the configurational coordinates of the excited state.
+        dE (float): The energy difference between the ground state and the
+            excited state.
+        Q_gs (ArrayLike): The list of the configurational coordinates of the
+            ground state.
+        Q_es (ArrayLike): The list of the configurational coordinates of the
+            excited state.
         energies_gs (ArrayLike): The list of the energies of the ground state.
         energies_es (ArrayLike): The list of the energies of the excited state.
         omega_gs (float): The frequency of the harmonic oscillator of the ground state.
@@ -54,6 +59,8 @@ class ConfigurationCoordinateDiagram(MSONable):
     """
 
     charge_gs: int
+    """The charge of the ground state."""
+
     charge_es: int
     # distortions in units of [amu^{1/2} Angstrom]
     dQ: float
@@ -123,7 +130,7 @@ class ConfigurationCoordinateDiagram(MSONable):
 
 
 def get_dQ(ground: Structure, excited: Structure) -> float:
-    """Calculate dQ from the initial and final structures.
+    """Calculate configuration coordinate difference.
 
     Args:
         ground : pymatgen structure corresponding to the ground (final) state
@@ -166,7 +173,9 @@ def _get_omega(
     return HBAR * popt[0] * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG))
 
 
-def _fit_parabola(Q: ArrayLike, energy: ArrayLike, Q0: float, E0: float) -> Tuple[float, float, float]:
+def _fit_parabola(
+    Q: ArrayLike, energy: ArrayLike, Q0: float, E0: float
+) -> Tuple[float, float, float]:
     """Fit the parabola to the data."""
 
     def f(Q, omega):

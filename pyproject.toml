@@ -65,12 +65,12 @@ method = "git"
 profile = "black"
 
 [tool.black]
-line-length = 120
+line-length = 88
 
 [tool.flake8]
 extend-ignore = "E203, W503, E501, F401, RST21"
-max-line-length = 120
-max-doc-length = 120
+max-line-length = 88
+max-doc-length = 88
 min-python-version = "3.8.0"
 rst-roles = "class, func, ref, obj"
 select = "C, E, F, W, B, B950"
