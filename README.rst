@@ -1,6 +1,10 @@
 pymatgen-analysis-defects
 =========================
 
+
+
+
+
 |testing| |codecov|
 
 📄 `Full Documentation <https://materialsproject.github.io/pymatgen-analysis-defects/>`_
