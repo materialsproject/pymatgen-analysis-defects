@@ -9,7 +9,7 @@ pymatgen-analysis-defects
 This package is a extension to ``pymatgen`` for performing defect analysis.
 The package is designed to work with VASP inputs and output files and is meant
 to be used as a namespace package extension to the main ``pymatgen`` library.
-The new code has been redesigned to work closely with ``atomate2``.  While the the automation
+The new module has been redesigned to work closely with ``atomate2``.  While the the automation
 frameworks is not required for this code to be useful, users are strongly encouraged to
 to adopt the ``atomate2`` framework as it contains codified "best practices" for running defect calculations
 as well as orchestrating the running of calculations and storing the results.
