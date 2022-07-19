@@ -156,7 +156,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -224,7 +224,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -488,23 +488,36 @@ div.rendered_html tbody tr:hover {
 </style>
 <section id="Quick-Start">
 <h1>Quick Start<a class="headerlink" href="#Quick-Start" title="Permalink to this heading">#</a></h1>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">test</span>
+<section id="Installation">
+<h2>Installation<a class="headerlink" href="#Installation" title="Permalink to this heading">#</a></h2>
+<p>The package can be installed from PyPI using <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pymatgen-analysis-defect</span></code>.</p>
+<p>Once installed, the different modules can be imported via the <code class="docutils literal notranslate"><span class="pre">pymatgen.analysis.defects</span></code> namespace.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.analysis.defects</span> <span class="kn">import</span> <span class="n">core</span><span class="p">,</span> <span class="n">ccd</span><span class="p">,</span> <span class="n">finder</span>
 </pre></div>
 </div>
-<p>The definition of a defect</p>
+<p>To ensure that the namespace is installed properly run</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.core</span> <span class="kn">import</span> <span class="n">Substitution</span><span class="p">,</span> <span class="vm">__file__</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.core</span> <span class="kn">import</span> <span class="vm">__file__</span>
 </pre></div>
 </div>
 </div>
+<p>and look at the <code class="docutils literal notranslate"><span class="pre">__file__</span></code> variable to make sure that it is accessing the code from <code class="docutils literal notranslate"><span class="pre">pymatgen-analysis-defect</span></code> and not <code class="docutils literal notranslate"><span class="pre">pymatgen</span></code>.</p>
+</section>
+<section id="Definition-of-a-defect">
+<h2>Definition of a defect<a class="headerlink" href="#Definition-of-a-defect" title="Permalink to this heading">#</a></h2>
+<p>Our code defines defects using a combination of bulk structure and sites. Since the bulk primitive structure is, in principle, unique up to arbitrary translations, equivalence of defects can be now easily checked using <code class="docutils literal notranslate"><span class="pre">StructureMatcher</span></code>.</p>
+<p>Below we show how you can create a basic substitutional defect from a <code class="docutils literal notranslate"><span class="pre">pymatgen.core.Structure</span></code> object by replacing one of the Ga atoms in GaN with Mg.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.core</span> <span class="kn">import</span> <span class="n">Substitution</span>
+<span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">PeriodicSite</span><span class="p">,</span> <span class="n">Species</span>
+<span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../tests/test_files&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -512,7 +525,13 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;JJ&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gan_struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;GaN.vasp&quot;</span><span class="p">)</span>
+<span class="c1"># make a substitution site</span>
+<span class="n">ga_site</span> <span class="o">=</span> <span class="n">gan_struct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">mg_site</span> <span class="o">=</span> <span class="n">PeriodicSite</span><span class="p">(</span><span class="n">Species</span><span class="p">(</span><span class="s2">&quot;Mg&quot;</span><span class="p">),</span> <span class="n">ga_site</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">,</span> <span class="n">gan_struct</span><span class="o">.</span><span class="n">lattice</span><span class="p">)</span>
+<span class="c1"># instantiate the defect object</span>
+<span class="n">mg_ga</span> <span class="o">=</span> <span class="n">Substitution</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">gan_struct</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">mg_site</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mg_ga</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -521,15 +540,42 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-JJ
+Mg subsitituted on the Ga site at at site #0
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mg_ga</span><span class="o">.</span><span class="n">defect_structure</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Structure Summary
+Lattice
+    abc : 3.2162901334217344 3.2162901334217344 5.239962
+ angles : 90.0 90.0 120.00000274450079
+ volume : 46.9428220153705
+      A : 1.608145 -2.785389 0.0
+      B : 1.608145 2.785389 0.0
+      C : 0.0 0.0 5.239962
+    pbc : True True True
+PeriodicSite: Mg2+ (1.6081, -0.9285, 2.6154) [0.6667, 0.3333, 0.4991]
+PeriodicSite: Ga3+ (1.6081, 0.9285, 5.2354) [0.3333, 0.6667, 0.9991]
+PeriodicSite: N3- (1.6081, -0.9285, 4.5896) [0.6667, 0.3333, 0.8759]
+PeriodicSite: N3- (1.6081, 0.9285, 1.9696) [0.3333, 0.6667, 0.3759]
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.ext.matproj</span> <span class="kn">import</span> <span class="n">MPRester</span>
-<span class="kn">from</span> <span class="nn">pymatgen.analysis.phase_diagram</span> <span class="kn">import</span> <span class="n">PhaseDiagram</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </div>
@@ -537,24 +583,54 @@ JJ
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ents</span> <span class="o">=</span> <span class="n">MPRester</span><span class="p">()</span><span class="o">.</span><span class="n">get_entries_in_chemsys</span><span class="p">(</span><span class="s2">&quot;Mg-Ga-N&quot;</span><span class="p">,</span> <span class="n">additional_criteria</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;e_above_hull&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$lte&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">}})</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.thermo</span> <span class="kn">import</span> <span class="n">FormationEnergyDiagram</span>
+<span class="kn">from</span> <span class="nn">pymatgen.ext.matproj</span> <span class="kn">import</span> <span class="n">MPRester</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">Vasprun</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+<span class="n">sc_dir</span> <span class="o">=</span> <span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;Mg_Ga&quot;</span>
+<span class="n">ents</span> <span class="o">=</span> <span class="n">MPRester</span><span class="p">()</span><span class="o">.</span><span class="n">get_entries_in_chemsys</span><span class="p">(</span><span class="s2">&quot;Mg-Ga-N&quot;</span><span class="p">,</span> <span class="n">additional_criteria</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;e_above_hull&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$lte&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">}})</span>
+<span class="n">fed</span> <span class="o">=</span> <span class="n">FormationEnergyDiagram</span><span class="o">.</span><span class="n">with_directories</span><span class="p">(</span>
+    <span class="n">directory_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;bulk&quot;</span> <span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;bulk_sc&quot;</span><span class="p">,</span> <span class="mi">0</span> <span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;q=0&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;q=-1&quot;</span><span class="p">,</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;q=1&quot;</span><span class="p">},</span>
+    <span class="n">defect</span> <span class="o">=</span> <span class="n">mg_ga</span><span class="p">,</span>
+    <span class="n">pd_entries</span> <span class="o">=</span> <span class="n">ents</span><span class="p">,</span>
+    <span class="n">dielectric</span><span class="o">=</span><span class="mi">10</span>
+<span class="p">)</span>
 </pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fed</span><span class="o">.</span><span class="n">get_transitions</span><span class="p">(</span><span class="n">fed</span><span class="o">.</span><span class="n">chempot_limits</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">x_min</span><span class="o">=-</span><span class="mi">3</span><span class="p">,</span> <span class="n">x_max</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ts</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">ts</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;-o&quot;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&lt;matplotlib.lines.Line2D at 0x7f6e75b8b460&gt;]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_1-quickstart_9_1.png" src="../_images/tutorials_1-quickstart_9_1.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span> <span class="o">=</span> <span class="n">PhaseDiagram</span><span class="p">(</span><span class="n">ents</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="kn">import</span> <span class="n">dumpfn</span>
-<span class="n">dumpfn</span><span class="p">(</span><span class="n">pd</span><span class="p">,</span> <span class="s2">&quot;./Ga-Mg-N_pd.json&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </div>
@@ -566,6 +642,7 @@ JJ
 </pre></div>
 </div>
 </div>
+</section>
 </section>
 
         </article>
@@ -612,8 +689,28 @@ JJ
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            Contents
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Quick Start</a><ul>
+<li><a class="reference internal" href="#Installation">Installation</a></li>
+<li><a class="reference internal" href="#Definition-of-a-defect">Definition of a defect</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

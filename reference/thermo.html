@@ -235,7 +235,7 @@
 <p>Classes and methods related to thermodynamics and energy.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.DefectEntry">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.thermo.</span></span><span class="sig-name descname"><span class="pre">DefectEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_entry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dielectric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_defect_frac_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#DefectEntry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.thermo.</span></span><span class="sig-name descname"><span class="pre">DefectEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_entry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_defect_frac_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#DefectEntry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
 <p>Data for completed defect supercell calculation.</p>
 <dl class="py attribute">
@@ -244,7 +244,7 @@
 <dd><p>The defect object used to generate the supercell.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="core.html#pymatgen.analysis.defects.core.Defect" title="pymatgen.analysis.defects.core.Defect">Defect</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="core.html#pymatgen.analysis.defects.core.Defect" title="pymatgen.analysis.defects.core.Defect">pymatgen.analysis.defects.core.Defect</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -266,18 +266,7 @@
 <dd><p>The ComputedStructureEntry for the supercell.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ComputedStructureEntry</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.DefectEntry.dielectric">
-<span class="sig-name descname"><span class="pre">dielectric</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry.dielectric" title="Permalink to this definition">#</a></dt>
-<dd><p>The dielectric tensor or constant for the bulk material.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float | NDArray</p>
+<dd class="field-odd"><p>pymatgen.entries.computed_entries.ComputedStructureEntry</p>
 </dd>
 </dl>
 </dd></dl>
@@ -290,7 +279,7 @@ If None, structures attributes of the locpot file will be used to
 automatically determine the defect location.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Optional[ArrayLike]</p>
+<dd class="field-odd"><p>Optional[Union[numpy.typing._array_like._SupportsArray[numpy.dtype], numpy.typing._nested_sequence._NestedSequence[numpy.typing._array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy.typing._nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -314,15 +303,16 @@ automatically determine the defect location.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.DefectEntry.get_freysoldt_correction">
-<span class="sig-name descname"><span class="pre">get_freysoldt_correction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defect_locpot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bulk_locpot</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#DefectEntry.get_freysoldt_correction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry.get_freysoldt_correction" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_freysoldt_correction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defect_locpot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bulk_locpot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dielectric</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#DefectEntry.get_freysoldt_correction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry.get_freysoldt_correction" title="Permalink to this definition">#</a></dt>
 <dd><p>Calculate the Freysoldt correction.</p>
 <p>Updates the corrections dictionary with the Freysoldt correction
 and returns the planar averaged potential data for plotting.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>defect_locpot</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Locpot</span></code>) – The Locpot object for the defect supercell.</p></li>
-<li><p><strong>bulk_locpot</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Locpot</span></code>) – The Locpot object for the bulk supercell.</p></li>
+<li><p><strong>defect_locpot</strong> (<em>Locpot</em>) – The Locpot object for the defect supercell.</p></li>
+<li><p><strong>bulk_locpot</strong> (<em>Locpot</em>) – The Locpot object for the bulk supercell.</p></li>
+<li><p><strong>dielectric</strong> (<em>float</em><em> | </em><em>NDArray</em>) – The dielectric tensor or constant for the bulk material.</p></li>
 <li><p><strong>kwargs</strong> – Additional keyword arguments for the get_correction method.</p></li>
 </ul>
 </dd>
@@ -427,7 +417,7 @@ which should not have very negative chemical potential.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.FormationEnergyDiagram.get_transitions">
-<span class="sig-name descname"><span class="pre">get_transitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chempots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#FormationEnergyDiagram.get_transitions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.get_transitions" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_transitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chempots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#FormationEnergyDiagram.get_transitions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.get_transitions" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the transition levels for the formation energy diagram.</p>
 <p>Get all of the kinks in the formation energy diagram.
 The points at the VBM and CBM are given by the first and last
@@ -445,6 +435,25 @@ VBM and CBM respectively.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list[tuple[float, float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_directories">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_directories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pd_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dielectric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vbm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#FormationEnergyDiagram.with_directories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_directories" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a FormationEnergyDiagram from VASP directories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory_map</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em>) – A dictionary mapping the defect name to the directory containing the
+VASP calculation.</p></li>
+<li><p><strong>defect</strong> (<a class="reference internal" href="core.html#pymatgen.analysis.defects.core.Defect" title="pymatgen.analysis.defects.core.Defect"><em>Defect</em></a>) – The defect used to create the defect entries.</p></li>
+<li><p><strong>pd_entries</strong> (<em>list</em><em>[</em><em>ComputedEntry</em><em>]</em>) – The list of entries used to construct the phase diagram and chemical
+potential diagram. They will be used to determine the stability region
+of the bulk crystal.</p></li>
+<li><p><strong>dielectric</strong> (<em>float</em><em> | </em><em>NDArray</em>) – The dielectric constant of the bulk crystal.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

@@ -330,6 +330,28 @@ determined by a1, a2, a3 and whose magntidue is less than gcut^2.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.get_zfile">
+<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">get_zfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#get_zfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.get_zfile" title="Permalink to this definition">#</a></dt>
+<dd><p>Find gzipped or non-gzipped versions of a file in a directory listing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>list of Path</em>) – A list of files in a directory.</p></li>
+<li><p><strong>base_name</strong> (<em>str</em>) – The base name of file file to find.</p></li>
+<li><p><strong>allow_missing</strong> (<em>bool</em>) – Whether to error if no version of the file (gzipped or un-gzipped) can be found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A path to the matched file. If <code class="docutils literal notranslate"><span class="pre">allow_missing=True</span></code> and the file cannot be
+found, then <code class="docutils literal notranslate"><span class="pre">None</span></code> will be returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path or None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
         </article>

@@ -231,11 +231,11 @@
         <article role="main">
           <h1>Source code for pymatgen.analysis.defects.thermo</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Classes and methods related to thermodynamics and energy.&quot;&quot;&quot;</span>
-
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -245,12 +245,13 @@
 <span class="kn">from</span> <span class="nn">pymatgen.analysis.phase_diagram</span> <span class="kn">import</span> <span class="n">PhaseDiagram</span>
 <span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">Composition</span>
 <span class="kn">from</span> <span class="nn">pymatgen.entries.computed_entries</span> <span class="kn">import</span> <span class="n">ComputedEntry</span><span class="p">,</span> <span class="n">ComputedStructureEntry</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.outputs</span> <span class="kn">import</span> <span class="n">Locpot</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">Locpot</span><span class="p">,</span> <span class="n">Vasprun</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">ConvexHull</span>
 
 <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.core</span> <span class="kn">import</span> <span class="n">Defect</span>
 <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.corrections</span> <span class="kn">import</span> <span class="n">get_correction</span>
 <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.finder</span> <span class="kn">import</span> <span class="n">DefectSiteFinder</span>
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.utils</span> <span class="kn">import</span> <span class="n">get_zfile</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath&quot;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2022, The Materials Project&quot;</span>
@@ -271,8 +272,6 @@
 <span class="sd">            The charge state of the defect.</span>
 <span class="sd">        sc_entry:</span>
 <span class="sd">            The ComputedStructureEntry for the supercell.</span>
-<span class="sd">        dielectric:</span>
-<span class="sd">            The dielectric tensor or constant for the bulk material.</span>
 <span class="sd">        sc_defect_frac_coords:</span>
 <span class="sd">            The fractional coordinates of the defect in the supercell.</span>
 <span class="sd">            If None, structures attributes of the locpot file will be used to</span>
@@ -284,7 +283,6 @@
     <span class="n">defect</span><span class="p">:</span> <span class="n">Defect</span>
     <span class="n">charge_state</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">sc_entry</span><span class="p">:</span> <span class="n">ComputedStructureEntry</span>
-    <span class="n">dielectric</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span>
     <span class="n">sc_defect_frac_coords</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ArrayLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">corrections</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -294,7 +292,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">corrections</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">corrections</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">corrections</span>
 
 <div class="viewcode-block" id="DefectEntry.get_freysoldt_correction"><a class="viewcode-back" href="../../../../reference/thermo.html#pymatgen.analysis.defects.thermo.DefectEntry.get_freysoldt_correction">[docs]</a>    <span class="k">def</span> <span class="nf">get_freysoldt_correction</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">defect_locpot</span><span class="p">:</span> <span class="n">Locpot</span><span class="p">,</span> <span class="n">bulk_locpot</span><span class="p">:</span> <span class="n">Locpot</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">defect_locpot</span><span class="p">:</span> <span class="n">Locpot</span><span class="p">,</span>
+        <span class="n">bulk_locpot</span><span class="p">:</span> <span class="n">Locpot</span><span class="p">,</span>
+        <span class="n">dielectric</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Calculate the Freysoldt correction.</span>
 
@@ -306,6 +308,8 @@
 <span class="sd">                The Locpot object for the defect supercell.</span>
 <span class="sd">            bulk_locpot:</span>
 <span class="sd">                The Locpot object for the bulk supercell.</span>
+<span class="sd">            dielectric:</span>
+<span class="sd">                The dielectric tensor or constant for the bulk material.</span>
 <span class="sd">            kwargs:</span>
 <span class="sd">                Additional keyword arguments for the get_correction method.</span>
 
@@ -327,7 +331,7 @@
 
         <span class="n">frey_corr</span><span class="p">,</span> <span class="n">plot_data</span> <span class="o">=</span> <span class="n">get_correction</span><span class="p">(</span>
             <span class="n">q</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">charge_state</span><span class="p">,</span>
-            <span class="n">dielectric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dielectric</span><span class="p">,</span>
+            <span class="n">dielectric</span><span class="o">=</span><span class="n">dielectric</span><span class="p">,</span>
             <span class="n">defect_locpot</span><span class="o">=</span><span class="n">defect_locpot</span><span class="p">,</span>
             <span class="n">bulk_locpot</span><span class="o">=</span><span class="n">bulk_locpot</span><span class="p">,</span>
             <span class="n">defect_frac_coords</span><span class="o">=</span><span class="n">defect_fpos</span><span class="p">,</span>
@@ -558,6 +562,70 @@
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+<div class="viewcode-block" id="FormationEnergyDiagram.with_directories"><a class="viewcode-back" href="../../../../reference/thermo.html#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_directories">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">with_directories</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">directory_map</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">defect</span><span class="p">:</span> <span class="n">Defect</span><span class="p">,</span>
+        <span class="n">pd_entries</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComputedEntry</span><span class="p">],</span>
+        <span class="n">dielectric</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">vbm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a FormationEnergyDiagram from VASP directories.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            directory_map:</span>
+<span class="sd">                A dictionary mapping the defect name to the directory containing the</span>
+<span class="sd">                VASP calculation.</span>
+<span class="sd">            defect:</span>
+<span class="sd">                The defect used to create the defect entries.</span>
+<span class="sd">            pd_entries:</span>
+<span class="sd">                The list of entries used to construct the phase diagram and chemical</span>
+<span class="sd">                potential diagram. They will be used to determine the stability region</span>
+<span class="sd">                of the bulk crystal.</span>
+<span class="sd">            dielectric:</span>
+<span class="sd">                The dielectric constant of the bulk crystal.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">_read_dir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+            <span class="n">vr</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="n">get_zfile</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span> <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">))</span>
+            <span class="n">ent</span> <span class="o">=</span> <span class="n">vr</span><span class="o">.</span><span class="n">get_computed_entry</span><span class="p">()</span>
+            <span class="n">locpot</span> <span class="o">=</span> <span class="n">Locpot</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">get_zfile</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;LOCPOT&quot;</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">ent</span><span class="p">,</span> <span class="n">locpot</span>
+
+        <span class="k">if</span> <span class="s2">&quot;bulk&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">directory_map</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The bulk directory must be provided.&quot;</span><span class="p">)</span>
+        <span class="n">bulk_entry</span><span class="p">,</span> <span class="n">bulk_locpot</span> <span class="o">=</span> <span class="n">_read_dir</span><span class="p">(</span><span class="n">directory_map</span><span class="p">[</span><span class="s2">&quot;bulk&quot;</span><span class="p">])</span>
+
+        <span class="n">def_entries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">qq</span><span class="p">,</span> <span class="n">q_dir</span> <span class="ow">in</span> <span class="n">directory_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">qq</span> <span class="o">==</span> <span class="s2">&quot;bulk&quot;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">q_entry</span><span class="p">,</span> <span class="n">q_locpot</span> <span class="o">=</span> <span class="n">_read_dir</span><span class="p">(</span><span class="n">q_dir</span><span class="p">)</span>
+            <span class="n">q_d_entry</span> <span class="o">=</span> <span class="n">DefectEntry</span><span class="p">(</span>
+                <span class="n">defect</span><span class="o">=</span><span class="n">defect</span><span class="p">,</span>
+                <span class="n">charge_state</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">qq</span><span class="p">),</span>
+                <span class="n">sc_entry</span><span class="o">=</span><span class="n">q_entry</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">q_d_entry</span><span class="o">.</span><span class="n">get_freysoldt_correction</span><span class="p">(</span>
+                <span class="n">defect_locpot</span><span class="o">=</span><span class="n">q_locpot</span><span class="p">,</span> <span class="n">bulk_locpot</span><span class="o">=</span><span class="n">bulk_locpot</span><span class="p">,</span> <span class="n">dielectric</span><span class="o">=</span><span class="n">dielectric</span>
+            <span class="p">)</span>
+            <span class="n">def_entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q_d_entry</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">vbm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">vr</span> <span class="o">=</span> <span class="n">Vasprun</span><span class="p">(</span><span class="n">get_zfile</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">directory_map</span><span class="p">[</span><span class="s2">&quot;bulk&quot;</span><span class="p">]),</span> <span class="s2">&quot;vasprun.xml&quot;</span><span class="p">))</span>
+            <span class="n">vbm</span> <span class="o">=</span> <span class="n">vr</span><span class="o">.</span><span class="n">get_band_structure</span><span class="p">()</span><span class="o">.</span><span class="n">get_vbm</span><span class="p">()[</span><span class="s2">&quot;energy&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">bulk_entry</span><span class="o">=</span><span class="n">bulk_entry</span><span class="p">,</span>
+            <span class="n">defect_entries</span><span class="o">=</span><span class="n">def_entries</span><span class="p">,</span>
+            <span class="n">pd_entries</span><span class="o">=</span><span class="n">pd_entries</span><span class="p">,</span>
+            <span class="n">vbm</span><span class="o">=</span><span class="n">vbm</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">_parse_chempots</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chempots</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Parse the chemical potentials.</span>
 
@@ -642,7 +710,7 @@
         <span class="k">return</span> <span class="n">lines</span>
 
 <div class="viewcode-block" id="FormationEnergyDiagram.get_transitions"><a class="viewcode-back" href="../../../../reference/thermo.html#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.get_transitions">[docs]</a>    <span class="k">def</span> <span class="nf">get_transitions</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">chempots</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">x_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">chempots</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">x_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">x_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;Get the transition levels for the formation energy diagram.</span>
 

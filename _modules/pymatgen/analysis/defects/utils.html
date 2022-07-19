@@ -231,10 +231,12 @@
         <article role="main">
           <h1>Source code for pymatgen.analysis.defects.utils</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Utilities for defects module.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MSONable</span>
@@ -417,6 +419,40 @@
         <span class="k">if</span> <span class="n">h</span> <span class="o">&gt;</span> <span class="n">max_h</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Did not converge before </span><span class="si">{</span><span class="n">h</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">g</span></div>
+
+
+<div class="viewcode-block" id="get_zfile"><a class="viewcode-back" href="../../../../reference/utils.html#pymatgen.analysis.defects.utils.get_zfile">[docs]</a><span class="k">def</span> <span class="nf">get_zfile</span><span class="p">(</span>
+    <span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">base_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">allow_missing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find gzipped or non-gzipped versions of a file in a directory listing.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    directory : list of Path</span>
+<span class="sd">        A list of files in a directory.</span>
+<span class="sd">    base_name : str</span>
+<span class="sd">        The base name of file file to find.</span>
+<span class="sd">    allow_missing : bool</span>
+<span class="sd">        Whether to error if no version of the file (gzipped or un-gzipped) can be found.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Path or None</span>
+<span class="sd">        A path to the matched file. If ``allow_missing=True`` and the file cannot be</span>
+<span class="sd">        found, then ``None`` will be returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">directory</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">*&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">base_name</span> <span class="o">==</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">file</span>
+        <span class="k">elif</span> <span class="n">base_name</span> <span class="o">+</span> <span class="s2">&quot;.gz&quot;</span> <span class="o">==</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">file</span>
+        <span class="k">elif</span> <span class="n">base_name</span> <span class="o">+</span> <span class="s2">&quot;.GZ&quot;</span> <span class="o">==</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">file</span>
+
+    <span class="k">if</span> <span class="n">allow_missing</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find </span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">.gz file.&quot;</span><span class="p">)</span></div>
 </pre></div>
         </article>
       </div>
