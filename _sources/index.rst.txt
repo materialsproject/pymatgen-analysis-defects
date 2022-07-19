@@ -10,9 +10,9 @@
    :hidden:
 
    API <reference/root>
+   Tutorials <tutorials>
    genindex
 
-============
 Introduction
 ============
 
