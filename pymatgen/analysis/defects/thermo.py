@@ -1,9 +1,9 @@
 """Classes and methods related to thermodynamics and energy."""
-
 from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
 import numpy as np
@@ -13,12 +13,13 @@ from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.core import Composition
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
-from pymatgen.io.vasp.outputs import Locpot
+from pymatgen.io.vasp import Locpot, Vasprun
 from scipy.spatial import ConvexHull
 
 from pymatgen.analysis.defects.core import Defect
 from pymatgen.analysis.defects.corrections import get_correction
 from pymatgen.analysis.defects.finder import DefectSiteFinder
+from pymatgen.analysis.defects.utils import get_zfile
 
 __author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -39,8 +40,6 @@ class DefectEntry(MSONable):
             The charge state of the defect.
         sc_entry:
             The ComputedStructureEntry for the supercell.
-        dielectric:
-            The dielectric tensor or constant for the bulk material.
         sc_defect_frac_coords:
             The fractional coordinates of the defect in the supercell.
             If None, structures attributes of the locpot file will be used to
@@ -52,7 +51,6 @@ class DefectEntry(MSONable):
     defect: Defect
     charge_state: int
     sc_entry: ComputedStructureEntry
-    dielectric: float | NDArray
     sc_defect_frac_coords: Optional[ArrayLike] = None
     corrections: Optional[Dict[str, float]] = None
 
@@ -62,7 +60,11 @@ class DefectEntry(MSONable):
         self.corrections: dict = {} if self.corrections is None else self.corrections
 
     def get_freysoldt_correction(
-        self, defect_locpot: Locpot, bulk_locpot: Locpot, **kwargs
+        self,
+        defect_locpot: Locpot,
+        bulk_locpot: Locpot,
+        dielectric: float | NDArray,
+        **kwargs,
     ):
         """Calculate the Freysoldt correction.
 
@@ -74,6 +76,8 @@ class DefectEntry(MSONable):
                 The Locpot object for the defect supercell.
             bulk_locpot:
                 The Locpot object for the bulk supercell.
+            dielectric:
+                The dielectric tensor or constant for the bulk material.
             kwargs:
                 Additional keyword arguments for the get_correction method.
 
@@ -95,7 +99,7 @@ class DefectEntry(MSONable):
 
         frey_corr, plot_data = get_correction(
             q=self.charge_state,
-            dielectric=self.dielectric,
+            dielectric=dielectric,
             defect_locpot=defect_locpot,
             bulk_locpot=bulk_locpot,
             defect_frac_coords=defect_fpos,
@@ -326,6 +330,70 @@ class FormationEnergyDiagram(MSONable):
             **kwargs,
         )
 
+    @classmethod
+    def with_directories(
+        cls,
+        directory_map: Dict[str, str],
+        defect: Defect,
+        pd_entries: list[ComputedEntry],
+        dielectric: float | NDArray,
+        vbm: float | None = None,
+        **kwargs,
+    ):
+        """Create a FormationEnergyDiagram from VASP directories.
+
+        Args:
+            directory_map:
+                A dictionary mapping the defect name to the directory containing the
+                VASP calculation.
+            defect:
+                The defect used to create the defect entries.
+            pd_entries:
+                The list of entries used to construct the phase diagram and chemical
+                potential diagram. They will be used to determine the stability region
+                of the bulk crystal.
+            dielectric:
+                The dielectric constant of the bulk crystal.
+        """
+
+        def _read_dir(directory):
+            vr = Vasprun(get_zfile(Path(directory), "vasprun.xml"))
+            ent = vr.get_computed_entry()
+            locpot = Locpot.from_file(get_zfile(directory, "LOCPOT"))
+            return ent, locpot
+
+        if "bulk" not in directory_map:
+            raise ValueError("The bulk directory must be provided.")
+        bulk_entry, bulk_locpot = _read_dir(directory_map["bulk"])
+
+        def_entries = []
+        for qq, q_dir in directory_map.items():
+            if qq == "bulk":
+                continue
+            q_entry, q_locpot = _read_dir(q_dir)
+            q_d_entry = DefectEntry(
+                defect=defect,
+                charge_state=int(qq),
+                sc_entry=q_entry,
+            )
+
+            q_d_entry.get_freysoldt_correction(
+                defect_locpot=q_locpot, bulk_locpot=bulk_locpot, dielectric=dielectric
+            )
+            def_entries.append(q_d_entry)
+
+        if vbm is None:
+            vr = Vasprun(get_zfile(Path(directory_map["bulk"]), "vasprun.xml"))
+            vbm = vr.get_band_structure().get_vbm()["energy"]
+
+        return cls(
+            bulk_entry=bulk_entry,
+            defect_entries=def_entries,
+            pd_entries=pd_entries,
+            vbm=vbm,
+            **kwargs,
+        )
+
     def _parse_chempots(self, chempots: dict | ArrayLike) -> dict:
         """Parse the chemical potentials.
 
@@ -410,7 +478,7 @@ class FormationEnergyDiagram(MSONable):
         return lines
 
     def get_transitions(
-        self, chempots: dict, x_min: float = 0, x_max: float | None = None
+        self, chempots: dict, x_min: float = 0, x_max: float = 10
     ) -> list[tuple[float, float]]:
         """Get the transition levels for the formation energy diagram.
 

@@ -1,8 +1,10 @@
 """Utilities for defects module."""
+from __future__ import annotations
 
 import logging
 import math
 from copy import deepcopy
+from pathlib import Path
 
 import numpy as np
 from monty.json import MSONable
@@ -185,3 +187,37 @@ def converge(f, step, tol, max_h):
         if h > max_h:
             raise Exception(f"Did not converge before {h}")
     return g
+
+
+def get_zfile(
+    directory: Path, base_name: str, allow_missing: bool = False
+) -> Path | None:
+    """
+    Find gzipped or non-gzipped versions of a file in a directory listing.
+
+    Parameters
+    ----------
+    directory : list of Path
+        A list of files in a directory.
+    base_name : str
+        The base name of file file to find.
+    allow_missing : bool
+        Whether to error if no version of the file (gzipped or un-gzipped) can be found.
+    Returns
+    -------
+    Path or None
+        A path to the matched file. If ``allow_missing=True`` and the file cannot be
+        found, then ``None`` will be returned.
+    """
+    for file in directory.glob(f"{base_name}*"):
+        if base_name == file.name:
+            return file
+        elif base_name + ".gz" == file.name:
+            return file
+        elif base_name + ".GZ" == file.name:
+            return file
+
+    if allow_missing:
+        return None
+
+    raise FileNotFoundError(f"Could not find {base_name} or {base_name}.gz file.")
