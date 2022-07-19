@@ -16,7 +16,7 @@ classifiers = [
   "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-  "pymatgen@git+https://github.com/materialsproject/pymatgen.git@master",
+  "pymatgen==2022.7.19",
   "dscribe>=1.2.1",
 ]
 description = "Pymatgen extension for defects analysis"
@@ -41,7 +41,7 @@ docs = [
 ]
 
 strict = [
-  "pymatgen@git+https://github.com/materialsproject/pymatgen.git@master",
+  "pymatgen==2022.7.19",
   "dscribe==1.2.1",
 ]
 
