@@ -611,6 +611,13 @@ def get_lower_envelope(lines):
         List[List[float]]:
             List lines that make up the lower envelope.
     """
+    if len(lines) < 1:
+        raise ValueError("Need at least one line to get lower envelope.")
+    elif len(lines) == 1:
+        return lines
+    elif len(lines) == 2:
+        return sorted(lines)
+
     dual_points = [(m, -b) for m, b in lines]
     upper_hull = get_upper_hull(dual_points)
     lower_envelope = [(m, -b) for m, b in upper_hull]

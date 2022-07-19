@@ -107,3 +107,21 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
     )
 
     assert len(fed.chempot_limits) == 2
+
+
+def test_formation_from_directory(test_dir, stable_entries_Mg_Ga_N, defect_Mg_Ga):
+    sc_dir = test_dir / "Mg_Ga"
+    qq = []
+    for q in [-1, 0, 1]:
+        qq.append(q)
+        dmap = {"bulk": sc_dir / "bulk_sc"}
+        dmap.update(zip(qq, map(lambda x: sc_dir / f"q={x}", qq)))
+        assert len(dmap) == len(qq) + 1
+        fed = FormationEnergyDiagram.with_directories(
+            directory_map=dmap,
+            defect=defect_Mg_Ga,
+            pd_entries=stable_entries_Mg_Ga_N,
+            dielectric=10,
+        )
+        trans = fed.get_transitions(fed.chempot_limits[1], x_min=-100, x_max=100)
+        assert len(trans) == 1 + len(qq)
