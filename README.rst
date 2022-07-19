@@ -19,7 +19,7 @@ Previous versions of the defects code
 
 This package is meant to replace the older ``pymatgen.analysis.defects`` modules.
 The previous module was used by ``pyCDT`` code which will continue to work with version ``2022.7.8`` of ``pymatgen``.
-New releases of ``pymatgen`` will only contain a stub in ``pymatgen.analysis.defects`` and this package must be installed separately.
+Newer releases of ``pymatgen`` will only contain a stub in ``pymatgen.analysis.defects`` and this package must be installed separately.
 
 
 .. |testing| image:: https://github.com/materialsproject/pymatgen-analysis-defects/actions/workflows/testing.yml/badge.svg?branch=main

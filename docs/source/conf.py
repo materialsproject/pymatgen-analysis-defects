@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 # -- Project information -----------------------------------------------------
 
 project = "pymatgen-analysis-defects"
-copyright = "2022, Jimmy-Xuan Shen"
+copyright = "2022, Materials Project Team"
 author = "Jimmy-Xuan Shen"
 
 
