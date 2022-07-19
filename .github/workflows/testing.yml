@@ -96,7 +96,7 @@ jobs:
 
       - name: Test Jupyter Notebooks
         run: |
-          pytest --nbmake tutorials
+          pytest --nbmake --nbmake-kernel=python3 tutorials
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
