@@ -270,7 +270,7 @@ class FormationEnergyDiagram(MSONable):
         vbm: float,
         api_key: str | None = None,
         **kwargs,
-    ):
+    ):  # pragma: no cover
         """Create a FormationEnergyDiagram object from existing phase diagram.
 
         This function allows you to grab an existing phase diagram and use the

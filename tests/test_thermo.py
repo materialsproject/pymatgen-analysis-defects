@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from pymatgen.analysis.phase_diagram import PhaseDiagram
 
 from pymatgen.analysis.defects.corrections import plot_plnr_avg
 from pymatgen.analysis.defects.thermo import (
@@ -95,11 +96,14 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
     atomic_entries = list(
         filter(lambda x: len(x.composition.elements) == 1, stable_entries_Mg_Ga_N)
     )
-    fed = FormationEnergyDiagram.with_phase_diagram_from_matproj(
+    pd = PhaseDiagram(stable_entries_Mg_Ga_N)
+    fed = FormationEnergyDiagram.with_phase_diagram(
         bulk_entry=bulk_entry,
         defect_entries=def_ent_list,
         atomic_entries=atomic_entries,
         vbm=vbm,
         inc_inf_values=False,
+        phase_diagram=pd,
     )
+
     assert len(fed.chempot_limits) == 2

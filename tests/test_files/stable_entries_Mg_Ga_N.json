@@ -1,1 +1,378 @@
-[{"@module": "pymatgen.entries.computed_entries", "@class": "ComputedEntry", "energy": -38.42229507, "composition": {"Mg": 4.0, "Ga": 10.0}, "entry_id": "mp-27668", "correction": 0.0, "energy_adjustments": [], "parameters": {"run_type": "GGA", "is_hubbard": false, "pseudo_potential": {"functional": "PBE", "labels": ["Mg_pv", "Ga_d"], "pot_type": "paw"}, "hubbards": {}, "potcar_symbols": ["PBE Mg_pv", "PBE Ga_d"], "oxide_type": "None"}, "data": {"oxide_type": "None", "oxidation_states": {}}, "@version": null}, {"@module": "pymatgen.entries.computed_entries", "@class": "ComputedEntry", "energy": -29.86997198, "composition": {"Mg": 10.0, "Ga": 4.0}, "entry_id": "mp-1770", "correction": 0.0, "energy_adjustments": [], "parameters": {"run_type": "GGA", "is_hubbard": false, "pseudo_potential": {"functional": "PBE", "labels": ["Mg_pv", "Ga_d"], "pot_type": "paw"}, "hubbards": {}, "potcar_symbols": ["PBE Mg_pv", "PBE Ga_d"], "oxide_type": "None"}, "data": {"oxide_type": "None", "oxidation_states": {}}, "@version": null}, {"@module": "pymatgen.entries.computed_entries", "@class": "ComputedEntry", "energy": -201.83378403, "composition": {"Mg": 24.0, "N": 16.0}, "entry_id": "mp-1559", "correction": -5.776, "energy_adjustments": [{"@module": "pymatgen.entries.computed_entries", "@class": "CompositionEnergyAdjustment", "@version": null, "adj_per_atom": -0.361, "n_atoms": 16.0, "uncertainty_per_atom": 0.0093, "name": "MP2020 anion correction (N)", "cls": {"@module": "pymatgen.entries.compatibility", "@class": "MaterialsProject2020Compatibility", "@version": null}, "description": "Composition-based energy adjustment"}], "parameters": {"run_type": "GGA", "is_hubbard": false, "pseudo_potential": {"functional": "PBE", "labels": ["Mg_pv", "N"], "pot_type": "paw"}, "hubbards": {}, "potcar_symbols": ["PBE Mg_pv", "PBE N"], "oxide_type": "None"}, "data": {"oxide_type": "None", "oxidation_states": {"Mg": 2.0, "N": -3.0}}, "@version": null}, {"@module": "pymatgen.entries.computed_entries", "@class": "ComputedEntry", "energy": -39.4000992, "composition": {"Mg": 8.0, "Ga": 8.0}, "entry_id": "mp-574266", "correction": 0.0, "energy_adjustments": [], "parameters": {"run_type": "GGA", "is_hubbard": false, "pseudo_potential": {"functional": "PBE", "labels": ["Mg_pv", "Ga_d"], "pot_type": "paw"}, "hubbards": {}, "potcar_symbols": ["PBE Mg_pv", "PBE Ga_d"], "oxide_type": "None"}, "data": {"oxide_type": "None", "oxidation_states": {}}, "@version": null}, {"@module": "pymatgen.entries.computed_entries", "@class": "ComputedEntry", "energy": -39.83410568, "composition": {"Mg": 12.0, "Ga": 6.0}, "entry_id": "mp-30650", "correction": 0.0, "energy_adjustments": [], "parameters": {"run_type": "GGA", "is_hubbard": false, "pseudo_potential": {"functional": "PBE", "labels": ["Mg_pv", "Ga_d"], "pot_type": "paw"}, "hubbards": {}, "potcar_symbols": ["PBE Mg_pv", "PBE Ga_d"], "oxide_type": "None"}, "data": {"oxide_type": "None", "oxidation_states": {}}, "@version": null}, {"@module": "pymatgen.entries.computed_entries", "@class": "ComputedEntry", "energy": -12.11235968, "composition": {"Ga": 4.0}, "entry_id": "mp-142", "correction": 0.0, "energy_adjustments": [], "parameters": {"run_type": "GGA", "is_hubbard": false, "pseudo_potential": {"functional": "PBE", "labels": ["Ga_d"], "pot_type": "paw"}, "hubbards": {}, "potcar_symbols": ["PBE Ga_d"], "oxide_type": "None"}, "data": {"oxide_type": "None"}, "@version": null}, {"@module": "pymatgen.entries.computed_entries", "@class": "ComputedEntry", "energy": -4.79068775, "composition": {"Mg": 3.0}, "entry_id": "mp-1094122", "correction": 0.0, "energy_adjustments": [], "parameters": {"run_type": "GGA", "is_hubbard": false, "pseudo_potential": {"functional": "PBE", "labels": ["Mg_pv"], "pot_type": "paw"}, "hubbards": {}, "potcar_symbols": ["PBE Mg_pv"], "oxide_type": "None"}, "data": {"oxide_type": "None"}, "@version": null}, {"@module": "pymatgen.entries.computed_entries", "@class": "ComputedEntry", "energy": -245.82917071, "composition": {"Mg": 149.0, "Ga": 1.0}, "entry_id": "mp-1185597", "correction": 0.0, "energy_adjustments": [], "parameters": {"run_type": "GGA", "is_hubbard": false, "pseudo_potential": {"functional": "PBE", "labels": ["Mg_pv", "Ga_d"], "pot_type": "paw"}, "hubbards": {}, "potcar_symbols": ["PBE Mg_pv", "PBE Ga_d"], "oxide_type": "None"}, "data": {"oxide_type": "None", "oxidation_states": {}}, "@version": null}, {"@module": "pymatgen.entries.computed_entries", "@class": "ComputedEntry", "energy": -24.63444937, "composition": {"Ga": 2.0, "N": 2.0}, "entry_id": "mp-804", "correction": -0.722, "energy_adjustments": [{"@module": "pymatgen.entries.computed_entries", "@class": "CompositionEnergyAdjustment", "@version": null, "adj_per_atom": -0.361, "n_atoms": 2.0, "uncertainty_per_atom": 0.0093, "name": "MP2020 anion correction (N)", "cls": {"@module": "pymatgen.entries.compatibility", "@class": "MaterialsProject2020Compatibility", "@version": null}, "description": "Composition-based energy adjustment"}], "parameters": {"run_type": "GGA", "is_hubbard": false, "pseudo_potential": {"functional": "PBE", "labels": ["Ga_d", "N"], "pot_type": "paw"}, "hubbards": {}, "potcar_symbols": ["PBE Ga_d", "PBE N"], "oxide_type": "None"}, "data": {"oxide_type": "None", "oxidation_states": {"Ga": 3.0, "N": -3.0}}, "@version": null}, {"@module": "pymatgen.entries.computed_entries", "@class": "ComputedEntry", "energy": -66.69195172, "composition": {"N": 8.0}, "entry_id": "mp-25", "correction": 0.0, "energy_adjustments": [], "parameters": {"run_type": "GGA", "is_hubbard": false, "pseudo_potential": {"functional": "PBE", "labels": ["N"], "pot_type": "paw"}, "hubbards": {}, "potcar_symbols": ["PBE N"], "oxide_type": "None"}, "data": {"oxide_type": "None"}, "@version": null}]
+[
+    {
+        "@module": "pymatgen.entries.computed_entries",
+        "@class": "ComputedEntry",
+        "energy": -38.42229507,
+        "composition": {
+            "Mg": 4.0,
+            "Ga": 10.0
+        },
+        "entry_id": "mp-27668",
+        "correction": 0.0,
+        "energy_adjustments": [],
+        "parameters": {
+            "run_type": "GGA",
+            "is_hubbard": false,
+            "pseudo_potential": {
+                "functional": "PBE",
+                "labels": [
+                    "Mg_pv",
+                    "Ga_d"
+                ],
+                "pot_type": "paw"
+            },
+            "hubbards": {},
+            "potcar_symbols": [
+                "PBE Mg_pv",
+                "PBE Ga_d"
+            ],
+            "oxide_type": "None"
+        },
+        "data": {
+            "oxide_type": "None",
+            "oxidation_states": {}
+        },
+        "@version": null
+    },
+    {
+        "@module": "pymatgen.entries.computed_entries",
+        "@class": "ComputedEntry",
+        "energy": -29.86997198,
+        "composition": {
+            "Mg": 10.0,
+            "Ga": 4.0
+        },
+        "entry_id": "mp-1770",
+        "correction": 0.0,
+        "energy_adjustments": [],
+        "parameters": {
+            "run_type": "GGA",
+            "is_hubbard": false,
+            "pseudo_potential": {
+                "functional": "PBE",
+                "labels": [
+                    "Mg_pv",
+                    "Ga_d"
+                ],
+                "pot_type": "paw"
+            },
+            "hubbards": {},
+            "potcar_symbols": [
+                "PBE Mg_pv",
+                "PBE Ga_d"
+            ],
+            "oxide_type": "None"
+        },
+        "data": {
+            "oxide_type": "None",
+            "oxidation_states": {}
+        },
+        "@version": null
+    },
+    {
+        "@module": "pymatgen.entries.computed_entries",
+        "@class": "ComputedEntry",
+        "energy": -201.83378403,
+        "composition": {
+            "Mg": 24.0,
+            "N": 16.0
+        },
+        "entry_id": "mp-1559",
+        "correction": -5.776,
+        "energy_adjustments": [
+            {
+                "@module": "pymatgen.entries.computed_entries",
+                "@class": "CompositionEnergyAdjustment",
+                "@version": null,
+                "adj_per_atom": -0.361,
+                "n_atoms": 16.0,
+                "uncertainty_per_atom": 0.0093,
+                "name": "MP2020 anion correction (N)",
+                "cls": {
+                    "@module": "pymatgen.entries.compatibility",
+                    "@class": "MaterialsProject2020Compatibility",
+                    "@version": null
+                },
+                "description": "Composition-based energy adjustment"
+            }
+        ],
+        "parameters": {
+            "run_type": "GGA",
+            "is_hubbard": false,
+            "pseudo_potential": {
+                "functional": "PBE",
+                "labels": [
+                    "Mg_pv",
+                    "N"
+                ],
+                "pot_type": "paw"
+            },
+            "hubbards": {},
+            "potcar_symbols": [
+                "PBE Mg_pv",
+                "PBE N"
+            ],
+            "oxide_type": "None"
+        },
+        "data": {
+            "oxide_type": "None",
+            "oxidation_states": {
+                "Mg": 2.0,
+                "N": -3.0
+            }
+        },
+        "@version": null
+    },
+    {
+        "@module": "pymatgen.entries.computed_entries",
+        "@class": "ComputedEntry",
+        "energy": -39.4000992,
+        "composition": {
+            "Mg": 8.0,
+            "Ga": 8.0
+        },
+        "entry_id": "mp-574266",
+        "correction": 0.0,
+        "energy_adjustments": [],
+        "parameters": {
+            "run_type": "GGA",
+            "is_hubbard": false,
+            "pseudo_potential": {
+                "functional": "PBE",
+                "labels": [
+                    "Mg_pv",
+                    "Ga_d"
+                ],
+                "pot_type": "paw"
+            },
+            "hubbards": {},
+            "potcar_symbols": [
+                "PBE Mg_pv",
+                "PBE Ga_d"
+            ],
+            "oxide_type": "None"
+        },
+        "data": {
+            "oxide_type": "None",
+            "oxidation_states": {}
+        },
+        "@version": null
+    },
+    {
+        "@module": "pymatgen.entries.computed_entries",
+        "@class": "ComputedEntry",
+        "energy": -39.83410568,
+        "composition": {
+            "Mg": 12.0,
+            "Ga": 6.0
+        },
+        "entry_id": "mp-30650",
+        "correction": 0.0,
+        "energy_adjustments": [],
+        "parameters": {
+            "run_type": "GGA",
+            "is_hubbard": false,
+            "pseudo_potential": {
+                "functional": "PBE",
+                "labels": [
+                    "Mg_pv",
+                    "Ga_d"
+                ],
+                "pot_type": "paw"
+            },
+            "hubbards": {},
+            "potcar_symbols": [
+                "PBE Mg_pv",
+                "PBE Ga_d"
+            ],
+            "oxide_type": "None"
+        },
+        "data": {
+            "oxide_type": "None",
+            "oxidation_states": {}
+        },
+        "@version": null
+    },
+    {
+        "@module": "pymatgen.entries.computed_entries",
+        "@class": "ComputedEntry",
+        "energy": -12.11235968,
+        "composition": {
+            "Ga": 4.0
+        },
+        "entry_id": "mp-142",
+        "correction": 0.0,
+        "energy_adjustments": [],
+        "parameters": {
+            "run_type": "GGA",
+            "is_hubbard": false,
+            "pseudo_potential": {
+                "functional": "PBE",
+                "labels": [
+                    "Ga_d"
+                ],
+                "pot_type": "paw"
+            },
+            "hubbards": {},
+            "potcar_symbols": [
+                "PBE Ga_d"
+            ],
+            "oxide_type": "None"
+        },
+        "data": {
+            "oxide_type": "None"
+        },
+        "@version": null
+    },
+    {
+        "@module": "pymatgen.entries.computed_entries",
+        "@class": "ComputedEntry",
+        "energy": -4.79068775,
+        "composition": {
+            "Mg": 3.0
+        },
+        "entry_id": "mp-1094122",
+        "correction": 0.0,
+        "energy_adjustments": [],
+        "parameters": {
+            "run_type": "GGA",
+            "is_hubbard": false,
+            "pseudo_potential": {
+                "functional": "PBE",
+                "labels": [
+                    "Mg_pv"
+                ],
+                "pot_type": "paw"
+            },
+            "hubbards": {},
+            "potcar_symbols": [
+                "PBE Mg_pv"
+            ],
+            "oxide_type": "None"
+        },
+        "data": {
+            "oxide_type": "None"
+        },
+        "@version": null
+    },
+    {
+        "@module": "pymatgen.entries.computed_entries",
+        "@class": "ComputedEntry",
+        "energy": -245.82917071,
+        "composition": {
+            "Mg": 149.0,
+            "Ga": 1.0
+        },
+        "entry_id": "mp-1185597",
+        "correction": 0.0,
+        "energy_adjustments": [],
+        "parameters": {
+            "run_type": "GGA",
+            "is_hubbard": false,
+            "pseudo_potential": {
+                "functional": "PBE",
+                "labels": [
+                    "Mg_pv",
+                    "Ga_d"
+                ],
+                "pot_type": "paw"
+            },
+            "hubbards": {},
+            "potcar_symbols": [
+                "PBE Mg_pv",
+                "PBE Ga_d"
+            ],
+            "oxide_type": "None"
+        },
+        "data": {
+            "oxide_type": "None",
+            "oxidation_states": {}
+        },
+        "@version": null
+    },
+    {
+        "@module": "pymatgen.entries.computed_entries",
+        "@class": "ComputedEntry",
+        "energy": -24.63444937,
+        "composition": {
+            "Ga": 2.0,
+            "N": 2.0
+        },
+        "entry_id": "mp-804",
+        "correction": -0.722,
+        "energy_adjustments": [
+            {
+                "@module": "pymatgen.entries.computed_entries",
+                "@class": "CompositionEnergyAdjustment",
+                "@version": null,
+                "adj_per_atom": -0.361,
+                "n_atoms": 2.0,
+                "uncertainty_per_atom": 0.0093,
+                "name": "MP2020 anion correction (N)",
+                "cls": {
+                    "@module": "pymatgen.entries.compatibility",
+                    "@class": "MaterialsProject2020Compatibility",
+                    "@version": null
+                },
+                "description": "Composition-based energy adjustment"
+            }
+        ],
+        "parameters": {
+            "run_type": "GGA",
+            "is_hubbard": false,
+            "pseudo_potential": {
+                "functional": "PBE",
+                "labels": [
+                    "Ga_d",
+                    "N"
+                ],
+                "pot_type": "paw"
+            },
+            "hubbards": {},
+            "potcar_symbols": [
+                "PBE Ga_d",
+                "PBE N"
+            ],
+            "oxide_type": "None"
+        },
+        "data": {
+            "oxide_type": "None",
+            "oxidation_states": {
+                "Ga": 3.0,
+                "N": -3.0
+            }
+        },
+        "@version": null
+    },
+    {
+        "@module": "pymatgen.entries.computed_entries",
+        "@class": "ComputedEntry",
+        "energy": -66.69195172,
+        "composition": {
+            "N": 8.0
+        },
+        "entry_id": "mp-25",
+        "correction": 0.0,
+        "energy_adjustments": [],
+        "parameters": {
+            "run_type": "GGA",
+            "is_hubbard": false,
+            "pseudo_potential": {
+                "functional": "PBE",
+                "labels": [
+                    "N"
+                ],
+                "pot_type": "paw"
+            },
+            "hubbards": {},
+            "potcar_symbols": [
+                "PBE N"
+            ],
+            "oxide_type": "None"
+        },
+        "data": {
+            "oxide_type": "None"
+        },
+        "@version": null
+    }
+]
