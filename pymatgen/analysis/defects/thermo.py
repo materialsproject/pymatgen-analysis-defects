@@ -150,7 +150,7 @@ class FormationEnergyDiagram(MSONable):
     pd_entries: list[ComputedEntry]
     vbm: float
     band_gap: Optional[float] = None
-    inc_inf_values: bool = True
+    inc_inf_values: bool = False
 
     def __post_init__(self):
         """Post-initialization.
