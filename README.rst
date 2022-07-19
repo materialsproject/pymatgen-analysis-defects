@@ -3,6 +3,7 @@ pymatgen-analysis-defects
 
 |testing| |codecov|
 
+📄 `Full Documentation <https://materialsproject.github.io/pymatgen-analysis-defects/>`_
 
 This package is a extension to ``pymatgen`` for performing defect analysis.
 The package is designed to work with VASP inputs and output files and is meant
