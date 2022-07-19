@@ -16,7 +16,7 @@ from pymatgen.analysis.defects.supercells import get_sc_fromstruct
 
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
-__maintainer__ = "Jimmy Shen @jmmshn"
+__maintainer__ = "Jimmy-Xuan Shen @jmmshn"
 __date__ = "Mar 15, 2022"
 
 logger = logging.getLogger(__name__)
