@@ -303,16 +303,16 @@
 <div class="viewcode-block" id="SubstitutionGenerator"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.SubstitutionGenerator">[docs]</a><span class="k">class</span> <span class="nc">SubstitutionGenerator</span><span class="p">(</span><span class="n">DefectGenerator</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Generate substitution for symmetry distinct sites in a structure.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">substitution</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;Initialize a substitution generator.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            structure: The bulk structure the vacancies are generated from.</span>
-<span class="sd">            substitutions: The substitutions to be made given as a dictionary.</span>
+<span class="sd">            substitution: The substitutions to be made given as a dictionary.</span>
 <span class="sd">                e.g. {&quot;Mg&quot;: &quot;Ga&quot;} means that Mg is substituted on the Ga site.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">substitutions</span> <span class="o">=</span> <span class="n">substitutions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">substitution</span> <span class="o">=</span> <span class="n">substitution</span>
 
 <div class="viewcode-block" id="SubstitutionGenerator.generate_defects"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.SubstitutionGenerator.generate_defects">[docs]</a>    <span class="k">def</span> <span class="nf">generate_defects</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Defect</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Generate the substitution objects.&quot;&quot;&quot;</span>
@@ -321,9 +321,9 @@
         <span class="k">for</span> <span class="n">site_group</span> <span class="ow">in</span> <span class="n">sym_struct</span><span class="o">.</span><span class="n">equivalent_sites</span><span class="p">:</span>
             <span class="n">site</span> <span class="o">=</span> <span class="n">site_group</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">el_str</span> <span class="o">=</span> <span class="n">element_str</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">el_str</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">substitutions</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">el_str</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">substitution</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">continue</span>
-            <span class="n">new_element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">substitutions</span><span class="p">[</span><span class="n">el_str</span><span class="p">]</span>
+            <span class="n">new_element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">substitution</span><span class="p">[</span><span class="n">el_str</span><span class="p">]</span>
             <span class="n">sub_site</span> <span class="o">=</span> <span class="n">PeriodicSite</span><span class="p">(</span>
                 <span class="n">Species</span><span class="p">(</span><span class="n">new_element</span><span class="p">),</span>
                 <span class="n">site</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">,</span>
