@@ -71,16 +71,16 @@ class VacancyGenerator(DefectGenerator):
 class SubstitutionGenerator(DefectGenerator):
     """Generate substitution for symmetry distinct sites in a structure."""
 
-    def __init__(self, structure: Structure, substitutions: dict[str, str]):
+    def __init__(self, structure: Structure, substitution: dict[str, str]):
         """Initialize a substitution generator.
 
         Args:
             structure: The bulk structure the vacancies are generated from.
-            substitutions: The substitutions to be made given as a dictionary.
+            substitution: The substitutions to be made given as a dictionary.
                 e.g. {"Mg": "Ga"} means that Mg is substituted on the Ga site.
         """
         super().__init__(structure)
-        self.substitutions = substitutions
+        self.substitution = substitution
 
     def generate_defects(self) -> Iterable[Defect]:
         """Generate the substitution objects."""
@@ -89,9 +89,9 @@ class SubstitutionGenerator(DefectGenerator):
         for site_group in sym_struct.equivalent_sites:
             site = site_group[0]
             el_str = element_str(site.specie)
-            if el_str not in self.substitutions.keys():
+            if el_str not in self.substitution.keys():
                 continue
-            new_element = self.substitutions[el_str]
+            new_element = self.substitution[el_str]
             sub_site = PeriodicSite(
                 Species(new_element),
                 site.frac_coords,
