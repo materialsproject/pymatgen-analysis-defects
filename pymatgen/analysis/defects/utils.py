@@ -340,7 +340,7 @@ def cluster_nodes(
 
 
 def get_avg_chg(
-    chgcar: VolumetricData, fcoord: npt.NDArray, radius: float = 0.4
+    chgcar: VolumetricData, fcoord: npt.ArrayLike, radius: float = 0.4
 ) -> float:
     """Get the average charge in a sphere.
 
@@ -354,6 +354,8 @@ def get_avg_chg(
 
 
     """
+    # makesure fcoord is an array
+    fcoord = np.array(fcoord)
 
     def _dist_mat(pos_frac):
         # return a matrix that contains the distances
@@ -371,5 +373,5 @@ def get_avg_chg(
         raise ValueError("f_coords must be in [0,1)")
     mask = _dist_mat(fcoord) < radius
     vol_sphere = chgcar.structure.volume * (mask.sum() / chgcar.ngridpts)
-    chg_in_sphere = np.sum(chgcar.data["total"] * mask) / mask.size / vol_sphere
-    return chg_in_sphere
+    avg_chg = np.sum(chgcar.data["total"] * mask) / mask.size / vol_sphere
+    return avg_chg
