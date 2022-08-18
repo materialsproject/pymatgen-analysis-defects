@@ -511,12 +511,12 @@ class ChargeInsertionAnalyzer(MSONable):
         avg_chg_first_member = {}
         for lab, g in lab_groups.items():
             avg_chg_first_member[lab] = get_avg_chg(
-                self.chgcar, fcoord=fcoords[g[0]], radius=self.avg_radius
+                self.chgcar, fcoord=fcoords[g[0]], radius=avg_radius
             )
 
         res = []
         for lab, avg_chg in sorted(avg_chg_first_member.items(), key=lambda x: x[1]):
-            if avg_chg > self.max_avg_charge:
+            if avg_chg > max_avg_charge:
                 break
             res.append((avg_chg, lab_groups[lab]))
 
