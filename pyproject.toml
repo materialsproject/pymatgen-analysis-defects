@@ -16,8 +16,9 @@ classifiers = [
   "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-  "pymatgen==2022.7.19",
+  "pymatgen>=2022.7.19",
   "dscribe>=1.2.1",
+  "scikit-image>=0.19.3",
 ]
 description = "Pymatgen extension for defects analysis"
 dynamic = ["version"]
@@ -43,6 +44,7 @@ docs = [
 strict = [
   "pymatgen==2022.7.19",
   "dscribe==1.2.1",
+  "scikit-image==0.19.3",
 ]
 
 tests = [
