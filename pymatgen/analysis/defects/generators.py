@@ -51,16 +51,22 @@ class DefectGenerator(MSONable, metaclass=ABCMeta):
 class VacancyGenerator(DefectGenerator):
     """Generate vacancy for each symmetry distinct site in a structure."""
 
-    def __init__(self, structure: Structure, rm_species: str | Species = None):
+    def __init__(self, structure: Structure, rm_species: list[str | Species] = None):
         """Initialize a vacancy generator.
 
         Args:
             structure: The bulk structure the vacancies are generated from.
-            rm_species: The species to be removed. If None considered all species.
+            rm_species: List of species to be removed. If None considered all species.
         """
         super().__init__(structure)
         all_species = [*map(str, structure.composition.elements)]
-        self.rm_species = str(rm_species) if rm_species else all_species
+        if rm_species is None:
+            self.rm_species = all_species
+        else:
+            self.rm_species = [*map(str, rm_species)]
+
+        if not set(self.rm_species).issubset(all_species):
+            raise ValueError("rm_species must be a subset of the structure species.")
 
     def generate_defects(self, **kwargs) -> Generator[Vacancy, None, None]:
         """Generate a vacancy defects.

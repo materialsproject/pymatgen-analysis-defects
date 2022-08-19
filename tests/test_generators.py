@@ -8,6 +8,10 @@ def test_generators(gan_struct):
     for defect in vacancy_generator:
         assert isinstance(defect, Vacancy)
 
+    vacancy_generator = VacancyGenerator(gan_struct, ["Xe"])
+    for defect in vacancy_generator:
+        assert isinstance(defect, Vacancy)
+
     # Substitution
     sub_generator = SubstitutionGenerator(gan_struct, {"Ga": "Mg"})
     replaced_atoms = set()
@@ -19,3 +23,6 @@ def test_generators(gan_struct):
         assert isinstance(defect, Substitution)
         replaced_atoms.add(defect.site.specie.symbol)
     assert replaced_atoms == {"Mg", "Ca"}
+
+
+# def test_interstitial_generator()
