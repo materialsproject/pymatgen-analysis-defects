@@ -277,10 +277,9 @@
 <span class="sd">        Args:</span>
 <span class="sd">            structure: The structure of the defect.</span>
 <span class="sd">            site: The site</span>
-<span class="sd">            charge: The charge of the defect.</span>
 <span class="sd">            multiplicity: The multiplicity of the defect.</span>
 <span class="sd">            oxi_state: The oxidation state of the defect, if not specified,</span>
-<span class="sd">            this will be determined automatically.</span>
+<span class="sd">                this will be determined automatically.</span>
 <span class="sd">            symprec: Tolerance for symmetry finding.</span>
 <span class="sd">            angle_tolerance: Angle tolerance for symmetry finding.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -294,7 +293,7 @@
         <span class="k">if</span> <span class="n">oxi_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># TODO this step might take time so wrap it in a timer</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">add_oxidation_state_by_guess</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">oxi_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_oxi_state</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">oxi_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guess_oxi_state</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">oxi_state</span> <span class="o">=</span> <span class="n">oxi_state</span>
 
@@ -306,13 +305,13 @@
 <span class="sd">            int: The multiplicity of the defect.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="Defect.get_oxi_state"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Defect.get_oxi_state">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">get_oxi_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Get the oxidation state of the defect.</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_guess_oxi_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Best guess for the oxidation state of the defect.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            float: The oxidation state of the defect.</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -340,7 +339,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            list of possible charge states</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxi_state</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oxi_state</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxi_state</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
             <span class="n">oxi_state</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oxi_state</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Oxidation state must be an integer&quot;</span><span class="p">)</span>
@@ -463,8 +462,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_site_index</span><span class="p">]</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">element</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}</span>
 
-<div class="viewcode-block" id="Vacancy.get_oxi_state"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Vacancy.get_oxi_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_oxi_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Get the oxidation state of the defect.</span>
+    <span class="k">def</span> <span class="nf">_guess_oxi_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Best guess for the oxidation state of the defect.</span>
 
 <span class="sd">        For vacancies, the oxidation state is the opposite of the oxidation state of the</span>
 <span class="sd">        removed atom.</span>
@@ -472,7 +471,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            float: The oxidation state of the defect.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">oxi_state</span></div>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">oxi_state</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Representation of a vacancy defect.&quot;&quot;&quot;</span>
@@ -566,8 +565,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">element</span><span class="p">:</span> <span class="o">+</span><span class="mi">1</span><span class="p">,</span>
         <span class="p">}</span>
 
-<div class="viewcode-block" id="Substitution.get_oxi_state"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Substitution.get_oxi_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_oxi_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Get the oxidation state of the defect.</span>
+    <span class="k">def</span> <span class="nf">_guess_oxi_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Best guess for the oxidation state of the defect.</span>
 
 <span class="sd">        For a substitution defect, the oxidation state of the defect is given</span>
 <span class="sd">        by the difference between the oxidation state of the new and old atoms.</span>
@@ -577,7 +576,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">orig_site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defect_site</span>
         <span class="n">sub_site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defect_structure</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_site_index</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">sub_site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">oxi_state</span> <span class="o">-</span> <span class="n">orig_site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">oxi_state</span></div>
+        <span class="k">return</span> <span class="n">sub_site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">oxi_state</span> <span class="o">-</span> <span class="n">orig_site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">oxi_state</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Representation of a vacancy defect.&quot;&quot;&quot;</span>
@@ -596,7 +595,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
         <span class="n">site</span><span class="p">:</span> <span class="n">PeriodicSite</span><span class="p">,</span>
-        <span class="n">multiplicity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">multiplicity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">oxi_state</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -619,19 +618,26 @@
             <span class="s2">&quot;Interstitial multiplicity should be determined by the generator.&quot;</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Interstitial.name"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Interstitial.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Name of the defect.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">get_element</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">)</span><span class="si">}</span><span class="s2">_i&quot;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">get_element</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">)</span><span class="si">}</span><span class="s2">_i&quot;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">defect_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns the defect structure.&quot;&quot;&quot;</span>
         <span class="n">struct</span><span class="p">:</span> <span class="n">Structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">int_states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">icsd_oxidation_states</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">int_states</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">int_states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">oxidation_states</span>
-        <span class="n">int_oxi</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">int_states</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">abs</span><span class="p">)</span>
-        <span class="n">int_specie</span> <span class="o">=</span> <span class="n">Species</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">int_oxi</span><span class="p">)</span>
+        <span class="c1"># use the highest value oxidation state among the two most popular ones</span>
+        <span class="c1"># found in the ICSD</span>
+        <span class="n">inter_states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">icsd_oxidation_states</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inter_states</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No oxidation states found for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="s2">&quot;in ICSD using `oxidation_states` without frequencuy ranking.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">inter_states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">oxidation_states</span>
+        <span class="n">inter_oxi</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">inter_states</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">abs</span><span class="p">)</span>
+        <span class="n">int_specie</span> <span class="o">=</span> <span class="n">Species</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">inter_oxi</span><span class="p">)</span>
         <span class="n">struct</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
             <span class="mi">0</span><span class="p">,</span>
             <span class="n">species</span><span class="o">=</span><span class="n">int_specie</span><span class="p">,</span>
@@ -655,8 +661,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">element</span><span class="p">:</span> <span class="o">+</span><span class="mi">1</span><span class="p">,</span>
         <span class="p">}</span>
 
-<div class="viewcode-block" id="Interstitial.get_oxi_state"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Interstitial.get_oxi_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_oxi_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Get the oxidation state of the defect.</span>
+    <span class="k">def</span> <span class="nf">_guess_oxi_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Best guess for the oxidation state of the defect.</span>
 
 <span class="sd">        For interstitials, just use the oxidation state of the site.</span>
 <span class="sd">        The oxidation of the interstitial site is determined by highest</span>
@@ -666,7 +672,7 @@
 <span class="sd">            float: The oxidation state of the defect.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sub_site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defect_structure</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_site_index</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">sub_site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">oxi_state</span></div>
+        <span class="k">return</span> <span class="n">sub_site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">oxi_state</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Representation of a vacancy defect.&quot;&quot;&quot;</span>
