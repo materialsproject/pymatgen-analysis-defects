@@ -239,9 +239,11 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
 <p>Analyze the charge density and create new candidate structures by inserting at each charge minima
 The similar inserterd structures are given the same uniqueness label.</p>
-<p><strong>Warning</strong>: This works best with AECCAR data since CHGCAR data often contains spurious local minima in the core.
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>{warning}
+This works best with AECCAR data since CHGCAR data often contains spurious local minima in the core.
 However you can still use CHGCAR with an appropriate max_avg_charge value.</p>
-<p><strong>Note</strong>: Since the user might want to rerun their analysis with different <cite>avg_charge</cite> and <cite>max_avg_charge</cite> values,
+<p><a href="#id5"><span class="problematic" id="id6">``</span></a><cite>{note}
+Since the user might want to rerun their analysis with different `avg_charge</cite> and <cite>max_avg_charge</cite> values,
 we will generate and store all the ion-inserted structure and their uniqueness labels first and allow the user to
 get the filtered and labeled results.</p>
 <p>If you use this code please cite the following paper:

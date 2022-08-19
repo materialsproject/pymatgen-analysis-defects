@@ -627,10 +627,12 @@
 <span class="sd">    Analyze the charge density and create new candidate structures by inserting at each charge minima</span>
 <span class="sd">    The similar inserterd structures are given the same uniqueness label.</span>
 
-<span class="sd">    **Warning**: This works best with AECCAR data since CHGCAR data often contains spurious local minima in the core.</span>
+<span class="sd">    ```{warning}</span>
+<span class="sd">    This works best with AECCAR data since CHGCAR data often contains spurious local minima in the core.</span>
 <span class="sd">    However you can still use CHGCAR with an appropriate max_avg_charge value.</span>
 
-<span class="sd">    **Note**: Since the user might want to rerun their analysis with different `avg_charge` and `max_avg_charge` values,</span>
+<span class="sd">    ```{note}</span>
+<span class="sd">    Since the user might want to rerun their analysis with different `avg_charge` and `max_avg_charge` values,</span>
 <span class="sd">    we will generate and store all the ion-inserted structure and their uniqueness labels first and allow the user to</span>
 <span class="sd">    get the filtered and labeled results.</span>
 
