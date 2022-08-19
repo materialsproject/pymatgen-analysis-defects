@@ -395,10 +395,12 @@ class ChargeInsertionAnalyzer(MSONable):
     Analyze the charge density and create new candidate structures by inserting at each charge minima
     The similar inserterd structures are given the same uniqueness label.
 
-    **Warning**: This works best with AECCAR data since CHGCAR data often contains spurious local minima in the core.
+    ```{warning}
+    This works best with AECCAR data since CHGCAR data often contains spurious local minima in the core.
     However you can still use CHGCAR with an appropriate max_avg_charge value.
 
-    **Note**: Since the user might want to rerun their analysis with different `avg_charge` and `max_avg_charge` values,
+    ```{note}
+    Since the user might want to rerun their analysis with different `avg_charge` and `max_avg_charge` values,
     we will generate and store all the ion-inserted structure and their uniqueness labels first and allow the user to
     get the filtered and labeled results.
 
