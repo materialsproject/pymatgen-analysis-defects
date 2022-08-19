@@ -1,5 +1,5 @@
 import numpy as np
-from pymatgen.core.periodic_table import Specie
+from pymatgen.core.periodic_table import Element, Specie
 
 from pymatgen.analysis.defects.core import (
     Interstitial,
@@ -21,6 +21,7 @@ def test_vacancy(gan_struct):
     assert vac.get_supercell_structure().formula == "Ga63 N64"
     assert vac.name == "Va_Ga"
     assert vac == vac
+    assert vac.element_changes == {Element("Ga"): -1}
 
 
 def test_substitution(gan_struct):
@@ -40,6 +41,7 @@ def test_substitution(gan_struct):
     assert sc.formula == "Ga64 N63 O1"
     assert sub.name == "O_N"
     assert sub == sub
+    assert sub.element_changes == {Element("N"): -1, Element("O"): 1}
 
 
 def test_interstitial(gan_struct):
@@ -53,3 +55,5 @@ def test_interstitial(gan_struct):
     sc = inter.get_supercell_structure()
     assert sc.formula == "Ga64 N65"
     assert inter.name == "N_i"
+    assert str(inter) == "N intersitial site at at site [0.00,0.00,0.75]"
+    assert inter.element_changes == {Element("N"): 1}
