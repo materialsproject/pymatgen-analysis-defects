@@ -395,20 +395,18 @@ class ChargeInsertionAnalyzer(MSONable):
     Analyze the charge density and create new candidate structures by inserting at each charge minima
     The similar inserterd structures are given the same uniqueness label.
 
-    ```{warning}
-    This works best with AECCAR data since CHGCAR data often contains spurious local minima in the core.
-    However you can still use CHGCAR with an appropriate max_avg_charge value.
-    ```
+    .. note::
+        The charge density analysis works best with AECCAR data since CHGCAR data
+        often contains spurious local minima in the core. However you can still use CHGCAR
+        with an appropriate ``max_avg_charge`` value.
 
-    ```{note}
-    Since the user might want to rerun their analysis with different `avg_charge` and `max_avg_charge` values,
-    we will generate and store all the ion-inserted structure and their uniqueness labels first and allow the user to
-    get the filtered and labeled results.
-    ```
+        Since the user might want to rerun their analysis with different ``avg_charge`` and ``max_avg_charge`` values,
+        we will generate and store all the ion-inserted structure and their uniqueness labels first and allow
+        the user to get the filtered and labeled results.
 
-    If you use this code please cite the following paper:
-    J.-X. Shen et al.: npj Comput. Mater. 6, 1 (2020)
-    https://www.nature.com/articles/s41524-020-00422-3
+        If you use this code please cite the following paper:
+        J.-X. Shen et al.: npj Comput. Mater. 6, 1 (2020)
+        https://www.nature.com/articles/s41524-020-00422-3
     """
 
     def __init__(
@@ -445,7 +443,7 @@ class ChargeInsertionAnalyzer(MSONable):
         2. Group the candidate sites by symmetry
         3. Label the groups by structure matching
         4. Since the average charge density is the most expensive part,
-            we will leave this until the end.
+        we will leave this until the end.
 
         Returns:
             list[tuple[list[float], int]]: A list of tuples of the form (fcoords, label)

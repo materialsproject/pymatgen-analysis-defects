@@ -300,7 +300,7 @@ class FormationEnergyDiagram(MSONable):
                 The VBM of the bulk crystal.
             api_key:
                 The api key to access the materials project database.
-                If None, the key from your `~/.pmgrc.yaml` file will be used.
+                If None, the key from your ``~/.pmgrc.yaml`` file will be used.
             band_gap:
                 The band gap of the bulk crystal.
             inc_inf_values:

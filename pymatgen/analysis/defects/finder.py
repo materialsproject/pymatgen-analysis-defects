@@ -238,8 +238,8 @@ def best_match(sv: SiteVec, sgs: List[SiteGroup]) -> Tuple[SiteGroup, float]:
         symmetrically equivalent sites in the pristine structure
 
     Returns:
-        SiteGroup: The group that represents the best match for `sv`
-        float: The cosine similarity between `sv` and the best match
+        SiteGroup: The group that represents the best match for ``sv``
+        float: The cosine similarity between ``sv`` and the best match
 
     """
     best_match = None
