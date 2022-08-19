@@ -18,6 +18,7 @@ from pymatgen.analysis.local_env import cn_opt_params
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.core import Lattice, Structure
 from pymatgen.io.vasp import VolumetricData
+from pymatgen.io.vasp.sets import get_valid_magmom_struct
 from scipy.cluster.hierarchy import fcluster, linkage
 from scipy.spatial.distance import squareform
 
@@ -461,11 +462,11 @@ class ChargeInsertionAnalyzer(MSONable):
         inserted_structs = []
         for fpos in local_minima:
             tmp_struct = self.chgcar.structure.copy()
+            get_valid_magmom_struct(tmp_struct, inplace=True, spin_mode="none")
             tmp_struct.insert(
                 0,
                 self.working_ion,
                 fpos,
-                properties=dict(magmom=0),
             )
             tmp_struct.sort()
             inserted_structs.append(tmp_struct)
@@ -500,7 +501,7 @@ class ChargeInsertionAnalyzer(MSONable):
         avg_chg_first_member = {}
         for lab, g in lab_groups.items():
             avg_chg_first_member[lab] = get_avg_chg(
-                self.chgcar, fcoord=self.labeled_sites[g[0]][0], radius=avg_radius
+                self.chgcar, fcoord=self.local_minima[g[0]], radius=avg_radius
             )
 
         res = []

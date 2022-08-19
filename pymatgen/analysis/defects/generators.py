@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from typing import Iterable
+from typing import Generator
 
 from monty.json import MSONable
 from pymatgen.core import Element, PeriodicSite, Species, Structure
@@ -37,10 +37,14 @@ class DefectGenerator(MSONable, metaclass=ABCMeta):
             yield defect
 
     @abstractmethod
-    def generate_defects(self) -> Iterable[Defect]:
-        """
-        Generate a list of symmetry-distinct site objects, the yield their corresponding
-        defect objects.
+    def generate_defects(self, **kwargs) -> Generator[Defect, None, None]:
+        """Generate a list of symmetry-distinct site objects,
+
+        Args:
+            **kwargs: Additional keyword arguments for the ``Defect`` constructor.
+
+        Returns:
+            Generator[Defect, None, None]: Generator that yields a list of ``Defect`` objects
         """
 
 
@@ -58,14 +62,21 @@ class VacancyGenerator(DefectGenerator):
         all_species = [*map(str, structure.composition.elements)]
         self.rm_species = str(rm_species) if rm_species else all_species
 
-    def generate_defects(self) -> Iterable[Defect]:
-        """Generate the vacancy objects."""
+    def generate_defects(self, **kwargs) -> Generator[Vacancy, None, None]:
+        """Generate a vacancy defects.
+
+        Args:
+            **kwargs: Additional keyword arguments for the ``Defect`` constructor.
+
+        Returns:
+            Generator[Vacancy, None, None]: Generator that yields a list of ``Defect`` objects
+        """
         sga = SpacegroupAnalyzer(self.structure)
         sym_struct = sga.get_symmetrized_structure()
         for site_group in sym_struct.equivalent_sites:
             site = site_group[0]
             if element_str(site.specie) in self.rm_species:
-                yield Vacancy(self.structure, site)
+                yield Vacancy(self.structure, site, **kwargs)
 
 
 class SubstitutionGenerator(DefectGenerator):
@@ -82,8 +93,15 @@ class SubstitutionGenerator(DefectGenerator):
         super().__init__(structure)
         self.substitution = substitution
 
-    def generate_defects(self) -> Iterable[Defect]:
-        """Generate the substitution objects."""
+    def generate_defects(self, **kwargs) -> Generator[Substitution, None, None]:
+        """Generate a substitution defects.
+
+        Args:
+            **kwargs: Additional keyword arguments for the ``Substitution`` constructor.
+
+        Returns:
+            Generator[Substitution, None, None]: Generator that yields a list of ``Substitution`` objects
+        """
         sga = SpacegroupAnalyzer(self.structure)
         sym_struct = sga.get_symmetrized_structure()
         for site_group in sym_struct.equivalent_sites:
@@ -98,7 +116,7 @@ class SubstitutionGenerator(DefectGenerator):
                 self.structure.lattice,
                 properties=site.properties,
             )
-            yield Substitution(self.structure, sub_site)
+            yield Substitution(self.structure, sub_site, **kwargs)
 
 
 class InterstitialGenerator(DefectGenerator):
@@ -157,17 +175,26 @@ class InterstitialGenerator(DefectGenerator):
         """
         cia = ChargeInsertionAnalyzer(chgcar, **kwargs)
         insert_groups = cia.filter_and_group(
-            avg_radius=avg_radius, max_radius=max_avg_charge
+            avg_radius=avg_radius, max_avg_charge=max_avg_charge
         )
-        i_pos = [group[0] for _, group in insert_groups]
+        i_pos = [cia.local_minima[group[0]] for _, group in insert_groups]
         if n_groups is not None:
             i_pos = i_pos[:n_groups]
         return cls(cia.chgcar.structure.copy(), insertions={i_species: i_pos})
 
-    def generate_defects(self) -> Iterable[Defect]:
-        """Generate the interstitial objects."""
-        for site in self.i_sites:
-            yield Interstitial(self.structure, site)
+    def generate_defects(self, **kwargs) -> Generator[Interstitial, None, None]:
+        """Generate interstitials defects.
+
+        Args:
+            **kwargs: Additional keyword arguments for the ``Interstitial`` constructor.
+
+        Returns:
+            Generator[Interstitial, None, None]: Generator that yields a list of ``Interstitial`` objects
+        """
+        for el_str, pos_list in self.insertions.items():
+            for pos in pos_list:
+                isite = PeriodicSite(Species(el_str), pos, self.structure.lattice)
+                yield Interstitial(self.structure, isite, **kwargs)
 
 
 def element_str(sp_or_el: Species | Element) -> str:
