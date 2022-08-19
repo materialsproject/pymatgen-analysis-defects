@@ -269,8 +269,8 @@ where <cite>index_group</cite> are the indices of <cite>self.local_minima</cite>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.inserted_structures_and_labels">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inserted_structures_and_labels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">pymatgen.core.structure.Structure</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.inserted_structures_and_labels" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.labeled_sites">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labeled_sites</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.labeled_sites" title="Permalink to this definition">#</a></dt>
 <dd><p>Get a list of inserted structures and a list of structure matching labels.</p>
 <p>The process is as follows:
 1. Get a list of candidate sites by finiding the local minima
@@ -282,11 +282,10 @@ where <cite>index_group</cite> are the indices of <cite>self.local_minima</cite>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The list of inserted structures
-list[int]: The list of structure matching labels</p>
+<dd class="field-odd"><p>A list of tuples of the form (fcoords, label)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>list[Structure]</p>
+<dd class="field-even"><p>list[tuple[list[float], int]]</p>
 </dd>
 </dl>
 </dd></dl>
