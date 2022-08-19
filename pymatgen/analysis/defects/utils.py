@@ -422,8 +422,6 @@ class ChargeInsertionAnalyzer(MSONable):
         Args:
             chgcar: The charge density object to analyze
             working_ion: The working ion to be inserted
-            avg_radius: The radius used to calculate average charge density at each site
-            max_avg_charge: Do no consider local minmas with avg charge above this value.
             clustering_tol: Distance tolerance for grouping sites together
             ltol: StructureMatcher ltol parameter
             stol: StructureMatcher stol parameter
@@ -432,14 +430,12 @@ class ChargeInsertionAnalyzer(MSONable):
         self.chgcar = chgcar
         self.working_ion = working_ion
         self.sm = StructureMatcher(ltol=ltol, stol=stol, angle_tol=angle_tol)
-        # self.max_avg_charge = max_avg_charge
-        # self.avg_radius = avg_radius
         self.clustering_tol = clustering_tol
 
     @cached_property
     def inserted_structures_and_labels(
         self,
-    ) -> tuple[list[npt.ArrayLike], list[Structure], list[int]]:
+    ) -> tuple[list[Structure], list[list[float]], list[int]]:
         """Get a list of inserted structures and a list of structure matching labels.
 
         The process is as follows:
@@ -477,7 +473,7 @@ class ChargeInsertionAnalyzer(MSONable):
 
         # Label the groups by structure matching
         site_labels = generic_groupby(inserted_structs, comp=self.sm.fit)
-        return inserted_structs, local_minima, site_labels
+        return inserted_structs, local_minima.tolist(), site_labels
 
     @cached_property
     def local_minima(self) -> list[npt.ArrayLike]:
@@ -521,46 +517,3 @@ class ChargeInsertionAnalyzer(MSONable):
             res.append((avg_chg, lab_groups[lab]))
 
         return res
-
-    # def get_labels(self):
-    #     """
-    #     Populate the extrema dataframe (self._extrema_df) with the insertion structure.
-    #     Then, group the sites by structure similarity.
-    #     Finally store a full list of the insertion sites, with their labels as a Structure Object
-    #     """
-
-    #     self.get_local_extrema()
-
-    #     if len(self._extrema_df) > 1:
-    #         self.cluster_nodes(tol=self.clustering_tol)
-
-    #     self.sort_sites_by_integrated_chg(r=self.avg_radius)
-
-    #     inserted_structs = []
-
-    #     self._extrema_df = self._extrema_df[self._extrema_df.avg_charge_den <= self.max_avg_charge]
-
-    #     for itr, li_site in self._extrema_df.iterrows():
-    #         if li_site["avg_charge_den"] > self.max_avg_charge:
-    #             continue
-    #         tmp_struct = self.chgcar.structure.copy()
-    #         li_site = self._extrema_df.iloc[itr]
-    #         tmp_struct.insert(
-    #             0,
-    #             self.working_ion,
-    #             [li_site["a"], li_site["b"], li_site["c"]],
-    #             properties=dict(magmom=0),
-    #         )
-    #         tmp_struct.sort()
-    #         inserted_structs.append(tmp_struct)
-    #     self._extrema_df["inserted_struct"] = inserted_structs
-    #     site_labels = generic_groupby(self._extrema_df.inserted_struct, comp=self.sm.fit)
-    #     self._extrema_df["site_label"] = site_labels
-
-    #     # generate the structure with only Li atoms for NN analysis
-    #     self.allsites_struct = Structure(
-    #         self.structure.lattice,
-    #         np.repeat(self.working_ion, len(self._extrema_df)),
-    #         self._extrema_df[["a", "b", "c"]].values,
-    #         site_properties={"label": self._extrema_df[["site_label"]].values.flatten()},
-    #     )

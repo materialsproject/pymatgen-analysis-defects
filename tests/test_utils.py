@@ -3,6 +3,7 @@ import pytest
 from pymatgen.io.vasp.outputs import Chgcar
 
 from pymatgen.analysis.defects.utils import (
+    ChargeInsertionAnalyzer,
     cluster_nodes,
     get_avg_chg,
     get_local_extrema,
@@ -47,3 +48,24 @@ def test_get_avg_chg(gan_struct):
     avg_chg_sphere = get_avg_chg(chgcar, fpos)
     avg_chg = np.sum(chgcar.data["total"]) / chgcar.ngridpts / chgcar.structure.volume
     pytest.approx(avg_chg_sphere, avg_chg)
+
+
+def test_chgcar_insertion(chgcar_fe3o4):
+    chgcar = chgcar_fe3o4
+    insert_ref = [
+        (
+            0.03692438178614583,
+            [[0.0, 0.0, 0.0], [0.0, 0.0, 0.5], [0.0, 0.5, 0.0], [0.5, 0.0, 0.0]],
+        ),  # corners and edge centers
+        (
+            0.10068764899215804,
+            [[0.375, 0.375, 0.375], [0.625, 0.625, 0.625]],
+        ),  # center of Fe-O cages
+    ]
+    cia = ChargeInsertionAnalyzer(chgcar)
+    insert_groups = cia.filter_and_group(max_avg_charge=0.5)
+    for (avg_chg, group), (ref_chg, ref_fpos) in zip(insert_groups, insert_ref):
+        print([cia.local_minima[i] for i in group])
+        fpos = sorted([cia.local_minima[i] for i in group])
+        pytest.approx(avg_chg, ref_chg)
+        np.allclose(fpos, ref_fpos)

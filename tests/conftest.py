@@ -5,7 +5,7 @@ import pytest
 from monty.serialization import loadfn
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Specie
-from pymatgen.io.vasp import Locpot, Vasprun
+from pymatgen.io.vasp import Chgcar, Locpot, Vasprun
 
 from pymatgen.analysis.defects.core import PeriodicSite, Substitution
 from pymatgen.analysis.defects.thermo import DefectEntry
@@ -88,3 +88,8 @@ def defect_entries_Mg_Ga(data_Mg_Ga, defect_Mg_Ga):
         defect_entries[qq] = defect_entry
         plot_data[qq] = p_data
     return defect_entries, plot_data
+
+
+@pytest.fixture(scope="session")
+def chgcar_fe3o4(test_dir):
+    return Chgcar.from_file(test_dir / "CHGCAR.Fe3O4.vasp")
