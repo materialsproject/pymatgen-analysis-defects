@@ -294,7 +294,9 @@
         <span class="k">if</span> <span class="n">oxi_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># TODO this step might take time so wrap it in a timer</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">add_oxidation_state_by_guess</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">oxi_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_oxi_state</span><span class="p">()</span> <span class="k">if</span> <span class="n">oxi_state</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">oxi_state</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">oxi_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_oxi_state</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">oxi_state</span> <span class="o">=</span> <span class="n">oxi_state</span>
 
 <div class="viewcode-block" id="Defect.get_multiplicity"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Defect.get_multiplicity">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">get_multiplicity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -464,6 +466,9 @@
 <div class="viewcode-block" id="Vacancy.get_oxi_state"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Vacancy.get_oxi_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_oxi_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Get the oxidation state of the defect.</span>
 
+<span class="sd">        For vacancies, the oxidation state is the opposite of the oxidation state of the</span>
+<span class="sd">        removed atom.</span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            float: The oxidation state of the defect.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -493,7 +498,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            structure: The structure of the defect.</span>
-<span class="sd">            site: replace the nearest site with this one.</span>
+<span class="sd">            site: Replace the nearest site with this one.</span>
 <span class="sd">            multiplicity: The multiplicity of the defect.</span>
 <span class="sd">            oxi_state: The oxidation state of the defect, if not specified,</span>
 <span class="sd">            this will be determined automatically.</span>
@@ -506,10 +511,9 @@
 <span class="sd">        This is required for concentration analysis and confirms that defect_site is</span>
 <span class="sd">        a site in bulk_structure.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">sga</span> <span class="o">=</span> <span class="n">SpacegroupAnalyzer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">)</span>
-        <span class="n">periodic_struc</span> <span class="o">=</span> <span class="n">sga</span><span class="o">.</span><span class="n">get_symmetrized_structure</span><span class="p">()</span>
+        <span class="n">symm_struct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symmetrized_structure</span>
         <span class="n">defect_site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_site_index</span><span class="p">]</span>
-        <span class="n">equivalent_sites</span> <span class="o">=</span> <span class="n">periodic_struc</span><span class="o">.</span><span class="n">find_equivalent_sites</span><span class="p">(</span><span class="n">defect_site</span><span class="p">)</span>
+        <span class="n">equivalent_sites</span> <span class="o">=</span> <span class="n">symm_struct</span><span class="o">.</span><span class="n">find_equivalent_sites</span><span class="p">(</span><span class="n">defect_site</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">equivalent_sites</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
@@ -565,6 +569,9 @@
 <div class="viewcode-block" id="Substitution.get_oxi_state"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Substitution.get_oxi_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_oxi_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Get the oxidation state of the defect.</span>
 
+<span class="sd">        For a substitution defect, the oxidation state of the defect is given</span>
+<span class="sd">        by the difference between the oxidation state of the new and old atoms.</span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            float: The oxidation state of the defect.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -580,6 +587,92 @@
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sub_species</span><span class="si">}</span><span class="s2"> subsitituted on the </span><span class="si">{</span><span class="n">rm_species</span><span class="si">}</span><span class="s2"> site at &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;at site #</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_site_index</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Interstitial"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Interstitial">[docs]</a><span class="k">class</span> <span class="nc">Interstitial</span><span class="p">(</span><span class="n">Defect</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interstitial Defect.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
+        <span class="n">site</span><span class="p">:</span> <span class="n">PeriodicSite</span><span class="p">,</span>
+        <span class="n">multiplicity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">oxi_state</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Initialize an interstitial defect object.</span>
+
+<span class="sd">        The interstitial defect effectively inserts the `site` object into the structure.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            structure: The structure of the defect.</span>
+<span class="sd">            site: Inserted site, also determines the species.</span>
+<span class="sd">            multiplicity: The multiplicity of the defect.</span>
+<span class="sd">            oxi_state: The oxidation state of the defect, if not specified,</span>
+<span class="sd">                this will be determined automatically.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">multiplicity</span><span class="p">,</span> <span class="n">oxi_state</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Interstitial.get_multiplicity"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Interstitial.get_multiplicity">[docs]</a>    <span class="k">def</span> <span class="nf">get_multiplicity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Determine the multiplicity of the defect site within the structure.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Interstitial multiplicity should be determined by the generator.&quot;</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Interstitial.name"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Interstitial.name">[docs]</a>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Name of the defect.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">get_element</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">)</span><span class="si">}</span><span class="s2">_i&quot;</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">defect_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the defect structure.&quot;&quot;&quot;</span>
+        <span class="n">struct</span><span class="p">:</span> <span class="n">Structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">int_states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">icsd_oxidation_states</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">int_states</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">int_states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">oxidation_states</span>
+        <span class="n">int_oxi</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">int_states</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">abs</span><span class="p">)</span>
+        <span class="n">int_specie</span> <span class="o">=</span> <span class="n">Species</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">int_oxi</span><span class="p">)</span>
+        <span class="n">struct</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="n">species</span><span class="o">=</span><span class="n">int_specie</span><span class="p">,</span>
+            <span class="n">coords</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">struct</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">defect_site_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get the index of the defect in the structure.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">element_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Element</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get the species changes of the intersitial defect.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict[Element, int]: The species changes of the defect.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">element</span><span class="p">:</span> <span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="Interstitial.get_oxi_state"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Interstitial.get_oxi_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_oxi_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get the oxidation state of the defect.</span>
+
+<span class="sd">        For interstitials, just use the oxidation state of the site.</span>
+<span class="sd">        The oxidation of the interstitial site is determined by highest</span>
+<span class="sd">        absolute value of the oxidation states of the inserted atom.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The oxidation state of the defect.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sub_site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defect_structure</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_site_index</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">sub_site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">oxi_state</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Representation of a vacancy defect.&quot;&quot;&quot;</span>
+        <span class="n">sub_species</span> <span class="o">=</span> <span class="n">get_element</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">)</span>
+        <span class="n">fpos_str</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sub_species</span><span class="si">}</span><span class="s2"> intersitial site at &quot;</span> <span class="sa">f</span><span class="s2">&quot;at site [</span><span class="si">{</span><span class="n">fpos_str</span><span class="si">}</span><span class="s2">]&quot;</span></div>
 
 
 <div class="viewcode-block" id="get_element"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.get_element">[docs]</a><span class="k">def</span> <span class="nf">get_element</span><span class="p">(</span><span class="n">sp_el</span><span class="p">:</span> <span class="n">Species</span> <span class="o">|</span> <span class="n">Element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Element</span><span class="p">:</span>
