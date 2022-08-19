@@ -66,7 +66,9 @@ class VacancyGenerator(DefectGenerator):
             self.rm_species = [*map(str, rm_species)]
 
         if not set(self.rm_species).issubset(all_species):
-            raise ValueError("rm_species must be a subset of the structure species.")
+            raise ValueError(
+                f"rm_species({rm_species}) must be a subset of the structure's species ({all_species})."
+            )
 
     def generate_defects(self, **kwargs) -> Generator[Vacancy, None, None]:
         """Generate a vacancy defects.
