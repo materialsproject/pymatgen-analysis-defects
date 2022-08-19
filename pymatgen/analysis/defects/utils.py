@@ -398,11 +398,13 @@ class ChargeInsertionAnalyzer(MSONable):
     ```{warning}
     This works best with AECCAR data since CHGCAR data often contains spurious local minima in the core.
     However you can still use CHGCAR with an appropriate max_avg_charge value.
+    ```
 
     ```{note}
     Since the user might want to rerun their analysis with different `avg_charge` and `max_avg_charge` values,
     we will generate and store all the ion-inserted structure and their uniqueness labels first and allow the user to
     get the filtered and labeled results.
+    ```
 
     If you use this code please cite the following paper:
     J.-X. Shen et al.: npj Comput. Mater. 6, 1 (2020)
