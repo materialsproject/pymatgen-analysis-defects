@@ -1,33 +1,41 @@
 """Utilities for defects module."""
 from __future__ import annotations
 
+import collections
 import logging
 import math
+import operator
 from copy import deepcopy
+from functools import cached_property
 from pathlib import Path
+from typing import Generator
 
 import numpy as np
 from monty.json import MSONable
+from numpy import typing as npt
 from numpy.linalg import norm
 from pymatgen.analysis.local_env import cn_opt_params
+from pymatgen.analysis.structure_matcher import StructureMatcher
+from pymatgen.core import Lattice, Structure
+from pymatgen.io.vasp import VolumetricData
+from scipy.cluster.hierarchy import fcluster, linkage
+from scipy.spatial.distance import squareform
 
 try:
-    pass
+    from skimage.feature import peak_local_max
 
     peak_local_max_found = True
 except ImportError:
     peak_local_max_found = False
 
 __author__ = (
-    "Danny Broberg, Shyam Dwaraknath, Bharat Medasani, Nils Zimmermann, "
+    "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath, Bharat Medasani, Nils Zimmermann, "
     "Geoffroy Hautier"
 )
-__copyright__ = "Copyright 2014, The Materials Project"
-__version__ = "1.0"
-__maintainer__ = "Danny Broberg, Shyam Dwaraknath"
-__email__ = "dbroberg@berkeley.edu, shyamd@lbl.gov"
+__maintainer__ = "Jimmy-Xuan Shen"
+__email__ = "jmmshn@gmail.com"
 __status__ = "Development"
-__date__ = "January 11, 2018"
+__date__ = "Aug 15, 2022"
 
 logger = logging.getLogger(__name__)
 hart_to_ev = 27.2114
@@ -112,7 +120,7 @@ def eV_to_k(energy):
     return math.sqrt(energy / invang_to_ev) * ang_to_bohr
 
 
-def genrecip(a1, a2, a3, encut):
+def genrecip(a1, a2, a3, encut) -> Generator[npt.ArrayLike, None, None]:
     """Generate reciprocal lattice vectors within the energy cutoff.
 
     Args:
@@ -120,6 +128,7 @@ def genrecip(a1, a2, a3, encut):
         a2: Lattice vector b (in Bohrs)
         a3: Lattice vector c (in Bohrs)
         encut: energy cut off in eV
+
     Returns:
         reciprocal lattice vectors with energy less than encut
     """
@@ -221,3 +230,281 @@ def get_zfile(
         return None
 
     raise FileNotFoundError(f"Could not find {base_name} or {base_name}.gz file.")
+
+
+def generic_groupby(list_in, comp=operator.eq):
+    """
+    Group a list of unsortable objects
+    Args:
+        list_in: A list of generic objects
+        comp: (Default value = operator.eq) The comparator
+    Returns:
+        [int] list of labels for the input list
+    """
+    list_out = [None] * len(list_in)
+    label_num = 0
+    for i1, ls1 in enumerate(list_out):
+        if ls1 is not None:
+            continue
+        list_out[i1] = label_num
+        for i2, ls2 in list(enumerate(list_out))[(i1 + 1) :]:
+            if comp(list_in[i1], list_in[i2]):
+                if ls2 is None:
+                    list_out[i2] = list_out[i1]
+                else:
+                    list_out[i1] = ls2
+                    label_num -= 1
+        label_num += 1
+    return list_out
+
+
+def get_local_extrema(chgcar: VolumetricData, find_min: bool = True) -> npt.NDArray:
+    """
+    Get all local extrema fractional coordinates in charge density,
+    searching for local minimum by default. Note that sites are NOT grouped
+    symmetrically.
+
+    Args:
+        find_min (bool): True to find local minimum else maximum, otherwise
+            find local maximum.
+
+    Returns:
+        extrema_coords (list): list of fractional coordinates corresponding
+            to local extrema.
+    """
+
+    if find_min:
+        sign = -1
+    else:
+        sign = 1
+
+    # Make 3x3x3 supercell
+    # This is a trick to resolve the periodical boundary issue.
+    # TODO: Add code to pyrho for max and min filtering.
+    total_chg = sign * chgcar.data["total"]
+    total_chg = np.tile(total_chg, reps=(3, 3, 3))
+    coordinates = peak_local_max(total_chg, min_distance=1)
+
+    # Remove duplicated sites introduced by supercell.
+    f_coords = [coord / total_chg.shape * 3 for coord in coordinates]
+    f_coords = [
+        f - 1 for f in f_coords if all(np.array(f) < 2) and all(np.array(f) >= 1)
+    ]
+
+    return np.array(f_coords)
+
+
+def remove_collisions(
+    fcoord: npt.ArrayLike, structure: Structure, min_dist: float = 0.5
+) -> npt.ArrayLike:
+    """
+    Removed points that are too close to existing atoms in the structure
+
+    Args:
+        min_dist(float): The minimum distance that a vertex needs to be
+            from existing atoms.
+    """
+    s_fcoord = structure.frac_coords
+    dist_matrix = structure.lattice.get_all_distances(fcoord, s_fcoord)
+    all_dist = np.min(dist_matrix, axis=1)
+    return np.array([fcoord[i] for i in range(len(fcoord)) if all_dist[i] >= min_dist])
+
+
+def cluster_nodes(
+    fcoords: npt.ArrayLike, lattice: Lattice, tol: float = 0.2
+) -> npt.NDArray:
+    """
+    Cluster nodes that are too close together using a tol.
+
+    Args:
+        tol (float): A distance tolerance. PBC is taken into account.
+    """
+    # Manually generate the distance matrix (which needs to take into
+    # account PBC.
+    dist_matrix = np.array(lattice.get_all_distances(fcoords, fcoords))
+    dist_matrix = (dist_matrix + dist_matrix.T) / 2
+
+    for i in range(len(dist_matrix)):
+        dist_matrix[i, i] = 0
+    condensed_m = squareform(dist_matrix)
+    z = linkage(condensed_m)
+    cn = fcluster(z, tol, criterion="distance")
+    merged_fcoords = []
+
+    for n in set(cn):
+        frac_coords = []
+        for i, j in enumerate(np.where(cn == n)[0]):
+            if i == 0:
+                frac_coords.append(fcoords[j])
+            else:
+                fcoord = fcoords[j]
+                # We need the image to combine the frac_coords properly.
+                d, image = lattice.get_distance_and_image(frac_coords[0], fcoord)
+                frac_coords.append(fcoord + image)
+        merged_fcoords.append(np.average(frac_coords, axis=0))
+
+    merged_fcoords = [f - np.floor(f) for f in merged_fcoords]
+    merged_fcoords = [f * (np.abs(f - 1) > 1e-15) for f in merged_fcoords]
+    # the second line for fringe cases like
+    # np.array([ 5.0000000e-01 -4.4408921e-17  5.0000000e-01])
+    # where the shift to [0,1) does not work due to float precision
+
+    return np.array(merged_fcoords)
+
+
+def get_avg_chg(
+    chgcar: VolumetricData, fcoord: npt.ArrayLike, radius: float = 0.4
+) -> float:
+    """Get the average charge in a sphere.
+
+    Args:
+        chgcar: The charge density.
+        fcoord: The fractional coordinates of the center of the sphere.
+        radius: The radius of the sphere in Angstroms.
+
+    Returns:
+        The average charge in the sphere.
+
+
+    """
+    # makesure fcoord is an array
+    fcoord = np.array(fcoord)
+
+    def _dist_mat(pos_frac):
+        # return a matrix that contains the distances
+        aa = np.linspace(0, 1, len(chgcar.get_axis_grid(0)), endpoint=False)
+        bb = np.linspace(0, 1, len(chgcar.get_axis_grid(1)), endpoint=False)
+        cc = np.linspace(0, 1, len(chgcar.get_axis_grid(2)), endpoint=False)
+        AA, BB, CC = np.meshgrid(aa, bb, cc, indexing="ij")
+        dist_from_pos = chgcar.structure.lattice.get_all_distances(
+            fcoords1=np.vstack([AA.flatten(), BB.flatten(), CC.flatten()]).T,
+            fcoords2=pos_frac,
+        )
+        return dist_from_pos.reshape(AA.shape)
+
+    if np.any(fcoord < 0) or np.any(fcoord > 1):
+        raise ValueError("f_coords must be in [0,1)")
+    mask = _dist_mat(fcoord) < radius
+    vol_sphere = chgcar.structure.volume * (mask.sum() / chgcar.ngridpts)
+    avg_chg = np.sum(chgcar.data["total"] * mask) / mask.size / vol_sphere
+    return avg_chg
+
+
+class ChargeInsertionAnalyzer(MSONable):
+    """
+    Analyze the charge density and create new candidate structures by inserting at each charge minima
+    The similar inserterd structures are given the same uniqueness label.
+
+    **Warning**: This works best with AECCAR data since CHGCAR data often contains spurious local minima in the core.
+    However you can still use CHGCAR with an appropriate max_avg_charge value.
+
+    **Note**: Since the user might want to rerun their analysis with different `avg_charge` and `max_avg_charge` values,
+    we will generate and store all the ion-inserted structure and their uniqueness labels first and allow the user to
+    get the filtered and labeled results.
+
+    If you use this code please cite the following paper:
+    J.-X. Shen et al.: npj Comput. Mater. 6, 1 (2020)
+    https://www.nature.com/articles/s41524-020-00422-3
+    """
+
+    def __init__(
+        self,
+        chgcar: VolumetricData,
+        working_ion: str = "Li",
+        clustering_tol: float = 0.6,
+        ltol: float = 0.2,
+        stol: float = 0.3,
+        angle_tol: float = 5,
+    ):
+        """
+        Args:
+            chgcar: The charge density object to analyze
+            working_ion: The working ion to be inserted
+            clustering_tol: Distance tolerance for grouping sites together
+            ltol: StructureMatcher ltol parameter
+            stol: StructureMatcher stol parameter
+            angle_tol: StructureMatcher angle_tol parameter
+        """
+        self.chgcar = chgcar
+        self.working_ion = working_ion
+        self.sm = StructureMatcher(ltol=ltol, stol=stol, angle_tol=angle_tol)
+        self.clustering_tol = clustering_tol
+
+    @cached_property
+    def labeled_sites(
+        self,
+    ) -> list[tuple[list[float], int]]:
+        """Get a list of inserted structures and a list of structure matching labels.
+
+        The process is as follows:
+        1. Get a list of candidate sites by finiding the local minima
+        2. Group the candidate sites by symmetry
+        3. Label the groups by structure matching
+        4. Since the average charge density is the most expensive part,
+            we will leave this until the end.
+
+        Returns:
+            list[tuple[list[float], int]]: A list of tuples of the form (fcoords, label)
+        """
+        # Get a reasonablly reduced set of candidate sites first
+        local_minima = get_local_extrema(self.chgcar, find_min=True)
+        local_minima = remove_collisions(
+            local_minima, structure=self.chgcar.structure, min_dist=self.clustering_tol
+        )
+        local_minima = cluster_nodes(
+            local_minima, lattice=self.chgcar.structure.lattice, tol=self.clustering_tol
+        )
+
+        # Group the candidate sites by symmetry
+        inserted_structs = []
+        for fpos in local_minima:
+            tmp_struct = self.chgcar.structure.copy()
+            tmp_struct.insert(
+                0,
+                self.working_ion,
+                fpos,
+                properties=dict(magmom=0),
+            )
+            tmp_struct.sort()
+            inserted_structs.append(tmp_struct)
+
+        # Label the groups by structure matching
+        site_labels = generic_groupby(inserted_structs, comp=self.sm.fit)
+        return [*zip(local_minima.tolist(), site_labels)]
+
+    @cached_property
+    def local_minima(self) -> list[npt.ArrayLike]:
+        """Get the full list of local minima."""
+        return [s for s, l in self.labeled_sites]
+
+    def filter_and_group(
+        self, avg_radius: float = 0.4, max_avg_charge: float = 1.0
+    ) -> list[tuple[float, list[int]]]:
+        """Filter and group the inserted structures.
+
+        Args:
+            avg_radius: The radius used to calculate average charge density.
+            max_avg_charge: Do no consider local minmas with avg charge above this value.
+
+        Returns:
+            list[tuple[float, list[int]]]: The list of `(avg_charge, index_group)` tuples
+            where `index_group` are the indices of `self.local_minima` that are in the group.
+        """
+        # measure the charge density at one representative site of each group
+        lab_groups = collections.defaultdict(list)
+        for idx, (_, lab) in enumerate(self.labeled_sites):
+            lab_groups[lab].append(idx)
+
+        avg_chg_first_member = {}
+        for lab, g in lab_groups.items():
+            avg_chg_first_member[lab] = get_avg_chg(
+                self.chgcar, fcoord=self.labeled_sites[g[0]][0], radius=avg_radius
+            )
+
+        res = []
+        for lab, avg_chg in sorted(avg_chg_first_member.items(), key=lambda x: x[1]):
+            if avg_chg > max_avg_charge:
+                break
+            res.append((avg_chg, lab_groups[lab]))
+
+        return res
