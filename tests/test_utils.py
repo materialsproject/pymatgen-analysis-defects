@@ -68,4 +68,4 @@ def test_chgcar_insertion(chgcar_fe3o4):
         print([cia.local_minima[i] for i in group])
         fpos = sorted([cia.local_minima[i] for i in group])
         pytest.approx(avg_chg, ref_chg)
-        np.allclose(fpos, ref_fpos)
+        assert np.allclose(fpos, ref_fpos)

@@ -45,10 +45,9 @@ class Defect(MSONable, metaclass=ABCMeta):
         Args:
             structure: The structure of the defect.
             site: The site
-            charge: The charge of the defect.
             multiplicity: The multiplicity of the defect.
             oxi_state: The oxidation state of the defect, if not specified,
-            this will be determined automatically.
+                this will be determined automatically.
             symprec: Tolerance for symmetry finding.
             angle_tolerance: Angle tolerance for symmetry finding.
         """
@@ -62,7 +61,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         if oxi_state is None:
             # TODO this step might take time so wrap it in a timer
             self.structure.add_oxidation_state_by_guess()
-            self.oxi_state = self.get_oxi_state()
+            self.oxi_state = self._guess_oxi_state()
         else:
             self.oxi_state = oxi_state
 
@@ -75,8 +74,8 @@ class Defect(MSONable, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_oxi_state(self) -> float:
-        """Get the oxidation state of the defect.
+    def _guess_oxi_state(self) -> float:
+        """Best guess for the oxidation state of the defect.
 
         Returns:
             float: The oxidation state of the defect.
@@ -108,7 +107,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         Returns:
             list of possible charge states
         """
-        if self.oxi_state.is_integer():
+        if isinstance(self.oxi_state, int) or self.oxi_state.is_integer():
             oxi_state = int(self.oxi_state)
         else:
             raise ValueError("Oxidation state must be an integer")
@@ -231,8 +230,8 @@ class Vacancy(Defect):
         """
         return {self.structure.sites[self.defect_site_index].specie.element: -1}
 
-    def get_oxi_state(self) -> float:
-        """Get the oxidation state of the defect.
+    def _guess_oxi_state(self) -> float:
+        """Best guess for the oxidation state of the defect.
 
         For vacancies, the oxidation state is the opposite of the oxidation state of the
         removed atom.
@@ -334,8 +333,8 @@ class Substitution(Defect):
             self.site.specie.element: +1,
         }
 
-    def get_oxi_state(self) -> float:
-        """Get the oxidation state of the defect.
+    def _guess_oxi_state(self) -> float:
+        """Best guess for the oxidation state of the defect.
 
         For a substitution defect, the oxidation state of the defect is given
         by the difference between the oxidation state of the new and old atoms.
@@ -364,7 +363,7 @@ class Interstitial(Defect):
         self,
         structure: Structure,
         site: PeriodicSite,
-        multiplicity: int | None = None,
+        multiplicity: int = 1,
         oxi_state: float | None = None,
         **kwargs,
     ) -> None:
@@ -387,6 +386,7 @@ class Interstitial(Defect):
             "Interstitial multiplicity should be determined by the generator."
         )
 
+    @property
     def name(self) -> str:
         """Name of the defect."""
         return f"{get_element(self.site.specie)}_i"
@@ -395,11 +395,17 @@ class Interstitial(Defect):
     def defect_structure(self):
         """Returns the defect structure."""
         struct: Structure = self.structure.copy()
-        int_states = self.site.specie.icsd_oxidation_states
-        if len(int_states) == 0:
-            int_states = self.site.specie.oxidation_states
-        int_oxi = max(int_states, key=abs)
-        int_specie = Species(self.site.specie.symbol, int_oxi)
+        # use the highest value oxidation state among the two most popular ones
+        # found in the ICSD
+        inter_states = self.site.specie.icsd_oxidation_states[:2]
+        if len(inter_states) == 0:
+            logger.warning(
+                f"No oxidation states found for {self.site.specie.symbol}. "
+                "in ICSD using `oxidation_states` without frequencuy ranking."
+            )
+            inter_states = self.site.specie.oxidation_states
+        inter_oxi = max(inter_states, key=abs)
+        int_specie = Species(self.site.specie.symbol, inter_oxi)
         struct.insert(
             0,
             species=int_specie,
@@ -423,8 +429,8 @@ class Interstitial(Defect):
             self.site.specie.element: +1,
         }
 
-    def get_oxi_state(self) -> float:
-        """Get the oxidation state of the defect.
+    def _guess_oxi_state(self) -> float:
+        """Best guess for the oxidation state of the defect.
 
         For interstitials, just use the oxidation state of the site.
         The oxidation of the interstitial site is determined by highest
