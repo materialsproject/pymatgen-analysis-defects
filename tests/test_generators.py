@@ -9,7 +9,6 @@ from pymatgen.analysis.defects.generators import (
 
 
 def test_vacancy_generators(gan_struct):
-    # Vacancy
     vacancy_generator = VacancyGenerator(gan_struct)
     for defect in vacancy_generator:
         assert isinstance(defect, Vacancy)
@@ -24,7 +23,6 @@ def test_vacancy_generators(gan_struct):
 
 
 def test_substitution_generators(gan_struct):
-    # Substitution
     sub_generator = SubstitutionGenerator(gan_struct, {"Ga": "Mg"})
     replaced_atoms = set()
     for defect in sub_generator:
