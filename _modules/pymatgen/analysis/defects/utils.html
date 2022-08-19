@@ -627,20 +627,18 @@
 <span class="sd">    Analyze the charge density and create new candidate structures by inserting at each charge minima</span>
 <span class="sd">    The similar inserterd structures are given the same uniqueness label.</span>
 
-<span class="sd">    ```{warning}</span>
-<span class="sd">    This works best with AECCAR data since CHGCAR data often contains spurious local minima in the core.</span>
-<span class="sd">    However you can still use CHGCAR with an appropriate max_avg_charge value.</span>
-<span class="sd">    ```</span>
+<span class="sd">    .. note::</span>
+<span class="sd">        The charge density analysis works best with AECCAR data since CHGCAR data</span>
+<span class="sd">        often contains spurious local minima in the core. However you can still use CHGCAR</span>
+<span class="sd">        with an appropriate ``max_avg_charge`` value.</span>
 
-<span class="sd">    ```{note}</span>
-<span class="sd">    Since the user might want to rerun their analysis with different `avg_charge` and `max_avg_charge` values,</span>
-<span class="sd">    we will generate and store all the ion-inserted structure and their uniqueness labels first and allow the user to</span>
-<span class="sd">    get the filtered and labeled results.</span>
-<span class="sd">    ```</span>
+<span class="sd">        Since the user might want to rerun their analysis with different ``avg_charge`` and ``max_avg_charge`` values,</span>
+<span class="sd">        we will generate and store all the ion-inserted structure and their uniqueness labels first and allow</span>
+<span class="sd">        the user to get the filtered and labeled results.</span>
 
-<span class="sd">    If you use this code please cite the following paper:</span>
-<span class="sd">    J.-X. Shen et al.: npj Comput. Mater. 6, 1 (2020)</span>
-<span class="sd">    https://www.nature.com/articles/s41524-020-00422-3</span>
+<span class="sd">        If you use this code please cite the following paper:</span>
+<span class="sd">        J.-X. Shen et al.: npj Comput. Mater. 6, 1 (2020)</span>
+<span class="sd">        https://www.nature.com/articles/s41524-020-00422-3</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -677,7 +675,7 @@
 <span class="sd">        2. Group the candidate sites by symmetry</span>
 <span class="sd">        3. Label the groups by structure matching</span>
 <span class="sd">        4. Since the average charge density is the most expensive part,</span>
-<span class="sd">            we will leave this until the end.</span>
+<span class="sd">        we will leave this until the end.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            list[tuple[list[float], int]]: A list of tuples of the form (fcoords, label)</span>

@@ -239,18 +239,18 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
 <p>Analyze the charge density and create new candidate structures by inserting at each charge minima
 The similar inserterd structures are given the same uniqueness label.</p>
-<p><code class="docutils literal notranslate"><span class="pre">`{warning}</span>
-<span class="pre">This</span> <span class="pre">works</span> <span class="pre">best</span> <span class="pre">with</span> <span class="pre">AECCAR</span> <span class="pre">data</span> <span class="pre">since</span> <span class="pre">CHGCAR</span> <span class="pre">data</span> <span class="pre">often</span> <span class="pre">contains</span> <span class="pre">spurious</span> <span class="pre">local</span> <span class="pre">minima</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">core.</span>
-<span class="pre">However</span> <span class="pre">you</span> <span class="pre">can</span> <span class="pre">still</span> <span class="pre">use</span> <span class="pre">CHGCAR</span> <span class="pre">with</span> <span class="pre">an</span> <span class="pre">appropriate</span> <span class="pre">max_avg_charge</span> <span class="pre">value.</span>
-<span class="pre">`</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">`{note}</span>
-<span class="pre">Since</span> <span class="pre">the</span> <span class="pre">user</span> <span class="pre">might</span> <span class="pre">want</span> <span class="pre">to</span> <span class="pre">rerun</span> <span class="pre">their</span> <span class="pre">analysis</span> <span class="pre">with</span> <span class="pre">different</span> <span class="pre">`avg_charge`</span> <span class="pre">and</span> <span class="pre">`max_avg_charge`</span> <span class="pre">values,</span>
-<span class="pre">we</span> <span class="pre">will</span> <span class="pre">generate</span> <span class="pre">and</span> <span class="pre">store</span> <span class="pre">all</span> <span class="pre">the</span> <span class="pre">ion-inserted</span> <span class="pre">structure</span> <span class="pre">and</span> <span class="pre">their</span> <span class="pre">uniqueness</span> <span class="pre">labels</span> <span class="pre">first</span> <span class="pre">and</span> <span class="pre">allow</span> <span class="pre">the</span> <span class="pre">user</span> <span class="pre">to</span>
-<span class="pre">get</span> <span class="pre">the</span> <span class="pre">filtered</span> <span class="pre">and</span> <span class="pre">labeled</span> <span class="pre">results.</span>
-<span class="pre">`</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The charge density analysis works best with AECCAR data since CHGCAR data
+often contains spurious local minima in the core. However you can still use CHGCAR
+with an appropriate <code class="docutils literal notranslate"><span class="pre">max_avg_charge</span></code> value.</p>
+<p>Since the user might want to rerun their analysis with different <code class="docutils literal notranslate"><span class="pre">avg_charge</span></code> and <code class="docutils literal notranslate"><span class="pre">max_avg_charge</span></code> values,
+we will generate and store all the ion-inserted structure and their uniqueness labels first and allow
+the user to get the filtered and labeled results.</p>
 <p>If you use this code please cite the following paper:
 J.-X. Shen et al.: npj Comput. Mater. 6, 1 (2020)
 <a class="reference external" href="https://www.nature.com/articles/s41524-020-00422-3">https://www.nature.com/articles/s41524-020-00422-3</a></p>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.filter_and_group">
 <span class="sig-name descname"><span class="pre">filter_and_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">avg_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_avg_charge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#ChargeInsertionAnalyzer.filter_and_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.filter_and_group" title="Permalink to this definition">#</a></dt>
@@ -280,10 +280,8 @@ where <cite>index_group</cite> are the indices of <cite>self.local_minima</cite>
 1. Get a list of candidate sites by finiding the local minima
 2. Group the candidate sites by symmetry
 3. Label the groups by structure matching
-4. Since the average charge density is the most expensive part,</p>
-<blockquote>
-<div><p>we will leave this until the end.</p>
-</div></blockquote>
+4. Since the average charge density is the most expensive part,
+we will leave this until the end.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A list of tuples of the form (fcoords, label)</p>
