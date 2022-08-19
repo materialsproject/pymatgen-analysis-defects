@@ -411,8 +411,6 @@ class ChargeInsertionAnalyzer(MSONable):
         self,
         chgcar: VolumetricData,
         working_ion: str = "Li",
-        # avg_radius: float=0.4,
-        # max_avg_charge: float=1.0,
         clustering_tol: float = 0.6,
         ltol: float = 0.2,
         stol: float = 0.3,
@@ -433,9 +431,9 @@ class ChargeInsertionAnalyzer(MSONable):
         self.clustering_tol = clustering_tol
 
     @cached_property
-    def inserted_structures_and_labels(
+    def labeled_sites(
         self,
-    ) -> tuple[list[Structure], list[list[float]], list[int]]:
+    ) -> list[tuple[list[float], int]]:
         """Get a list of inserted structures and a list of structure matching labels.
 
         The process is as follows:
@@ -446,8 +444,7 @@ class ChargeInsertionAnalyzer(MSONable):
             we will leave this until the end.
 
         Returns:
-            list[Structure]: The list of inserted structures
-            list[int]: The list of structure matching labels
+            list[tuple[list[float], int]]: A list of tuples of the form (fcoords, label)
         """
         # Get a reasonablly reduced set of candidate sites first
         local_minima = get_local_extrema(self.chgcar, find_min=True)
@@ -473,12 +470,12 @@ class ChargeInsertionAnalyzer(MSONable):
 
         # Label the groups by structure matching
         site_labels = generic_groupby(inserted_structs, comp=self.sm.fit)
-        return inserted_structs, local_minima.tolist(), site_labels
+        return [*zip(local_minima.tolist(), site_labels)]
 
     @cached_property
     def local_minima(self) -> list[npt.ArrayLike]:
         """Get the full list of local minima."""
-        return self.inserted_structures_and_labels[1]
+        return [s for s, l in self.labeled_sites]
 
     def filter_and_group(
         self, avg_radius: float = 0.4, max_avg_charge: float = 1.0
@@ -493,21 +490,15 @@ class ChargeInsertionAnalyzer(MSONable):
             list[tuple[float, list[int]]]: The list of `(avg_charge, index_group)` tuples
             where `index_group` are the indices of `self.local_minima` that are in the group.
         """
-        (
-            _,
-            fcoords,
-            site_labels,
-        ) = self.inserted_structures_and_labels
-
         # measure the charge density at one representative site of each group
         lab_groups = collections.defaultdict(list)
-        for idx, lab in enumerate(site_labels):
+        for idx, (_, lab) in enumerate(self.labeled_sites):
             lab_groups[lab].append(idx)
 
         avg_chg_first_member = {}
         for lab, g in lab_groups.items():
             avg_chg_first_member[lab] = get_avg_chg(
-                self.chgcar, fcoord=fcoords[g[0]], radius=avg_radius
+                self.chgcar, fcoord=self.labeled_sites[g[0]][0], radius=avg_radius
             )
 
         res = []
