@@ -65,6 +65,6 @@ def test_chgcar_insertion(chgcar_fe3o4):
     cia = ChargeInsertionAnalyzer(chgcar)
     insert_groups = cia.filter_and_group(max_avg_charge=0.5)
     for (avg_chg, group), (ref_chg, ref_fpos) in zip(insert_groups, insert_ref):
-        fpos = sorted([cia.local_minima[i] for i in group])
+        fpos = sorted(group)
         pytest.approx(avg_chg, ref_chg)
         assert np.allclose(fpos, ref_fpos)
