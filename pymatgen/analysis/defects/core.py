@@ -123,22 +123,32 @@ class Defect(MSONable, metaclass=ABCMeta):
         self,
         sc_mat: np.ndarray | None = None,
         dummy_species: str | None = None,
-        **kwargs,
+        min_atoms: int = 80,
+        max_atoms: int = 240,
+        min_length: float = 10.0,
+        force_diagonal: bool = False,
     ) -> Structure:
         """Generate the supercell for a defect.
 
         Args:
-            defect: defect object
-            sc_mat: supercell matrix
-            dummy_species: dummy species to highlight the defect position
-            (for visualization)
-            kwargs: kwargs for `CubicSupercellTransformation`
+            sc_mat: supercell matrix if None, the supercell will be determined by `CubicSupercellAnalyzer`.
+            dummy_species: Dummy species to highlight the defect position (for visualizing vacancies).
+            max_atoms: Maximum number of atoms allowed in the supercell.
+            min_atoms: Minimum number of atoms allowed in the supercell.
+            min_length: Minimum length of the smallest supercell lattice vector.
+            force_diagonal: If True, return a transformation with a diagonal transformation matrix.
 
         Returns:
-            defect: defect object
+            Structure: The supercell structure.
         """
         if sc_mat is None:
-            sc_mat = get_sc_fromstruct(self.structure, **kwargs)
+            sc_mat = get_sc_fromstruct(
+                self.structure,
+                min_atoms=min_atoms,
+                max_atoms=max_atoms,
+                min_length=min_length,
+                force_diagonal=force_diagonal,
+            )
 
         sc_structure = self.structure * sc_mat
         sc_mat_inv = np.linalg.inv(sc_mat)
@@ -185,6 +195,9 @@ class Vacancy(Defect):
 
         This is required for concentration analysis and confirms that defect_site is
         a site in bulk_structure.
+
+        Returns:
+            int: The multiplicity of the defect.
         """
         symm_struct = self.symmetrized_structure
         defect_site = self.structure[self.defect_site_index]

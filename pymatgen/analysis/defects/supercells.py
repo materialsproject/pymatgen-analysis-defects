@@ -24,6 +24,7 @@ def get_sc_fromstruct(
     min_atoms: int = 80,
     max_atoms: int = 240,
     min_length: float = 10.0,
+    force_diagonal: bool = False,
 ) -> np.ndarray | np.array | None:
     """Generate the best supercell from a unitcell.
 
@@ -38,6 +39,7 @@ def get_sc_fromstruct(
         max_atoms: Maximum number of atoms allowed in the supercell.
         min_atoms: Minimum number of atoms allowed in the supercell.
         min_length: Minimum length of the smallest supercell lattice vector.
+        force_diagonal: If True, return a transformation with a diagonal transformation matrix.
 
     Returns:
         struc_sc: Supercell that is as close to cubic as possible
@@ -83,6 +85,7 @@ def _cubic_cell(
     min_atoms: int = 80,
     max_atoms: int = 240,
     min_length: float = 10.0,
+    force_diagonal: bool = False,
 ) -> np.ndarray | None:
     """Generate the best supercell from a unit cell
 
@@ -93,6 +96,7 @@ def _cubic_cell(
         max_atoms: Maximum number of atoms allowed in the supercell.
         min_atoms: Minimum number of atoms allowed in the supercell.
         min_length: Minimum length of the smallest supercell lattice vector.
+        force_diagonal: If True, return a transformation with a diagonal transformation matrix.
 
     Returns:
         3x3 matrix: supercell matrix
@@ -102,7 +106,10 @@ def _cubic_cell(
     )
 
     cst = CubicSupercellTransformation(
-        min_atoms=min_atoms, max_atoms=max_atoms, min_length=min_length
+        min_atoms=min_atoms,
+        max_atoms=max_atoms,
+        min_length=min_length,
+        force_diagonal=force_diagonal,
     )
 
     try:
