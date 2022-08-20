@@ -482,16 +482,16 @@ class ChargeInsertionAnalyzer(MSONable):
 
     def filter_and_group(
         self, avg_radius: float = 0.4, max_avg_charge: float = 1.0
-    ) -> list[tuple[float, list[int]]]:
-        """Filter and group the inserted structures.
+    ) -> list[tuple[float, list[list[float]]]]:
+        """Filter and group the insertion sites by average charge.
 
         Args:
             avg_radius: The radius used to calculate average charge density.
             max_avg_charge: Do no consider local minmas with avg charge above this value.
 
         Returns:
-            list[tuple[float, list[int]]]: The list of `(avg_charge, index_group)` tuples
-            where `index_group` are the indices of `self.local_minima` that are in the group.
+            list[tuple[float, list[int]]]: The list of ``(avg_charge, site_group)`` tuples
+            where ``site_group`` are the positions of the local minima.
         """
         # measure the charge density at one representative site of each group
         lab_groups = collections.defaultdict(list)
@@ -508,6 +508,6 @@ class ChargeInsertionAnalyzer(MSONable):
         for lab, avg_chg in sorted(avg_chg_first_member.items(), key=lambda x: x[1]):
             if avg_chg > max_avg_charge:
                 break
-            res.append((avg_chg, lab_groups[lab]))
+            res.append((avg_chg, [self.local_minima[idx] for idx in lab_groups[lab]]))
 
         return res

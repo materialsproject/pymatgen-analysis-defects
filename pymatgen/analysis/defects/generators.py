@@ -1,7 +1,10 @@
 """Defect generators (bulk structure and other inputs) -> (Defect Objects)."""
 from __future__ import annotations
 
+import collections
+import logging
 from abc import ABCMeta, abstractmethod
+from itertools import combinations
 from typing import Generator
 
 from monty.json import MSONable
@@ -16,6 +19,8 @@ __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
 __maintainer__ = "Jimmy-Xuan Shen @jmmshn"
 __date__ = "Mar 15, 2022"
+
+logger = logging.getLogger(__name__)
 
 
 class DefectGenerator(MSONable, metaclass=ABCMeta):
@@ -70,16 +75,24 @@ class VacancyGenerator(DefectGenerator):
                 f"rm_species({rm_species}) must be a subset of the structure's species ({all_species})."
             )
 
-    def generate_defects(self, **kwargs) -> Generator[Vacancy, None, None]:
+    def generate_defects(
+        self, symprec: float = 0.01, angle_tolerance: float = 5, **kwargs
+    ) -> Generator[Vacancy, None, None]:
         """Generate a vacancy defects.
 
         Args:
+            symprec:  Tolerance for symmetry finding.
+            (parameter for ``SpacegroupAnalyzer``).
+            angle_tolerance: Angle tolerance for symmetry finding.
+            (parameter for ``SpacegroupAnalyzer``).
             **kwargs: Additional keyword arguments for the ``Defect`` constructor.
 
         Returns:
             Generator[Vacancy, None, None]: Generator that yields a list of ``Defect`` objects
         """
-        sga = SpacegroupAnalyzer(self.structure)
+        sga = SpacegroupAnalyzer(
+            self.structure, symprec=symprec, angle_tolerance=angle_tolerance
+        )
         sym_struct = sga.get_symmetrized_structure()
         for site_group in sym_struct.equivalent_sites:
             site = site_group[0]
@@ -90,41 +103,67 @@ class VacancyGenerator(DefectGenerator):
 class SubstitutionGenerator(DefectGenerator):
     """Generate substitution for symmetry distinct sites in a structure."""
 
-    def __init__(self, structure: Structure, substitution: dict[str, str]):
+    def __init__(self, structure: Structure, substitution: dict[str, list[str]]):
         """Initialize a substitution generator.
 
         Args:
             structure: The bulk structure the vacancies are generated from.
             substitution: The substitutions to be made given as a dictionary.
-                e.g. {"Mg": "Ga"} means that Mg is substituted on the Ga site.
+                e.g. {"Ga": ["Mg", "Ca"]} means that Ga is substituted with Mg or Ca.
         """
         super().__init__(structure)
         self.substitution = substitution
 
-    def generate_defects(self, **kwargs) -> Generator[Substitution, None, None]:
-        """Generate a substitution defects.
+    def generate_defects(
+        self, symprec: float = 0.01, angle_tolerance: float = 5, **kwargs
+    ) -> Generator[Substitution, None, None]:
+        """Generate a vacancy defects.
 
         Args:
-            **kwargs: Additional keyword arguments for the ``Substitution`` constructor.
+            symprec:  Tolerance for symmetry finding.
+            (parameter for ``SpacegroupAnalyzer``).
+            angle_tolerance: Angle tolerance for symmetry finding.
+            (parameter for ``SpacegroupAnalyzer``).
+            **kwargs: Additional keyword arguments for the ``Defect`` constructor.
 
         Returns:
             Generator[Substitution, None, None]: Generator that yields a list of ``Substitution`` objects
         """
-        sga = SpacegroupAnalyzer(self.structure)
+        sga = SpacegroupAnalyzer(
+            self.structure, symprec=symprec, angle_tolerance=angle_tolerance
+        )
         sym_struct = sga.get_symmetrized_structure()
         for site_group in sym_struct.equivalent_sites:
             site = site_group[0]
             el_str = element_str(site.specie)
             if el_str not in self.substitution.keys():
                 continue
-            new_element = self.substitution[el_str]
-            sub_site = PeriodicSite(
-                Species(new_element),
-                site.frac_coords,
-                self.structure.lattice,
-                properties=site.properties,
-            )
-            yield Substitution(self.structure, sub_site, **kwargs)
+            for sub_el in self.substitution[el_str]:
+                sub_site = PeriodicSite(
+                    Species(sub_el),
+                    site.frac_coords,
+                    self.structure.lattice,
+                    properties=site.properties,
+                )
+                yield Substitution(self.structure, sub_site, **kwargs)
+
+
+class AntiSiteGenerator(SubstitutionGenerator):
+    """Generate all anti-site defects."""
+
+    def __init__(self, structure: Structure):
+        """Initialize an anti-site generator.
+
+        Args:
+            structure: The bulk structure the anti-site defects are generated from.
+        """
+        all_species = [*map(element_str, structure.composition.elements)]
+        subs = collections.defaultdict(list)
+        for u, v in combinations(all_species, 2):
+            subs[u].append(v)
+            subs[v].append(u)
+        logger.debug(f"All anti-site pairings: {subs}")
+        super().__init__(structure, subs)
 
 
 class InterstitialGenerator(DefectGenerator):
@@ -185,7 +224,7 @@ class InterstitialGenerator(DefectGenerator):
         insert_groups = cia.filter_and_group(
             avg_radius=avg_radius, max_avg_charge=max_avg_charge
         )
-        i_pos = [cia.local_minima[group[0]] for _, group in insert_groups]
+        i_pos = [group[0] for _, group in insert_groups]
         if n_groups is not None:
             i_pos = i_pos[:n_groups]
         return cls(cia.chgcar.structure.copy(), insertions={i_species: i_pos})
