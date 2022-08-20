@@ -234,73 +234,6 @@
 <span id="pymatgen-analysis-defects-utils"></span><h1>pymatgen.analysis.defects.utils<a class="headerlink" href="#module-pymatgen.analysis.defects.utils" title="Permalink to this heading">#</a></h1>
 <p>Utilities for defects module.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">ChargeInsertionAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chgcar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_ion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Li'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clustering_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ltol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#ChargeInsertionAnalyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
-<p>Analyze the charge density and create new candidate structures by inserting at each charge minima
-The similar inserterd structures are given the same uniqueness label.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The charge density analysis works best with AECCAR data since CHGCAR data
-often contains spurious local minima in the core. However you can still use CHGCAR
-with an appropriate <code class="docutils literal notranslate"><span class="pre">max_avg_charge</span></code> value.</p>
-<p>Since the user might want to rerun their analysis with different <code class="docutils literal notranslate"><span class="pre">avg_charge</span></code> and <code class="docutils literal notranslate"><span class="pre">max_avg_charge</span></code> values,
-we will generate and store all the ion-inserted structure and their uniqueness labels first and allow
-the user to get the filtered and labeled results.</p>
-<p>If you use this code please cite the following paper:
-J.-X. Shen et al.: npj Comput. Mater. 6, 1 (2020)
-<a class="reference external" href="https://www.nature.com/articles/s41524-020-00422-3">https://www.nature.com/articles/s41524-020-00422-3</a></p>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.filter_and_group">
-<span class="sig-name descname"><span class="pre">filter_and_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">avg_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_avg_charge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#ChargeInsertionAnalyzer.filter_and_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.filter_and_group" title="Permalink to this definition">#</a></dt>
-<dd><p>Filter and group the insertion sites by average charge.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>avg_radius</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The radius used to calculate average charge density.</p></li>
-<li><p><strong>max_avg_charge</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Do no consider local minmas with avg charge above this value.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The list of <code class="docutils literal notranslate"><span class="pre">(avg_charge,</span> <span class="pre">site_group)</span></code> tuples
-where <code class="docutils literal notranslate"><span class="pre">site_group</span></code> are the positions of the local minima.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[tuple[float, list[int]]]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.labeled_sites">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labeled_sites</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.labeled_sites" title="Permalink to this definition">#</a></dt>
-<dd><p>Get a list of inserted structures and a list of structure matching labels.</p>
-<p>The process is as follows:
-1. Get a list of candidate sites by finiding the local minima
-2. Group the candidate sites by symmetry
-3. Label the groups by structure matching
-4. Since the average charge density is the most expensive part,
-we will leave this until the end.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A list of tuples of the form (fcoords, label)</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>list[tuple[list[float], int]]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.local_minima">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">local_minima</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing._array_like._SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing._nested_sequence._NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing._array_like._SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing._nested_sequence._NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.local_minima" title="Permalink to this definition">#</a></dt>
-<dd><p>Get the full list of local minima.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.QModel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">QModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expnorm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#QModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.QModel" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
@@ -311,6 +244,19 @@ we will leave this until the end.</p>
 without normalization constants</p>
 <p>By default, gaussian distribution with 1 Bohr width is assumed.
 If defect charge is more delocalized, exponential tail is suggested.</p>
+<p>Initialize the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> – Gaussian decay constant. Default value is 1 Bohr.
+When delocalized (eg. diamond), 2 Bohr is more appropriate.</p></li>
+<li><p><strong>expnorm</strong> – Weight for the exponential tail in the range of [0-1].
+Default is 0.0 indicating no tail. For delocalized charges ideal value
+is around 0.54-0.6.</p></li>
+<li><p><strong>gamma</strong> – Exponential decay constant</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.QModel.rho_rec">
 <span class="sig-name descname"><span class="pre">rho_rec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#QModel.rho_rec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.QModel.rho_rec" title="Permalink to this definition">#</a></dt>
@@ -337,26 +283,6 @@ rho_rec(g-&gt;0) -&gt; 1 + rho_rec_limit0 * g^2</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.cluster_nodes">
-<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">cluster_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lattice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#cluster_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.cluster_nodes" title="Permalink to this definition">#</a></dt>
-<dd><p>Cluster nodes that are too close together using a tol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>tol</strong> (<em>float</em>) – A distance tolerance. PBC is taken into account.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">ScalarType</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.converge">
-<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">converge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_h</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#converge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.converge" title="Permalink to this definition">#</a></dt>
-<dd><p>Simple newton iteration based convergence function.</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.eV_to_k">
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">eV_to_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#eV_to_k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.eV_to_k" title="Permalink to this definition">#</a></dt>
 <dd><p>Convert energy to reciprocal vector magnitude k via hbar*k^2/2m.</p>
@@ -366,41 +292,6 @@ rho_rec(g-&gt;0) -&gt; 1 + rho_rec_limit0 * g^2</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>(double) Reciprocal vector magnitude (units of 1/Bohr).</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.generate_reciprocal_vectors_squared">
-<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">generate_reciprocal_vectors_squared</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encut</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#generate_reciprocal_vectors_squared"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.generate_reciprocal_vectors_squared" title="Permalink to this definition">#</a></dt>
-<dd><p>Generate Reciprocal vectors squared.</p>
-<p>Generate reciprocal vector magnitudes within the cutoff along the specified
-lattice vectors.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>a1</strong> – Lattice vector a (in Bohrs)</p></li>
-<li><p><strong>a2</strong> – Lattice vector b (in Bohrs)</p></li>
-<li><p><strong>a3</strong> – Lattice vector c (in Bohrs)</p></li>
-<li><p><strong>encut</strong> – Reciprocal vector energy cutoff</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>[[g1^2], [g2^2], …] Square of reciprocal vectors (1/Bohr)^2
-determined by a1, a2, a3 and whose magntidue is less than gcut^2.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.generic_groupby">
-<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">generic_groupby</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comp=&lt;built-in</span> <span class="pre">function</span> <span class="pre">eq&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#generic_groupby"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.generic_groupby" title="Permalink to this definition">#</a></dt>
-<dd><p>Group a list of unsortable objects
-:param list_in: A list of generic objects
-:param comp: (Default value = operator.eq) The comparator</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[int] list of labels for the input list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -428,22 +319,64 @@ determined by a1, a2, a3 and whose magntidue is less than gcut^2.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.get_avg_chg">
-<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">get_avg_chg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chgcar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcoord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#get_avg_chg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.get_avg_chg" title="Permalink to this definition">#</a></dt>
-<dd><p>Get the average charge in a sphere.</p>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.generate_reciprocal_vectors_squared">
+<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">generate_reciprocal_vectors_squared</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encut</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#generate_reciprocal_vectors_squared"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.generate_reciprocal_vectors_squared" title="Permalink to this definition">#</a></dt>
+<dd><p>Generate Reciprocal vectors squared.</p>
+<p>Generate reciprocal vector magnitudes within the cutoff along the specified
+lattice vectors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>chgcar</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">VolumetricData</span></code>) – The charge density.</p></li>
-<li><p><strong>fcoord</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">_NestedSequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_NestedSequence</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>]]]) – The fractional coordinates of the center of the sphere.</p></li>
-<li><p><strong>radius</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The radius of the sphere in Angstroms.</p></li>
+<li><p><strong>a1</strong> – Lattice vector a (in Bohrs)</p></li>
+<li><p><strong>a2</strong> – Lattice vector b (in Bohrs)</p></li>
+<li><p><strong>a3</strong> – Lattice vector c (in Bohrs)</p></li>
+<li><p><strong>encut</strong> – Reciprocal vector energy cutoff</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>[[g1^2], [g2^2], …] Square of reciprocal vectors (1/Bohr)^2
+determined by a1, a2, a3 and whose magntidue is less than gcut^2.</p>
 </dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.converge">
+<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">converge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_h</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#converge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.converge" title="Permalink to this definition">#</a></dt>
+<dd><p>Simple newton iteration based convergence function.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.get_zfile">
+<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">get_zfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#get_zfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.get_zfile" title="Permalink to this definition">#</a></dt>
+<dd><p>Find gzipped or non-gzipped versions of a file in a directory listing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>list of Path</em>) – A list of files in a directory.</p></li>
+<li><p><strong>base_name</strong> (<em>str</em>) – The base name of file file to find.</p></li>
+<li><p><strong>allow_missing</strong> (<em>bool</em>) – Whether to error if no version of the file (gzipped or un-gzipped) can be found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A path to the matched file. If <code class="docutils literal notranslate"><span class="pre">allow_missing=True</span></code> and the file cannot be
+found, then <code class="docutils literal notranslate"><span class="pre">None</span></code> will be returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Path or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.generic_groupby">
+<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">generic_groupby</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comp=&lt;built-in</span> <span class="pre">function</span> <span class="pre">eq&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#generic_groupby"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.generic_groupby" title="Permalink to this definition">#</a></dt>
+<dd><p>Group a list of unsortable objects
+:param list_in: A list of generic objects
+:param comp: (Default value = operator.eq) The comparator</p>
+<dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The average charge in the sphere.</p>
+<dd class="field-odd"><p>[int] list of labels for the input list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -473,28 +406,6 @@ find local maximum.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.get_zfile">
-<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">get_zfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#get_zfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.get_zfile" title="Permalink to this definition">#</a></dt>
-<dd><p>Find gzipped or non-gzipped versions of a file in a directory listing.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>directory</strong> (<em>list of Path</em>) – A list of files in a directory.</p></li>
-<li><p><strong>base_name</strong> (<em>str</em>) – The base name of file file to find.</p></li>
-<li><p><strong>allow_missing</strong> (<em>bool</em>) – Whether to error if no version of the file (gzipped or un-gzipped) can be found.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A path to the matched file. If <code class="docutils literal notranslate"><span class="pre">allow_missing=True</span></code> and the file cannot be
-found, then <code class="docutils literal notranslate"><span class="pre">None</span></code> will be returned.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Path or None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.remove_collisions">
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">remove_collisions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcoord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#remove_collisions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.remove_collisions" title="Permalink to this definition">#</a></dt>
 <dd><p>Removed points that are too close to existing atoms in the structure</p>
@@ -507,6 +418,120 @@ from existing atoms.</p>
 <dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">_NestedSequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_NestedSequence</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>]]]</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.cluster_nodes">
+<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">cluster_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lattice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#cluster_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.cluster_nodes" title="Permalink to this definition">#</a></dt>
+<dd><p>Cluster nodes that are too close together using a tol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tol</strong> (<em>float</em>) – A distance tolerance. PBC is taken into account.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">ScalarType</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.get_avg_chg">
+<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">get_avg_chg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chgcar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcoord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#get_avg_chg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.get_avg_chg" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the average charge in a sphere.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chgcar</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">VolumetricData</span></code>) – The charge density.</p></li>
+<li><p><strong>fcoord</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">_NestedSequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_NestedSequence</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>]]]) – The fractional coordinates of the center of the sphere.</p></li>
+<li><p><strong>radius</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The radius of the sphere in Angstroms.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The average charge in the sphere.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">ChargeInsertionAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chgcar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_ion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Li'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clustering_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ltol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#ChargeInsertionAnalyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
+<p>Analyze the charge density and create new candidate structures by inserting at each charge minima
+The similar inserterd structures are given the same uniqueness label.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The charge density analysis works best with AECCAR data since CHGCAR data
+often contains spurious local minima in the core. However you can still use CHGCAR
+with an appropriate <code class="docutils literal notranslate"><span class="pre">max_avg_charge</span></code> value.</p>
+<p>Since the user might want to rerun their analysis with different <code class="docutils literal notranslate"><span class="pre">avg_charge</span></code> and <code class="docutils literal notranslate"><span class="pre">max_avg_charge</span></code> values,
+we will generate and store all the ion-inserted structure and their uniqueness labels first and allow
+the user to get the filtered and labeled results.</p>
+<p>If you use this code please cite the following paper:
+J.-X. Shen et al.: npj Comput. Mater. 6, 1 (2020)
+<a class="reference external" href="https://www.nature.com/articles/s41524-020-00422-3">https://www.nature.com/articles/s41524-020-00422-3</a></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chgcar</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">VolumetricData</span></code>) – The charge density object to analyze</p></li>
+<li><p><strong>working_ion</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The working ion to be inserted</p></li>
+<li><p><strong>clustering_tol</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Distance tolerance for grouping sites together</p></li>
+<li><p><strong>ltol</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – StructureMatcher ltol parameter</p></li>
+<li><p><strong>stol</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – StructureMatcher stol parameter</p></li>
+<li><p><strong>angle_tol</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – StructureMatcher angle_tol parameter</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.labeled_sites">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labeled_sites</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.labeled_sites" title="Permalink to this definition">#</a></dt>
+<dd><p>Get a list of inserted structures and a list of structure matching labels.</p>
+<p>The process is as follows:
+1. Get a list of candidate sites by finiding the local minima
+2. Group the candidate sites by symmetry
+3. Label the groups by structure matching
+4. Since the average charge density is the most expensive part,
+we will leave this until the end.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of tuples of the form (fcoords, label)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[tuple[list[float], int]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.local_minima">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">local_minima</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing._array_like._SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing._nested_sequence._NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.typing._array_like._SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.typing._nested_sequence._NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.local_minima" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the full list of local minima.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.filter_and_group">
+<span class="sig-name descname"><span class="pre">filter_and_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">avg_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_avg_charge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#ChargeInsertionAnalyzer.filter_and_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.filter_and_group" title="Permalink to this definition">#</a></dt>
+<dd><p>Filter and group the insertion sites by average charge.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>avg_radius</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The radius used to calculate average charge density.</p></li>
+<li><p><strong>max_avg_charge</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Do no consider local minmas with avg charge above this value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of <code class="docutils literal notranslate"><span class="pre">(avg_charge,</span> <span class="pre">site_group)</span></code> tuples
+where <code class="docutils literal notranslate"><span class="pre">site_group</span></code> are the positions of the local minima.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[tuple[float, list[int]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>

@@ -234,10 +234,69 @@
 <span id="pymatgen-analysis-defects-finder"></span><h1>pymatgen.analysis.defects.finder<a class="headerlink" href="#module-pymatgen.analysis.defects.finder" title="Permalink to this heading">#</a></h1>
 <p>Defect position identification without prior knowledge.</p>
 <dl class="py class">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteVec">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">SiteVec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteVec" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<p>Create new instance of SiteVec(species, site, vec)</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteVec.site">
+<span class="sig-name descname"><span class="pre">site</span></span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteVec.site" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteVec.species">
+<span class="sig-name descname"><span class="pre">species</span></span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteVec.species" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteVec.vec">
+<span class="sig-name descname"><span class="pre">vec</span></span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteVec.vec" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteGroup">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">SiteGroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">similar_sites</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteGroup" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<p>Create new instance of SiteGroup(species, similar_sites, vec)</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteGroup.similar_sites">
+<span class="sig-name descname"><span class="pre">similar_sites</span></span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteGroup.similar_sites" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteGroup.species">
+<span class="sig-name descname"><span class="pre">species</span></span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteGroup.species" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteGroup.vec">
+<span class="sig-name descname"><span class="pre">vec</span></span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteGroup.vec" title="Permalink to this definition">#</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.DefectSiteFinder">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">DefectSiteFinder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symprec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#DefectSiteFinder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.DefectSiteFinder" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
 <p>Find the location of a defect with no pior knowledge.</p>
+<p>Configure the behavior of the defect site finder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>symprec</strong> (<em>float</em>) – Symmetry tolerance parameter for SpacegroupAnalyzer</p></li>
+<li><p><strong>angle_tolerance</strong> (<em>float</em>) – Angle tolerance parameter for SpacegroupAnalyzer</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.DefectSiteFinder.get_defect_fpos">
 <span class="sig-name descname"><span class="pre">get_defect_fpos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defect_structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_structure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#DefectSiteFinder.get_defect_fpos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.DefectSiteFinder.get_defect_fpos" title="Permalink to this definition">#</a></dt>
@@ -251,6 +310,27 @@
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Position of the defect in the pristine structure
+(in fractional coordinates)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ArrayLike</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.DefectSiteFinder.get_native_defect_position">
+<span class="sig-name descname"><span class="pre">get_native_defect_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defect_structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_structure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#DefectSiteFinder.get_native_defect_position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.DefectSiteFinder.get_native_defect_position" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the position of a native defect in the defect structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>defect_structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – Relaxed structure containing the defect</p></li>
+<li><p><strong>base_structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – Pristine structure without the defect</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Position of the defect in the defect structure
 (in fractional coordinates)</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -319,108 +399,6 @@ the sites.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.DefectSiteFinder.get_native_defect_position">
-<span class="sig-name descname"><span class="pre">get_native_defect_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defect_structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_structure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#DefectSiteFinder.get_native_defect_position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.DefectSiteFinder.get_native_defect_position" title="Permalink to this definition">#</a></dt>
-<dd><p>Get the position of a native defect in the defect structure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>defect_structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – Relaxed structure containing the defect</p></li>
-<li><p><strong>base_structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – Pristine structure without the defect</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Position of the defect in the defect structure
-(in fractional coordinates)</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ArrayLike</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteGroup">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">SiteGroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">similar_sites</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteGroup" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteGroup.similar_sites">
-<span class="sig-name descname"><span class="pre">similar_sites</span></span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteGroup.similar_sites" title="Permalink to this definition">#</a></dt>
-<dd><p>Alias for field number 1</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteGroup.species">
-<span class="sig-name descname"><span class="pre">species</span></span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteGroup.species" title="Permalink to this definition">#</a></dt>
-<dd><p>Alias for field number 0</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteGroup.vec">
-<span class="sig-name descname"><span class="pre">vec</span></span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteGroup.vec" title="Permalink to this definition">#</a></dt>
-<dd><p>Alias for field number 2</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteVec">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">SiteVec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteVec" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteVec.site">
-<span class="sig-name descname"><span class="pre">site</span></span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteVec.site" title="Permalink to this definition">#</a></dt>
-<dd><p>Alias for field number 1</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteVec.species">
-<span class="sig-name descname"><span class="pre">species</span></span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteVec.species" title="Permalink to this definition">#</a></dt>
-<dd><p>Alias for field number 0</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.SiteVec.vec">
-<span class="sig-name descname"><span class="pre">vec</span></span><a class="headerlink" href="#pymatgen.analysis.defects.finder.SiteVec.vec" title="Permalink to this definition">#</a></dt>
-<dd><p>Alias for field number 2</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.best_match">
-<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">best_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#best_match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.best_match" title="Permalink to this definition">#</a></dt>
-<dd><p>Find the best match for a site in the defect structure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>sv</strong> (<a class="reference internal" href="#pymatgen.analysis.defects.finder.SiteVec" title="pymatgen.analysis.defects.finder.SiteVec"><code class="xref py py-class docutils literal notranslate"><span class="pre">SiteVec</span></code></a>) – SiteVec namedtuples representing a site in the defect structure</p></li>
-<li><p><strong>sgs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#pymatgen.analysis.defects.finder.SiteGroup" title="pymatgen.analysis.defects.finder.SiteGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SiteGroup</span></code></a>]) – List of SiteGroup namedtuples representing groups of</p></li>
-<li><p><strong>structure</strong> (<em>symmetrically equivalent sites in the pristine</em>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The group that represents the best match for <code class="docutils literal notranslate"><span class="pre">sv</span></code>
-float: The cosine similarity between <code class="docutils literal notranslate"><span class="pre">sv</span></code> and the best match</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pymatgen.analysis.defects.finder.SiteGroup" title="pymatgen.analysis.defects.finder.SiteGroup">SiteGroup</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.cosine_similarity">
-<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">cosine_similarity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#cosine_similarity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.cosine_similarity" title="Permalink to this definition">#</a></dt>
-<dd><p>Cosine similarity between two vectors.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -448,12 +426,6 @@ symmetrically equivalent sites</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.get_site_vecs">
-<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">get_site_vecs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">struct</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#get_site_vecs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.get_site_vecs" title="Permalink to this definition">#</a></dt>
-<dd><p>Get the SiteVec representation of each site in the structure.</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.get_soap_vec">
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">get_soap_vec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">struct</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#get_soap_vec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.get_soap_vec" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the SOAP vector for each site in the structure.</p>
@@ -470,6 +442,45 @@ symmetrically equivalent sites</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>NDArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.get_site_vecs">
+<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">get_site_vecs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">struct</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#get_site_vecs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.get_site_vecs" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the SiteVec representation of each site in the structure.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.cosine_similarity">
+<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">cosine_similarity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#cosine_similarity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.cosine_similarity" title="Permalink to this definition">#</a></dt>
+<dd><p>Cosine similarity between two vectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.finder.best_match">
+<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.finder.</span></span><span class="sig-name descname"><span class="pre">best_match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/finder.html#best_match"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.finder.best_match" title="Permalink to this definition">#</a></dt>
+<dd><p>Find the best match for a site in the defect structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sv</strong> (<a class="reference internal" href="#pymatgen.analysis.defects.finder.SiteVec" title="pymatgen.analysis.defects.finder.SiteVec"><code class="xref py py-class docutils literal notranslate"><span class="pre">SiteVec</span></code></a>) – SiteVec namedtuples representing a site in the defect structure</p></li>
+<li><p><strong>sgs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#pymatgen.analysis.defects.finder.SiteGroup" title="pymatgen.analysis.defects.finder.SiteGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SiteGroup</span></code></a>]) – List of SiteGroup namedtuples representing groups of</p></li>
+<li><p><strong>structure</strong> (<em>symmetrically equivalent sites in the pristine</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The group that represents the best match for <code class="docutils literal notranslate"><span class="pre">sv</span></code>
+float: The cosine similarity between <code class="docutils literal notranslate"><span class="pre">sv</span></code> and the best match</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pymatgen.analysis.defects.finder.SiteGroup" title="pymatgen.analysis.defects.finder.SiteGroup">SiteGroup</a></p>
 </dd>
 </dl>
 </dd></dl>

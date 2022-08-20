@@ -295,12 +295,6 @@ automatically determine the defect location.</p>
 </dl>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.DefectEntry.corrected_energy">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">corrected_energy</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry.corrected_energy" title="Permalink to this definition">#</a></dt>
-<dd><p>The energy of the defect entry with all corrections applied.</p>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.DefectEntry.get_freysoldt_correction">
 <span class="sig-name descname"><span class="pre">get_freysoldt_correction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defect_locpot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bulk_locpot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dielectric</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#DefectEntry.get_freysoldt_correction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry.get_freysoldt_correction" title="Permalink to this definition">#</a></dt>
@@ -324,6 +318,12 @@ in the three periodic lattice directions.</p>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.DefectEntry.corrected_energy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">corrected_energy</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry.corrected_energy" title="Permalink to this definition">#</a></dt>
+<dd><p>The energy of the defect entry with all corrections applied.</p>
 </dd></dl>
 
 </dd></dl>
@@ -409,55 +409,6 @@ which should not have very negative chemical potential.</p>
 </dl>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.FormationEnergyDiagram.chempot_limits">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">chempot_limits</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.chempot_limits" title="Permalink to this definition">#</a></dt>
-<dd><p>Return the chemical potential limits in dictionary format.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.FormationEnergyDiagram.get_transitions">
-<span class="sig-name descname"><span class="pre">get_transitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chempots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#FormationEnergyDiagram.get_transitions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.get_transitions" title="Permalink to this definition">#</a></dt>
-<dd><p>Get the transition levels for the formation energy diagram.</p>
-<p>Get all of the kinks in the formation energy diagram.
-The points at the VBM and CBM are given by the first and last
-point respectively.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>chempot_dict</strong> – A dictionary of the chemical potentials (referenced to the elements)
-representations a vertex of the stability region of the chemical
-potential diagram.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Transition levels and the formation energy at each transition level.
-The first and last points are the intercepts with the
-VBM and CBM respectively.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[tuple[float, float]]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_directories">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_directories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pd_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dielectric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vbm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#FormationEnergyDiagram.with_directories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_directories" title="Permalink to this definition">#</a></dt>
-<dd><p>Create a FormationEnergyDiagram from VASP directories.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>directory_map</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em>) – A dictionary mapping the defect name to the directory containing the
-VASP calculation.</p></li>
-<li><p><strong>defect</strong> (<a class="reference internal" href="core.html#pymatgen.analysis.defects.core.Defect" title="pymatgen.analysis.defects.core.Defect"><em>Defect</em></a>) – The defect used to create the defect entries.</p></li>
-<li><p><strong>pd_entries</strong> (<em>list</em><em>[</em><em>ComputedEntry</em><em>]</em>) – The list of entries used to construct the phase diagram and chemical
-potential diagram. They will be used to determine the stability region
-of the bulk crystal.</p></li>
-<li><p><strong>dielectric</strong> (<em>float</em><em> | </em><em>NDArray</em>) – The dielectric constant of the bulk crystal.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_phase_diagram">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_phase_diagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bulk_entry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defect_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomic_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_diagram</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vbm</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#FormationEnergyDiagram.with_phase_diagram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_phase_diagram" title="Permalink to this definition">#</a></dt>
@@ -531,6 +482,55 @@ the chemical potential limits.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_directories">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_directories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pd_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dielectric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vbm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#FormationEnergyDiagram.with_directories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_directories" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a FormationEnergyDiagram from VASP directories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory_map</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em>) – A dictionary mapping the defect name to the directory containing the
+VASP calculation.</p></li>
+<li><p><strong>defect</strong> (<a class="reference internal" href="core.html#pymatgen.analysis.defects.core.Defect" title="pymatgen.analysis.defects.core.Defect"><em>Defect</em></a>) – The defect used to create the defect entries.</p></li>
+<li><p><strong>pd_entries</strong> (<em>list</em><em>[</em><em>ComputedEntry</em><em>]</em>) – The list of entries used to construct the phase diagram and chemical
+potential diagram. They will be used to determine the stability region
+of the bulk crystal.</p></li>
+<li><p><strong>dielectric</strong> (<em>float</em><em> | </em><em>NDArray</em>) – The dielectric constant of the bulk crystal.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.FormationEnergyDiagram.chempot_limits">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">chempot_limits</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.chempot_limits" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the chemical potential limits in dictionary format.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.FormationEnergyDiagram.get_transitions">
+<span class="sig-name descname"><span class="pre">get_transitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chempots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#FormationEnergyDiagram.get_transitions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.get_transitions" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the transition levels for the formation energy diagram.</p>
+<p>Get all of the kinks in the formation energy diagram.
+The points at the VBM and CBM are given by the first and last
+point respectively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>chempot_dict</strong> – A dictionary of the chemical potentials (referenced to the elements)
+representations a vertex of the stability region of the chemical
+potential diagram.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Transition levels and the formation energy at each transition level.
+The first and last points are the intercepts with the
+VBM and CBM respectively.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[tuple[float, float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
@@ -559,27 +559,6 @@ the energy of supplied entry.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.get_lower_envelope">
-<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.thermo.</span></span><span class="sig-name descname"><span class="pre">get_lower_envelope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lines</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#get_lower_envelope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.get_lower_envelope" title="Permalink to this definition">#</a></dt>
-<dd><p>Get the lower envelope of the formation energy.</p>
-<p>Based on the fact that the lower envelope of the lines is
-given by the upper convex hull of the points (m, -b) as shown in:
-<a class="reference external" href="https://www.cs.umd.edu/class/spring2020/cmsc754/Lects/lect06-duality.pdf">https://www.cs.umd.edu/class/spring2020/cmsc754/Lects/lect06-duality.pdf</a>
-Note: The lines are returned with decreasing slope.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>lines</strong> – (m, b) format for each line</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>List lines that make up the lower envelope.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>List[List[float]]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.get_transitions">
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.thermo.</span></span><span class="sig-name descname"><span class="pre">get_transitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#get_transitions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.get_transitions" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the “transition” points in a list of lines.</p>
@@ -597,6 +576,27 @@ i.e. intersection points (x_i, y_i) where line i intersects line i+1</p>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List of intersection points, including the boundary points at
 x_min and x_max.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[List[float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.get_lower_envelope">
+<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.thermo.</span></span><span class="sig-name descname"><span class="pre">get_lower_envelope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lines</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#get_lower_envelope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.get_lower_envelope" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the lower envelope of the formation energy.</p>
+<p>Based on the fact that the lower envelope of the lines is
+given by the upper convex hull of the points (m, -b) as shown in:
+<a class="reference external" href="https://www.cs.umd.edu/class/spring2020/cmsc754/Lects/lect06-duality.pdf">https://www.cs.umd.edu/class/spring2020/cmsc754/Lects/lect06-duality.pdf</a>
+Note: The lines are returned with decreasing slope.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lines</strong> – (m, b) format for each line</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List lines that make up the lower envelope.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List[List[float]]</p>
