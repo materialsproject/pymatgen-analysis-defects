@@ -213,8 +213,7 @@ class InterstitialGenerator(DefectGenerator):
                 two interstitials at [0.5, 0.5, 0.5] and [0.25, 0.25, 0.25].
             avg_radius: The radius used to calculate average charge density.
             max_avg_charge: Do no consider local minmas with avg charge above this value.
-            n_groups: Only consider the n_groups with lowest average charge density.
-            If None, all groups are considered.
+            n_groups: Only consider the n_groups with lowest average charge density. If None, all groups are considered.
             **kwargs: Other keyword arguments passed to ``ChargeInsertionAnalyzer``.
 
         Returns:
