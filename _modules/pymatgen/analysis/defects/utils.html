@@ -714,16 +714,16 @@
 
 <div class="viewcode-block" id="ChargeInsertionAnalyzer.filter_and_group"><a class="viewcode-back" href="../../../../reference/utils.html#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.filter_and_group">[docs]</a>    <span class="k">def</span> <span class="nf">filter_and_group</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">avg_radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">,</span> <span class="n">max_avg_charge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
-        <span class="sd">&quot;&quot;&quot;Filter and group the inserted structures.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]]]:</span>
+        <span class="sd">&quot;&quot;&quot;Filter and group the insertion sites by average charge.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            avg_radius: The radius used to calculate average charge density.</span>
 <span class="sd">            max_avg_charge: Do no consider local minmas with avg charge above this value.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            list[tuple[float, list[int]]]: The list of `(avg_charge, index_group)` tuples</span>
-<span class="sd">            where `index_group` are the indices of `self.local_minima` that are in the group.</span>
+<span class="sd">            list[tuple[float, list[int]]]: The list of ``(avg_charge, site_group)`` tuples</span>
+<span class="sd">            where ``site_group`` are the positions of the local minima.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># measure the charge density at one representative site of each group</span>
         <span class="n">lab_groups</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
@@ -740,7 +740,7 @@
         <span class="k">for</span> <span class="n">lab</span><span class="p">,</span> <span class="n">avg_chg</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">avg_chg_first_member</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
             <span class="k">if</span> <span class="n">avg_chg</span> <span class="o">&gt;</span> <span class="n">max_avg_charge</span><span class="p">:</span>
                 <span class="k">break</span>
-            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">avg_chg</span><span class="p">,</span> <span class="n">lab_groups</span><span class="p">[</span><span class="n">lab</span><span class="p">]))</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">avg_chg</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">local_minima</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">lab_groups</span><span class="p">[</span><span class="n">lab</span><span class="p">]]))</span>
 
         <span class="k">return</span> <span class="n">res</span></div></div>
 </pre></div>

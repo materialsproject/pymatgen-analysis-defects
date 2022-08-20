@@ -254,7 +254,7 @@ J.-X. Shen et al.: npj Comput. Mater. 6, 1 (2020)
 <dl class="py method">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.filter_and_group">
 <span class="sig-name descname"><span class="pre">filter_and_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">avg_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_avg_charge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#ChargeInsertionAnalyzer.filter_and_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.filter_and_group" title="Permalink to this definition">#</a></dt>
-<dd><p>Filter and group the inserted structures.</p>
+<dd><p>Filter and group the insertion sites by average charge.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -263,8 +263,8 @@ J.-X. Shen et al.: npj Comput. Mater. 6, 1 (2020)
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The list of <cite>(avg_charge, index_group)</cite> tuples
-where <cite>index_group</cite> are the indices of <cite>self.local_minima</cite> that are in the group.</p>
+<dd class="field-even"><p>The list of <code class="docutils literal notranslate"><span class="pre">(avg_charge,</span> <span class="pre">site_group)</span></code> tuples
+where <code class="docutils literal notranslate"><span class="pre">site_group</span></code> are the positions of the local minima.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list[tuple[float, list[int]]]</p>

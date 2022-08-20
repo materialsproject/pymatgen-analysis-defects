@@ -234,6 +234,13 @@
 <span id="pymatgen-analysis-defects-generators"></span><h1>pymatgen.analysis.defects.generators<a class="headerlink" href="#module-pymatgen.analysis.defects.generators" title="Permalink to this heading">#</a></h1>
 <p>Defect generators (bulk structure and other inputs) -&gt; (Defect Objects).</p>
 <dl class="py class">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.AntiSiteGenerator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.generators.</span></span><span class="sig-name descname"><span class="pre">AntiSiteGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#AntiSiteGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.AntiSiteGenerator" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymatgen.analysis.defects.generators.SubstitutionGenerator" title="pymatgen.analysis.defects.generators.SubstitutionGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SubstitutionGenerator</span></code></a></p>
+<p>Generate all anti-site defects.</p>
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.DefectGenerator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.generators.</span></span><span class="sig-name descname"><span class="pre">DefectGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#DefectGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.DefectGenerator" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
@@ -323,11 +330,17 @@ two interstitials at [0.5, 0.5, 0.5] and [0.25, 0.25, 0.25].</p></li>
 <p>Generate substitution for symmetry distinct sites in a structure.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.SubstitutionGenerator.generate_defects">
-<span class="sig-name descname"><span class="pre">generate_defects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#SubstitutionGenerator.generate_defects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.SubstitutionGenerator.generate_defects" title="Permalink to this definition">#</a></dt>
-<dd><p>Generate a substitution defects.</p>
+<span class="sig-name descname"><span class="pre">generate_defects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symprec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#SubstitutionGenerator.generate_defects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.SubstitutionGenerator.generate_defects" title="Permalink to this definition">#</a></dt>
+<dd><p>Generate a vacancy defects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – Additional keyword arguments for the <code class="docutils literal notranslate"><span class="pre">Substitution</span></code> constructor.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>symprec</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Tolerance for symmetry finding.</p></li>
+<li><p><strong>SpacegroupAnalyzer</strong><strong>)</strong><strong>.</strong> (<em>(</em><em>parameter for</em>) – </p></li>
+<li><p><strong>angle_tolerance</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Angle tolerance for symmetry finding.</p></li>
+<li><p><strong>SpacegroupAnalyzer</strong><strong>)</strong><strong>.</strong> – </p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments for the <code class="docutils literal notranslate"><span class="pre">Defect</span></code> constructor.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Generator that yields a list of <code class="docutils literal notranslate"><span class="pre">Substitution</span></code> objects</p>
@@ -347,11 +360,17 @@ two interstitials at [0.5, 0.5, 0.5] and [0.25, 0.25, 0.25].</p></li>
 <p>Generate vacancy for each symmetry distinct site in a structure.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.VacancyGenerator.generate_defects">
-<span class="sig-name descname"><span class="pre">generate_defects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#VacancyGenerator.generate_defects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.VacancyGenerator.generate_defects" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">generate_defects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symprec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#VacancyGenerator.generate_defects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.VacancyGenerator.generate_defects" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate a vacancy defects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – Additional keyword arguments for the <code class="docutils literal notranslate"><span class="pre">Defect</span></code> constructor.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>symprec</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Tolerance for symmetry finding.</p></li>
+<li><p><strong>SpacegroupAnalyzer</strong><strong>)</strong><strong>.</strong> (<em>(</em><em>parameter for</em>) – </p></li>
+<li><p><strong>angle_tolerance</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Angle tolerance for symmetry finding.</p></li>
+<li><p><strong>SpacegroupAnalyzer</strong><strong>)</strong><strong>.</strong> – </p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments for the <code class="docutils literal notranslate"><span class="pre">Defect</span></code> constructor.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Generator that yields a list of <code class="docutils literal notranslate"><span class="pre">Defect</span></code> objects</p>
