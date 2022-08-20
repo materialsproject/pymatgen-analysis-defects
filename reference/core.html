@@ -315,23 +315,24 @@ this will be determined automatically.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.core.Defect.get_supercell_structure">
-<span class="sig-name descname"><span class="pre">get_supercell_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sc_mat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dummy_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#Defect.get_supercell_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.Defect.get_supercell_structure" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_supercell_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sc_mat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dummy_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">240</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_diagonal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#Defect.get_supercell_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.Defect.get_supercell_structure" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate the supercell for a defect.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>defect</strong> – defect object</p></li>
-<li><p><strong>sc_mat</strong> (<em>np.ndarray</em><em> | </em><em>None</em>) – supercell matrix</p></li>
-<li><p><strong>dummy_species</strong> (<em>str</em><em> | </em><em>None</em>) – dummy species to highlight the defect position</p></li>
-<li><p><strong>visualization</strong><strong>)</strong> (<em>(</em><em>for</em>) – </p></li>
-<li><p><strong>kwargs</strong> – kwargs for <cite>CubicSupercellTransformation</cite></p></li>
+<li><p><strong>sc_mat</strong> (<em>np.ndarray</em><em> | </em><em>None</em>) – supercell matrix if None, the supercell will be determined by <cite>CubicSupercellAnalyzer</cite>.</p></li>
+<li><p><strong>dummy_species</strong> (<em>str</em><em> | </em><em>None</em>) – Dummy species to highlight the defect position (for visualizing vacancies).</p></li>
+<li><p><strong>max_atoms</strong> (<em>int</em>) – Maximum number of atoms allowed in the supercell.</p></li>
+<li><p><strong>min_atoms</strong> (<em>int</em>) – Minimum number of atoms allowed in the supercell.</p></li>
+<li><p><strong>min_length</strong> (<em>float</em>) – Minimum length of the smallest supercell lattice vector.</p></li>
+<li><p><strong>force_diagonal</strong> (<em>bool</em>) – If True, return a transformation with a diagonal transformation matrix.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>defect object</p>
+<dd class="field-even"><p>The supercell structure.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>defect</p>
+<dd class="field-odd"><p>Structure</p>
 </dd>
 </dl>
 </dd></dl>
@@ -377,8 +378,11 @@ this will be determined automatically.</p></li>
 <p>This is required for concentration analysis and confirms that defect_site is
 a site in bulk_structure.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The multiplicity of the defect.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
 </dd>
 </dl>
 </dd></dl>

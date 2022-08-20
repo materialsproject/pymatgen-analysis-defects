@@ -355,22 +355,32 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">sc_mat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">dummy_species</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">min_atoms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">80</span><span class="p">,</span>
+        <span class="n">max_atoms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">240</span><span class="p">,</span>
+        <span class="n">min_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>
+        <span class="n">force_diagonal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Structure</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Generate the supercell for a defect.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            defect: defect object</span>
-<span class="sd">            sc_mat: supercell matrix</span>
-<span class="sd">            dummy_species: dummy species to highlight the defect position</span>
-<span class="sd">            (for visualization)</span>
-<span class="sd">            kwargs: kwargs for `CubicSupercellTransformation`</span>
+<span class="sd">            sc_mat: supercell matrix if None, the supercell will be determined by `CubicSupercellAnalyzer`.</span>
+<span class="sd">            dummy_species: Dummy species to highlight the defect position (for visualizing vacancies).</span>
+<span class="sd">            max_atoms: Maximum number of atoms allowed in the supercell.</span>
+<span class="sd">            min_atoms: Minimum number of atoms allowed in the supercell.</span>
+<span class="sd">            min_length: Minimum length of the smallest supercell lattice vector.</span>
+<span class="sd">            force_diagonal: If True, return a transformation with a diagonal transformation matrix.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            defect: defect object</span>
+<span class="sd">            Structure: The supercell structure.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">sc_mat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">sc_mat</span> <span class="o">=</span> <span class="n">get_sc_fromstruct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">sc_mat</span> <span class="o">=</span> <span class="n">get_sc_fromstruct</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span>
+                <span class="n">min_atoms</span><span class="o">=</span><span class="n">min_atoms</span><span class="p">,</span>
+                <span class="n">max_atoms</span><span class="o">=</span><span class="n">max_atoms</span><span class="p">,</span>
+                <span class="n">min_length</span><span class="o">=</span><span class="n">min_length</span><span class="p">,</span>
+                <span class="n">force_diagonal</span><span class="o">=</span><span class="n">force_diagonal</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="n">sc_structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">*</span> <span class="n">sc_mat</span>
         <span class="n">sc_mat_inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">sc_mat</span><span class="p">)</span>
@@ -417,6 +427,9 @@
 
 <span class="sd">        This is required for concentration analysis and confirms that defect_site is</span>
 <span class="sd">        a site in bulk_structure.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The multiplicity of the defect.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">symm_struct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symmetrized_structure</span>
         <span class="n">defect_site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_site_index</span><span class="p">]</span>
