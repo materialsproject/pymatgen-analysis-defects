@@ -1,4 +1,18 @@
-"""Defect generators (bulk structure and other inputs) -> (Defect Objects)."""
+"""Defect generators.
+
+The generator objects can be used directly as generators once instantiated.
+
+.. code-block:: python
+
+    from pymatgen.analysis.defects.generators import VacancyGenerator
+
+    gen = VacancyGenerator(structure, ["Ga", "N"])
+    for defect in gen:
+        # do something with defect
+        pass
+
+"""
+
 from __future__ import annotations
 
 import collections
@@ -24,10 +38,8 @@ logger = logging.getLogger(__name__)
 
 
 class DefectGenerator(MSONable, metaclass=ABCMeta):
-    """Abstract class for a defect generator."""
-
-    def __init__(self, structure: Structure):
-        """Initialize a defect generator.
+    def __init__(self, structure: Structure, **kwargs):
+        """Abstract class for a defect generator.
 
         Args:
             structure: The bulk structure the defects are generated from.
@@ -54,10 +66,8 @@ class DefectGenerator(MSONable, metaclass=ABCMeta):
 
 
 class VacancyGenerator(DefectGenerator):
-    """Generate vacancy for each symmetry distinct site in a structure."""
-
     def __init__(self, structure: Structure, rm_species: list[str | Species] = None):
-        """Initialize a vacancy generator.
+        """Generate vacancy for each symmetry distinct site in a structure.
 
         Args:
             structure: The bulk structure the vacancies are generated from.
@@ -96,15 +106,13 @@ class VacancyGenerator(DefectGenerator):
         sym_struct = sga.get_symmetrized_structure()
         for site_group in sym_struct.equivalent_sites:
             site = site_group[0]
-            if element_str(site.specie) in self.rm_species:
+            if _element_str(site.specie) in self.rm_species:
                 yield Vacancy(self.structure, site, **kwargs)
 
 
 class SubstitutionGenerator(DefectGenerator):
-    """Generate substitution for symmetry distinct sites in a structure."""
-
     def __init__(self, structure: Structure, substitution: dict[str, list[str]]):
-        """Initialize a substitution generator.
+        """Generator of substitutions for symmetry distinct sites in a structure.
 
         Args:
             structure: The bulk structure the vacancies are generated from.
@@ -117,7 +125,7 @@ class SubstitutionGenerator(DefectGenerator):
     def generate_defects(
         self, symprec: float = 0.01, angle_tolerance: float = 5, **kwargs
     ) -> Generator[Substitution, None, None]:
-        """Generate a vacancy defects.
+        """Generate a subsitutional defects.
 
         Args:
             symprec:  Tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).
@@ -133,7 +141,7 @@ class SubstitutionGenerator(DefectGenerator):
         sym_struct = sga.get_symmetrized_structure()
         for site_group in sym_struct.equivalent_sites:
             site = site_group[0]
-            el_str = element_str(site.specie)
+            el_str = _element_str(site.specie)
             if el_str not in self.substitution.keys():
                 continue
             for sub_el in self.substitution[el_str]:
@@ -155,7 +163,7 @@ class AntiSiteGenerator(SubstitutionGenerator):
         Args:
             structure: The bulk structure the anti-site defects are generated from.
         """
-        all_species = [*map(element_str, structure.composition.elements)]
+        all_species = [*map(_element_str, structure.composition.elements)]
         subs = collections.defaultdict(list)
         for u, v in combinations(all_species, 2):
             subs[u].append(v)
@@ -165,14 +173,12 @@ class AntiSiteGenerator(SubstitutionGenerator):
 
 
 class InterstitialGenerator(DefectGenerator):
-    """Generate intersitials defects in structure."""
-
     def __init__(
         self,
         structure: Structure,
         insertions: dict[str | Species | Element, list[list[float]]],
     ):
-        """Initialize the interstitial generator.
+        """Generator for intersitials defects in structure.
 
         Args:
             structure: The bulk structure the interstitials atoms are placed in.
@@ -241,7 +247,7 @@ class InterstitialGenerator(DefectGenerator):
                 yield Interstitial(self.structure, isite, **kwargs)
 
 
-def element_str(sp_or_el: Species | Element) -> str:
+def _element_str(sp_or_el: Species | Element) -> str:
     """Convert a species or element to a string."""
     if isinstance(sp_or_el, Species):
         return str(sp_or_el.element)
