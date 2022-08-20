@@ -120,10 +120,8 @@ class SubstitutionGenerator(DefectGenerator):
         """Generate a vacancy defects.
 
         Args:
-            symprec:  Tolerance for symmetry finding.
-            (parameter for ``SpacegroupAnalyzer``).
-            angle_tolerance: Angle tolerance for symmetry finding.
-            (parameter for ``SpacegroupAnalyzer``).
+            symprec:  Tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).
+            angle_tolerance: Angle tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).
             **kwargs: Additional keyword arguments for the ``Defect`` constructor.
 
         Returns:
