@@ -49,6 +49,7 @@ exclude_patterns = ["Thumbs.db", ".DS_Store", "test*.py"]
 # use type hints
 # autodoc_typehints = "description"
 autoclass_content = "both"
+autodoc_member_order = "bysource"
 
 # better napoleon support
 # napoleon_use_param = True
