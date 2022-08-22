@@ -266,9 +266,9 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         ltol: float = 0.2,
         stol: float = 0.3,
         angle_tol: float = 5,
-        min_dist: float = 0.5,
+        min_dist: float = 1.0,
         avg_radius: float = 0.4,
-        max_avg_charge: float = 1.0,
+        max_avg_charge: float = 0.9,
     ) -> None:
         """Generator of interstitiald defects.
 
@@ -299,7 +299,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         """
         if len(set(insert_species)) != len(insert_species):
             raise ValueError("Insert species must be unique.")
-        cand_sites = self._get_candidate_sites(chgcar)
+        cand_sites = [*self._get_candidate_sites(chgcar)]
         for species in insert_species:
             yield from super().get_defects(chgcar.structure, {species: cand_sites})
 
@@ -316,7 +316,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
             avg_radius=self.avg_radius, max_avg_charge=self.max_avg_charge
         )
         for _, g in avg_chg_groups:
-            yield g[0]
+            yield min(g)
 
 
 def _element_str(sp_or_el: Species | Element) -> str:

@@ -296,7 +296,7 @@ def get_local_extrema(chgcar: VolumetricData, find_min: bool = True) -> npt.NDAr
 
 
 def remove_collisions(
-    fcoords: npt.NDArray, structure: Structure, min_dist: float = 0.5
+    fcoords: npt.NDArray, structure: Structure, min_dist: float = 0.9
 ) -> npt.NDArray:
     """
     Removed points that are too close to existing atoms in the structure
@@ -425,7 +425,7 @@ class ChargeInsertionAnalyzer(MSONable):
         ltol: float = 0.2,
         stol: float = 0.3,
         angle_tol: float = 5,
-        min_dist: float = 0.5,
+        min_dist: float = 0.9,
     ):
         """
         Args:
@@ -435,7 +435,7 @@ class ChargeInsertionAnalyzer(MSONable):
             ltol: StructureMatcher ltol parameter
             stol: StructureMatcher stol parameter
             angle_tol: StructureMatcher angle_tol parameter
-            min_dist: Minimum distance between sites and the host atoms.
+            min_dist: Minimum distance between sites and the host atoms in Å.
         """
         self.chgcar = chgcar
         self.working_ion = working_ion

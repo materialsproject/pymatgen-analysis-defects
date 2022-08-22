@@ -1,8 +1,9 @@
 import pytest
 
-from pymatgen.analysis.defects.core import Substitution, Vacancy
+from pymatgen.analysis.defects.core import Interstitial, Substitution, Vacancy
 from pymatgen.analysis.defects.generators import (
     AntiSiteGenerator,
+    ChargeInterstitialGenerator,
     InterstitialGenerator,
     SubstitutionGenerator,
     VacancyGenerator,
@@ -44,7 +45,7 @@ def test_antisite_generator(gan_struct):
     assert sorted(def_names) == ["Ga_N", "N_Ga"]
 
 
-def test_interstitial_generator(gan_struct, chgcar_fe3o4):
+def test_interstitial_generator(gan_struct):
     gen = InterstitialGenerator().get_defects(
         gan_struct, insertions={"Mg": [[0, 0, 0]]}
     )
@@ -60,11 +61,11 @@ def test_interstitial_generator(gan_struct, chgcar_fe3o4):
     assert len(l_gen) == 1
 
 
-# def test_interstitial_generator(chgcar_fe3o4):
-#     gen = InterstitialGenerator.from_chgcar(chgcar_fe3o4, "Ga", max_avg_charge=0.5)
-#     cnt = 0
-#     for defect in gen:
-#         assert isinstance(defect, Interstitial)
-#         assert defect.site.specie.symbol == "Ga"
-#         cnt += 1
-#     assert cnt == 2
+def test_charge_interstitial_generator(chgcar_fe3o4):
+    gen = ChargeInterstitialGenerator().get_defects(chgcar_fe3o4, {"Ga"})
+    cnt = 0
+    for defect in gen:
+        assert isinstance(defect, Interstitial)
+        assert defect.site.specie.symbol == "Ga"
+        cnt += 1
+    assert cnt == 2
