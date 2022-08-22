@@ -242,13 +242,13 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>structure</strong> (<em>Structure</em>) – The structure of the defect.</p></li>
-<li><p><strong>site</strong> (<em>PeriodicSite</em>) – The site</p></li>
-<li><p><strong>multiplicity</strong> (<em>int</em><em> | </em><em>None</em>) – The multiplicity of the defect.</p></li>
-<li><p><strong>oxi_state</strong> (<em>float</em><em> | </em><em>None</em>) – The oxidation state of the defect, if not specified,
+<li><p><strong>structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – The structure of the defect.</p></li>
+<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PeriodicSite</span></code>) – The site</p></li>
+<li><p><strong>multiplicity</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The multiplicity of the defect.</p></li>
+<li><p><strong>oxi_state</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – The oxidation state of the defect, if not specified,
 this will be determined automatically.</p></li>
-<li><p><strong>symprec</strong> (<em>float</em>) – Tolerance for symmetry finding.</p></li>
-<li><p><strong>angle_tolerance</strong> (<em>float</em>) – Angle tolerance for symmetry finding.</p></li>
+<li><p><strong>symprec</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Tolerance for symmetry finding.</p></li>
+<li><p><strong>angle_tolerance</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Angle tolerance for symmetry finding.</p></li>
 </ul>
 </dd>
 </dl>
@@ -320,12 +320,12 @@ this will be determined automatically.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>sc_mat</strong> (<em>np.ndarray</em><em> | </em><em>None</em>) – supercell matrix if None, the supercell will be determined by <cite>CubicSupercellAnalyzer</cite>.</p></li>
-<li><p><strong>dummy_species</strong> (<em>str</em><em> | </em><em>None</em>) – Dummy species to highlight the defect position (for visualizing vacancies).</p></li>
-<li><p><strong>max_atoms</strong> (<em>int</em>) – Maximum number of atoms allowed in the supercell.</p></li>
-<li><p><strong>min_atoms</strong> (<em>int</em>) – Minimum number of atoms allowed in the supercell.</p></li>
-<li><p><strong>min_length</strong> (<em>float</em>) – Minimum length of the smallest supercell lattice vector.</p></li>
-<li><p><strong>force_diagonal</strong> (<em>bool</em>) – If True, return a transformation with a diagonal transformation matrix.</p></li>
+<li><p><strong>sc_mat</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]) – supercell matrix if None, the supercell will be determined by <cite>CubicSupercellAnalyzer</cite>.</p></li>
+<li><p><strong>dummy_species</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – Dummy species to highlight the defect position (for visualizing vacancies).</p></li>
+<li><p><strong>max_atoms</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Maximum number of atoms allowed in the supercell.</p></li>
+<li><p><strong>min_atoms</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Minimum number of atoms allowed in the supercell.</p></li>
+<li><p><strong>min_length</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Minimum length of the smallest supercell lattice vector.</p></li>
+<li><p><strong>force_diagonal</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – If True, return a transformation with a diagonal transformation matrix.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -361,13 +361,13 @@ site in bulk_structure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>structure</strong> (<em>Structure</em>) – The structure of the defect.</p></li>
-<li><p><strong>site</strong> (<em>PeriodicSite</em>) – The site</p></li>
-<li><p><strong>multiplicity</strong> (<em>int</em><em> | </em><em>None</em>) – The multiplicity of the defect.</p></li>
-<li><p><strong>oxi_state</strong> (<em>float</em><em> | </em><em>None</em>) – The oxidation state of the defect, if not specified,
+<li><p><strong>structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – The structure of the defect.</p></li>
+<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PeriodicSite</span></code>) – The site</p></li>
+<li><p><strong>multiplicity</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The multiplicity of the defect.</p></li>
+<li><p><strong>oxi_state</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – The oxidation state of the defect, if not specified,
 this will be determined automatically.</p></li>
-<li><p><strong>symprec</strong> (<em>float</em>) – Tolerance for symmetry finding.</p></li>
-<li><p><strong>angle_tolerance</strong> (<em>float</em>) – Angle tolerance for symmetry finding.</p></li>
+<li><p><strong>symprec</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Tolerance for symmetry finding.</p></li>
+<li><p><strong>angle_tolerance</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Angle tolerance for symmetry finding.</p></li>
 </ul>
 </dd>
 </dl>
@@ -448,10 +448,10 @@ a site in bulk_structure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>structure</strong> (<em>Structure</em>) – The structure of the defect.</p></li>
-<li><p><strong>site</strong> (<em>PeriodicSite</em>) – Replace the nearest site with this one.</p></li>
-<li><p><strong>multiplicity</strong> (<em>int</em><em> | </em><em>None</em>) – The multiplicity of the defect.</p></li>
-<li><p><strong>oxi_state</strong> (<em>float</em><em> | </em><em>None</em>) – The oxidation state of the defect, if not specified,</p></li>
+<li><p><strong>structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – The structure of the defect.</p></li>
+<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PeriodicSite</span></code>) – Replace the nearest site with this one.</p></li>
+<li><p><strong>multiplicity</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The multiplicity of the defect.</p></li>
+<li><p><strong>oxi_state</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – The oxidation state of the defect, if not specified,</p></li>
 <li><p><strong>automatically.</strong> (<em>this will be determined</em>) – </p></li>
 </ul>
 </dd>
@@ -529,10 +529,10 @@ a site in bulk_structure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>structure</strong> (<em>Structure</em>) – The structure of the defect.</p></li>
-<li><p><strong>site</strong> (<em>PeriodicSite</em>) – Inserted site, also determines the species.</p></li>
-<li><p><strong>multiplicity</strong> (<em>int</em>) – The multiplicity of the defect.</p></li>
-<li><p><strong>oxi_state</strong> (<em>float</em><em> | </em><em>None</em>) – The oxidation state of the defect, if not specified,
+<li><p><strong>structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – The structure of the defect.</p></li>
+<li><p><strong>site</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PeriodicSite</span></code>) – Inserted site, also determines the species.</p></li>
+<li><p><strong>multiplicity</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – The multiplicity of the defect.</p></li>
+<li><p><strong>oxi_state</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – The oxidation state of the defect, if not specified,
 this will be determined automatically.</p></li>
 </ul>
 </dd>
@@ -598,7 +598,7 @@ this will be determined automatically.</p></li>
 <dd><p>Get the element from a species or element.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Element</p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code></p>
 </dd>
 </dl>
 </dd></dl>

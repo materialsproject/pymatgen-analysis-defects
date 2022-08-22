@@ -282,8 +282,8 @@ With non-default values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>structure</strong> (<em>Structure</em>) – The bulk structure the vacancies are generated from.</p></li>
-<li><p><strong>rm_species</strong> (<em>list</em><em>[</em><em>str</em><em> | </em><em>Species</em><em>]</em>) – List of species to be removed. If None considered all species.</p></li>
+<li><p><strong>structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – The bulk structure the vacancies are generated from.</p></li>
+<li><p><strong>rm_species</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Species</span></code>]]) – List of species to be removed. If None considered all species.</p></li>
 <li><p><strong>**kwargs</strong> – Additional keyword arguments for the <code class="docutils literal notranslate"><span class="pre">Vacancy</span></code> constructor.</p></li>
 </ul>
 </dd>
@@ -428,13 +428,13 @@ e.g. {“Ga”: [“Mg”, “Ca”]} means that Ga is substituted with Mg or Ca
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>chgcar</strong> (<em>Chgcar</em>) – The chgcar object to be used for the charge density.</p></li>
-<li><p><strong>insert_species</strong> (<em>set</em><em>[</em><em>str</em><em>] </em><em>| </em><em>list</em><em>[</em><em>str</em><em>]</em>) – The species to be inserted.</p></li>
+<li><p><strong>chgcar</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Chgcar</span></code>) – The chgcar object to be used for the charge density.</p></li>
+<li><p><strong>insert_species</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>] | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – The species to be inserted.</p></li>
 <li><p><strong>**kwargs</strong> – Additional keyword arguments for the <code class="docutils literal notranslate"><span class="pre">Interstitial</span></code> constructor.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Generator[<a class="reference internal" href="core.html#pymatgen.analysis.defects.core.Interstitial" title="pymatgen.analysis.defects.core.Interstitial">Interstitial</a>, None, None]</p>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code>[<a class="reference internal" href="core.html#pymatgen.analysis.defects.core.Interstitial" title="pymatgen.analysis.defects.core.Interstitial"><code class="xref py py-class docutils literal notranslate"><span class="pre">Interstitial</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>

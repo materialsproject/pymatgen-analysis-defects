@@ -304,9 +304,9 @@ and returns the planar averaged potential data for plotting.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>defect_locpot</strong> (<em>Locpot</em>) – The Locpot object for the defect supercell.</p></li>
-<li><p><strong>bulk_locpot</strong> (<em>Locpot</em>) – The Locpot object for the bulk supercell.</p></li>
-<li><p><strong>dielectric</strong> (<em>float</em><em> | </em><em>NDArray</em>) – The dielectric tensor or constant for the bulk material.</p></li>
+<li><p><strong>defect_locpot</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Locpot</span></code>) – The Locpot object for the defect supercell.</p></li>
+<li><p><strong>bulk_locpot</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Locpot</span></code>) – The Locpot object for the bulk supercell.</p></li>
+<li><p><strong>dielectric</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">ScalarType</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]]) – The dielectric tensor or constant for the bulk material.</p></li>
 <li><p><strong>kwargs</strong> – Additional keyword arguments for the get_correction method.</p></li>
 </ul>
 </dd>
@@ -459,14 +459,14 @@ formation energy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bulk_entry</strong> (<em>ComputedEntry</em>) – The bulk computed entry to get the total energy of the bulk supercell.</p></li>
-<li><p><strong>defect_entries</strong> (<em>List</em><em>[</em><a class="reference internal" href="#pymatgen.analysis.defects.thermo.DefectEntry" title="pymatgen.analysis.defects.thermo.DefectEntry"><em>DefectEntry</em></a><em>]</em>) – The list of defect entries for the different charge states.
+<li><p><strong>bulk_entry</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ComputedEntry</span></code>) – The bulk computed entry to get the total energy of the bulk supercell.</p></li>
+<li><p><strong>defect_entries</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#pymatgen.analysis.defects.thermo.DefectEntry" title="pymatgen.analysis.defects.thermo.DefectEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefectEntry</span></code></a>]) – The list of defect entries for the different charge states.
 The finite-size correction should already be applied to these.</p></li>
-<li><p><strong>atomic_entries</strong> (<em>list</em><em>[</em><em>ComputedEntry</em><em>]</em>) – The list of entries used to construct the phase diagram and chemical
+<li><p><strong>atomic_entries</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ComputedEntry</span></code>]) – The list of entries used to construct the phase diagram and chemical
 potential diagram. They will be used to determine the stability region
 of the bulk phase.</p></li>
-<li><p><strong>vbm</strong> (<em>float</em>) – The VBM of the bulk crystal.</p></li>
-<li><p><strong>api_key</strong> (<em>str</em><em> | </em><em>None</em>) – The api key to access the materials project database.
+<li><p><strong>vbm</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The VBM of the bulk crystal.</p></li>
+<li><p><strong>api_key</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – The api key to access the materials project database.
 If None, the key from your <code class="docutils literal notranslate"><span class="pre">~/.pmgrc.yaml</span></code> file will be used.</p></li>
 <li><p><strong>band_gap</strong> – The band gap of the bulk crystal.</p></li>
 <li><p><strong>inc_inf_values</strong> – If False these boundary points at infinity are ignored when we look at
@@ -489,13 +489,13 @@ the chemical potential limits.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>directory_map</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em>) – A dictionary mapping the defect name to the directory containing the
+<li><p><strong>directory_map</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – A dictionary mapping the defect name to the directory containing the
 VASP calculation.</p></li>
-<li><p><strong>defect</strong> (<a class="reference internal" href="core.html#pymatgen.analysis.defects.core.Defect" title="pymatgen.analysis.defects.core.Defect"><em>Defect</em></a>) – The defect used to create the defect entries.</p></li>
-<li><p><strong>pd_entries</strong> (<em>list</em><em>[</em><em>ComputedEntry</em><em>]</em>) – The list of entries used to construct the phase diagram and chemical
+<li><p><strong>defect</strong> (<a class="reference internal" href="core.html#pymatgen.analysis.defects.core.Defect" title="pymatgen.analysis.defects.core.Defect"><code class="xref py py-class docutils literal notranslate"><span class="pre">Defect</span></code></a>) – The defect used to create the defect entries.</p></li>
+<li><p><strong>pd_entries</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ComputedEntry</span></code>]) – The list of entries used to construct the phase diagram and chemical
 potential diagram. They will be used to determine the stability region
 of the bulk crystal.</p></li>
-<li><p><strong>dielectric</strong> (<em>float</em><em> | </em><em>NDArray</em>) – The dielectric constant of the bulk crystal.</p></li>
+<li><p><strong>dielectric</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">ScalarType</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]]) – The dielectric constant of the bulk crystal.</p></li>
 </ul>
 </dd>
 </dl>
