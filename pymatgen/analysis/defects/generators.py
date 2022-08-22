@@ -259,7 +259,7 @@ class InterstitialGenerator(DefectGenerator):
             yield fc
 
 
-class ChargeInterstitialGenerator(DefectGenerator):
+class ChargeInterstitialGenerator(InterstitialGenerator):
     def __init__(
         self,
         clustering_tol: float = 0.6,
@@ -285,13 +285,11 @@ class ChargeInterstitialGenerator(DefectGenerator):
         self.ltol = ltol
         self.stol = stol
         self.angle_tol = angle_tol
-        self.min_dist = min_dist
         self.avg_radius = avg_radius
         self.max_avg_charge = max_avg_charge
+        super().__init__(min_dist=min_dist)
 
-    def get_defects(
-        self, chgcar: Chgcar, insert_species: set[str], **kwargs
-    ) -> Generator[Interstitial, None, None]:
+    def get_defects(self, chgcar: Chgcar, insert_species: set[str] | list[str], **kwargs) -> Generator[Interstitial, None, None]:  # type: ignore[override]
         """Generate interstitials.
 
         Args:
@@ -299,11 +297,11 @@ class ChargeInterstitialGenerator(DefectGenerator):
             insert_species: The species to be inserted.
             **kwargs: Additional keyword arguments for the ``Interstitial`` constructor.
         """
+        if len(set(insert_species)) != len(insert_species):
+            raise ValueError("Insert species must be unique.")
         cand_sites = self._get_candidate_sites(chgcar)
         for species in insert_species:
-            yield from InterstitialGenerator.get_defects(
-                self, chgcar.structure, {species: cand_sites}
-            )
+            yield from super().get_defects(chgcar.structure, {species: cand_sites})
 
     def _get_candidate_sites(self, chgcar: Chgcar):
         cia = ChargeInsertionAnalyzer(
