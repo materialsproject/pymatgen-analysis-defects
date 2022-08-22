@@ -17,9 +17,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
           python-version: 3.8
 
@@ -45,9 +45,9 @@ jobs:
       PMG_MAPI_KEY: ${{ secrets.PMG_MAPI_KEY }}
 
     steps:
-    - uses: actions/checkout@v2.3.4
+    - uses: actions/checkout@v3
 
-    - uses: actions/setup-python@v2.2.2
+    - uses: actions/setup-python@v3
       with:
         python-version:  ${{ matrix.python-version }}
         cache: pip
