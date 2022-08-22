@@ -3,6 +3,7 @@ import pytest
 from pymatgen.analysis.defects.core import Interstitial, Substitution, Vacancy
 from pymatgen.analysis.defects.generators import (
     AntiSiteGenerator,
+    ChargeInterstitialGenerator,
     InterstitialGenerator,
     SubstitutionGenerator,
     VacancyGenerator,
@@ -10,11 +11,11 @@ from pymatgen.analysis.defects.generators import (
 
 
 def test_vacancy_generators(gan_struct):
-    vacancy_generator = VacancyGenerator(gan_struct)
+    vacancy_generator = VacancyGenerator().get_defects(gan_struct)
     for defect in vacancy_generator:
         assert isinstance(defect, Vacancy)
 
-    vacancy_generator = VacancyGenerator(gan_struct, ["Ga"])
+    vacancy_generator = VacancyGenerator().get_defects(gan_struct, ["Ga"])
     cnt = 0
     for defect in vacancy_generator:
         assert isinstance(defect, Vacancy)
@@ -22,11 +23,15 @@ def test_vacancy_generators(gan_struct):
     assert cnt == 1
 
     with pytest.raises(ValueError):
-        vacancy_generator = VacancyGenerator(gan_struct, ["Xe"])
+        vacancy_generator = list(
+            VacancyGenerator().get_defects(gan_struct, rm_species=["Xe"])
+        )
 
 
 def test_substitution_generators(gan_struct):
-    sub_generator = SubstitutionGenerator(gan_struct, {"Ga": ["Mg", "Ca"]})
+    sub_generator = SubstitutionGenerator().get_defects(
+        gan_struct, {"Ga": ["Mg", "Ca"]}
+    )
     replaced_atoms = set()
     for defect in sub_generator:
         assert isinstance(defect, Substitution)
@@ -35,13 +40,29 @@ def test_substitution_generators(gan_struct):
 
 
 def test_antisite_generator(gan_struct):
-    anti_gen = AntiSiteGenerator(gan_struct)
+    anti_gen = AntiSiteGenerator().get_defects(gan_struct)
     def_names = [defect.name for defect in anti_gen]
     assert sorted(def_names) == ["Ga_N", "N_Ga"]
 
 
-def test_interstitial_generator(chgcar_fe3o4):
-    gen = InterstitialGenerator.from_chgcar(chgcar_fe3o4, "Ga", max_avg_charge=0.5)
+def test_interstitial_generator(gan_struct):
+    gen = InterstitialGenerator().get_defects(
+        gan_struct, insertions={"Mg": [[0, 0, 0]]}
+    )
+    l_gen = list(gen)
+    assert len(l_gen) == 1
+    assert str(l_gen[0]) == "Mg intersitial site at at site [0.00,0.00,0.00]"
+
+    bad_site = [0.667, 0.333, 0.875]
+    gen = InterstitialGenerator().get_defects(
+        gan_struct, insertions={"Mg": [[0, 0, 0], bad_site]}
+    )
+    l_gen = list(gen)
+    assert len(l_gen) == 1
+
+
+def test_charge_interstitial_generator(chgcar_fe3o4):
+    gen = ChargeInterstitialGenerator().get_defects(chgcar_fe3o4, {"Ga"})
     cnt = 0
     for defect in gen:
         assert isinstance(defect, Interstitial)
