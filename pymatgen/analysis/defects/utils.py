@@ -296,19 +296,26 @@ def get_local_extrema(chgcar: VolumetricData, find_min: bool = True) -> npt.NDAr
 
 
 def remove_collisions(
-    fcoord: npt.ArrayLike, structure: Structure, min_dist: float = 0.5
-) -> npt.ArrayLike:
+    fcoords: npt.NDArray, structure: Structure, min_dist: float = 0.5
+) -> npt.NDArray:
     """
     Removed points that are too close to existing atoms in the structure
 
     Args:
+        fcoords (npt.ArrayLike): fractional coordinates of points to remove
         min_dist(float): The minimum distance that a vertex needs to be
             from existing atoms.
+
+    Returns:
+        fcoord (numpy.ndarray): The filtered coordinates.
     """
     s_fcoord = structure.frac_coords
-    dist_matrix = structure.lattice.get_all_distances(fcoord, s_fcoord)
+    logger.info(s_fcoord)
+    dist_matrix = structure.lattice.get_all_distances(fcoords, s_fcoord)
     all_dist = np.min(dist_matrix, axis=1)
-    return np.array([fcoord[i] for i in range(len(fcoord)) if all_dist[i] >= min_dist])
+    return np.array(
+        [fcoords[i] for i in range(len(fcoords)) if all_dist[i] >= min_dist]
+    )
 
 
 def cluster_nodes(
@@ -414,10 +421,11 @@ class ChargeInsertionAnalyzer(MSONable):
         self,
         chgcar: VolumetricData,
         working_ion: str = "Li",
-        clustering_tol: float = 0.6,
+        clustering_tol: float = 0.5,
         ltol: float = 0.2,
         stol: float = 0.3,
         angle_tol: float = 5,
+        min_dist: float = 0.5,
     ):
         """
         Args:
@@ -427,11 +435,13 @@ class ChargeInsertionAnalyzer(MSONable):
             ltol: StructureMatcher ltol parameter
             stol: StructureMatcher stol parameter
             angle_tol: StructureMatcher angle_tol parameter
+            min_dist: Minimum distance between sites and the host atoms.
         """
         self.chgcar = chgcar
         self.working_ion = working_ion
         self.sm = StructureMatcher(ltol=ltol, stol=stol, angle_tol=angle_tol)
         self.clustering_tol = clustering_tol
+        self.min_dist = min_dist
 
     @cached_property
     def labeled_sites(
@@ -452,7 +462,7 @@ class ChargeInsertionAnalyzer(MSONable):
         # Get a reasonablly reduced set of candidate sites first
         local_minima = get_local_extrema(self.chgcar, find_min=True)
         local_minima = remove_collisions(
-            local_minima, structure=self.chgcar.structure, min_dist=self.clustering_tol
+            local_minima, structure=self.chgcar.structure, min_dist=self.min_dist
         )
         local_minima = cluster_nodes(
             local_minima, lattice=self.chgcar.structure.lattice, tol=self.clustering_tol
