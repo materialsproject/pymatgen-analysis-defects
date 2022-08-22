@@ -528,19 +528,26 @@
 
 
 <div class="viewcode-block" id="remove_collisions"><a class="viewcode-back" href="../../../../reference/utils.html#pymatgen.analysis.defects.utils.remove_collisions">[docs]</a><span class="k">def</span> <span class="nf">remove_collisions</span><span class="p">(</span>
-    <span class="n">fcoord</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">min_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">:</span>
+    <span class="n">fcoords</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">min_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Removed points that are too close to existing atoms in the structure</span>
 
 <span class="sd">    Args:</span>
+<span class="sd">        fcoords (npt.ArrayLike): fractional coordinates of points to remove</span>
 <span class="sd">        min_dist(float): The minimum distance that a vertex needs to be</span>
 <span class="sd">            from existing atoms.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        fcoord (numpy.ndarray): The filtered coordinates.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">s_fcoord</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">frac_coords</span>
-    <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">get_all_distances</span><span class="p">(</span><span class="n">fcoord</span><span class="p">,</span> <span class="n">s_fcoord</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">s_fcoord</span><span class="p">)</span>
+    <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">get_all_distances</span><span class="p">(</span><span class="n">fcoords</span><span class="p">,</span> <span class="n">s_fcoord</span><span class="p">)</span>
     <span class="n">all_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dist_matrix</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">fcoord</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fcoord</span><span class="p">))</span> <span class="k">if</span> <span class="n">all_dist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_dist</span><span class="p">])</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">fcoords</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fcoords</span><span class="p">))</span> <span class="k">if</span> <span class="n">all_dist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_dist</span><span class="p">]</span>
+    <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="cluster_nodes"><a class="viewcode-back" href="../../../../reference/utils.html#pymatgen.analysis.defects.utils.cluster_nodes">[docs]</a><span class="k">def</span> <span class="nf">cluster_nodes</span><span class="p">(</span>
@@ -646,10 +653,11 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">chgcar</span><span class="p">:</span> <span class="n">VolumetricData</span><span class="p">,</span>
         <span class="n">working_ion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Li&quot;</span><span class="p">,</span>
-        <span class="n">clustering_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span>
+        <span class="n">clustering_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
         <span class="n">ltol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
         <span class="n">stol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
         <span class="n">angle_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">min_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
@@ -659,11 +667,13 @@
 <span class="sd">            ltol: StructureMatcher ltol parameter</span>
 <span class="sd">            stol: StructureMatcher stol parameter</span>
 <span class="sd">            angle_tol: StructureMatcher angle_tol parameter</span>
+<span class="sd">            min_dist: Minimum distance between sites and the host atoms in Å.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chgcar</span> <span class="o">=</span> <span class="n">chgcar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">working_ion</span> <span class="o">=</span> <span class="n">working_ion</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sm</span> <span class="o">=</span> <span class="n">StructureMatcher</span><span class="p">(</span><span class="n">ltol</span><span class="o">=</span><span class="n">ltol</span><span class="p">,</span> <span class="n">stol</span><span class="o">=</span><span class="n">stol</span><span class="p">,</span> <span class="n">angle_tol</span><span class="o">=</span><span class="n">angle_tol</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clustering_tol</span> <span class="o">=</span> <span class="n">clustering_tol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_dist</span> <span class="o">=</span> <span class="n">min_dist</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">labeled_sites</span><span class="p">(</span>
@@ -684,7 +694,7 @@
         <span class="c1"># Get a reasonablly reduced set of candidate sites first</span>
         <span class="n">local_minima</span> <span class="o">=</span> <span class="n">get_local_extrema</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chgcar</span><span class="p">,</span> <span class="n">find_min</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">local_minima</span> <span class="o">=</span> <span class="n">remove_collisions</span><span class="p">(</span>
-            <span class="n">local_minima</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clustering_tol</span>
+            <span class="n">local_minima</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span> <span class="n">min_dist</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_dist</span>
         <span class="p">)</span>
         <span class="n">local_minima</span> <span class="o">=</span> <span class="n">cluster_nodes</span><span class="p">(</span>
             <span class="n">local_minima</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clustering_tol</span>
