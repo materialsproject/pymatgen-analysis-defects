@@ -40,7 +40,7 @@ from pymatgen.core import Element, PeriodicSite, Species, Structure
 from pymatgen.io.vasp import Chgcar
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-from pymatgen.analysis.defects.core import Interstitial, Substitution, Vacancy
+from pymatgen.analysis.defects.core import Defect, Interstitial, Substitution, Vacancy
 from pymatgen.analysis.defects.utils import ChargeInsertionAnalyzer, remove_collisions
 
 __author__ = "Jimmy-Xuan Shen"
@@ -66,6 +66,14 @@ class DefectGenerator(MSONable, metaclass=ABCMeta):
         else:
             raise ValueError("This generator does not have symprec and angle_tolerance")
 
+    def get_defects(self, *args, **kwargs) -> list[Defect]:
+        """
+        Get the defects.
+
+        This method is called by the generator object directly.
+        """
+        return list(self.generate(*args, **kwargs))
+
 
 class VacancyGenerator(DefectGenerator):
     def __init__(
@@ -84,7 +92,7 @@ class VacancyGenerator(DefectGenerator):
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
 
-    def get_defects(
+    def generate(
         self, structure: Structure, rm_species: list[str | Species] = None, **kwargs
     ) -> Generator[Vacancy, None, None]:
         """Generate a vacancy defects.
@@ -131,7 +139,7 @@ class SubstitutionGenerator(DefectGenerator):
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
 
-    def get_defects(
+    def generate(
         self, structure: Structure, substitution: dict[str, list[str]], **kwargs
     ) -> Generator[Substitution, None, None]:
         """Generate subsitutional defects.
@@ -176,7 +184,7 @@ class AntiSiteGenerator(DefectGenerator):
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
 
-    def get_defects(
+    def generate(
         self,
         structure: Structure,
         **kwargs,
@@ -192,7 +200,7 @@ class AntiSiteGenerator(DefectGenerator):
             subs[u].append(v)
             subs[v].append(u)
         logger.debug(f"All anti-site pairings: {subs}")
-        return SubstitutionGenerator.get_defects(self, structure, subs)
+        return SubstitutionGenerator.generate(self, structure, subs)
 
 
 class InterstitialGenerator(DefectGenerator):
@@ -204,7 +212,7 @@ class InterstitialGenerator(DefectGenerator):
         """
         self.min_dist = min_dist
 
-    def get_defects(
+    def generate(
         self, structure: Structure, insertions: dict[str, list[list[float]]], **kwargs
     ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
@@ -275,7 +283,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         self.max_avg_charge = max_avg_charge
         super().__init__(min_dist=min_dist)
 
-    def get_defects(self, chgcar: Chgcar, insert_species: set[str] | list[str], **kwargs) -> Generator[Interstitial, None, None]:  # type: ignore[override]
+    def generate(self, chgcar: Chgcar, insert_species: set[str] | list[str], **kwargs) -> Generator[Interstitial, None, None]:  # type: ignore[override]
         """Generate interstitials.
 
         Args:
@@ -287,7 +295,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
             raise ValueError("Insert species must be unique.")
         cand_sites = [*self._get_candidate_sites(chgcar)]
         for species in insert_species:
-            yield from super().get_defects(chgcar.structure, {species: cand_sites})
+            yield from super().generate(chgcar.structure, {species: cand_sites})
 
     def _get_candidate_sites(self, chgcar: Chgcar):
         cia = ChargeInsertionAnalyzer(
