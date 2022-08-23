@@ -1,31 +1,4 @@
-"""Defect generators.
-
-The generator objects can be used directly as generators once instantiated.
-
-.. code-block:: python
-
-    from pymatgen.analysis.defects.generators import VacancyGenerator
-
-    gen = VacancyGenerator(structure, ["Ga", "N"])
-    for defect in gen:
-        # do something with defect
-        pass
-
-In this case the generator's ``generate_defects`` method is called with only the default values.
-
-For more fine-grained control, the generator's ``generate_defects`` method can be called directly.
-With non-default values.
-
-.. code-block:: python
-
-    from pymatgen.analysis.defects.generators import VacancyGenerator
-
-    gen = VacancyGenerator(structure, ["Ga", "N"])
-    for defect in gen.generate_defects(max_avg_charge=0.5):
-        # do something with defect
-        pass
-
-"""
+"""Defect generators."""
 
 from __future__ import annotations
 
