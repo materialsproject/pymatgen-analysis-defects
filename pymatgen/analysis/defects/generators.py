@@ -36,7 +36,6 @@ from itertools import combinations
 from typing import Generator
 
 from monty.json import MSONable
-from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.core import Element, PeriodicSite, Species, Structure
 from pymatgen.io.vasp import Chgcar
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
@@ -63,19 +62,6 @@ class DefectGenerator(MSONable, metaclass=ABCMeta):
                 struct,
                 symprec=self.symprec,
                 angle_tolerance=self.angle_tolerance,
-            )
-        else:
-            raise ValueError("This generator does not have symprec and angle_tolerance")
-
-    def _stucture_matcher(self) -> StructureMatcher:
-        """Get the ``StructureMatcher``."""
-        if (
-            hasattr(self, "ltol")
-            and hasattr(self, "stol")
-            and hasattr(self, "angle_tol")
-        ):
-            return StructureMatcher(
-                ltol=self.ltol, stol=self.stol, angle_tol=self.angle_tol
             )
         else:
             raise ValueError("This generator does not have symprec and angle_tolerance")
@@ -326,7 +312,7 @@ def _element_str(sp_or_el: Species | Element) -> str:
     elif isinstance(sp_or_el, Element):
         return str(sp_or_el)
     else:
-        raise ValueError(f"{sp_or_el} is not a species or element")
+        raise ValueError(f"{sp_or_el} is not a species or element")  # pragma: no cover
 
 
 def _remove_oxidation_states(structure: Structure) -> Structure:
