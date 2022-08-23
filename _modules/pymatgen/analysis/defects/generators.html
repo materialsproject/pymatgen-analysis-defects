@@ -230,34 +230,7 @@
         </div>
         <article role="main">
           <h1>Source code for pymatgen.analysis.defects.generators</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Defect generators.</span>
-
-<span class="sd">The generator objects can be used directly as generators once instantiated.</span>
-
-<span class="sd">.. code-block:: python</span>
-
-<span class="sd">    from pymatgen.analysis.defects.generators import VacancyGenerator</span>
-
-<span class="sd">    gen = VacancyGenerator(structure, [&quot;Ga&quot;, &quot;N&quot;])</span>
-<span class="sd">    for defect in gen:</span>
-<span class="sd">        # do something with defect</span>
-<span class="sd">        pass</span>
-
-<span class="sd">In this case the generator&#39;s ``generate_defects`` method is called with only the default values.</span>
-
-<span class="sd">For more fine-grained control, the generator&#39;s ``generate_defects`` method can be called directly.</span>
-<span class="sd">With non-default values.</span>
-
-<span class="sd">.. code-block:: python</span>
-
-<span class="sd">    from pymatgen.analysis.defects.generators import VacancyGenerator</span>
-
-<span class="sd">    gen = VacancyGenerator(structure, [&quot;Ga&quot;, &quot;N&quot;])</span>
-<span class="sd">    for defect in gen.generate_defects(max_avg_charge=0.5):</span>
-<span class="sd">        # do something with defect</span>
-<span class="sd">        pass</span>
-
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;Defect generators.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
@@ -272,7 +245,7 @@
 <span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">Chgcar</span>
 <span class="kn">from</span> <span class="nn">pymatgen.symmetry.analyzer</span> <span class="kn">import</span> <span class="n">SpacegroupAnalyzer</span>
 
-<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.core</span> <span class="kn">import</span> <span class="n">Interstitial</span><span class="p">,</span> <span class="n">Substitution</span><span class="p">,</span> <span class="n">Vacancy</span>
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.core</span> <span class="kn">import</span> <span class="n">Defect</span><span class="p">,</span> <span class="n">Interstitial</span><span class="p">,</span> <span class="n">Substitution</span><span class="p">,</span> <span class="n">Vacancy</span>
 <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.utils</span> <span class="kn">import</span> <span class="n">ChargeInsertionAnalyzer</span><span class="p">,</span> <span class="n">remove_collisions</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Jimmy-Xuan Shen&quot;</span>
@@ -296,7 +269,11 @@
                 <span class="n">angle_tolerance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">angle_tolerance</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;This generator does not have symprec and angle_tolerance&quot;</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;This generator does not have symprec and angle_tolerance&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DefectGenerator.get_defects"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.DefectGenerator.get_defects">[docs]</a>    <span class="k">def</span> <span class="nf">get_defects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Defect</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Call the generator and convert the results into a list.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span></div></div>
 
 
 <div class="viewcode-block" id="VacancyGenerator"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.VacancyGenerator">[docs]</a><span class="k">class</span> <span class="nc">VacancyGenerator</span><span class="p">(</span><span class="n">DefectGenerator</span><span class="p">):</span>
@@ -316,7 +293,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">symprec</span> <span class="o">=</span> <span class="n">symprec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">angle_tolerance</span> <span class="o">=</span> <span class="n">angle_tolerance</span>
 
-<div class="viewcode-block" id="VacancyGenerator.get_defects"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.VacancyGenerator.get_defects">[docs]</a>    <span class="k">def</span> <span class="nf">get_defects</span><span class="p">(</span>
+<div class="viewcode-block" id="VacancyGenerator.generate"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.VacancyGenerator.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">rm_species</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Species</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Vacancy</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Generate a vacancy defects.</span>
@@ -363,7 +340,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">symprec</span> <span class="o">=</span> <span class="n">symprec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">angle_tolerance</span> <span class="o">=</span> <span class="n">angle_tolerance</span>
 
-<div class="viewcode-block" id="SubstitutionGenerator.get_defects"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.SubstitutionGenerator.get_defects">[docs]</a>    <span class="k">def</span> <span class="nf">get_defects</span><span class="p">(</span>
+<div class="viewcode-block" id="SubstitutionGenerator.generate"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.SubstitutionGenerator.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">substitution</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Substitution</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Generate subsitutional defects.</span>
@@ -408,7 +385,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">symprec</span> <span class="o">=</span> <span class="n">symprec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">angle_tolerance</span> <span class="o">=</span> <span class="n">angle_tolerance</span>
 
-<div class="viewcode-block" id="AntiSiteGenerator.get_defects"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.AntiSiteGenerator.get_defects">[docs]</a>    <span class="k">def</span> <span class="nf">get_defects</span><span class="p">(</span>
+<div class="viewcode-block" id="AntiSiteGenerator.generate"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.AntiSiteGenerator.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
@@ -424,7 +401,7 @@
             <span class="n">subs</span><span class="p">[</span><span class="n">u</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
             <span class="n">subs</span><span class="p">[</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All anti-site pairings: </span><span class="si">{</span><span class="n">subs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">SubstitutionGenerator</span><span class="o">.</span><span class="n">get_defects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">subs</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">SubstitutionGenerator</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">subs</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="InterstitialGenerator"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.InterstitialGenerator">[docs]</a><span class="k">class</span> <span class="nc">InterstitialGenerator</span><span class="p">(</span><span class="n">DefectGenerator</span><span class="p">):</span>
@@ -436,7 +413,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_dist</span> <span class="o">=</span> <span class="n">min_dist</span>
 
-<div class="viewcode-block" id="InterstitialGenerator.get_defects"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.InterstitialGenerator.get_defects">[docs]</a>    <span class="k">def</span> <span class="nf">get_defects</span><span class="p">(</span>
+<div class="viewcode-block" id="InterstitialGenerator.generate"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.InterstitialGenerator.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">insertions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]],</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Interstitial</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Generate interstitials.</span>
@@ -507,7 +484,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">max_avg_charge</span> <span class="o">=</span> <span class="n">max_avg_charge</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">min_dist</span><span class="o">=</span><span class="n">min_dist</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ChargeInterstitialGenerator.get_defects"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.ChargeInterstitialGenerator.get_defects">[docs]</a>    <span class="k">def</span> <span class="nf">get_defects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chgcar</span><span class="p">:</span> <span class="n">Chgcar</span><span class="p">,</span> <span class="n">insert_species</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Interstitial</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>  <span class="c1"># type: ignore[override]</span>
+<div class="viewcode-block" id="ChargeInterstitialGenerator.generate"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.ChargeInterstitialGenerator.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chgcar</span><span class="p">:</span> <span class="n">Chgcar</span><span class="p">,</span> <span class="n">insert_species</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Interstitial</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>  <span class="c1"># type: ignore[override]</span>
         <span class="sd">&quot;&quot;&quot;Generate interstitials.</span>
 
 <span class="sd">        Args:</span>
@@ -519,7 +496,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Insert species must be unique.&quot;</span><span class="p">)</span>
         <span class="n">cand_sites</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_candidate_sites</span><span class="p">(</span><span class="n">chgcar</span><span class="p">)]</span>
         <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">insert_species</span><span class="p">:</span>
-            <span class="k">yield from</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_defects</span><span class="p">(</span><span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span> <span class="p">{</span><span class="n">species</span><span class="p">:</span> <span class="n">cand_sites</span><span class="p">})</span></div>
+            <span class="k">yield from</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span> <span class="p">{</span><span class="n">species</span><span class="p">:</span> <span class="n">cand_sites</span><span class="p">})</span></div>
 
     <span class="k">def</span> <span class="nf">_get_candidate_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chgcar</span><span class="p">:</span> <span class="n">Chgcar</span><span class="p">):</span>
         <span class="n">cia</span> <span class="o">=</span> <span class="n">ChargeInsertionAnalyzer</span><span class="p">(</span>

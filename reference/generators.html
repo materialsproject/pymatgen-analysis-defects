@@ -233,31 +233,22 @@
           <section id="module-pymatgen.analysis.defects.generators">
 <span id="pymatgen-analysis-defects-generators"></span><h1>pymatgen.analysis.defects.generators<a class="headerlink" href="#module-pymatgen.analysis.defects.generators" title="Permalink to this heading">#</a></h1>
 <p>Defect generators.</p>
-<p>The generator objects can be used directly as generators once instantiated.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.generators</span> <span class="kn">import</span> <span class="n">VacancyGenerator</span>
-
-<span class="n">gen</span> <span class="o">=</span> <span class="n">VacancyGenerator</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;Ga&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">])</span>
-<span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="n">gen</span><span class="p">:</span>
-    <span class="c1"># do something with defect</span>
-    <span class="k">pass</span>
-</pre></div>
-</div>
-<p>In this case the generator’s <code class="docutils literal notranslate"><span class="pre">generate_defects</span></code> method is called with only the default values.</p>
-<p>For more fine-grained control, the generator’s <code class="docutils literal notranslate"><span class="pre">generate_defects</span></code> method can be called directly.
-With non-default values.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.generators</span> <span class="kn">import</span> <span class="n">VacancyGenerator</span>
-
-<span class="n">gen</span> <span class="o">=</span> <span class="n">VacancyGenerator</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;Ga&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">])</span>
-<span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate_defects</span><span class="p">(</span><span class="n">max_avg_charge</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
-    <span class="c1"># do something with defect</span>
-    <span class="k">pass</span>
-</pre></div>
-</div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.DefectGenerator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.generators.</span></span><span class="sig-name descname"><span class="pre">DefectGenerator</span></span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#DefectGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.DefectGenerator" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
 <p>Abstract class for a defect generator.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.DefectGenerator.get_defects">
+<span class="sig-name descname"><span class="pre">get_defects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#DefectGenerator.get_defects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.DefectGenerator.get_defects" title="Permalink to this definition">#</a></dt>
+<dd><p>Call the generator and convert the results into a list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="core.html#pymatgen.analysis.defects.core.Defect" title="pymatgen.analysis.defects.core.Defect"><code class="xref py py-class docutils literal notranslate"><span class="pre">Defect</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -276,8 +267,8 @@ With non-default values.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.VacancyGenerator.get_defects">
-<span class="sig-name descname"><span class="pre">get_defects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rm_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#VacancyGenerator.get_defects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.VacancyGenerator.get_defects" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.VacancyGenerator.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rm_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#VacancyGenerator.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.VacancyGenerator.generate" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate a vacancy defects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -312,8 +303,8 @@ With non-default values.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.SubstitutionGenerator.get_defects">
-<span class="sig-name descname"><span class="pre">get_defects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substitution</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#SubstitutionGenerator.get_defects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.SubstitutionGenerator.get_defects" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.SubstitutionGenerator.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">substitution</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#SubstitutionGenerator.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.SubstitutionGenerator.generate" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate subsitutional defects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -355,8 +346,8 @@ e.g. {“Ga”: [“Mg”, “Ca”]} means that Ga is substituted with Mg or Ca
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.AntiSiteGenerator.get_defects">
-<span class="sig-name descname"><span class="pre">get_defects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#AntiSiteGenerator.get_defects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.AntiSiteGenerator.get_defects" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.AntiSiteGenerator.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#AntiSiteGenerator.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.AntiSiteGenerator.generate" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate anti-site defects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -381,8 +372,8 @@ e.g. {“Ga”: [“Mg”, “Ca”]} means that Ga is substituted with Mg or Ca
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.InterstitialGenerator.get_defects">
-<span class="sig-name descname"><span class="pre">get_defects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">insertions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#InterstitialGenerator.get_defects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.InterstitialGenerator.get_defects" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.InterstitialGenerator.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">insertions</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#InterstitialGenerator.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.InterstitialGenerator.generate" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate interstitials.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -422,8 +413,8 @@ e.g. {“Ga”: [“Mg”, “Ca”]} means that Ga is substituted with Mg or Ca
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.ChargeInterstitialGenerator.get_defects">
-<span class="sig-name descname"><span class="pre">get_defects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chgcar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">insert_species</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#ChargeInterstitialGenerator.get_defects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.ChargeInterstitialGenerator.get_defects" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.generators.ChargeInterstitialGenerator.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chgcar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">insert_species</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/generators.html#ChargeInterstitialGenerator.generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.generators.ChargeInterstitialGenerator.generate" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate interstitials.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
