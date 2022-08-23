@@ -44,10 +44,15 @@ def get_sc_fromstruct(
     Returns:
         struc_sc: Supercell that is as close to cubic as possible
     """
-    m_len = min_length
     sc_mat = None
     while sc_mat is None:
-        sc_mat = _cubic_cell(base_struct, min_atoms, max_atoms, m_len)
+        sc_mat = _cubic_cell(
+            base_struct,
+            min_atoms,
+            max_atoms=max_atoms,
+            min_length=min_length,
+            force_diagonal=force_diagonal,
+        )
         max_atoms += 1
     return sc_mat
 
