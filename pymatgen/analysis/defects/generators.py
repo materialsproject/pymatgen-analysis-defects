@@ -67,11 +67,7 @@ class DefectGenerator(MSONable, metaclass=ABCMeta):
             raise ValueError("This generator does not have symprec and angle_tolerance")
 
     def get_defects(self, *args, **kwargs) -> list[Defect]:
-        """
-        Get the defects.
-
-        This method is called by the generator object directly.
-        """
+        """Call the generator and convert the results into a list."""
         return list(self.generate(*args, **kwargs))
 
 
