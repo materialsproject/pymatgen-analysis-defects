@@ -90,7 +90,7 @@ def _cubic_cell(
     min_length: float = 10.0,
     force_diagonal: bool = False,
 ) -> np.ndarray | None:
-    """Generate the best supercell from a unit cell
+    """Generate the best supercell from a unit cell.
 
     This is done using the pymatgen CubicSupercellTransformation class.
 

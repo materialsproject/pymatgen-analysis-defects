@@ -178,6 +178,7 @@ def _fit_parabola(
     """Fit the parabola to the data."""
 
     def f(Q, omega):
+        """The parabola function."""
         return 0.5 * omega**2 * (Q - Q0) ** 2 + E0
 
     popt, _ = curve_fit(f, Q, energy)

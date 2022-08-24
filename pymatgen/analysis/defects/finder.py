@@ -167,7 +167,7 @@ class DefectSiteFinder(MSONable):
 
 # %%
 def get_site_groups(struct, symprec=0.01, angle_tolerance=5.0) -> List[SiteGroup]:
-    """Group the sites in the structure by symmetry
+    """Group the sites in the structure by symmetry.
 
     Group the sites in the structure by symmetry and return a
     list of ``SiteGroup`` namedtuples.
@@ -257,7 +257,8 @@ def best_match(sv: SiteVec, sgs: List[SiteGroup]) -> Tuple[SiteGroup, float]:
 
 
 def _get_broundary(arr, n_max=16, n_skip=3):
-    """
+    """Get the boundary index for the high-distortion indices.
+
     Assuming arr is sorted in reverse order,
     find the biggest value drop in arr[n_skip:n_max].
     """

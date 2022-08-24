@@ -97,3 +97,9 @@ source = ["pymatgen/"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
+
+[tool.pydocstyle]
+convention = 'google'
+match = '^pymatgen/(?!_).*\.py'
+inherit = false
+add-ignore= "D107, "

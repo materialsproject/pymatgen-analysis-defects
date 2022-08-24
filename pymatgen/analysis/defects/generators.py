@@ -45,19 +45,20 @@ class DefectGenerator(MSONable, metaclass=ABCMeta):
 
 
 class VacancyGenerator(DefectGenerator):
+    """Generator for vacancy defects.
+
+    Attributes:
+        symprec:  Tolerance for symmetry finding
+            (parameter for ``SpacegroupAnalyzer``).
+        angle_tolerance: Angle tolerance for symmetry finding
+            (parameter for ``SpacegroupAnalyzer``).
+    """
+
     def __init__(
         self,
         symprec: float = 0.01,
         angle_tolerance: float = 5,
     ):
-        """Generator for vacancy defects.
-
-        Args:
-            symprec:  Tolerance for symmetry finding.
-            (parameter for ``SpacegroupAnalyzer``).
-            angle_tolerance: Angle tolerance for symmetry finding.
-            (parameter for ``SpacegroupAnalyzer``).
-        """
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
 
@@ -97,14 +98,15 @@ class VacancyGenerator(DefectGenerator):
 
 
 class SubstitutionGenerator(DefectGenerator):
+    """Generator of substitutions for symmetry distinct sites in a structure.
+
+    Attributes:
+        symprec:  Tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).
+        angle_tolerance: Angle tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).
+
+    """
+
     def __init__(self, symprec: float = 0.01, angle_tolerance: float = 5):
-        """Generator of substitutions for symmetry distinct sites in a structure.
-
-        Args:
-            symprec:  Tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).
-            angle_tolerance: Angle tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).
-
-        """
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
 
@@ -140,16 +142,14 @@ class SubstitutionGenerator(DefectGenerator):
 
 
 class AntiSiteGenerator(DefectGenerator):
+    """Generator of all anti-site defects.
+
+    Attributes:
+        symprec:  Tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).
+        angle_tolerance: Angle tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).
+    """
+
     def __init__(self, symprec: float = 0.01, angle_tolerance: float = 5):
-        """Generator of all anti-site defects.
-
-        Args:
-            symprec:  Tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).
-            angle_tolerance: Angle tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).
-
-        Returns:
-            Generator[Substitution, None, None]: Generator that yields a list of ``Substitution`` objects
-        """
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
 
@@ -173,12 +173,13 @@ class AntiSiteGenerator(DefectGenerator):
 
 
 class InterstitialGenerator(DefectGenerator):
-    def __init__(self, min_dist: float = 0.5) -> None:
-        """Generator of interstitiald defects.
+    """Generator of interstitiald defects.
 
-        Args:
-            min_dist: Minimum distance between an interstitial and the nearest atom.
-        """
+    Attributes:
+        min_dist: Minimum distance between an interstitial and the nearest atom.
+    """
+
+    def __init__(self, min_dist: float = 0.5) -> None:
         self.min_dist = min_dist
 
     def generate(
@@ -223,6 +224,18 @@ class InterstitialGenerator(DefectGenerator):
 
 
 class ChargeInterstitialGenerator(InterstitialGenerator):
+    """Generator of interstitiald defects.
+
+    Attributes:
+        clustering_tol: Tolerance for clustering see :meth:`pymatgen.analysis.defects.utils.cluster_nodes`.
+        ltol: Tolerance for lattice parameter matching
+        stol: Tolerance for site matching
+        angle_tol: Tolerance for angles in degrees
+        min_dist: Minimum to atoms in the host structure
+        avg_radius: The radius around each local minima used to evaluate the average charge.
+        max_avg_charge: The maximum average charge to accept.
+    """
+
     def __init__(
         self,
         clustering_tol: float = 0.6,
@@ -233,17 +246,6 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         avg_radius: float = 0.4,
         max_avg_charge: float = 0.9,
     ) -> None:
-        """Generator of interstitiald defects.
-
-        Args:
-            clustering_tol: Tolerance for clustering see :meth:`pymatgen.analysis.defects.utils.cluster_nodes`.
-            ltol: Tolerance for lattice parameter matching
-            stol: Tolerance for site matching
-            angle_tol: Tolerance for angles in degrees
-            min_dist: Minimum to atoms in the host structure
-            avg_radius: The radius around each local minima used to evaluate the average charge.
-            max_avg_charge: The maximum average charge to accept.
-        """
         self.clustering_tol = clustering_tol
         self.ltol = ltol
         self.stol = stol
@@ -293,6 +295,7 @@ def _element_str(sp_or_el: Species | Element) -> str:
 
 
 def _remove_oxidation_states(structure: Structure) -> Structure:
+    """Get a structure with oxidation states removed."""
     struct = structure.copy()
     struct.remove_oxidation_states()
     return struct

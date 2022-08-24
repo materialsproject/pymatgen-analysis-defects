@@ -202,22 +202,16 @@ def converge(f, step, tol, max_h):
 def get_zfile(
     directory: Path, base_name: str, allow_missing: bool = False
 ) -> Path | None:
-    """
-    Find gzipped or non-gzipped versions of a file in a directory listing.
+    """Find gzipped or non-gzipped versions of a file in a directory listing.
 
-    Parameters
-    ----------
-    directory : list of Path
-        A list of files in a directory.
-    base_name : str
-        The base name of file file to find.
-    allow_missing : bool
-        Whether to error if no version of the file (gzipped or un-gzipped) can be found.
-    Returns
-    -------
-    Path or None
-        A path to the matched file. If ``allow_missing=True`` and the file cannot be
-        found, then ``None`` will be returned.
+    Args:
+        directory : A list of files in a directory.
+        base_name : The base name of file file to find.
+        allow_missing : Whether to error if no version of the file (gzipped or un-gzipped) can be found.
+
+    Returns:
+        Path | None: A path to the matched file. If ``allow_missing=True``
+        and the file cannot be found, then ``None`` will be returned.
     """
     for file in directory.glob(f"{base_name}*"):
         if base_name == file.name:
@@ -234,13 +228,15 @@ def get_zfile(
 
 
 def generic_groupby(list_in, comp=operator.eq):
-    """
-    Group a list of unsortable objects
+    """Group a list of unsortable objects.
+
     Args:
         list_in: A list of generic objects
         comp: (Default value = operator.eq) The comparator
+
     Returns:
-        [int] list of labels for the input list
+        list[int]: list of labels for the input list
+
     """
     list_out = [None] * len(list_in)
     label_num = 0
@@ -260,9 +256,9 @@ def generic_groupby(list_in, comp=operator.eq):
 
 
 def get_local_extrema(chgcar: VolumetricData, find_min: bool = True) -> npt.NDArray:
-    """
-    Get all local extrema fractional coordinates in charge density,
-    searching for local minimum by default. Note that sites are NOT grouped
+    """Get all local extrema fractional coordinates in charge density.
+
+    Searching for local minimum by default. Note that sites are NOT grouped
     symmetrically.
 
     Args:
@@ -273,7 +269,6 @@ def get_local_extrema(chgcar: VolumetricData, find_min: bool = True) -> npt.NDAr
         extrema_coords (list): list of fractional coordinates corresponding
             to local extrema.
     """
-
     if find_min:
         sign = -1
     else:
@@ -298,8 +293,7 @@ def get_local_extrema(chgcar: VolumetricData, find_min: bool = True) -> npt.NDAr
 def remove_collisions(
     fcoords: npt.NDArray, structure: Structure, min_dist: float = 0.9
 ) -> npt.NDArray:
-    """
-    Removed points that are too close to existing atoms in the structure
+    """Removed points that are too close to existing atoms in the structure.
 
     Args:
         fcoords (npt.ArrayLike): fractional coordinates of points to remove
@@ -321,10 +315,11 @@ def remove_collisions(
 def cluster_nodes(
     fcoords: npt.ArrayLike, lattice: Lattice, tol: float = 0.2
 ) -> npt.NDArray:
-    """
-    Cluster nodes that are too close together using a tol.
+    """Cluster nodes that are too close together using hiercharcal clustering.
 
     Args:
+        fcoords (npt.ArrayLike): fractional coordinates of points to cluster.
+        lattice (Lattice): The lattice of the structure.
         tol (float): A distance tolerance. PBC is taken into account.
     """
     # Manually generate the distance matrix (which needs to take into
@@ -399,7 +394,8 @@ def get_avg_chg(
 
 
 class ChargeInsertionAnalyzer(MSONable):
-    """
+    """Object for insertions sites from charge density.
+
     Analyze the charge density and create new candidate structures by inserting at each charge minima
     The similar inserterd structures are given the same uniqueness label.
 
@@ -408,13 +404,22 @@ class ChargeInsertionAnalyzer(MSONable):
         often contains spurious local minima in the core. However you can still use CHGCAR
         with an appropriate ``max_avg_charge`` value.
 
-        Since the user might want to rerun their analysis with different ``avg_charge`` and ``max_avg_charge`` values,
-        we will generate and store all the ion-inserted structure and their uniqueness labels first and allow
-        the user to get the filtered and labeled results.
+        Since the user might want to rerun their analysis with different ``avg_charge`` and
+        ``max_avg_charge`` values, we will generate and store all the ion-inserted structure
+        and their uniqueness labels first and allow the user to get the filtered and labeled results.
 
         If you use this code please cite the following paper:
         J.-X. Shen et al.: npj Comput. Mater. 6, 1 (2020)
         https://www.nature.com/articles/s41524-020-00422-3
+
+    Attributes:
+        chgcar: The charge density object to analyze
+        working_ion: The working ion to be inserted
+        clustering_tol: Distance tolerance for grouping sites together
+        ltol: StructureMatcher ltol parameter
+        stol: StructureMatcher stol parameter
+        angle_tol: StructureMatcher angle_tol parameter
+        min_dist: Minimum distance between sites and the host atoms in Å.
     """
 
     def __init__(
@@ -427,16 +432,6 @@ class ChargeInsertionAnalyzer(MSONable):
         angle_tol: float = 5,
         min_dist: float = 0.9,
     ):
-        """
-        Args:
-            chgcar: The charge density object to analyze
-            working_ion: The working ion to be inserted
-            clustering_tol: Distance tolerance for grouping sites together
-            ltol: StructureMatcher ltol parameter
-            stol: StructureMatcher stol parameter
-            angle_tol: StructureMatcher angle_tol parameter
-            min_dist: Minimum distance between sites and the host atoms in Å.
-        """
         self.chgcar = chgcar
         self.working_ion = working_ion
         self.sm = StructureMatcher(ltol=ltol, stol=stol, angle_tol=angle_tol)

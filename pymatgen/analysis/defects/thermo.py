@@ -226,6 +226,8 @@ class FormationEnergyDiagram(MSONable):
             inc_inf_values:
                 If False these boundary points at infinity are ignored when we look at
                 the chemical potential limits.
+            **kwargs:
+                Additional keyword arguments for the FormationEnergyDiagram class.
 
         Returns:
             FormationEnergyDiagram:
@@ -266,7 +268,7 @@ class FormationEnergyDiagram(MSONable):
         )
 
     @classmethod
-    def with_phase_diagram_from_matproj(
+    def with_alternate_phase_diagram(
         cls,
         bulk_entry: ComputedEntry,
         defect_entries: List[DefectEntry],
@@ -343,17 +345,15 @@ class FormationEnergyDiagram(MSONable):
         """Create a FormationEnergyDiagram from VASP directories.
 
         Args:
-            directory_map:
-                A dictionary mapping the defect name to the directory containing the
+            directory_map: A dictionary mapping the defect name to the directory containing the
                 VASP calculation.
-            defect:
-                The defect used to create the defect entries.
-            pd_entries:
-                The list of entries used to construct the phase diagram and chemical
+            defect: The defect used to create the defect entries.
+            pd_entries: The list of entries used to construct the phase diagram and chemical
                 potential diagram. They will be used to determine the stability region
                 of the bulk crystal.
-            dielectric:
-                The dielectric constant of the bulk crystal.
+            dielectric: The dielectric constant of the bulk crystal.
+            vbm: The VBM of the bulk crystal.
+            **kwargs: Additional keyword arguments for the constructor.
         """
 
         def _read_dir(directory):
