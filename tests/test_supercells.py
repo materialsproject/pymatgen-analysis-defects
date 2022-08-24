@@ -25,4 +25,3 @@ def test_ase_supercells(gan_struct):
     sc_mat = _ase_cubic(gan_struct, min_atoms=4, max_atoms=8)
     sc = gan_struct * sc_mat
     assert 4 <= sc.num_sites <= 8
-    assert False
