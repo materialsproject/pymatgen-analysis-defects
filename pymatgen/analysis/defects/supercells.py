@@ -126,12 +126,15 @@ def _ase_cubic(base_struture, min_atoms: int = 80, max_atoms: int = 240):
     from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape
     from pymatgen.io.ase import AseAtomsAdaptor
 
+    _logger.info("ASE cubic supercell generation.")
+
     aaa = AseAtomsAdaptor()
     ase_atoms = aaa.get_atoms(base_struture)
     lower = math.ceil(min_atoms / base_struture.num_sites)
     upper = math.floor(max_atoms / base_struture.num_sites)
     min_dev = (float("inf"), None)
     for size in range(lower, upper + 1):
+        _logger.info(f"Trying size {size} out of {upper}.")
         sc = find_optimal_cell_shape(
             ase_atoms.cell, target_size=size, target_shape="sc"
         )
