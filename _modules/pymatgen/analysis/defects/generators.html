@@ -277,19 +277,20 @@
 
 
 <div class="viewcode-block" id="VacancyGenerator"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.VacancyGenerator">[docs]</a><span class="k">class</span> <span class="nc">VacancyGenerator</span><span class="p">(</span><span class="n">DefectGenerator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generator for vacancy defects.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        symprec:  Tolerance for symmetry finding</span>
+<span class="sd">            (parameter for ``SpacegroupAnalyzer``).</span>
+<span class="sd">        angle_tolerance: Angle tolerance for symmetry finding</span>
+<span class="sd">            (parameter for ``SpacegroupAnalyzer``).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">symprec</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
         <span class="n">angle_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Generator for vacancy defects.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            symprec:  Tolerance for symmetry finding.</span>
-<span class="sd">            (parameter for ``SpacegroupAnalyzer``).</span>
-<span class="sd">            angle_tolerance: Angle tolerance for symmetry finding.</span>
-<span class="sd">            (parameter for ``SpacegroupAnalyzer``).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">symprec</span> <span class="o">=</span> <span class="n">symprec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">angle_tolerance</span> <span class="o">=</span> <span class="n">angle_tolerance</span>
 
@@ -329,14 +330,15 @@
 
 
 <div class="viewcode-block" id="SubstitutionGenerator"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.SubstitutionGenerator">[docs]</a><span class="k">class</span> <span class="nc">SubstitutionGenerator</span><span class="p">(</span><span class="n">DefectGenerator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generator of substitutions for symmetry distinct sites in a structure.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        symprec:  Tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).</span>
+<span class="sd">        angle_tolerance: Angle tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symprec</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">angle_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Generator of substitutions for symmetry distinct sites in a structure.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            symprec:  Tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).</span>
-<span class="sd">            angle_tolerance: Angle tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">symprec</span> <span class="o">=</span> <span class="n">symprec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">angle_tolerance</span> <span class="o">=</span> <span class="n">angle_tolerance</span>
 
@@ -372,16 +374,14 @@
 
 
 <div class="viewcode-block" id="AntiSiteGenerator"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.AntiSiteGenerator">[docs]</a><span class="k">class</span> <span class="nc">AntiSiteGenerator</span><span class="p">(</span><span class="n">DefectGenerator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generator of all anti-site defects.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        symprec:  Tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).</span>
+<span class="sd">        angle_tolerance: Angle tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symprec</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">angle_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Generator of all anti-site defects.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            symprec:  Tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).</span>
-<span class="sd">            angle_tolerance: Angle tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Generator[Substitution, None, None]: Generator that yields a list of ``Substitution`` objects</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">symprec</span> <span class="o">=</span> <span class="n">symprec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">angle_tolerance</span> <span class="o">=</span> <span class="n">angle_tolerance</span>
 
@@ -405,12 +405,13 @@
 
 
 <div class="viewcode-block" id="InterstitialGenerator"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.InterstitialGenerator">[docs]</a><span class="k">class</span> <span class="nc">InterstitialGenerator</span><span class="p">(</span><span class="n">DefectGenerator</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Generator of interstitiald defects.</span>
+    <span class="sd">&quot;&quot;&quot;Generator of interstitiald defects.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            min_dist: Minimum distance between an interstitial and the nearest atom.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        min_dist: Minimum distance between an interstitial and the nearest atom.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_dist</span> <span class="o">=</span> <span class="n">min_dist</span>
 
 <div class="viewcode-block" id="InterstitialGenerator.generate"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.InterstitialGenerator.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span>
@@ -455,6 +456,18 @@
 
 
 <div class="viewcode-block" id="ChargeInterstitialGenerator"><a class="viewcode-back" href="../../../../reference/generators.html#pymatgen.analysis.defects.generators.ChargeInterstitialGenerator">[docs]</a><span class="k">class</span> <span class="nc">ChargeInterstitialGenerator</span><span class="p">(</span><span class="n">InterstitialGenerator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generator of interstitiald defects.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        clustering_tol: Tolerance for clustering see :meth:`pymatgen.analysis.defects.utils.cluster_nodes`.</span>
+<span class="sd">        ltol: Tolerance for lattice parameter matching</span>
+<span class="sd">        stol: Tolerance for site matching</span>
+<span class="sd">        angle_tol: Tolerance for angles in degrees</span>
+<span class="sd">        min_dist: Minimum to atoms in the host structure</span>
+<span class="sd">        avg_radius: The radius around each local minima used to evaluate the average charge.</span>
+<span class="sd">        max_avg_charge: The maximum average charge to accept.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">clustering_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span>
@@ -465,17 +478,6 @@
         <span class="n">avg_radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">,</span>
         <span class="n">max_avg_charge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Generator of interstitiald defects.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            clustering_tol: Tolerance for clustering see :meth:`pymatgen.analysis.defects.utils.cluster_nodes`.</span>
-<span class="sd">            ltol: Tolerance for lattice parameter matching</span>
-<span class="sd">            stol: Tolerance for site matching</span>
-<span class="sd">            angle_tol: Tolerance for angles in degrees</span>
-<span class="sd">            min_dist: Minimum to atoms in the host structure</span>
-<span class="sd">            avg_radius: The radius around each local minima used to evaluate the average charge.</span>
-<span class="sd">            max_avg_charge: The maximum average charge to accept.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clustering_tol</span> <span class="o">=</span> <span class="n">clustering_tol</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ltol</span> <span class="o">=</span> <span class="n">ltol</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stol</span> <span class="o">=</span> <span class="n">stol</span>
@@ -525,6 +527,7 @@
 
 
 <span class="k">def</span> <span class="nf">_remove_oxidation_states</span><span class="p">(</span><span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Structure</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get a structure with oxidation states removed.&quot;&quot;&quot;</span>
     <span class="n">struct</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">struct</span><span class="o">.</span><span class="n">remove_oxidation_states</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">struct</span>

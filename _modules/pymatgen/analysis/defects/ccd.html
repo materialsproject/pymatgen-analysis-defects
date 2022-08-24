@@ -410,6 +410,7 @@
     <span class="sd">&quot;&quot;&quot;Fit the parabola to the data.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">omega</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The parabola function.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">omega</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">Q0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">E0</span>
 
     <span class="n">popt</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">energy</span><span class="p">)</span>

@@ -458,6 +458,8 @@
 <span class="sd">            inc_inf_values:</span>
 <span class="sd">                If False these boundary points at infinity are ignored when we look at</span>
 <span class="sd">                the chemical potential limits.</span>
+<span class="sd">            **kwargs:</span>
+<span class="sd">                Additional keyword arguments for the FormationEnergyDiagram class.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            FormationEnergyDiagram:</span>
@@ -497,8 +499,8 @@
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="FormationEnergyDiagram.with_phase_diagram_from_matproj"><a class="viewcode-back" href="../../../../reference/thermo.html#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_phase_diagram_from_matproj">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">with_phase_diagram_from_matproj</span><span class="p">(</span>
+<div class="viewcode-block" id="FormationEnergyDiagram.with_alternate_phase_diagram"><a class="viewcode-back" href="../../../../reference/thermo.html#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_alternate_phase_diagram">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">with_alternate_phase_diagram</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">bulk_entry</span><span class="p">:</span> <span class="n">ComputedEntry</span><span class="p">,</span>
         <span class="n">defect_entries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DefectEntry</span><span class="p">],</span>
@@ -575,17 +577,15 @@
         <span class="sd">&quot;&quot;&quot;Create a FormationEnergyDiagram from VASP directories.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            directory_map:</span>
-<span class="sd">                A dictionary mapping the defect name to the directory containing the</span>
+<span class="sd">            directory_map: A dictionary mapping the defect name to the directory containing the</span>
 <span class="sd">                VASP calculation.</span>
-<span class="sd">            defect:</span>
-<span class="sd">                The defect used to create the defect entries.</span>
-<span class="sd">            pd_entries:</span>
-<span class="sd">                The list of entries used to construct the phase diagram and chemical</span>
+<span class="sd">            defect: The defect used to create the defect entries.</span>
+<span class="sd">            pd_entries: The list of entries used to construct the phase diagram and chemical</span>
 <span class="sd">                potential diagram. They will be used to determine the stability region</span>
 <span class="sd">                of the bulk crystal.</span>
-<span class="sd">            dielectric:</span>
-<span class="sd">                The dielectric constant of the bulk crystal.</span>
+<span class="sd">            dielectric: The dielectric constant of the bulk crystal.</span>
+<span class="sd">            vbm: The VBM of the bulk crystal.</span>
+<span class="sd">            **kwargs: Additional keyword arguments for the constructor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">_read_dir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>

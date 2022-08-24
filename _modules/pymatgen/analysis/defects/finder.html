@@ -399,7 +399,7 @@
 
 <span class="c1"># %%</span>
 <div class="viewcode-block" id="get_site_groups"><a class="viewcode-back" href="../../../../reference/finder.html#pymatgen.analysis.defects.finder.get_site_groups">[docs]</a><span class="k">def</span> <span class="nf">get_site_groups</span><span class="p">(</span><span class="n">struct</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">angle_tolerance</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">SiteGroup</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Group the sites in the structure by symmetry</span>
+    <span class="sd">&quot;&quot;&quot;Group the sites in the structure by symmetry.</span>
 
 <span class="sd">    Group the sites in the structure by symmetry and return a</span>
 <span class="sd">    list of ``SiteGroup`` namedtuples.</span>
@@ -489,7 +489,8 @@
 
 
 <span class="k">def</span> <span class="nf">_get_broundary</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">n_max</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">n_skip</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Get the boundary index for the high-distortion indices.</span>
+
 <span class="sd">    Assuming arr is sorted in reverse order,</span>
 <span class="sd">    find the biggest value drop in arr[n_skip:n_max].</span>
 <span class="sd">    &quot;&quot;&quot;</span>

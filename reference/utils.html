@@ -353,17 +353,17 @@ determined by a1, a2, a3 and whose magntidue is less than gcut^2.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>directory</strong> (<em>list of Path</em>) – A list of files in a directory.</p></li>
-<li><p><strong>base_name</strong> (<em>str</em>) – The base name of file file to find.</p></li>
-<li><p><strong>allow_missing</strong> (<em>bool</em>) – Whether to error if no version of the file (gzipped or un-gzipped) can be found.</p></li>
+<li><p><strong>directory</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>) – A list of files in a directory.</p></li>
+<li><p><strong>base_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The base name of file file to find.</p></li>
+<li><p><strong>allow_missing</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to error if no version of the file (gzipped or un-gzipped) can be found.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A path to the matched file. If <code class="docutils literal notranslate"><span class="pre">allow_missing=True</span></code> and the file cannot be
-found, then <code class="docutils literal notranslate"><span class="pre">None</span></code> will be returned.</p>
+<dd class="field-even"><p>A path to the matched file. If <code class="docutils literal notranslate"><span class="pre">allow_missing=True</span></code>
+and the file cannot be found, then <code class="docutils literal notranslate"><span class="pre">None</span></code> will be returned.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Path or None</p>
+<dd class="field-odd"><p>Path | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -371,12 +371,19 @@ found, then <code class="docutils literal notranslate"><span class="pre">None</s
 <dl class="py function">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.generic_groupby">
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">generic_groupby</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comp=&lt;built-in</span> <span class="pre">function</span> <span class="pre">eq&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#generic_groupby"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.generic_groupby" title="Permalink to this definition">#</a></dt>
-<dd><p>Group a list of unsortable objects
-:param list_in: A list of generic objects
-:param comp: (Default value = operator.eq) The comparator</p>
+<dd><p>Group a list of unsortable objects.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[int] list of labels for the input list</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>list_in</strong> – A list of generic objects</p></li>
+<li><p><strong>comp</strong> – (Default value = operator.eq) The comparator</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of labels for the input list</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[int]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -384,8 +391,8 @@ found, then <code class="docutils literal notranslate"><span class="pre">None</s
 <dl class="py function">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.get_local_extrema">
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">get_local_extrema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chgcar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">find_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#get_local_extrema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.get_local_extrema" title="Permalink to this definition">#</a></dt>
-<dd><p>Get all local extrema fractional coordinates in charge density,
-searching for local minimum by default. Note that sites are NOT grouped
+<dd><p>Get all local extrema fractional coordinates in charge density.</p>
+<p>Searching for local minimum by default. Note that sites are NOT grouped
 symmetrically.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -408,7 +415,7 @@ find local maximum.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.remove_collisions">
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">remove_collisions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#remove_collisions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.remove_collisions" title="Permalink to this definition">#</a></dt>
-<dd><p>Removed points that are too close to existing atoms in the structure</p>
+<dd><p>Removed points that are too close to existing atoms in the structure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -429,10 +436,14 @@ from existing atoms.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.cluster_nodes">
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">cluster_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fcoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lattice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#cluster_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.cluster_nodes" title="Permalink to this definition">#</a></dt>
-<dd><p>Cluster nodes that are too close together using a tol.</p>
+<dd><p>Cluster nodes that are too close together using hiercharcal clustering.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>tol</strong> (<em>float</em>) – A distance tolerance. PBC is taken into account.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fcoords</strong> (<em>npt.ArrayLike</em>) – fractional coordinates of points to cluster.</p></li>
+<li><p><strong>lattice</strong> (<em>Lattice</em>) – The lattice of the structure.</p></li>
+<li><p><strong>tol</strong> (<em>float</em>) – A distance tolerance. PBC is taken into account.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">ScalarType</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]]</p>
@@ -465,6 +476,7 @@ from existing atoms.</p></li>
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">ChargeInsertionAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chgcar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_ion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Li'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clustering_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ltol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#ChargeInsertionAnalyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
+<p>Object for insertions sites from charge density.</p>
 <p>Analyze the charge density and create new candidate structures by inserting at each charge minima
 The similar inserterd structures are given the same uniqueness label.</p>
 <div class="admonition note">
@@ -472,26 +484,55 @@ The similar inserterd structures are given the same uniqueness label.</p>
 <p>The charge density analysis works best with AECCAR data since CHGCAR data
 often contains spurious local minima in the core. However you can still use CHGCAR
 with an appropriate <code class="docutils literal notranslate"><span class="pre">max_avg_charge</span></code> value.</p>
-<p>Since the user might want to rerun their analysis with different <code class="docutils literal notranslate"><span class="pre">avg_charge</span></code> and <code class="docutils literal notranslate"><span class="pre">max_avg_charge</span></code> values,
-we will generate and store all the ion-inserted structure and their uniqueness labels first and allow
-the user to get the filtered and labeled results.</p>
+<p>Since the user might want to rerun their analysis with different <code class="docutils literal notranslate"><span class="pre">avg_charge</span></code> and
+<code class="docutils literal notranslate"><span class="pre">max_avg_charge</span></code> values, we will generate and store all the ion-inserted structure
+and their uniqueness labels first and allow the user to get the filtered and labeled results.</p>
 <p>If you use this code please cite the following paper:
 J.-X. Shen et al.: npj Comput. Mater. 6, 1 (2020)
 <a class="reference external" href="https://www.nature.com/articles/s41524-020-00422-3">https://www.nature.com/articles/s41524-020-00422-3</a></p>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>chgcar</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">VolumetricData</span></code>) – The charge density object to analyze</p></li>
-<li><p><strong>working_ion</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The working ion to be inserted</p></li>
-<li><p><strong>clustering_tol</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Distance tolerance for grouping sites together</p></li>
-<li><p><strong>ltol</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – StructureMatcher ltol parameter</p></li>
-<li><p><strong>stol</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – StructureMatcher stol parameter</p></li>
-<li><p><strong>angle_tol</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – StructureMatcher angle_tol parameter</p></li>
-<li><p><strong>min_dist</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Minimum distance between sites and the host atoms in Å.</p></li>
-</ul>
-</dd>
-</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.chgcar">
+<span class="sig-name descname"><span class="pre">chgcar</span></span><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.chgcar" title="Permalink to this definition">#</a></dt>
+<dd><p>The charge density object to analyze</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.working_ion">
+<span class="sig-name descname"><span class="pre">working_ion</span></span><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.working_ion" title="Permalink to this definition">#</a></dt>
+<dd><p>The working ion to be inserted</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.clustering_tol">
+<span class="sig-name descname"><span class="pre">clustering_tol</span></span><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.clustering_tol" title="Permalink to this definition">#</a></dt>
+<dd><p>Distance tolerance for grouping sites together</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.ltol">
+<span class="sig-name descname"><span class="pre">ltol</span></span><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.ltol" title="Permalink to this definition">#</a></dt>
+<dd><p>StructureMatcher ltol parameter</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.stol">
+<span class="sig-name descname"><span class="pre">stol</span></span><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.stol" title="Permalink to this definition">#</a></dt>
+<dd><p>StructureMatcher stol parameter</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.angle_tol">
+<span class="sig-name descname"><span class="pre">angle_tol</span></span><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.angle_tol" title="Permalink to this definition">#</a></dt>
+<dd><p>StructureMatcher angle_tol parameter</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.min_dist">
+<span class="sig-name descname"><span class="pre">min_dist</span></span><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.min_dist" title="Permalink to this definition">#</a></dt>
+<dd><p>Minimum distance between sites and the host atoms in Å.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.labeled_sites">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">labeled_sites</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer.labeled_sites" title="Permalink to this definition">#</a></dt>

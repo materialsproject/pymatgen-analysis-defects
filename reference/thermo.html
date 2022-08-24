@@ -433,6 +433,7 @@ of the bulk crystal.</p></li>
 <li><p><strong>band_gap</strong> – The band gap of the bulk crystal.</p></li>
 <li><p><strong>inc_inf_values</strong> – If False these boundary points at infinity are ignored when we look at
 the chemical potential limits.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments for the FormationEnergyDiagram class.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -445,8 +446,8 @@ the chemical potential limits.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_phase_diagram_from_matproj">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_phase_diagram_from_matproj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bulk_entry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defect_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomic_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vbm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#FormationEnergyDiagram.with_phase_diagram_from_matproj"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_phase_diagram_from_matproj" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_alternate_phase_diagram">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_alternate_phase_diagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bulk_entry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defect_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomic_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vbm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#FormationEnergyDiagram.with_alternate_phase_diagram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_alternate_phase_diagram" title="Permalink to this definition">#</a></dt>
 <dd><p>Create a FormationEnergyDiagram object from existing phase diagram.</p>
 <p>This function allows you to grab an existing phase diagram and use the
 formation enthalpies from that to compute the chemical potentials.
@@ -496,6 +497,8 @@ VASP calculation.</p></li>
 potential diagram. They will be used to determine the stability region
 of the bulk crystal.</p></li>
 <li><p><strong>dielectric</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">ScalarType</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code>, covariant=True)]]) – The dielectric constant of the bulk crystal.</p></li>
+<li><p><strong>vbm</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – The VBM of the bulk crystal.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments for the constructor.</p></li>
 </ul>
 </dd>
 </dl>

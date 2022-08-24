@@ -434,22 +434,16 @@
 <div class="viewcode-block" id="get_zfile"><a class="viewcode-back" href="../../../../reference/utils.html#pymatgen.analysis.defects.utils.get_zfile">[docs]</a><span class="k">def</span> <span class="nf">get_zfile</span><span class="p">(</span>
     <span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">base_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">allow_missing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Find gzipped or non-gzipped versions of a file in a directory listing.</span>
+    <span class="sd">&quot;&quot;&quot;Find gzipped or non-gzipped versions of a file in a directory listing.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    directory : list of Path</span>
-<span class="sd">        A list of files in a directory.</span>
-<span class="sd">    base_name : str</span>
-<span class="sd">        The base name of file file to find.</span>
-<span class="sd">    allow_missing : bool</span>
-<span class="sd">        Whether to error if no version of the file (gzipped or un-gzipped) can be found.</span>
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Path or None</span>
-<span class="sd">        A path to the matched file. If ``allow_missing=True`` and the file cannot be</span>
-<span class="sd">        found, then ``None`` will be returned.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        directory : A list of files in a directory.</span>
+<span class="sd">        base_name : The base name of file file to find.</span>
+<span class="sd">        allow_missing : Whether to error if no version of the file (gzipped or un-gzipped) can be found.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Path | None: A path to the matched file. If ``allow_missing=True``</span>
+<span class="sd">        and the file cannot be found, then ``None`` will be returned.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">directory</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_name</span><span class="si">}</span><span class="s2">*&quot;</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">base_name</span> <span class="o">==</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
@@ -466,13 +460,15 @@
 
 
 <div class="viewcode-block" id="generic_groupby"><a class="viewcode-back" href="../../../../reference/utils.html#pymatgen.analysis.defects.utils.generic_groupby">[docs]</a><span class="k">def</span> <span class="nf">generic_groupby</span><span class="p">(</span><span class="n">list_in</span><span class="p">,</span> <span class="n">comp</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">eq</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Group a list of unsortable objects</span>
+    <span class="sd">&quot;&quot;&quot;Group a list of unsortable objects.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        list_in: A list of generic objects</span>
 <span class="sd">        comp: (Default value = operator.eq) The comparator</span>
+
 <span class="sd">    Returns:</span>
-<span class="sd">        [int] list of labels for the input list</span>
+<span class="sd">        list[int]: list of labels for the input list</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">list_out</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_in</span><span class="p">)</span>
     <span class="n">label_num</span> <span class="o">=</span> <span class="mi">0</span>
@@ -492,9 +488,9 @@
 
 
 <div class="viewcode-block" id="get_local_extrema"><a class="viewcode-back" href="../../../../reference/utils.html#pymatgen.analysis.defects.utils.get_local_extrema">[docs]</a><span class="k">def</span> <span class="nf">get_local_extrema</span><span class="p">(</span><span class="n">chgcar</span><span class="p">:</span> <span class="n">VolumetricData</span><span class="p">,</span> <span class="n">find_min</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get all local extrema fractional coordinates in charge density,</span>
-<span class="sd">    searching for local minimum by default. Note that sites are NOT grouped</span>
+    <span class="sd">&quot;&quot;&quot;Get all local extrema fractional coordinates in charge density.</span>
+
+<span class="sd">    Searching for local minimum by default. Note that sites are NOT grouped</span>
 <span class="sd">    symmetrically.</span>
 
 <span class="sd">    Args:</span>
@@ -505,7 +501,6 @@
 <span class="sd">        extrema_coords (list): list of fractional coordinates corresponding</span>
 <span class="sd">            to local extrema.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">if</span> <span class="n">find_min</span><span class="p">:</span>
         <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="k">else</span><span class="p">:</span>
@@ -530,8 +525,7 @@
 <div class="viewcode-block" id="remove_collisions"><a class="viewcode-back" href="../../../../reference/utils.html#pymatgen.analysis.defects.utils.remove_collisions">[docs]</a><span class="k">def</span> <span class="nf">remove_collisions</span><span class="p">(</span>
     <span class="n">fcoords</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">min_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Removed points that are too close to existing atoms in the structure</span>
+    <span class="sd">&quot;&quot;&quot;Removed points that are too close to existing atoms in the structure.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        fcoords (npt.ArrayLike): fractional coordinates of points to remove</span>
@@ -553,10 +547,11 @@
 <div class="viewcode-block" id="cluster_nodes"><a class="viewcode-back" href="../../../../reference/utils.html#pymatgen.analysis.defects.utils.cluster_nodes">[docs]</a><span class="k">def</span> <span class="nf">cluster_nodes</span><span class="p">(</span>
     <span class="n">fcoords</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">lattice</span><span class="p">:</span> <span class="n">Lattice</span><span class="p">,</span> <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Cluster nodes that are too close together using a tol.</span>
+    <span class="sd">&quot;&quot;&quot;Cluster nodes that are too close together using hiercharcal clustering.</span>
 
 <span class="sd">    Args:</span>
+<span class="sd">        fcoords (npt.ArrayLike): fractional coordinates of points to cluster.</span>
+<span class="sd">        lattice (Lattice): The lattice of the structure.</span>
 <span class="sd">        tol (float): A distance tolerance. PBC is taken into account.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Manually generate the distance matrix (which needs to take into</span>
@@ -631,7 +626,8 @@
 
 
 <div class="viewcode-block" id="ChargeInsertionAnalyzer"><a class="viewcode-back" href="../../../../reference/utils.html#pymatgen.analysis.defects.utils.ChargeInsertionAnalyzer">[docs]</a><span class="k">class</span> <span class="nc">ChargeInsertionAnalyzer</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Object for insertions sites from charge density.</span>
+
 <span class="sd">    Analyze the charge density and create new candidate structures by inserting at each charge minima</span>
 <span class="sd">    The similar inserterd structures are given the same uniqueness label.</span>
 
@@ -640,13 +636,22 @@
 <span class="sd">        often contains spurious local minima in the core. However you can still use CHGCAR</span>
 <span class="sd">        with an appropriate ``max_avg_charge`` value.</span>
 
-<span class="sd">        Since the user might want to rerun their analysis with different ``avg_charge`` and ``max_avg_charge`` values,</span>
-<span class="sd">        we will generate and store all the ion-inserted structure and their uniqueness labels first and allow</span>
-<span class="sd">        the user to get the filtered and labeled results.</span>
+<span class="sd">        Since the user might want to rerun their analysis with different ``avg_charge`` and</span>
+<span class="sd">        ``max_avg_charge`` values, we will generate and store all the ion-inserted structure</span>
+<span class="sd">        and their uniqueness labels first and allow the user to get the filtered and labeled results.</span>
 
 <span class="sd">        If you use this code please cite the following paper:</span>
 <span class="sd">        J.-X. Shen et al.: npj Comput. Mater. 6, 1 (2020)</span>
 <span class="sd">        https://www.nature.com/articles/s41524-020-00422-3</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        chgcar: The charge density object to analyze</span>
+<span class="sd">        working_ion: The working ion to be inserted</span>
+<span class="sd">        clustering_tol: Distance tolerance for grouping sites together</span>
+<span class="sd">        ltol: StructureMatcher ltol parameter</span>
+<span class="sd">        stol: StructureMatcher stol parameter</span>
+<span class="sd">        angle_tol: StructureMatcher angle_tol parameter</span>
+<span class="sd">        min_dist: Minimum distance between sites and the host atoms in Å.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -659,16 +664,6 @@
         <span class="n">angle_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
         <span class="n">min_dist</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Args:</span>
-<span class="sd">            chgcar: The charge density object to analyze</span>
-<span class="sd">            working_ion: The working ion to be inserted</span>
-<span class="sd">            clustering_tol: Distance tolerance for grouping sites together</span>
-<span class="sd">            ltol: StructureMatcher ltol parameter</span>
-<span class="sd">            stol: StructureMatcher stol parameter</span>
-<span class="sd">            angle_tol: StructureMatcher angle_tol parameter</span>
-<span class="sd">            min_dist: Minimum distance between sites and the host atoms in Å.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chgcar</span> <span class="o">=</span> <span class="n">chgcar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">working_ion</span> <span class="o">=</span> <span class="n">working_ion</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sm</span> <span class="o">=</span> <span class="n">StructureMatcher</span><span class="p">(</span><span class="n">ltol</span><span class="o">=</span><span class="n">ltol</span><span class="p">,</span> <span class="n">stol</span><span class="o">=</span><span class="n">stol</span><span class="p">,</span> <span class="n">angle_tol</span><span class="o">=</span><span class="n">angle_tol</span><span class="p">)</span>
