@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 
 import numpy as np
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
@@ -44,16 +45,13 @@ def get_sc_fromstruct(
     Returns:
         struc_sc: Supercell that is as close to cubic as possible
     """
-    sc_mat = None
-    while sc_mat is None:
-        sc_mat = _cubic_cell(
-            base_struct,
-            min_atoms,
-            max_atoms=max_atoms,
-            min_length=min_length,
-            force_diagonal=force_diagonal,
-        )
-        max_atoms += 1
+    sc_mat = _cubic_cell(
+        base_struct,
+        min_atoms,
+        max_atoms=max_atoms,
+        min_length=min_length,
+        force_diagonal=force_diagonal,
+    )
     return sc_mat
 
 
@@ -120,5 +118,26 @@ def _cubic_cell(
     try:
         cst.apply_transformation(base_struct)
     except BaseException:
-        return None
+        return _ase_cubic(base_struct, min_atoms, max_atoms)
     return cst.transformation_matrix
+
+
+def _ase_cubic(base_struture, min_atoms: int = 80, max_atoms: int = 240):
+    from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape
+    from pymatgen.io.ase import AseAtomsAdaptor
+
+    aaa = AseAtomsAdaptor()
+    ase_atoms = aaa.get_atoms(base_struture)
+    lower = math.ceil(min_atoms / base_struture.num_sites)
+    upper = math.floor(max_atoms / base_struture.num_sites)
+    min_dev = (float("inf"), None)
+    for size in range(lower, upper + 1):
+        sc = find_optimal_cell_shape(
+            ase_atoms.cell, target_size=size, target_shape="sc"
+        )
+        sc_cell = aaa.get_atoms(base_struture * sc).cell
+        deviation = get_deviation_from_optimal_cell_shape(sc_cell, target_shape="sc")
+        min_dev = min(min_dev, (deviation, sc))
+    if min_dev[1] is None:
+        raise RuntimeError("Could not find a cubic supercell")
+    return min_dev[1]
