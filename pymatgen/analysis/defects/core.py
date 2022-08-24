@@ -123,8 +123,8 @@ class Defect(MSONable, metaclass=ABCMeta):
         self,
         sc_mat: np.ndarray | None = None,
         dummy_species: str | None = None,
-        min_atoms: int = 80,
-        max_atoms: int = 240,
+        min_atoms: int = 60,
+        max_atoms: int = 100,
         min_length: float = 10.0,
         force_diagonal: bool = False,
     ) -> Structure:

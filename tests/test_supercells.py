@@ -1,6 +1,7 @@
 import numpy as np
 
 from pymatgen.analysis.defects.supercells import (
+    _ase_cubic,
     get_matched_structure_mapping,
     get_sc_fromstruct,
 )
@@ -18,3 +19,9 @@ def test_supercells(gan_struct):
     np.testing.assert_allclose(
         sc.lattice.abc, sc2.lattice.abc
     )  # the sc_mat can be reconstructed from the sc
+
+
+def test_ase_supercells(gan_struct):
+    sc_mat = _ase_cubic(gan_struct, min_atoms=24, max_atoms=32)
+    sc = gan_struct * sc_mat
+    assert 24 <= sc.num_sites <= 32
