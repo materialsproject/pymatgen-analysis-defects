@@ -78,4 +78,4 @@ repos:
   rev: 0.6.0
   hooks:
     - id: nbstripout
-      args: ["--keep-output"]
+      args: [--keep-output, --drop-empty-cells]
