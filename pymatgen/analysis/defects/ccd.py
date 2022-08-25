@@ -27,7 +27,54 @@ EV2J = const.e  # 1 eV in Joules
 AMU2KG = const.physical_constants["atomic mass constant"][0]
 ANGS2M = 1e-10  # angstrom in meters
 
-__all__ = ["ConfigurationCoordinateDiagram", "get_dQ"]
+__all__ = ["ConfigurationCoordinateDiagram", "HarmonicDefectPhonon", "get_dQ"]
+
+
+@dataclass
+class HarmonicDefectPhonon(MSONable):
+    """A class representing the a harmonic defect vibronic state.
+
+    The vibronic part of a defect is often catured by a simple harmonic oscillator.
+    This class store a representation of the SHO as well as some additional information for book-keeping purposes.
+
+    Attributes:
+        omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.
+        charge: The charge state. This should be the charge of the defect
+            simulation that gave rise to the minimum of the parabola.
+        distortions : The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
+            This object's internal reference for the distoration should always be relaxed structure.
+        energies : The potential energy surface obtained by distorting the structure.
+    """
+
+    omega: float
+    charge: int
+    distortions: ArrayLike[float] = tuple()
+    energies: ArrayLike[float] = tuple()
+
+    @classmethod
+    def from_distortions(
+        cls, distortions: ArrayLike[float], energies: ArrayLike[float]
+    ) -> HarmonicDefectPhonon:
+        """Create a HarmonicDefectPhonon from a distortion and energy array.
+
+        Args:
+            distortions: The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
+                This object's internal reference for the distoration should always be relaxed structure.
+            energies: The potential energy surface obtained by distorting the structure.
+        """
+        zero_index = np.argmin(distortions)
+        omega = _get_omega(
+            Q=distortions,
+            E=energies,
+            Q0=distortions[zero_index],
+            E0=energies[zero_index],
+        )
+        return cls(omega=omega, charge=0, energies=energies, distortions=distortions)
+
+    @property
+    def omega_eV(self) -> float:
+        """The vibronic frequency of the phonon state in (eV)."""
+        return self.omega * HBAR * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG))
 
 
 @dataclass
@@ -152,7 +199,7 @@ def get_dQ(ground: Structure, excited: Structure) -> float:
 
 def _get_omega(
     Q: ArrayLike,
-    energy: ArrayLike,
+    E: ArrayLike,
     Q0: float,
     E0: float,
 ) -> float:
@@ -162,14 +209,15 @@ def _get_omega(
 
     Args:
         Q: array of Q values (amu^{1/2} Angstrom) corresponding to each vasprun
-        energy: array of energy values (eV) corresponding to each vasprun
-        Q0: fix the value of the minimum of the parabola
+        E: array of energy values (eV) corresponding to each vasprun
+        Q0: fix the x-value of the minimum of the parabola
+        E0: fix the y-value of the minimum of the parabola
 
     Returns:
         omega: the harmonic phonon frequency in (eV)
     """
-    popt = _fit_parabola(Q, energy, Q0, E0)
-    return HBAR * popt[0] * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG))
+    popt = _fit_parabola(Q, E, Q0, E0)
+    return HBAR * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG)) * popt[0]
 
 
 def _fit_parabola(
