@@ -1,6 +1,7 @@
 """Utilities for defects module."""
 from __future__ import annotations
 
+import bisect
 import collections
 import logging
 import math
@@ -17,7 +18,7 @@ from numpy.linalg import norm
 from pymatgen.analysis.local_env import cn_opt_params
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.core import Lattice, Structure
-from pymatgen.io.vasp import VolumetricData
+from pymatgen.io.vasp.outputs import BandStructure, Procar, VolumetricData
 from pymatgen.io.vasp.sets import get_valid_magmom_struct
 from scipy.cluster.hierarchy import fcluster, linkage
 from scipy.spatial.distance import squareform
@@ -516,3 +517,56 @@ class ChargeInsertionAnalyzer(MSONable):
             res.append((avg_chg, [self.local_minima[idx] for idx in lab_groups[lab]]))
 
         return res
+
+
+def get_localized_state(
+    bandstructure: BandStructure,
+    procar: Procar,
+    k_index: int | None = None,
+    band_range: int = 5,
+):
+    """Find the index of the localized state.
+
+    Find the band index with the lowest inverse participation ratio (IPR) in a small window
+    around the fermi level.  Since some of the core states can be very localized,
+    we should only search near the valence.
+
+    Args:
+        bandstructure: The bandstructure object.
+            The band just below the fermi level is used as the center of band window.
+        procar: The procar object.
+        k_index: The index of the k-point to use. If None, the IPR is averaged over all k-points.
+        band_range: The number of bands above and blow the fermi level to include in the search window.
+
+    Returns:
+        dict[Spin, tuple(float, int)]:
+            The inverse participation ratio (IPR) and the index for each spin channel.
+    """
+    res = dict()
+    for spin in bandstructure.bands.keys():
+        # last band that is fully below the fermi level
+        last_occ_idx = bisect.bisect_left(
+            bandstructure.bands[spin].max(1), bandstructure.efermi
+        )
+        lbound = max(last_occ_idx - band_range, 0)
+        if k_index is None:
+            # average over all k
+            ipr = np.average(
+                [
+                    _get_ipr(spin, ik, procar)
+                    for ik in range(len(bandstructure.kpoints))
+                ],
+                axis=0,
+            )
+        else:
+            ipr = _get_ipr(spin, k_index, procar)
+
+        idx = ipr[lbound:].argmin() + lbound
+        res[spin] = (ipr[idx], idx)
+    return res
+
+
+def _get_ipr(spin, k_index, procar):
+    states = procar.data[spin][k_index, ...]
+    flat_states = states.reshape(states.shape[0], -1)
+    return 1 / np.sum(flat_states**2, axis=1)
