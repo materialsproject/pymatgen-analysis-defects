@@ -25,9 +25,17 @@ def test_OpticalHarmonicDefect(v_ga):
     from pymatgen.analysis.defects.ccd import OpticalHarmonicDefect
 
     vaspruns = v_ga[(0, -1)]["vaspruns"]
-    v_ga[(0, -1)]["procar"]
+    procar = v_ga[(0, -1)]["procar"]
     wavder = v_ga[(0, -1)]["waveder"]
-    hd0 = OpticalHarmonicDefect.from_vaspruns(vaspruns, waveder=wavder, charge_state=0)
+    hd0 = OpticalHarmonicDefect.from_vaspruns_and_waveder(
+        vaspruns, waveder=wavder, charge_state=0
+    )
+
+    wswqs = v_ga[(0, -1)]["wswqs"]
+    relaxed_bs = vaspruns[1].get_band_structure()
+    elph_me = hd0.get_elph_me(bandstructure=relaxed_bs, wswqs=wswqs, procar=procar)
+    assert np.allclose(elph_me[..., 138], 0.0)  # ediff should be zero for defect band
+    assert np.linalg.norm(elph_me[..., 139]) > 0
 
 
 def test_wswq_slope():
