@@ -242,7 +242,7 @@
 <span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
 <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MSONable</span>
 <span class="kn">from</span> <span class="nn">pymatgen.electronic_structure.core</span> <span class="kn">import</span> <span class="n">Spin</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.outputs</span> <span class="kn">import</span> <span class="n">WSWQ</span><span class="p">,</span> <span class="n">BandStructure</span><span class="p">,</span> <span class="n">Procar</span><span class="p">,</span> <span class="n">Vasprun</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.outputs</span> <span class="kn">import</span> <span class="n">WSWQ</span><span class="p">,</span> <span class="n">BandStructure</span><span class="p">,</span> <span class="n">Procar</span><span class="p">,</span> <span class="n">Vasprun</span><span class="p">,</span> <span class="n">Waveder</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">const</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">curve_fit</span>
 
@@ -294,6 +294,7 @@
         <span class="n">vasp_runs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Vasprun</span><span class="p">],</span>
         <span class="n">charge_state</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">relaxed_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HarmonicDefect</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Create a HarmonicDefectPhonon from a list of vasprun.</span>
 
@@ -305,6 +306,7 @@
 <span class="sd">            vasp_runs: A list of Vasprun objects.</span>
 <span class="sd">            charge_state: The charge state for the defect.</span>
 <span class="sd">            relaxed_index: The index of the relaxed structure in the list of structures.</span>
+<span class="sd">            **kwargs: Additional keyword arguments to pass to the constructor.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A HarmonicDefect object.</span>
@@ -338,7 +340,6 @@
             <span class="n">E</span><span class="o">=</span><span class="n">energies</span><span class="p">,</span>
             <span class="n">Q0</span><span class="o">=</span><span class="n">distortions</span><span class="p">[</span><span class="n">relaxed_index</span><span class="p">],</span>
             <span class="n">E0</span><span class="o">=</span><span class="n">energies</span><span class="p">[</span><span class="n">relaxed_index</span><span class="p">],</span>
-            <span class="n">return_eV</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
@@ -347,6 +348,7 @@
             <span class="n">structures</span><span class="o">=</span><span class="n">structures</span><span class="p">,</span>
             <span class="n">distortions</span><span class="o">=</span><span class="n">distortions</span><span class="p">,</span>
             <span class="n">energies</span><span class="o">=</span><span class="n">energies</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
     <span class="nd">@property</span>
@@ -398,6 +400,63 @@
             <span class="n">ediffs_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ediffs_</span><span class="p">[</span><span class="n">Spin</span><span class="o">.</span><span class="n">down</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
         <span class="n">ediffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">ediffs_stack</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">slopes</span><span class="p">,</span> <span class="n">ediffs</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="OpticalHarmonicDefect"><a class="viewcode-back" href="../../../../reference/ccd.html#pymatgen.analysis.defects.ccd.OpticalHarmonicDefect">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">OpticalHarmonicDefect</span><span class="p">(</span><span class="n">HarmonicDefect</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Representation of Harmonic defect with optical (dipole) matrix elements.</span>
+
+<span class="sd">    The dipole matrix elements are computed by VASP and reported in the WAVEDER file.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.</span>
+<span class="sd">        charge: The charge state. This should be the charge of the defect</span>
+<span class="sd">            simulation that gave rise to the minimum of the parabola.</span>
+<span class="sd">        distortions : The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.</span>
+<span class="sd">            This object&#39;s internal reference for the distoration should always be relaxed structure.</span>
+<span class="sd">        energies : The potential energy surface obtained by distorting the structure.</span>
+<span class="sd">        waveder: The WAVEDER object containing the dipole matrix elements.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">waveder</span><span class="p">:</span> <span class="n">Waveder</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># TODO: use kw_only once we drop Python &lt; 3.10</span>
+
+<div class="viewcode-block" id="OpticalHarmonicDefect.from_vaspruns_and_waveder"><a class="viewcode-back" href="../../../../reference/ccd.html#pymatgen.analysis.defects.ccd.OpticalHarmonicDefect.from_vaspruns_and_waveder">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_vaspruns_and_waveder</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">vasp_runs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Vasprun</span><span class="p">],</span>
+        <span class="n">waveder</span><span class="p">:</span> <span class="n">Waveder</span><span class="p">,</span>
+        <span class="n">charge_state</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">relaxed_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalHarmonicDefect</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create a HarmonicDefectPhonon from a list of vasprun.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            The constructor check that you have the vaspruns sorted by the distortions</span>
+<span class="sd">            but does not order it for you.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            vasp_runs: A list of Vasprun objects.</span>
+<span class="sd">            charge_state: The charge state for the defect.</span>
+<span class="sd">            relaxed_index: The index of the relaxed structure in the list of structures.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            An OpticalHarmonicDefect object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">from_vaspruns</span><span class="p">(</span>
+            <span class="n">vasp_runs</span><span class="p">,</span> <span class="n">charge_state</span><span class="p">,</span> <span class="n">relaxed_index</span><span class="p">,</span> <span class="n">waveder</span><span class="o">=</span><span class="n">waveder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OpticalHarmonicDefect.from_vaspruns"><a class="viewcode-back" href="../../../../reference/ccd.html#pymatgen.analysis.defects.ccd.OpticalHarmonicDefect.from_vaspruns">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_vaspruns</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">vasp_runs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Vasprun</span><span class="p">],</span>
+        <span class="n">charge_state</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">relaxed_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HarmonicDefect</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Not implemented.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Use from_vaspruns_and_waveder instead.&quot;</span><span class="p">)</span></div></div>
 
 
 <span class="c1"># @dataclass</span>
@@ -465,7 +524,6 @@
     <span class="n">E</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">Q0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">E0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">return_eV</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Calculate the omega from the PES.</span>
 
@@ -481,10 +539,7 @@
 <span class="sd">        omega: the harmonic phonon frequency in (eV)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">popt</span> <span class="o">=</span> <span class="n">_fit_parabola</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">Q0</span><span class="p">,</span> <span class="n">E0</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">return_eV</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">HBAR</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">EV2J</span> <span class="o">/</span> <span class="p">(</span><span class="n">ANGS2M</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">AMU2KG</span><span class="p">))</span> <span class="o">*</span> <span class="n">popt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">popt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">popt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
 
 <span class="k">def</span> <span class="nf">_fit_parabola</span><span class="p">(</span>
