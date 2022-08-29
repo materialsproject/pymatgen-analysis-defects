@@ -10,7 +10,7 @@ import numpy as np
 import numpy.typing as npt
 from monty.json import MSONable
 from pymatgen.electronic_structure.core import Spin
-from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun
+from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun, Waveder
 from scipy import constants as const
 from scipy.optimize import curve_fit
 
@@ -62,6 +62,7 @@ class HarmonicDefect(MSONable):
         vasp_runs: list[Vasprun],
         charge_state: int,
         relaxed_index: int | None = None,
+        **kwargs,
     ) -> HarmonicDefect:
         """Create a HarmonicDefectPhonon from a list of vasprun.
 
@@ -73,6 +74,7 @@ class HarmonicDefect(MSONable):
             vasp_runs: A list of Vasprun objects.
             charge_state: The charge state for the defect.
             relaxed_index: The index of the relaxed structure in the list of structures.
+            **kwargs: Additional keyword arguments to pass to the constructor.
 
         Returns:
             A HarmonicDefect object.
@@ -106,7 +108,6 @@ class HarmonicDefect(MSONable):
             E=energies,
             Q0=distortions[relaxed_index],
             E0=energies[relaxed_index],
-            return_eV=False,
         )
 
         return cls(
@@ -115,6 +116,7 @@ class HarmonicDefect(MSONable):
             structures=structures,
             distortions=distortions,
             energies=energies,
+            **kwargs,
         )
 
     @property
@@ -166,6 +168,52 @@ class HarmonicDefect(MSONable):
             ediffs_stack.append(ediffs_[Spin.down].T)
         ediffs = np.stack(ediffs_stack)
         return np.multiply(slopes, ediffs)
+
+
+@dataclass
+class OpticalHarmonicDefect(HarmonicDefect):
+    """Representation of Harmonic defect with optical (dipole) matrix elements.
+
+    The dipole matrix elements are computed by VASP and reported in the WAVEDER file.
+
+    Attributes:
+        omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.
+        charge: The charge state. This should be the charge of the defect
+            simulation that gave rise to the minimum of the parabola.
+        distortions : The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
+            This object's internal reference for the distoration should always be relaxed structure.
+        energies : The potential energy surface obtained by distorting the structure.
+        waveder: The WAVEDER object containing the dipole matrix elements.
+    """
+
+    waveder: Waveder | None = None  # TODO: use kw_only once we drop Python < 3.10
+
+    @classmethod
+    def from_vaspruns_and_waveder(
+        cls,
+        vasp_runs: list[Vasprun],
+        waveder: Waveder,
+        charge_state: int,
+        relaxed_index: int | None = None,
+        **kwargs,
+    ) -> OpticalHarmonicDefect:
+        """Create a HarmonicDefectPhonon from a list of vasprun.
+
+        .. note::
+            The constructor check that you have the vaspruns sorted by the distortions
+            but does not order it for you.
+
+        Args:
+            vasp_runs: A list of Vasprun objects.
+            charge_state: The charge state for the defect.
+            relaxed_index: The index of the relaxed structure in the list of structures.
+
+        Returns:
+            An OpticalHarmonicDefect object.
+        """
+        return super().from_vaspruns(
+            vasp_runs, charge_state, relaxed_index, waveder=waveder, **kwargs
+        )
 
 
 # @dataclass
@@ -233,7 +281,6 @@ def _get_omega(
     E: npt.ArrayLike,
     Q0: float,
     E0: float,
-    return_eV: bool = False,
 ) -> float:
     """Calculate the omega from the PES.
 
@@ -249,10 +296,7 @@ def _get_omega(
         omega: the harmonic phonon frequency in (eV)
     """
     popt = _fit_parabola(Q, E, Q0, E0)
-    if return_eV:
-        return HBAR * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG)) * popt[0]
-    else:
-        return popt[0]
+    return popt[0]
 
 
 def _fit_parabola(

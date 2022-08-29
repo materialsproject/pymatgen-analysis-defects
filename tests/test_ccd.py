@@ -21,6 +21,15 @@ def test_HarmonicDefect(v_ga):
     assert np.linalg.norm(elph_me[..., 139]) > 0
 
 
+def test_OpticalHarmonicDefect(v_ga):
+    from pymatgen.analysis.defects.ccd import OpticalHarmonicDefect
+
+    vaspruns = v_ga[(0, -1)]["vaspruns"]
+    v_ga[(0, -1)]["procar"]
+    wavder = v_ga[(0, -1)]["waveder"]
+    hd0 = OpticalHarmonicDefect.from_vaspruns(vaspruns, waveder=wavder, charge_state=0)
+
+
 def test_wswq_slope():
     mats = [np.ones((3, 3)), np.zeros((3, 3)), np.ones((3, 3))]
     FakeWSWQ = namedtuple("FakeWSWQ", ["data"])
