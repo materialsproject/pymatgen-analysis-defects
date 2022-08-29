@@ -5,7 +5,7 @@ import pytest
 from monty.serialization import loadfn
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Specie
-from pymatgen.io.vasp import Chgcar, Locpot, Vasprun
+from pymatgen.io.vasp.outputs import WSWQ, Chgcar, Locpot, Procar, Vasprun
 
 from pymatgen.analysis.defects.core import PeriodicSite, Substitution
 from pymatgen.analysis.defects.thermo import DefectEntry
@@ -93,3 +93,18 @@ def defect_entries_Mg_Ga(data_Mg_Ga, defect_Mg_Ga):
 @pytest.fixture(scope="session")
 def chgcar_fe3o4(test_dir):
     return Chgcar.from_file(test_dir / "CHGCAR.Fe3O4.vasp")
+
+
+@pytest.fixture(scope="session")
+def v_ga(test_dir):
+    res = dict()
+    for q1, q2 in [(0, -1), (-1, 0)]:
+        ccd_dir = test_dir / f"V_Ga/ccd_{q1}_{q2}"
+        vaspruns = [Vasprun(ccd_dir / f"vasprun.xml.{i}.gz") for i in [0, 1, 2]]
+        wswqs = [WSWQ.from_file(ccd_dir / f"WSWQ.{i}.gz") for i in [0, 1, 2]]
+        res[(q1, q2)] = {
+            "vaspruns": vaspruns,
+            "procar": Procar(ccd_dir / "PROCAR.1.gz"),
+            "wswqs": wswqs,
+        }
+    return res

@@ -17,7 +17,8 @@ from numpy import typing as npt
 from numpy.linalg import norm
 from pymatgen.analysis.local_env import cn_opt_params
 from pymatgen.analysis.structure_matcher import StructureMatcher
-from pymatgen.core import Lattice, Spin, Structure
+from pymatgen.core import Lattice, Structure
+from pymatgen.electronic_structure.core import Spin
 from pymatgen.io.vasp.outputs import BandStructure, Procar, VolumetricData
 from pymatgen.io.vasp.sets import get_valid_magmom_struct
 from scipy.cluster.hierarchy import fcluster, linkage

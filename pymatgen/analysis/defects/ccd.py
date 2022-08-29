@@ -7,9 +7,9 @@ from dataclasses import dataclass
 from typing import Optional, Tuple
 
 import numpy as np
+import numpy.typing as npt
 from monty.json import MSONable
-from numpy.typing import ArrayLike, NDArray
-from pymatgen.core import Spin
+from pymatgen.electronic_structure.core import Spin
 from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun
 from scipy import constants as const
 from scipy.optimize import curve_fit
@@ -24,7 +24,7 @@ __copyright__ = "The Materials Project"
 __maintainer__ = "Jimmy Shen"
 __email__ = "jmmshn@gmail.com"
 __date__ = "Mar 15, 2022"
-__logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 HBAR = const.hbar / const.e  # in units of eV.s
 EV2J = const.e  # 1 eV in Joules
@@ -58,7 +58,10 @@ class HarmonicDefect(MSONable):
 
     @classmethod
     def from_vaspruns(
-        cls, vasp_runs: list[Vasprun], charge_state: int, relaxed_index: int | None = 0
+        cls,
+        vasp_runs: list[Vasprun],
+        charge_state: int,
+        relaxed_index: int | None = None,
     ) -> HarmonicDefect:
         """Create a HarmonicDefectPhonon from a list of vasprun.
 
@@ -122,9 +125,10 @@ class HarmonicDefect(MSONable):
     def get_elph_me(
         self,
         wswqs: list[WSWQ],
-        defect_band_index: tuple[Spin, int, int] | None = None,
+        bandstructure: BandStructure,
+        defect_band_index: int | None = None,
         procar: Procar | None = None,
-    ):
+    ) -> npt.NDArray:
         """Calculate the electron phonon matrix elements.
 
         Combine the data from the WSWQs to calculate the electron phonon matrix elements.
@@ -136,11 +140,32 @@ class HarmonicDefect(MSONable):
 
         Args:
             wswqs: A list of WSWQ objects, assuming that they match the order of the distortions.
+            bandstructure: The bandstructure of the relaxed defect calculation.
             defect_band_index: The index of the defect band.
             procar: A Procar object.
 
         """
-        _get_wswq_slope(self.distortions, wswqs)
+        if defect_band_index is None and procar is None:
+            raise ValueError("You must provide either defect_band_index or procar.")
+
+        if defect_band_index is None:
+            loc_res = get_localized_state(bandstructure=bandstructure, procar=procar)
+            _, (_, defect_band_index) = min(loc_res.items(), key=lambda x: x[1])
+
+        # It's either [..., defect_band_index, :] or [..., defect_band_index]
+        # Which band index is the "correct" one might not be super important since
+        # the matrix is symmetric in the first-order theory we are working in.
+        slopes = _get_wswq_slope(self.distortions, wswqs)[..., defect_band_index, :]
+        ediffs_ = _get_ks_ediff(
+            bandstructure=bandstructure, defect_band_index=defect_band_index
+        )
+        ediffs_stack = [
+            ediffs_[Spin.up].T,
+        ]
+        if Spin.down in ediffs_.keys():
+            ediffs_stack.append(ediffs_[Spin.down].T)
+        ediffs = np.stack(ediffs_stack)
+        return np.multiply(slopes, ediffs)
 
 
 # @dataclass
@@ -204,8 +229,8 @@ def get_dQ(ground: Structure, excited: Structure) -> float:
 
 
 def _get_omega(
-    Q: ArrayLike,
-    E: ArrayLike,
+    Q: npt.ArrayLike,
+    E: npt.ArrayLike,
     Q0: float,
     E0: float,
     return_eV: bool = False,
@@ -231,7 +256,7 @@ def _get_omega(
 
 
 def _fit_parabola(
-    Q: ArrayLike, energy: ArrayLike, Q0: float, E0: float
+    Q: npt.ArrayLike, energy: npt.ArrayLike, Q0: float, E0: float
 ) -> Tuple[float, float, float]:
     """Fit the parabola to the data."""
 
@@ -243,7 +268,7 @@ def _fit_parabola(
     return popt
 
 
-def _get_wswq_slope(distortions: list[float], wswqs: list[WSWQ]) -> NDArray:
+def _get_wswq_slope(distortions: list[float], wswqs: list[WSWQ]) -> npt.NDArray:
     """Get the slopes of the overlap matrixs vs. Q.
 
     Args:
@@ -251,7 +276,7 @@ def _get_wswq_slope(distortions: list[float], wswqs: list[WSWQ]) -> NDArray:
         wswqs: List of WSWQ objects.
 
     Returns:
-        NDArray: slope matrix with the same shape as the ``WSWQ.data``.
+        npt.NDArray: slope matrix with the same shape as the ``WSWQ.data``.
     """
     yy = np.stack([np.abs(ww.data) * np.sign(qq) for qq, ww in zip(distortions, wswqs)])
     _, *oldshape = yy.shape
@@ -261,20 +286,25 @@ def _get_wswq_slope(distortions: list[float], wswqs: list[WSWQ]) -> NDArray:
 
 
 def _get_ks_ediff(
-    delta_bands: list[int],
     bandstructure: BandStructure,
-    procar: Procar,
-    k_index: int,
-    band_window: int = 5,
-):
-    """Calculate the Kohn-Sham energy between the defect state and a list of other states."""
-    loc_states = get_localized_state(
-        bandstructure, procar, k_index, band_window=band_window
-    )
+    defect_band_index: int,
+) -> dict[Spin, npt.NDArray]:
+    """Calculate the Kohn-Sham energy between the defect state.
+
+    Get the eigenvalue differences to the defect band. Report this difference
+    on each k-point and each spin, the result should be shape [nspins, nkpoints, nbands].
+
+    Args:
+        bandstructure: A BandStructure object.
+        defect_band_index: The index of the defect band.
+
+    Returns:
+        npt.NDArray: The Kohn-Sham energy difference between the defect state and other states.
+        Indexed the same way as ``bandstructure.bands``.
+    """
     res = dict()
-    for spin, (ipr, min_band) in loc_states.items():
-        def_eig = bandstructure.bands[spin][min_band, k_index]
-        val_bands = np.array(delta_bands) + min_band
-        val_eigs = bandstructure.bands[spin][val_bands, k_index]
-        res[spin] = (ipr, dict(zip(val_bands, val_eigs - def_eig)))
+    for k, kpt_bands in bandstructure.bands.items():
+        e_at_def_band = kpt_bands[defect_band_index, :]
+        e_diff = kpt_bands - e_at_def_band
+        res[k] = e_diff
     return res
