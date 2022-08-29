@@ -55,6 +55,7 @@ class HarmonicDefect(MSONable):
     structures: Optional[list[Structure]] = None
     distortions: Optional[list[float]] = None
     energies: Optional[list[float]] = None
+    defect_band_index: Optional[int] = None
 
     @classmethod
     def from_vaspruns(
@@ -62,6 +63,8 @@ class HarmonicDefect(MSONable):
         vasp_runs: list[Vasprun],
         charge_state: int,
         relaxed_index: int | None = None,
+        defect_band_index: int | None = None,
+        procar: Procar | None = None,
         **kwargs,
     ) -> HarmonicDefect:
         """Create a HarmonicDefectPhonon from a list of vasprun.
@@ -110,12 +113,18 @@ class HarmonicDefect(MSONable):
             E0=energies[relaxed_index],
         )
 
+        if defect_band_index is None and procar is not None:
+            bandstructure = vasp_runs[relaxed_index].get_band_structure()
+            loc_res = get_localized_state(bandstructure=bandstructure, procar=procar)
+            _, (_, defect_band_index) = min(loc_res.items(), key=lambda x: x[1])
+
         return cls(
             omega=omega,
             charge_state=charge_state,
             structures=structures,
             distortions=distortions,
             energies=energies,
+            defect_band_index=defect_band_index,
             **kwargs,
         )
 
@@ -146,13 +155,18 @@ class HarmonicDefect(MSONable):
             defect_band_index: The index of the defect band.
             procar: A Procar object.
 
+        Returns:
+            npt.NDArray: The electron phonon matrix elements.
         """
-        if defect_band_index is None and procar is None:
-            raise ValueError("You must provide either defect_band_index or procar.")
-
-        if defect_band_index is None:
+        if hasattr(self, "defect_band_index"):
+            defect_band_index = self.defect_band_index
+        elif defect_band_index is not None:
+            pass
+        elif procar is not None:
             loc_res = get_localized_state(bandstructure=bandstructure, procar=procar)
             _, (_, defect_band_index) = min(loc_res.items(), key=lambda x: x[1])
+        else:
+            raise ValueError("You must provide either defect_band_index or procar.")
 
         # It's either [..., defect_band_index, :] or [..., defect_band_index]
         # Which band index is the "correct" one might not be super important since
@@ -186,7 +200,9 @@ class OpticalHarmonicDefect(HarmonicDefect):
         waveder: The WAVEDER object containing the dipole matrix elements.
     """
 
-    waveder: Waveder | None = None  # TODO: use kw_only once we drop Python < 3.10
+    # TODO: use kw_only once we drop Python < 3.10
+    waveder: Waveder | None = None
+    defect_band_index: int | None = None
 
     @classmethod
     def from_vaspruns_and_waveder(
@@ -195,6 +211,8 @@ class OpticalHarmonicDefect(HarmonicDefect):
         waveder: Waveder,
         charge_state: int,
         relaxed_index: int | None = None,
+        defect_band_index: int | None = None,
+        procar: Procar | None = None,
         **kwargs,
     ) -> OpticalHarmonicDefect:
         """Create a HarmonicDefectPhonon from a list of vasprun.
@@ -212,7 +230,13 @@ class OpticalHarmonicDefect(HarmonicDefect):
             An OpticalHarmonicDefect object.
         """
         return super().from_vaspruns(
-            vasp_runs, charge_state, relaxed_index, waveder=waveder, **kwargs
+            vasp_runs,
+            charge_state,
+            relaxed_index,
+            waveder=waveder,
+            defect_band_index=defect_band_index,
+            procar=procar,
+            **kwargs,
         )
 
     @classmethod
@@ -221,10 +245,20 @@ class OpticalHarmonicDefect(HarmonicDefect):
         vasp_runs: list[Vasprun],
         charge_state: int,
         relaxed_index: int | None = None,
+        defect_band_index: int | None = None,
+        procar: Procar | None = None,
         **kwargs,
     ) -> HarmonicDefect:
         """Not implemented."""
         raise NotImplementedError("Use from_vaspruns_and_waveder instead.")
+
+    def get_defect_dipoles(self) -> npt.NDArray:
+        """Get the dipole matrix elements for the defect.
+
+        Returns:
+            The dipole matrix elements for the defect.
+        """
+        return self.waveder.get_defect_dipoles(self.defect_band_index)
 
 
 # @dataclass

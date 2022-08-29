@@ -11,7 +11,7 @@ def test_HarmonicDefect(v_ga):
 
     vaspruns = v_ga[(0, -1)]["vaspruns"]
     procar = v_ga[(0, -1)]["procar"]
-    hd0 = HarmonicDefect.from_vaspruns(vaspruns, charge_state=0)
+    hd0 = HarmonicDefect.from_vaspruns(vaspruns, charge_state=0, procar=procar)
     pytest.approx(hd0.distortions[1], 0.0)
     pytest.approx(hd0.omega_eV, 0.032680)
     wswqs = v_ga[(0, -1)]["wswqs"]
@@ -28,14 +28,20 @@ def test_OpticalHarmonicDefect(v_ga):
     procar = v_ga[(0, -1)]["procar"]
     wavder = v_ga[(0, -1)]["waveder"]
     hd0 = OpticalHarmonicDefect.from_vaspruns_and_waveder(
-        vaspruns, waveder=wavder, charge_state=0
+        vaspruns, waveder=wavder, charge_state=0, procar=procar
     )
 
+    # the non-optical part should behave the same
     wswqs = v_ga[(0, -1)]["wswqs"]
     relaxed_bs = vaspruns[1].get_band_structure()
     elph_me = hd0.get_elph_me(bandstructure=relaxed_bs, wswqs=wswqs, procar=procar)
     assert np.allclose(elph_me[..., 138], 0.0)  # ediff should be zero for defect band
     assert np.linalg.norm(elph_me[..., 139]) > 0
+
+    # # check that waveder is symmetric
+    # def is_symm(waveder, i,j):
+    #     assert np.max(np.abs(np.abs(waveder.cder_data[i,j,:,:]) - np.abs(waveder.cder_data[j,i,:,:]))) <= 1E-10
+    # is_symm(hd0.waveder, 0,1)
 
 
 def test_wswq_slope():
