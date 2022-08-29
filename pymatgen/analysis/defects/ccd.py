@@ -215,6 +215,17 @@ class OpticalHarmonicDefect(HarmonicDefect):
             vasp_runs, charge_state, relaxed_index, waveder=waveder, **kwargs
         )
 
+    @classmethod
+    def from_vaspruns(
+        cls,
+        vasp_runs: list[Vasprun],
+        charge_state: int,
+        relaxed_index: int | None = None,
+        **kwargs,
+    ) -> HarmonicDefect:
+        """Not implemented."""
+        raise NotImplementedError("Use from_vaspruns_and_waveder instead.")
+
 
 # @dataclass
 # class ConfigurationCoordinateDiagram(MSONable):
