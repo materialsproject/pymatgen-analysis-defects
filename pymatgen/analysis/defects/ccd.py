@@ -4,13 +4,17 @@ from __future__ import annotations
 import logging
 from ctypes import Structure
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 from monty.json import MSONable
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
+from pymatgen.core import Spin
+from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun
 from scipy import constants as const
 from scipy.optimize import curve_fit
+
+from .utils import get_localized_state, sort_positive_definite
 
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
@@ -27,11 +31,11 @@ EV2J = const.e  # 1 eV in Joules
 AMU2KG = const.physical_constants["atomic mass constant"][0]
 ANGS2M = 1e-10  # angstrom in meters
 
-__all__ = ["ConfigurationCoordinateDiagram", "HarmonicDefectPhonon", "get_dQ"]
+# __all__ = ["ConfigurationCoordinateDiagram", "HarmonicDefect", "get_dQ"]
 
 
 @dataclass
-class HarmonicDefectPhonon(MSONable):
+class HarmonicDefect(MSONable):
     """A class representing the a harmonic defect vibronic state.
 
     The vibronic part of a defect is often catured by a simple harmonic oscillator.
@@ -47,132 +51,134 @@ class HarmonicDefectPhonon(MSONable):
     """
 
     omega: float
-    charge: int
-    distortions: ArrayLike[float] = tuple()
-    energies: ArrayLike[float] = tuple()
+    charge_state: int
+    structures: Optional[list[Structure]] = None
+    distortions: Optional[list[float]] = None
+    energies: Optional[list[float]] = None
 
     @classmethod
-    def from_distortions(
-        cls, distortions: ArrayLike[float], energies: ArrayLike[float]
-    ) -> HarmonicDefectPhonon:
-        """Create a HarmonicDefectPhonon from a distortion and energy array.
+    def from_vaspruns(
+        cls, vasp_runs: list[Vasprun], charge_state: int, relaxed_index: int | None = 0
+    ) -> HarmonicDefect:
+        """Create a HarmonicDefectPhonon from a list of vasprun.
+
+        .. note::
+            The constructor check that you have the vaspruns sorted by the distortions
+            but does not order it for you.
 
         Args:
-            distortions: The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
-                This object's internal reference for the distoration should always be relaxed structure.
-            energies: The potential energy surface obtained by distorting the structure.
+            vasp_runs: A list of Vasprun objects.
+            charge_state: The charge state for the defect.
+            relaxed_index: The index of the relaxed structure in the list of structures.
+
+        Returns:
+            A HarmonicDefect object.
         """
-        zero_index = np.argmin(distortions)
+
+        def _parse_vasprun(vasprun: Vasprun):
+            energy = vasprun.final_energy
+            struct = vasprun.final_structure
+            return (energy, struct)
+
+        energy_struct = list(map(_parse_vasprun, vasp_runs))
+        unsorted_e = [e for e, _ in energy_struct]
+
+        if relaxed_index is None:
+            # Use the vasprun with the lowest energy
+            relaxed_index = np.argmin([e for e, _ in energy_struct])
+
+        sorted_list, distortions = sort_positive_definite(
+            energy_struct,
+            energy_struct[relaxed_index],
+            energy_struct[-1],
+            lambda x, y: get_dQ(x[1], y[1]),
+        )
+        energies, structures = list(zip(*sorted_list))
+
+        if not np.allclose(unsorted_e, energies, atol=1e-99):
+            raise ValueError("The vaspruns should already be in order.")
+
         omega = _get_omega(
             Q=distortions,
             E=energies,
-            Q0=distortions[zero_index],
-            E0=energies[zero_index],
+            Q0=distortions[relaxed_index],
+            E0=energies[relaxed_index],
+            return_eV=False,
         )
-        return cls(omega=omega, charge=0, energies=energies, distortions=distortions)
+
+        return cls(
+            omega=omega,
+            charge_state=charge_state,
+            structures=structures,
+            distortions=distortions,
+            energies=energies,
+        )
 
     @property
     def omega_eV(self) -> float:
         """The vibronic frequency of the phonon state in (eV)."""
         return self.omega * HBAR * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG))
 
+    def get_elph_me(
+        self,
+        wswqs: list[WSWQ],
+        defect_band_index: tuple[Spin, int, int] | None = None,
+        procar: Procar | None = None,
+    ):
+        """Calculate the electron phonon matrix elements.
 
-@dataclass
-class ConfigurationCoordinateDiagram(MSONable):
-    """A class representing a configuration coordinate diagram.
+        Combine the data from the WSWQs to calculate the electron phonon matrix elements.
+        The matrix elements are calculated by combining the finite difference from the matrix overlaps.
 
-    Based on the NONRAD code:
-        M. E. Turiansky et al.: Comput. Phys. Commun. 267, 108056 (2021).
+        d(<W|S|W(Q)>) / dQ
 
-    Since configuration coordinate diagrams always represent some kind of a process
-    in a defect. We will call one state `gs` for ground state and another state `es`
-    for excited state.  The ground state is always lower in energy than the excited
-    state.
+        And the eignvalue difference.
 
-    Attributes:
-        charge_gs (int): The charge of the ground state.
-        charge_es (int): The charge of the excited state.
-        dQ (float): The configurational difference between the relaxed structures of the
-            ground state and the excited state.
-        dE (float): The energy difference between the ground state and the
-            excited state.
-        Q_gs (ArrayLike): The list of the configurational coordinates of the
-            ground state.
-        Q_es (ArrayLike): The list of the configurational coordinates of the
-            excited state.
-        energies_gs (ArrayLike): The list of the energies of the ground state.
-        energies_es (ArrayLike): The list of the energies of the excited state.
-        omega_gs (float): The frequency of the harmonic oscillator of the ground state.
-        omega_es (float): The frequency of the harmonic oscillator of the excited state.
-    """
+        Args:
+            wswqs: A list of WSWQ objects, assuming that they match the order of the distortions.
+            defect_band_index: The index of the defect band.
+            procar: A Procar object.
 
-    charge_gs: int
-    charge_es: int
-    # distortions in units of [amu^{1/2} Angstrom]
-    dQ: float
-    Q_gs: ArrayLike
-    Q_es: ArrayLike
-    # energies in units of [eV]
-    energies_gs: ArrayLike
-    energies_es: ArrayLike
-    # zero-phonon line energy in units of [eV]
-    dE: float
-    # electron-phonon matrix element Wif in units of
-    # eV amu^{-1/2} Angstrom^{-1} for each bulk_index
-
-    def __post_init__(self):
-        """After all the attributes.
-
-        Perform the following:
-            - convert fields to numpy arrays
-            - reference the gs to zero and es to dE
-            - compute the frequencies of the harmonic oscillators defined by curves
         """
-        self.Q_gs = np.array(self.Q_gs)
-        self.Q_es = np.array(self.Q_es)
-        self.energies_gs = np.array(self.energies_gs)
-        self.energies_es = np.array(self.energies_es)
+        _get_wswq_slope(self.distortions, wswqs)
 
-        # reference energies to zero:
-        idx_zero = np.argmin(np.abs(self.Q_gs))
-        idx_Q = np.argmin(np.abs(self.Q_es - self.dQ))
-        self.energies_gs -= self.energies_gs[idx_zero]
-        self.energies_es -= self.energies_es[idx_Q] - self.dE
-        # get frequencies
-        self.omega_gs = _get_omega(self.Q_gs, self.energies_gs, 0, 0)
-        self.omega_es = _get_omega(self.Q_es, self.energies_es, self.dQ, self.dE)
 
-    def fit_gs(self, Q):
-        """Fit the ground state energy to a parabola."""
-        E0 = 0
-        omega = _fit_parabola(self.Q_gs, self.energies_gs, 0, E0)
-        return 0.5 * omega**2 * (Q) ** 2 + E0
+# @dataclass
+# class ConfigurationCoordinateDiagram(MSONable):
+#     """A class representing a configuration coordinate diagram.
 
-    def fit_es(self, Q):
-        """Fit the excited state energy to a parabola."""
-        E0 = self.dE
-        omega = _fit_parabola(self.Q_es, self.energies_es, self.dQ, E0)
-        return 0.5 * omega**2 * (Q - self.dQ) ** 2 + E0
+#     The configuration coordinate diagram represents two parabolas with some finite configuration shift ``dQ``.
+#     The two defects are ``sorted`` in the sense that the defect with the lower ``charge_state``
+#       is designated as ``defect_state_0``.
 
-    def plot(self, ax=None, show=True, **kwargs):
-        """Plot the configuration coordinate diagram."""
-        import matplotlib.pyplot as plt
+#     Attributes:
+#         phonon_mode_0 : The defect with the lower charge state.
+#         phonon_mode_1 : The defect with the higher charge state.
+#         dQ : The finite configuration shift.
+#     """
+#     phonon_mode_0: HarmonicDefect
+#     phonon_mode_1: HarmonicDefect
+#     dQ: float
 
-        if ax is None:
-            fig, ax = plt.subplots()
-        (l_gs,) = ax.plot(self.Q_gs, self.energies_gs, "o", label="gs", **kwargs)
-        (l_es,) = ax.plot(self.Q_es, self.energies_es, "o", label="es", **kwargs)
+#     def __post_init__(self):
+#         """Post-initialization."""
+#         if abs(self.phonon_mode_0.charge_state - self.phonon_mode_1.charge_state) != 1:
+#             raise ValueError(
+#                 "The charge states of the two defects must be 1 apart. "
+#                 "Got {} and {}".format(self.phonon_mode_0.charge_state, self.phonon_mode_1.charge_state)
+#             )
+#         if self.phonon_mode_0.charge_state > self.phonon_mode_1.charge_state:
+#             self.phonon_mode_0, self.phonon_mode_1 = self.phonon_mode_1, self.phonon_mode_0
 
-        qq = np.linspace(self.Q_gs.min() - 0.2, self.Q_es.max() + 0.2, 100)
-        ax.plot(qq, self.fit_gs(qq), "-", color=l_gs.get_color())
-        ax.plot(qq, self.fit_es(qq), "-", color=l_es.get_color())
+#     @property
+#     def omega0_eV(self) -> float:
+#         """The vibronic frequency of the defect with the lower charge state."""
+#         return self.phonon_mode_0.omega_eV
 
-        ax.set_xlabel("Q [amu^{1/2} Angstrom]")
-        ax.set_ylabel("Energy [eV]")
-        ax.legend()
-        if show:
-            plt.show()
-        return ax
+#     @property
+#     def omega1_eV(self) -> float:
+#         """The vibronic frequency of the defect with the higher charge state."""
+#         return self.phonon_mode_1.omega_eV
 
 
 def get_dQ(ground: Structure, excited: Structure) -> float:
@@ -202,6 +208,7 @@ def _get_omega(
     E: ArrayLike,
     Q0: float,
     E0: float,
+    return_eV: bool = False,
 ) -> float:
     """Calculate the omega from the PES.
 
@@ -217,7 +224,10 @@ def _get_omega(
         omega: the harmonic phonon frequency in (eV)
     """
     popt = _fit_parabola(Q, E, Q0, E0)
-    return HBAR * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG)) * popt[0]
+    if return_eV:
+        return HBAR * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG)) * popt[0]
+    else:
+        return popt[0]
 
 
 def _fit_parabola(
@@ -231,3 +241,40 @@ def _fit_parabola(
 
     popt, _ = curve_fit(f, Q, energy)
     return popt
+
+
+def _get_wswq_slope(distortions: list[float], wswqs: list[WSWQ]) -> NDArray:
+    """Get the slopes of the overlap matrixs vs. Q.
+
+    Args:
+        distortions: List of Q values (amu^{1/2} Angstrom).
+        wswqs: List of WSWQ objects.
+
+    Returns:
+        NDArray: slope matrix with the same shape as the ``WSWQ.data``.
+    """
+    yy = np.stack([np.abs(ww.data) * np.sign(qq) for qq, ww in zip(distortions, wswqs)])
+    _, *oldshape = yy.shape
+    return np.polyfit(distortions, yy.reshape(yy.shape[0], -1), deg=1)[0].reshape(
+        *oldshape
+    )
+
+
+def _get_ks_ediff(
+    delta_bands: list[int],
+    bandstructure: BandStructure,
+    procar: Procar,
+    k_index: int,
+    band_window: int = 5,
+):
+    """Calculate the Kohn-Sham energy between the defect state and a list of other states."""
+    loc_states = get_localized_state(
+        bandstructure, procar, k_index, band_window=band_window
+    )
+    res = dict()
+    for spin, (ipr, min_band) in loc_states.items():
+        def_eig = bandstructure.bands[spin][min_band, k_index]
+        val_bands = np.array(delta_bands) + min_band
+        val_eigs = bandstructure.bands[spin][val_bands, k_index]
+        res[spin] = (ipr, dict(zip(val_bands, val_eigs - def_eig)))
+    return res

@@ -1,7 +1,9 @@
 {
     "restructuredtext.confPath": "",
     "esbonio.sphinx.confDir": "",
-    "python.testing.pytestArgs": [],
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "python.formatting.provider": "black"

@@ -9,7 +9,7 @@ import operator
 from copy import deepcopy
 from functools import cached_property
 from pathlib import Path
-from typing import Generator
+from typing import Any, Callable, Generator
 
 import numpy as np
 from monty.json import MSONable
@@ -17,7 +17,7 @@ from numpy import typing as npt
 from numpy.linalg import norm
 from pymatgen.analysis.local_env import cn_opt_params
 from pymatgen.analysis.structure_matcher import StructureMatcher
-from pymatgen.core import Lattice, Structure
+from pymatgen.core import Lattice, Spin, Structure
 from pymatgen.io.vasp.outputs import BandStructure, Procar, VolumetricData
 from pymatgen.io.vasp.sets import get_valid_magmom_struct
 from scipy.cluster.hierarchy import fcluster, linkage
@@ -523,8 +523,8 @@ def get_localized_state(
     bandstructure: BandStructure,
     procar: Procar,
     k_index: int | None = None,
-    band_range: int = 5,
-):
+    band_window: int = 5,
+) -> dict[Spin, tuple[float, int]]:
     """Find the index of the localized state.
 
     Find the band index with the lowest inverse participation ratio (IPR) in a small window
@@ -548,7 +548,7 @@ def get_localized_state(
         last_occ_idx = bisect.bisect_left(
             bandstructure.bands[spin].max(1), bandstructure.efermi
         )
-        lbound = max(last_occ_idx - band_range, 0)
+        lbound = max(last_occ_idx - band_window, 0)
         if k_index is None:
             # average over all k
             ipr = np.average(
@@ -570,3 +570,39 @@ def _get_ipr(spin, k_index, procar):
     states = procar.data[spin][k_index, ...]
     flat_states = states.reshape(states.shape[0], -1)
     return 1 / np.sum(flat_states**2, axis=1)
+
+
+def sort_positive_definite(
+    list_in: list, ref1: Any, ref2: Any, dist: Callable
+) -> tuple[list, list[float]]:
+    """Sort a list where we can only compute a positive-definite distance.
+
+    Sometimes, we can only compute a positive-definite distance between two objects.
+    (E.g., the displacement between two structures). In these cases, standard
+    sorting algorithms will not work. Here, we accept two reference points to give
+    some sense of direction. We then sort the list based on the distance between the
+    reference points. Note: this only works if the list falls on a line of some sort.
+
+    Args:
+        list_in: The list to sort.
+        ref1: The first reference point, this will be the `zero` point.
+        ref2: The second reference point, this will determine the direction.
+        dist: Some positive definite distance function.
+
+    Returns:
+        - the sorted list of objects.
+        - the signed distance in the chosen direction.
+    """
+    d1 = [dist(el, ref1) for el in list_in]
+    d2 = [dist(el, ref2) for el in list_in]
+    D0 = dist(ref1, ref2)
+
+    d_vs_s = []
+    for q1, q2, el in zip(d1, d2, list_in):
+        sign = +1
+        if q1 < q2 and q2 > D0:
+            sign = -1
+        d_vs_s.append((sign * q1, el))
+    d_vs_s.sort()
+    distances, sorted_list = list(zip(*d_vs_s))
+    return sorted_list, distances
