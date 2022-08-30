@@ -46,15 +46,19 @@ class HarmonicDefect(MSONable):
         omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.
         charge: The charge state. This should be the charge of the defect
             simulation that gave rise to the minimum of the parabola.
-        distortions : The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
+        distortions: The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
             This object's internal reference for the distoration should always be relaxed structure.
-        energies : The potential energy surface obtained by distorting the structure.
+        structures: The list of structures that were used to compute the distortions.
+        energies: The potential energy surface obtained by distorting the structure.A
+        defect_band_index: The index of the defect band.
+        relaxed_indices: The indices of the relaxed defect structure.
+        relaxed_bandstructure: The band structure of the relaxed defect calculation.
     """
 
     omega: float
     charge_state: int
-    structures: Optional[list[Structure]] = None
     distortions: Optional[list[float]] = None
+    structures: Optional[list[Structure]] = None
     energies: Optional[list[float]] = None
     defect_band_index: Optional[int] = None
     relaxed_index: Optional[int] = None
@@ -85,6 +89,9 @@ class HarmonicDefect(MSONable):
             relaxed_index: The index of the relaxed structure in the list of structures.
             defect_band_index: The index of the defect band (0-indexed).
             procar: A Procar object.  Used to identify the defect band if the defect_band_index is not provided.
+            store_bandstructure: Whether to store the bandstructure of the relaxed defect calculation.
+                Defaults to False to save space.
+            get_band_structure_kwargs: Keyword arguments to pass to the ``get_band_structure`` method.
             **kwargs: Additional keyword arguments to pass to the constructor.
 
         Returns:
@@ -204,8 +211,12 @@ class HarmonicDefect(MSONable):
             The eigenvalue difference to the defect band in the order specified by output_order.
         """
         if self.defect_band_index is None:
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "The ``defect_band_index`` must be set before ``ediff`` can be computed."
+            )
+        if self.relaxed_bandstructure is None:
+            raise ValueError(  # pragma: no cover
+                "The ``relaxed_bandstructure`` must be set before ``ediff`` can be computed."
             )
 
         ediffs_ = _get_ks_ediff(
@@ -239,17 +250,18 @@ class OpticalHarmonicDefect(HarmonicDefect):
         omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.
         charge: The charge state. This should be the charge of the defect
             simulation that gave rise to the minimum of the parabola.
-        distortions : The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
+        distortions: The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
             This object's internal reference for the distoration should always be relaxed structure.
-        energies : The potential energy surface obtained by distorting the structure.
+        structures: The list of structures that were used to compute the distortions.
+        energies: The potential energy surface obtained by distorting the structure.A
+        defect_band_index: The index of the defect band.
+        relaxed_indices: The indices of the relaxed defect structure.
+        relaxed_bandstructure: The band structure of the relaxed defect calculation.
         waveder: The WAVEDER object containing the dipole matrix elements.
     """
 
     # TODO: use kw_only once we drop Python < 3.10
     waveder: Waveder | None = None
-    ediff: npt.NDArray | None = None
-    defect_band_index: int | None = None
-    bandstructure: BandStructure | None = None
 
     @classmethod
     def from_vaspruns_and_waveder(

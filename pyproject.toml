@@ -99,5 +99,6 @@ show_missing = true
 skip_covered = true
 
 [tool.pydocstyle]
-convention = 'google'
-match = 'pymatgen'
+convention="google"
+match="^((?!(test|docs)).)*$"
+add-ignore="D107,"
