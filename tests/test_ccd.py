@@ -39,9 +39,19 @@ def test_OpticalHarmonicDefect(v_ga):
     assert np.linalg.norm(elph_me[..., 139]) > 0
 
     # # check that waveder is symmetric
-    # def is_symm(waveder, i,j):
-    #     assert np.max(np.abs(np.abs(waveder.cder_data[i,j,:,:]) - np.abs(waveder.cder_data[j,i,:,:]))) <= 1E-10
-    # is_symm(hd0.waveder, 0,1)
+    def is_symm(waveder, i, j):
+        assert (
+            np.max(
+                np.abs(
+                    np.abs(waveder.cder_data[i, j, :, :])
+                    - np.abs(waveder.cder_data[j, i, :, :])
+                )
+            )
+            <= 1e-10
+        )
+
+    is_symm(hd0.waveder, 123, 42)
+    is_symm(hd0.waveder, 138, 69)
 
 
 def test_wswq_slope():

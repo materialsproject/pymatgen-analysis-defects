@@ -71,12 +71,15 @@ class HarmonicDefect(MSONable):
 
         .. note::
             The constructor check that you have the vaspruns sorted by the distortions
-            but does not order it for you.
+            but does not perform the sorting for you.  This serves as a safety check to
+            ensure that the vaspruns are properly ordered.
 
         Args:
             vasp_runs: A list of Vasprun objects.
             charge_state: The charge state for the defect.
             relaxed_index: The index of the relaxed structure in the list of structures.
+            defect_band_index: The index of the defect band.
+            procar: A Procar object.  Used to identify the defect band if the defect_band_index is not provided.
             **kwargs: Additional keyword arguments to pass to the constructor.
 
         Returns:
@@ -137,8 +140,6 @@ class HarmonicDefect(MSONable):
         self,
         wswqs: list[WSWQ],
         bandstructure: BandStructure,
-        defect_band_index: int | None = None,
-        procar: Procar | None = None,
     ) -> npt.NDArray:
         """Calculate the electron phonon matrix elements.
 
@@ -152,28 +153,41 @@ class HarmonicDefect(MSONable):
         Args:
             wswqs: A list of WSWQ objects, assuming that they match the order of the distortions.
             bandstructure: The bandstructure of the relaxed defect calculation.
-            defect_band_index: The index of the defect band.
-            procar: A Procar object.
 
         Returns:
             npt.NDArray: The electron phonon matrix elements.
         """
-        if hasattr(self, "defect_band_index"):
-            defect_band_index = self.defect_band_index
-        elif defect_band_index is not None:
-            pass
-        elif procar is not None:
-            loc_res = get_localized_state(bandstructure=bandstructure, procar=procar)
-            _, (_, defect_band_index) = min(loc_res.items(), key=lambda x: x[1])
-        else:
-            raise ValueError("You must provide either defect_band_index or procar.")
+        if self.defect_band_index is not None:
+            raise ValueError("The ``defect_band_index`` must be already be set.")
 
         # It's either [..., defect_band_index, :] or [..., defect_band_index]
         # Which band index is the "correct" one might not be super important since
         # the matrix is symmetric in the first-order theory we are working in.
-        slopes = _get_wswq_slope(self.distortions, wswqs)[..., defect_band_index, :]
+        # TODO: I should really read my thesis.
+        slopes = _get_wswq_slope(self.distortions, wswqs)[
+            ..., self.defect_band_index, :
+        ]
+        ediffs = self._get_ediff(bandstructure, output_order="skb")
+        return np.multiply(slopes, ediffs)
+
+    def _get_ediff(self, band_structure, output_order="skb") -> npt.NDArray:
+        """Compute the eigenvalue difference to the defect band.
+
+        Args:
+            band_structure: The band structure of the relaxed defect calculation.
+            output_order: The order of the output. Defaults to "skb" (spin, kpoint, band]).
+                You can also use "bks" (band, kpoint, spin).
+
+        Returns:
+            The eigenvalue difference to the defect band in the order specified by output_order.
+        """
+        if self.defect_band_index is None:
+            raise ValueError(
+                "The ``defect_band_index`` must be set before ``ediff`` can be computed."
+            )
+
         ediffs_ = _get_ks_ediff(
-            bandstructure=bandstructure, defect_band_index=defect_band_index
+            bandstructure=band_structure, defect_band_index=self.defect_band_index
         )
         ediffs_stack = [
             ediffs_[Spin.up].T,
@@ -181,7 +195,13 @@ class HarmonicDefect(MSONable):
         if Spin.down in ediffs_.keys():
             ediffs_stack.append(ediffs_[Spin.down].T)
         ediffs = np.stack(ediffs_stack)
-        return np.multiply(slopes, ediffs)
+
+        if output_order == "skb":
+            return ediffs
+        elif output_order == "bks":
+            return ediffs.transpose((1, 2, 0))
+        else:
+            raise ValueError("Invalid output_order, choose from 'skb' or 'bks'.")
 
 
 @dataclass
@@ -202,6 +222,7 @@ class OpticalHarmonicDefect(HarmonicDefect):
 
     # TODO: use kw_only once we drop Python < 3.10
     waveder: Waveder | None = None
+    ediff: npt.NDArray | None = None
     defect_band_index: int | None = None
 
     @classmethod
@@ -229,7 +250,7 @@ class OpticalHarmonicDefect(HarmonicDefect):
         Returns:
             An OpticalHarmonicDefect object.
         """
-        return super().from_vaspruns(
+        obj = super().from_vaspruns(
             vasp_runs,
             charge_state,
             relaxed_index,
@@ -238,6 +259,11 @@ class OpticalHarmonicDefect(HarmonicDefect):
             procar=procar,
             **kwargs,
         )
+        if obj.defect_band_index is None:
+            raise ValueError(
+                "You must provide `defect_band_index` or PROCAR to help indetify the `defect_band_index`."
+            )
+        return obj
 
     @classmethod
     def from_vaspruns(
@@ -252,13 +278,22 @@ class OpticalHarmonicDefect(HarmonicDefect):
         """Not implemented."""
         raise NotImplementedError("Use from_vaspruns_and_waveder instead.")
 
-    def get_defect_dipoles(self) -> npt.NDArray:
+    def _get_defect_dipoles(self) -> npt.NDArray:
         """Get the dipole matrix elements for the defect.
 
         Returns:
-            The dipole matrix elements for the defect.
+            The dipole matrix elements for the defect. The indices are:
+                ``[band index, k-point index, spin index, cart. direction]``.
         """
-        return self.waveder.get_defect_dipoles(self.defect_band_index)
+        return self.waveder.cder_data[self.defect_band_index, ...]
+
+    def _get_spectra(self, shift: float = 0):
+        """Get the spectra for the defect.
+
+        Args:
+            shift: The shift to apply to the spectra.
+        """
+        return self._get_ediff(self.band_structure, output_order="bks") + shift
 
 
 # @dataclass
