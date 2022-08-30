@@ -83,7 +83,7 @@ class HarmonicDefect(MSONable):
             vasp_runs: A list of Vasprun objects.
             charge_state: The charge state for the defect.
             relaxed_index: The index of the relaxed structure in the list of structures.
-            defect_band_index: The index of the defect band.
+            defect_band_index: The index of the defect band (0-indexed).
             procar: A Procar object.  Used to identify the defect band if the defect_band_index is not provided.
             **kwargs: Additional keyword arguments to pass to the constructor.
 
@@ -148,7 +148,7 @@ class HarmonicDefect(MSONable):
 
     @property
     def omega_eV(self) -> float:
-        """The vibronic frequency of the phonon state in (eV)."""
+        """Get the vibronic frequency of the phonon state in (eV)."""
         return self.omega * HBAR * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG))
 
     def occupation(self, t: npt.ArrayLike | float) -> npt.ArrayLike:
@@ -273,6 +273,8 @@ class OpticalHarmonicDefect(HarmonicDefect):
             vasp_runs: A list of Vasprun objects.
             charge_state: The charge state for the defect.
             relaxed_index: The index of the relaxed structure in the list of structures.
+            defect_band_index: The index of the defect band (0-indexed).
+            procar: The Procar object for the defect calculation.
 
         Returns:
             An OpticalHarmonicDefect object.
@@ -322,14 +324,14 @@ class OpticalHarmonicDefect(HarmonicDefect):
         """
         return self.waveder.cder_data[self.defect_band_index, ...]
 
-    def _get_spectra(self, shift: float = 0):
+    def _get_spectra(self) -> npt.NDArray:
         """Get the spectra for the defect.
 
         Args:
             bandstructure: The band structure of the relaxed defect calculation.
             shift: The shift to apply to the spectra.
         """
-        return self._get_ediff(output_order="bks") + shift
+        return self._get_ediff(output_order="bks")
 
 
 # @dataclass
@@ -421,7 +423,7 @@ def _fit_parabola(
     """Fit the parabola to the data."""
 
     def f(Q, omega):
-        """The parabola function."""
+        """Get the parabola function."""
         return 0.5 * omega**2 * (Q - Q0) ** 2 + E0
 
     popt, _ = curve_fit(f, Q, energy)
