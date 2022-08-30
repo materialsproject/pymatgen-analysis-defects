@@ -262,6 +262,7 @@
 <span class="n">EV2J</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">e</span>  <span class="c1"># 1 eV in Joules</span>
 <span class="n">AMU2KG</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">physical_constants</span><span class="p">[</span><span class="s2">&quot;atomic mass constant&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">ANGS2M</span> <span class="o">=</span> <span class="mf">1e-10</span>  <span class="c1"># angstrom in meters</span>
+<span class="n">KB</span> <span class="o">=</span> <span class="n">const</span><span class="o">.</span><span class="n">k</span> <span class="o">/</span> <span class="n">const</span><span class="o">.</span><span class="n">e</span>  <span class="c1"># Boltzmann constant in eV/K</span>
 
 <span class="c1"># __all__ = [&quot;ConfigurationCoordinateDiagram&quot;, &quot;HarmonicDefect&quot;, &quot;get_dQ&quot;]</span>
 
@@ -277,17 +278,23 @@
 <span class="sd">        omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.</span>
 <span class="sd">        charge: The charge state. This should be the charge of the defect</span>
 <span class="sd">            simulation that gave rise to the minimum of the parabola.</span>
-<span class="sd">        distortions : The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.</span>
+<span class="sd">        distortions: The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.</span>
 <span class="sd">            This object&#39;s internal reference for the distoration should always be relaxed structure.</span>
-<span class="sd">        energies : The potential energy surface obtained by distorting the structure.</span>
+<span class="sd">        structures: The list of structures that were used to compute the distortions.</span>
+<span class="sd">        energies: The potential energy surface obtained by distorting the structure.A</span>
+<span class="sd">        defect_band_index: The index of the defect band.</span>
+<span class="sd">        relaxed_indices: The indices of the relaxed defect structure.</span>
+<span class="sd">        relaxed_bandstructure: The band structure of the relaxed defect calculation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">omega</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">charge_state</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="n">structures</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Structure</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">distortions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">structures</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Structure</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">energies</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">defect_band_index</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">relaxed_index</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">relaxed_bandstructure</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BandStructure</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="HarmonicDefect.from_vaspruns"><a class="viewcode-back" href="../../../../reference/ccd.html#pymatgen.analysis.defects.ccd.HarmonicDefect.from_vaspruns">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_vaspruns</span><span class="p">(</span>
@@ -297,6 +304,8 @@
         <span class="n">relaxed_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">defect_band_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">procar</span><span class="p">:</span> <span class="n">Procar</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store_bandstructure</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">get_band_structure_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HarmonicDefect</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Create a HarmonicDefectPhonon from a list of vasprun.</span>
@@ -310,8 +319,11 @@
 <span class="sd">            vasp_runs: A list of Vasprun objects.</span>
 <span class="sd">            charge_state: The charge state for the defect.</span>
 <span class="sd">            relaxed_index: The index of the relaxed structure in the list of structures.</span>
-<span class="sd">            defect_band_index: The index of the defect band.</span>
+<span class="sd">            defect_band_index: The index of the defect band (0-indexed).</span>
 <span class="sd">            procar: A Procar object.  Used to identify the defect band if the defect_band_index is not provided.</span>
+<span class="sd">            store_bandstructure: Whether to store the bandstructure of the relaxed defect calculation.</span>
+<span class="sd">                Defaults to False to save space.</span>
+<span class="sd">            get_band_structure_kwargs: Keyword arguments to pass to the ``get_band_structure`` method.</span>
 <span class="sd">            **kwargs: Additional keyword arguments to pass to the constructor.</span>
 
 <span class="sd">        Returns:</span>
@@ -353,6 +365,14 @@
             <span class="n">loc_res</span> <span class="o">=</span> <span class="n">get_localized_state</span><span class="p">(</span><span class="n">bandstructure</span><span class="o">=</span><span class="n">bandstructure</span><span class="p">,</span> <span class="n">procar</span><span class="o">=</span><span class="n">procar</span><span class="p">)</span>
             <span class="n">_</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">defect_band_index</span><span class="p">)</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">loc_res</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
+        <span class="k">if</span> <span class="n">store_bandstructure</span><span class="p">:</span>
+            <span class="n">get_band_structure_kwargs</span> <span class="o">=</span> <span class="n">get_band_structure_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+            <span class="n">bs</span> <span class="o">=</span> <span class="n">vasp_runs</span><span class="p">[</span><span class="n">relaxed_index</span><span class="p">]</span><span class="o">.</span><span class="n">get_band_structure</span><span class="p">(</span>
+                <span class="o">**</span><span class="n">get_band_structure_kwargs</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bs</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">omega</span><span class="o">=</span><span class="n">omega</span><span class="p">,</span>
             <span class="n">charge_state</span><span class="o">=</span><span class="n">charge_state</span><span class="p">,</span>
@@ -360,18 +380,27 @@
             <span class="n">distortions</span><span class="o">=</span><span class="n">distortions</span><span class="p">,</span>
             <span class="n">energies</span><span class="o">=</span><span class="n">energies</span><span class="p">,</span>
             <span class="n">defect_band_index</span><span class="o">=</span><span class="n">defect_band_index</span><span class="p">,</span>
+            <span class="n">relaxed_index</span><span class="o">=</span><span class="n">relaxed_index</span><span class="p">,</span>
+            <span class="n">relaxed_bandstructure</span><span class="o">=</span><span class="n">bs</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">omega_eV</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;The vibronic frequency of the phonon state in (eV).&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Get the vibronic frequency of the phonon state in (eV).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">omega</span> <span class="o">*</span> <span class="n">HBAR</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">EV2J</span> <span class="o">/</span> <span class="p">(</span><span class="n">ANGS2M</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">AMU2KG</span><span class="p">))</span>
+
+<div class="viewcode-block" id="HarmonicDefect.occupation"><a class="viewcode-back" href="../../../../reference/ccd.html#pymatgen.analysis.defects.ccd.HarmonicDefect.occupation">[docs]</a>    <span class="k">def</span> <span class="nf">occupation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the phonon occupation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            t: The temperature in Kelvin.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">omega_eV</span> <span class="o">/</span> <span class="n">KB</span> <span class="o">*</span> <span class="n">t</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="HarmonicDefect.get_elph_me"><a class="viewcode-back" href="../../../../reference/ccd.html#pymatgen.analysis.defects.ccd.HarmonicDefect.get_elph_me">[docs]</a>    <span class="k">def</span> <span class="nf">get_elph_me</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">wswqs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">WSWQ</span><span class="p">],</span>
-        <span class="n">bandstructure</span><span class="p">:</span> <span class="n">BandStructure</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Calculate the electron phonon matrix elements.</span>
 
@@ -399,10 +428,10 @@
         <span class="n">slopes</span> <span class="o">=</span> <span class="n">_get_wswq_slope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distortions</span><span class="p">,</span> <span class="n">wswqs</span><span class="p">)[</span>
             <span class="o">...</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defect_band_index</span><span class="p">,</span> <span class="p">:</span>
         <span class="p">]</span>
-        <span class="n">ediffs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ediff</span><span class="p">(</span><span class="n">bandstructure</span><span class="p">,</span> <span class="n">output_order</span><span class="o">=</span><span class="s2">&quot;skb&quot;</span><span class="p">)</span>
+        <span class="n">ediffs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ediff</span><span class="p">(</span><span class="n">output_order</span><span class="o">=</span><span class="s2">&quot;skb&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">slopes</span><span class="p">,</span> <span class="n">ediffs</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_get_ediff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">band_structure</span><span class="p">,</span> <span class="n">output_order</span><span class="o">=</span><span class="s2">&quot;skb&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_get_ediff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_order</span><span class="o">=</span><span class="s2">&quot;skb&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Compute the eigenvalue difference to the defect band.</span>
 
 <span class="sd">        Args:</span>
@@ -414,12 +443,17 @@
 <span class="sd">            The eigenvalue difference to the defect band in the order specified by output_order.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">defect_band_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>  <span class="c1"># pragma: no cover</span>
                 <span class="s2">&quot;The ``defect_band_index`` must be set before ``ediff`` can be computed.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxed_bandstructure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>  <span class="c1"># pragma: no cover</span>
+                <span class="s2">&quot;The ``relaxed_bandstructure`` must be set before ``ediff`` can be computed.&quot;</span>
             <span class="p">)</span>
 
         <span class="n">ediffs_</span> <span class="o">=</span> <span class="n">_get_ks_ediff</span><span class="p">(</span>
-            <span class="n">bandstructure</span><span class="o">=</span><span class="n">band_structure</span><span class="p">,</span> <span class="n">defect_band_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_band_index</span>
+            <span class="n">bandstructure</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">relaxed_bandstructure</span><span class="p">,</span>
+            <span class="n">defect_band_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_band_index</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">ediffs_stack</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">ediffs_</span><span class="p">[</span><span class="n">Spin</span><span class="o">.</span><span class="n">up</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
@@ -433,7 +467,9 @@
         <span class="k">elif</span> <span class="n">output_order</span> <span class="o">==</span> <span class="s2">&quot;bks&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ediffs</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid output_order, choose from &#39;skb&#39; or &#39;bks&#39;.&quot;</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Invalid output_order, choose from &#39;skb&#39; or &#39;bks&#39;.&quot;</span>
+            <span class="p">)</span>  <span class="c1"># pragma: no cover</span></div>
 
 
 <div class="viewcode-block" id="OpticalHarmonicDefect"><a class="viewcode-back" href="../../../../reference/ccd.html#pymatgen.analysis.defects.ccd.OpticalHarmonicDefect">[docs]</a><span class="nd">@dataclass</span>
@@ -446,16 +482,18 @@
 <span class="sd">        omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.</span>
 <span class="sd">        charge: The charge state. This should be the charge of the defect</span>
 <span class="sd">            simulation that gave rise to the minimum of the parabola.</span>
-<span class="sd">        distortions : The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.</span>
+<span class="sd">        distortions: The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.</span>
 <span class="sd">            This object&#39;s internal reference for the distoration should always be relaxed structure.</span>
-<span class="sd">        energies : The potential energy surface obtained by distorting the structure.</span>
+<span class="sd">        structures: The list of structures that were used to compute the distortions.</span>
+<span class="sd">        energies: The potential energy surface obtained by distorting the structure.A</span>
+<span class="sd">        defect_band_index: The index of the defect band.</span>
+<span class="sd">        relaxed_indices: The indices of the relaxed defect structure.</span>
+<span class="sd">        relaxed_bandstructure: The band structure of the relaxed defect calculation.</span>
 <span class="sd">        waveder: The WAVEDER object containing the dipole matrix elements.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># TODO: use kw_only once we drop Python &lt; 3.10</span>
     <span class="n">waveder</span><span class="p">:</span> <span class="n">Waveder</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">ediff</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">defect_band_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="OpticalHarmonicDefect.from_vaspruns_and_waveder"><a class="viewcode-back" href="../../../../reference/ccd.html#pymatgen.analysis.defects.ccd.OpticalHarmonicDefect.from_vaspruns_and_waveder">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_vaspruns_and_waveder</span><span class="p">(</span>
@@ -466,6 +504,7 @@
         <span class="n">relaxed_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">defect_band_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">procar</span><span class="p">:</span> <span class="n">Procar</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">get_band_structure_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpticalHarmonicDefect</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Create a HarmonicDefectPhonon from a list of vasprun.</span>
@@ -478,6 +517,8 @@
 <span class="sd">            vasp_runs: A list of Vasprun objects.</span>
 <span class="sd">            charge_state: The charge state for the defect.</span>
 <span class="sd">            relaxed_index: The index of the relaxed structure in the list of structures.</span>
+<span class="sd">            defect_band_index: The index of the defect band (0-indexed).</span>
+<span class="sd">            procar: The Procar object for the defect calculation.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            An OpticalHarmonicDefect object.</span>
@@ -489,11 +530,17 @@
             <span class="n">waveder</span><span class="o">=</span><span class="n">waveder</span><span class="p">,</span>
             <span class="n">defect_band_index</span><span class="o">=</span><span class="n">defect_band_index</span><span class="p">,</span>
             <span class="n">procar</span><span class="o">=</span><span class="n">procar</span><span class="p">,</span>
+            <span class="n">store_bandstructure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">get_band_structure_kwargs</span><span class="o">=</span><span class="n">get_band_structure_kwargs</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">defect_band_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>  <span class="c1"># pragma: no cover</span>
                 <span class="s2">&quot;You must provide `defect_band_index` or PROCAR to help indetify the `defect_band_index`.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">relaxed_bandstructure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>  <span class="c1"># pragma: no cover</span>
+                <span class="s2">&quot;The bandstructure was not populated properly check the constructor of the parent.&quot;</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">obj</span></div>
 
@@ -505,6 +552,8 @@
         <span class="n">relaxed_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">defect_band_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">procar</span><span class="p">:</span> <span class="n">Procar</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store_bandstructure</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">get_band_structure_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HarmonicDefect</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Not implemented.&quot;&quot;&quot;</span>
@@ -519,14 +568,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">waveder</span><span class="o">.</span><span class="n">cder_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_band_index</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">_get_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bandstructure</span><span class="p">:</span> <span class="n">BandStructure</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_get_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Get the spectra for the defect.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            bandstructure: The band structure of the relaxed defect calculation.</span>
 <span class="sd">            shift: The shift to apply to the spectra.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ediff</span><span class="p">(</span><span class="n">bandstructure</span><span class="p">,</span> <span class="n">output_order</span><span class="o">=</span><span class="s2">&quot;bks&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">shift</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ediff</span><span class="p">(</span><span class="n">output_order</span><span class="o">=</span><span class="s2">&quot;bks&quot;</span><span class="p">)</span></div>
 
 
 <span class="c1"># @dataclass</span>
@@ -618,7 +667,7 @@
     <span class="sd">&quot;&quot;&quot;Fit the parabola to the data.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">omega</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The parabola function.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Get the parabola function.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">omega</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">Q</span> <span class="o">-</span> <span class="n">Q0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">E0</span>
 
     <span class="n">popt</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">energy</span><span class="p">)</span>
