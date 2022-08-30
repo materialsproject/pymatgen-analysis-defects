@@ -30,6 +30,7 @@ HBAR = const.hbar / const.e  # in units of eV.s
 EV2J = const.e  # 1 eV in Joules
 AMU2KG = const.physical_constants["atomic mass constant"][0]
 ANGS2M = 1e-10  # angstrom in meters
+KB = const.k / const.e  # Boltzmann constant in eV/K
 
 # __all__ = ["ConfigurationCoordinateDiagram", "HarmonicDefect", "get_dQ"]
 
@@ -56,6 +57,8 @@ class HarmonicDefect(MSONable):
     distortions: Optional[list[float]] = None
     energies: Optional[list[float]] = None
     defect_band_index: Optional[int] = None
+    relaxed_index: Optional[int] = None
+    relaxed_bandstructure: Optional[BandStructure] = None
 
     @classmethod
     def from_vaspruns(
@@ -65,6 +68,8 @@ class HarmonicDefect(MSONable):
         relaxed_index: int | None = None,
         defect_band_index: int | None = None,
         procar: Procar | None = None,
+        store_bandstructure: bool = False,
+        get_band_structure_kwargs: dict | None = None,
         **kwargs,
     ) -> HarmonicDefect:
         """Create a HarmonicDefectPhonon from a list of vasprun.
@@ -121,6 +126,14 @@ class HarmonicDefect(MSONable):
             loc_res = get_localized_state(bandstructure=bandstructure, procar=procar)
             _, (_, defect_band_index) = min(loc_res.items(), key=lambda x: x[1])
 
+        if store_bandstructure:
+            get_band_structure_kwargs = get_band_structure_kwargs or {}
+            bs = vasp_runs[relaxed_index].get_band_structure(
+                **get_band_structure_kwargs
+            )
+        else:
+            bs = None
+
         return cls(
             omega=omega,
             charge_state=charge_state,
@@ -128,6 +141,8 @@ class HarmonicDefect(MSONable):
             distortions=distortions,
             energies=energies,
             defect_band_index=defect_band_index,
+            relaxed_index=relaxed_index,
+            relaxed_bandstructure=bs,
             **kwargs,
         )
 
@@ -136,10 +151,17 @@ class HarmonicDefect(MSONable):
         """The vibronic frequency of the phonon state in (eV)."""
         return self.omega * HBAR * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG))
 
+    def occupation(self, t: npt.ArrayLike | float) -> npt.ArrayLike:
+        """Calculate the phonon occupation.
+
+        Args:
+            t: The temperature in Kelvin.
+        """
+        return 1.0 / (1 - np.exp(-self.omega_eV / KB * t))
+
     def get_elph_me(
         self,
         wswqs: list[WSWQ],
-        bandstructure: BandStructure,
     ) -> npt.NDArray:
         """Calculate the electron phonon matrix elements.
 
@@ -167,10 +189,10 @@ class HarmonicDefect(MSONable):
         slopes = _get_wswq_slope(self.distortions, wswqs)[
             ..., self.defect_band_index, :
         ]
-        ediffs = self._get_ediff(bandstructure, output_order="skb")
+        ediffs = self._get_ediff(output_order="skb")
         return np.multiply(slopes, ediffs)
 
-    def _get_ediff(self, band_structure, output_order="skb") -> npt.NDArray:
+    def _get_ediff(self, output_order="skb") -> npt.NDArray:
         """Compute the eigenvalue difference to the defect band.
 
         Args:
@@ -187,7 +209,8 @@ class HarmonicDefect(MSONable):
             )
 
         ediffs_ = _get_ks_ediff(
-            bandstructure=band_structure, defect_band_index=self.defect_band_index
+            bandstructure=self.relaxed_bandstructure,
+            defect_band_index=self.defect_band_index,
         )
         ediffs_stack = [
             ediffs_[Spin.up].T,
@@ -201,7 +224,9 @@ class HarmonicDefect(MSONable):
         elif output_order == "bks":
             return ediffs.transpose((2, 1, 0))
         else:
-            raise ValueError("Invalid output_order, choose from 'skb' or 'bks'.")
+            raise ValueError(
+                "Invalid output_order, choose from 'skb' or 'bks'."
+            )  # pragma: no cover
 
 
 @dataclass
@@ -224,6 +249,7 @@ class OpticalHarmonicDefect(HarmonicDefect):
     waveder: Waveder | None = None
     ediff: npt.NDArray | None = None
     defect_band_index: int | None = None
+    bandstructure: BandStructure | None = None
 
     @classmethod
     def from_vaspruns_and_waveder(
@@ -234,6 +260,7 @@ class OpticalHarmonicDefect(HarmonicDefect):
         relaxed_index: int | None = None,
         defect_band_index: int | None = None,
         procar: Procar | None = None,
+        get_band_structure_kwargs: dict | None = None,
         **kwargs,
     ) -> OpticalHarmonicDefect:
         """Create a HarmonicDefectPhonon from a list of vasprun.
@@ -257,11 +284,17 @@ class OpticalHarmonicDefect(HarmonicDefect):
             waveder=waveder,
             defect_band_index=defect_band_index,
             procar=procar,
+            store_bandstructure=True,
+            get_band_structure_kwargs=get_band_structure_kwargs,
             **kwargs,
         )
         if obj.defect_band_index is None:
-            raise ValueError(
+            raise ValueError(  # pragma: no cover
                 "You must provide `defect_band_index` or PROCAR to help indetify the `defect_band_index`."
+            )
+        if obj.relaxed_bandstructure is None:
+            raise ValueError(  # pragma: no cover
+                "The bandstructure was not populated properly check the constructor of the parent."
             )
         return obj
 
@@ -273,6 +306,8 @@ class OpticalHarmonicDefect(HarmonicDefect):
         relaxed_index: int | None = None,
         defect_band_index: int | None = None,
         procar: Procar | None = None,
+        store_bandstructure: bool = False,
+        get_band_structure_kwargs: dict | None = None,
         **kwargs,
     ) -> HarmonicDefect:
         """Not implemented."""
@@ -287,14 +322,14 @@ class OpticalHarmonicDefect(HarmonicDefect):
         """
         return self.waveder.cder_data[self.defect_band_index, ...]
 
-    def _get_spectra(self, bandstructure: BandStructure, shift: float = 0):
+    def _get_spectra(self, shift: float = 0):
         """Get the spectra for the defect.
 
         Args:
             bandstructure: The band structure of the relaxed defect calculation.
             shift: The shift to apply to the spectra.
         """
-        return self._get_ediff(bandstructure, output_order="bks") + shift
+        return self._get_ediff(output_order="bks") + shift
 
 
 # @dataclass

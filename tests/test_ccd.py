@@ -53,7 +53,7 @@ def test_OpticalHarmonicDefect(v_ga):
     is_symm(hd0.waveder, 123, 42)
     is_symm(hd0.waveder, 138, 69)
 
-    nbands_spectra, *_ = hd0._get_spectra(bandstructure=relaxed_bs).shape
+    nbands_spectra, *_ = hd0._get_spectra().shape
     nbands_dipole, *_ = hd0._get_defect_dipoles().shape
     assert nbands_spectra == nbands_dipole
 
