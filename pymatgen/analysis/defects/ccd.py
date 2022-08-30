@@ -157,7 +157,7 @@ class HarmonicDefect(MSONable):
         Returns:
             npt.NDArray: The electron phonon matrix elements.
         """
-        if self.defect_band_index is not None:
+        if self.defect_band_index is None:
             raise ValueError("The ``defect_band_index`` must be already be set.")
 
         # It's either [..., defect_band_index, :] or [..., defect_band_index]
@@ -199,7 +199,7 @@ class HarmonicDefect(MSONable):
         if output_order == "skb":
             return ediffs
         elif output_order == "bks":
-            return ediffs.transpose((1, 2, 0))
+            return ediffs.transpose((2, 1, 0))
         else:
             raise ValueError("Invalid output_order, choose from 'skb' or 'bks'.")
 
@@ -287,13 +287,14 @@ class OpticalHarmonicDefect(HarmonicDefect):
         """
         return self.waveder.cder_data[self.defect_band_index, ...]
 
-    def _get_spectra(self, shift: float = 0):
+    def _get_spectra(self, bandstructure: BandStructure, shift: float = 0):
         """Get the spectra for the defect.
 
         Args:
+            bandstructure: The band structure of the relaxed defect calculation.
             shift: The shift to apply to the spectra.
         """
-        return self._get_ediff(self.band_structure, output_order="bks") + shift
+        return self._get_ediff(bandstructure, output_order="bks") + shift
 
 
 # @dataclass

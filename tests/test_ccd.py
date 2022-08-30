@@ -16,7 +16,7 @@ def test_HarmonicDefect(v_ga):
     pytest.approx(hd0.omega_eV, 0.032680)
     wswqs = v_ga[(0, -1)]["wswqs"]
     relaxed_bs = vaspruns[1].get_band_structure()
-    elph_me = hd0.get_elph_me(bandstructure=relaxed_bs, wswqs=wswqs, procar=procar)
+    elph_me = hd0.get_elph_me(bandstructure=relaxed_bs, wswqs=wswqs)
     assert np.allclose(elph_me[..., 138], 0.0)  # ediff should be zero for defect band
     assert np.linalg.norm(elph_me[..., 139]) > 0
 
@@ -34,7 +34,7 @@ def test_OpticalHarmonicDefect(v_ga):
     # the non-optical part should behave the same
     wswqs = v_ga[(0, -1)]["wswqs"]
     relaxed_bs = vaspruns[1].get_band_structure()
-    elph_me = hd0.get_elph_me(bandstructure=relaxed_bs, wswqs=wswqs, procar=procar)
+    elph_me = hd0.get_elph_me(bandstructure=relaxed_bs, wswqs=wswqs)
     assert np.allclose(elph_me[..., 138], 0.0)  # ediff should be zero for defect band
     assert np.linalg.norm(elph_me[..., 139]) > 0
 
@@ -53,14 +53,18 @@ def test_OpticalHarmonicDefect(v_ga):
     is_symm(hd0.waveder, 123, 42)
     is_symm(hd0.waveder, 138, 69)
 
+    nbands_spectra, *_ = hd0._get_spectra(bandstructure=relaxed_bs).shape
+    nbands_dipole, *_ = hd0._get_defect_dipoles().shape
+    assert nbands_spectra == nbands_dipole
+
 
 def test_wswq_slope():
-    mats = [np.ones((3, 3)), np.zeros((3, 3)), np.ones((3, 3))]
+    mats = [np.ones((3, 5)), np.zeros((3, 5)), np.ones((3, 5))]
     FakeWSWQ = namedtuple("FakeWSWQ", ["data"])
     fake_wswqs = [FakeWSWQ(data=m) for m in mats]
 
     res = _get_wswq_slope([-0.5, 0, 0.5], fake_wswqs)
-    np.allclose(res, np.ones((3, 3)) * 2)
+    np.allclose(res, np.ones((3, 5)) * 2)
 
     res = _get_wswq_slope([1.0, 0, -1.0], fake_wswqs)
-    np.allclose(res, np.ones((3, 3)) * -1)
+    np.allclose(res, np.ones((3, 5)) * -1)
