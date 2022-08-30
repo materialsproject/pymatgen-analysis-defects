@@ -4,13 +4,17 @@ from __future__ import annotations
 import logging
 from ctypes import Structure
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
+import numpy.typing as npt
 from monty.json import MSONable
-from numpy.typing import ArrayLike
+from pymatgen.electronic_structure.core import Spin
+from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun, Waveder
 from scipy import constants as const
 from scipy.optimize import curve_fit
+
+from .utils import get_localized_state, sort_positive_definite
 
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
@@ -20,112 +24,364 @@ __copyright__ = "The Materials Project"
 __maintainer__ = "Jimmy Shen"
 __email__ = "jmmshn@gmail.com"
 __date__ = "Mar 15, 2022"
-__logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 HBAR = const.hbar / const.e  # in units of eV.s
 EV2J = const.e  # 1 eV in Joules
 AMU2KG = const.physical_constants["atomic mass constant"][0]
 ANGS2M = 1e-10  # angstrom in meters
+KB = const.k / const.e  # Boltzmann constant in eV/K
 
-__all__ = ["ConfigurationCoordinateDiagram", "get_dQ"]
+# __all__ = ["ConfigurationCoordinateDiagram", "HarmonicDefect", "get_dQ"]
 
 
 @dataclass
-class ConfigurationCoordinateDiagram(MSONable):
-    """A class representing a configuration coordinate diagram.
+class HarmonicDefect(MSONable):
+    """A class representing the a harmonic defect vibronic state.
 
-    Based on the NONRAD code:
-        M. E. Turiansky et al.: Comput. Phys. Commun. 267, 108056 (2021).
-
-    Since configuration coordinate diagrams always represent some kind of a process
-    in a defect. We will call one state `gs` for ground state and another state `es`
-    for excited state.  The ground state is always lower in energy than the excited
-    state.
+    The vibronic part of a defect is often catured by a simple harmonic oscillator.
+    This class store a representation of the SHO as well as some additional information for book-keeping purposes.
 
     Attributes:
-        charge_gs (int): The charge of the ground state.
-        charge_es (int): The charge of the excited state.
-        dQ (float): The configurational difference between the relaxed structures of the
-            ground state and the excited state.
-        dE (float): The energy difference between the ground state and the
-            excited state.
-        Q_gs (ArrayLike): The list of the configurational coordinates of the
-            ground state.
-        Q_es (ArrayLike): The list of the configurational coordinates of the
-            excited state.
-        energies_gs (ArrayLike): The list of the energies of the ground state.
-        energies_es (ArrayLike): The list of the energies of the excited state.
-        omega_gs (float): The frequency of the harmonic oscillator of the ground state.
-        omega_es (float): The frequency of the harmonic oscillator of the excited state.
+        omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.
+        charge: The charge state. This should be the charge of the defect
+            simulation that gave rise to the minimum of the parabola.
+        distortions: The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
+            This object's internal reference for the distoration should always be relaxed structure.
+        structures: The list of structures that were used to compute the distortions.
+        energies: The potential energy surface obtained by distorting the structure.A
+        defect_band_index: The index of the defect band.
+        relaxed_indices: The indices of the relaxed defect structure.
+        relaxed_bandstructure: The band structure of the relaxed defect calculation.
     """
 
-    charge_gs: int
-    charge_es: int
-    # distortions in units of [amu^{1/2} Angstrom]
-    dQ: float
-    Q_gs: ArrayLike
-    Q_es: ArrayLike
-    # energies in units of [eV]
-    energies_gs: ArrayLike
-    energies_es: ArrayLike
-    # zero-phonon line energy in units of [eV]
-    dE: float
-    # electron-phonon matrix element Wif in units of
-    # eV amu^{-1/2} Angstrom^{-1} for each bulk_index
+    omega: float
+    charge_state: int
+    distortions: Optional[list[float]] = None
+    structures: Optional[list[Structure]] = None
+    energies: Optional[list[float]] = None
+    defect_band_index: Optional[int] = None
+    relaxed_index: Optional[int] = None
+    relaxed_bandstructure: Optional[BandStructure] = None
 
-    def __post_init__(self):
-        """After all the attributes.
+    @classmethod
+    def from_vaspruns(
+        cls,
+        vasp_runs: list[Vasprun],
+        charge_state: int,
+        relaxed_index: int | None = None,
+        defect_band_index: int | None = None,
+        procar: Procar | None = None,
+        store_bandstructure: bool = False,
+        get_band_structure_kwargs: dict | None = None,
+        **kwargs,
+    ) -> HarmonicDefect:
+        """Create a HarmonicDefectPhonon from a list of vasprun.
 
-        Perform the following:
-            - convert fields to numpy arrays
-            - reference the gs to zero and es to dE
-            - compute the frequencies of the harmonic oscillators defined by curves
+        .. note::
+            The constructor check that you have the vaspruns sorted by the distortions
+            but does not perform the sorting for you.  This serves as a safety check to
+            ensure that the vaspruns are properly ordered.
+
+        Args:
+            vasp_runs: A list of Vasprun objects.
+            charge_state: The charge state for the defect.
+            relaxed_index: The index of the relaxed structure in the list of structures.
+            defect_band_index: The index of the defect band (0-indexed).
+            procar: A Procar object.  Used to identify the defect band if the defect_band_index is not provided.
+            store_bandstructure: Whether to store the bandstructure of the relaxed defect calculation.
+                Defaults to False to save space.
+            get_band_structure_kwargs: Keyword arguments to pass to the ``get_band_structure`` method.
+            **kwargs: Additional keyword arguments to pass to the constructor.
+
+        Returns:
+            A HarmonicDefect object.
         """
-        self.Q_gs = np.array(self.Q_gs)
-        self.Q_es = np.array(self.Q_es)
-        self.energies_gs = np.array(self.energies_gs)
-        self.energies_es = np.array(self.energies_es)
 
-        # reference energies to zero:
-        idx_zero = np.argmin(np.abs(self.Q_gs))
-        idx_Q = np.argmin(np.abs(self.Q_es - self.dQ))
-        self.energies_gs -= self.energies_gs[idx_zero]
-        self.energies_es -= self.energies_es[idx_Q] - self.dE
-        # get frequencies
-        self.omega_gs = _get_omega(self.Q_gs, self.energies_gs, 0, 0)
-        self.omega_es = _get_omega(self.Q_es, self.energies_es, self.dQ, self.dE)
+        def _parse_vasprun(vasprun: Vasprun):
+            energy = vasprun.final_energy
+            struct = vasprun.final_structure
+            return (energy, struct)
 
-    def fit_gs(self, Q):
-        """Fit the ground state energy to a parabola."""
-        E0 = 0
-        omega = _fit_parabola(self.Q_gs, self.energies_gs, 0, E0)
-        return 0.5 * omega**2 * (Q) ** 2 + E0
+        energy_struct = list(map(_parse_vasprun, vasp_runs))
+        unsorted_e = [e for e, _ in energy_struct]
 
-    def fit_es(self, Q):
-        """Fit the excited state energy to a parabola."""
-        E0 = self.dE
-        omega = _fit_parabola(self.Q_es, self.energies_es, self.dQ, E0)
-        return 0.5 * omega**2 * (Q - self.dQ) ** 2 + E0
+        if relaxed_index is None:
+            # Use the vasprun with the lowest energy
+            relaxed_index = np.argmin([e for e, _ in energy_struct])
 
-    def plot(self, ax=None, show=True, **kwargs):
-        """Plot the configuration coordinate diagram."""
-        import matplotlib.pyplot as plt
+        sorted_list, distortions = sort_positive_definite(
+            energy_struct,
+            energy_struct[relaxed_index],
+            energy_struct[-1],
+            lambda x, y: get_dQ(x[1], y[1]),
+        )
+        energies, structures = list(zip(*sorted_list))
 
-        if ax is None:
-            fig, ax = plt.subplots()
-        (l_gs,) = ax.plot(self.Q_gs, self.energies_gs, "o", label="gs", **kwargs)
-        (l_es,) = ax.plot(self.Q_es, self.energies_es, "o", label="es", **kwargs)
+        if not np.allclose(unsorted_e, energies, atol=1e-99):
+            raise ValueError("The vaspruns should already be in order.")
 
-        qq = np.linspace(self.Q_gs.min() - 0.2, self.Q_es.max() + 0.2, 100)
-        ax.plot(qq, self.fit_gs(qq), "-", color=l_gs.get_color())
-        ax.plot(qq, self.fit_es(qq), "-", color=l_es.get_color())
+        omega = _get_omega(
+            Q=distortions,
+            E=energies,
+            Q0=distortions[relaxed_index],
+            E0=energies[relaxed_index],
+        )
 
-        ax.set_xlabel("Q [amu^{1/2} Angstrom]")
-        ax.set_ylabel("Energy [eV]")
-        ax.legend()
-        if show:
-            plt.show()
-        return ax
+        if defect_band_index is None and procar is not None:
+            bandstructure = vasp_runs[relaxed_index].get_band_structure()
+            loc_res = get_localized_state(bandstructure=bandstructure, procar=procar)
+            _, (_, defect_band_index) = min(loc_res.items(), key=lambda x: x[1])
+
+        if store_bandstructure:
+            get_band_structure_kwargs = get_band_structure_kwargs or {}
+            bs = vasp_runs[relaxed_index].get_band_structure(
+                **get_band_structure_kwargs
+            )
+        else:
+            bs = None
+
+        return cls(
+            omega=omega,
+            charge_state=charge_state,
+            structures=structures,
+            distortions=distortions,
+            energies=energies,
+            defect_band_index=defect_band_index,
+            relaxed_index=relaxed_index,
+            relaxed_bandstructure=bs,
+            **kwargs,
+        )
+
+    @property
+    def omega_eV(self) -> float:
+        """Get the vibronic frequency of the phonon state in (eV)."""
+        return self.omega * HBAR * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG))
+
+    def occupation(self, t: npt.ArrayLike | float) -> npt.ArrayLike:
+        """Calculate the phonon occupation.
+
+        Args:
+            t: The temperature in Kelvin.
+        """
+        return 1.0 / (1 - np.exp(-self.omega_eV / KB * t))
+
+    def get_elph_me(
+        self,
+        wswqs: list[WSWQ],
+    ) -> npt.NDArray:
+        """Calculate the electron phonon matrix elements.
+
+        Combine the data from the WSWQs to calculate the electron phonon matrix elements.
+        The matrix elements are calculated by combining the finite difference from the matrix overlaps.
+
+        d(<W|S|W(Q)>) / dQ
+
+        And the eignvalue difference.
+
+        Args:
+            wswqs: A list of WSWQ objects, assuming that they match the order of the distortions.
+            bandstructure: The bandstructure of the relaxed defect calculation.
+
+        Returns:
+            npt.NDArray: The electron phonon matrix elements.
+        """
+        if self.defect_band_index is None:
+            raise ValueError("The ``defect_band_index`` must be already be set.")
+
+        # It's either [..., defect_band_index, :] or [..., defect_band_index]
+        # Which band index is the "correct" one might not be super important since
+        # the matrix is symmetric in the first-order theory we are working in.
+        # TODO: I should really read my thesis.
+        slopes = _get_wswq_slope(self.distortions, wswqs)[
+            ..., self.defect_band_index, :
+        ]
+        ediffs = self._get_ediff(output_order="skb")
+        return np.multiply(slopes, ediffs)
+
+    def _get_ediff(self, output_order="skb") -> npt.NDArray:
+        """Compute the eigenvalue difference to the defect band.
+
+        Args:
+            band_structure: The band structure of the relaxed defect calculation.
+            output_order: The order of the output. Defaults to "skb" (spin, kpoint, band]).
+                You can also use "bks" (band, kpoint, spin).
+
+        Returns:
+            The eigenvalue difference to the defect band in the order specified by output_order.
+        """
+        if self.defect_band_index is None:
+            raise ValueError(  # pragma: no cover
+                "The ``defect_band_index`` must be set before ``ediff`` can be computed."
+            )
+        if self.relaxed_bandstructure is None:
+            raise ValueError(  # pragma: no cover
+                "The ``relaxed_bandstructure`` must be set before ``ediff`` can be computed."
+            )
+
+        ediffs_ = _get_ks_ediff(
+            bandstructure=self.relaxed_bandstructure,
+            defect_band_index=self.defect_band_index,
+        )
+        ediffs_stack = [
+            ediffs_[Spin.up].T,
+        ]
+        if Spin.down in ediffs_.keys():
+            ediffs_stack.append(ediffs_[Spin.down].T)
+        ediffs = np.stack(ediffs_stack)
+
+        if output_order == "skb":
+            return ediffs
+        elif output_order == "bks":
+            return ediffs.transpose((2, 1, 0))
+        else:
+            raise ValueError(
+                "Invalid output_order, choose from 'skb' or 'bks'."
+            )  # pragma: no cover
+
+
+@dataclass
+class OpticalHarmonicDefect(HarmonicDefect):
+    """Representation of Harmonic defect with optical (dipole) matrix elements.
+
+    The dipole matrix elements are computed by VASP and reported in the WAVEDER file.
+
+    Attributes:
+        omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.
+        charge: The charge state. This should be the charge of the defect
+            simulation that gave rise to the minimum of the parabola.
+        distortions: The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
+            This object's internal reference for the distoration should always be relaxed structure.
+        structures: The list of structures that were used to compute the distortions.
+        energies: The potential energy surface obtained by distorting the structure.A
+        defect_band_index: The index of the defect band.
+        relaxed_indices: The indices of the relaxed defect structure.
+        relaxed_bandstructure: The band structure of the relaxed defect calculation.
+        waveder: The WAVEDER object containing the dipole matrix elements.
+    """
+
+    # TODO: use kw_only once we drop Python < 3.10
+    waveder: Waveder | None = None
+
+    @classmethod
+    def from_vaspruns_and_waveder(
+        cls,
+        vasp_runs: list[Vasprun],
+        waveder: Waveder,
+        charge_state: int,
+        relaxed_index: int | None = None,
+        defect_band_index: int | None = None,
+        procar: Procar | None = None,
+        get_band_structure_kwargs: dict | None = None,
+        **kwargs,
+    ) -> OpticalHarmonicDefect:
+        """Create a HarmonicDefectPhonon from a list of vasprun.
+
+        .. note::
+            The constructor check that you have the vaspruns sorted by the distortions
+            but does not order it for you.
+
+        Args:
+            vasp_runs: A list of Vasprun objects.
+            charge_state: The charge state for the defect.
+            relaxed_index: The index of the relaxed structure in the list of structures.
+            defect_band_index: The index of the defect band (0-indexed).
+            procar: The Procar object for the defect calculation.
+
+        Returns:
+            An OpticalHarmonicDefect object.
+        """
+        obj = super().from_vaspruns(
+            vasp_runs,
+            charge_state,
+            relaxed_index,
+            waveder=waveder,
+            defect_band_index=defect_band_index,
+            procar=procar,
+            store_bandstructure=True,
+            get_band_structure_kwargs=get_band_structure_kwargs,
+            **kwargs,
+        )
+        if obj.defect_band_index is None:
+            raise ValueError(  # pragma: no cover
+                "You must provide `defect_band_index` or PROCAR to help indetify the `defect_band_index`."
+            )
+        if obj.relaxed_bandstructure is None:
+            raise ValueError(  # pragma: no cover
+                "The bandstructure was not populated properly check the constructor of the parent."
+            )
+        return obj
+
+    @classmethod
+    def from_vaspruns(
+        cls,
+        vasp_runs: list[Vasprun],
+        charge_state: int,
+        relaxed_index: int | None = None,
+        defect_band_index: int | None = None,
+        procar: Procar | None = None,
+        store_bandstructure: bool = False,
+        get_band_structure_kwargs: dict | None = None,
+        **kwargs,
+    ) -> HarmonicDefect:
+        """Not implemented."""
+        raise NotImplementedError("Use from_vaspruns_and_waveder instead.")
+
+    def _get_defect_dipoles(self) -> npt.NDArray:
+        """Get the dipole matrix elements for the defect.
+
+        Returns:
+            The dipole matrix elements for the defect. The indices are:
+                ``[band index, k-point index, spin index, cart. direction]``.
+        """
+        return self.waveder.cder_data[self.defect_band_index, ...]
+
+    def _get_spectra(self) -> npt.NDArray:
+        """Get the spectra for the defect.
+
+        Args:
+            bandstructure: The band structure of the relaxed defect calculation.
+            shift: The shift to apply to the spectra.
+        """
+        return self._get_ediff(output_order="bks")
+
+
+# @dataclass
+# class ConfigurationCoordinateDiagram(MSONable):
+#     """A class representing a configuration coordinate diagram.
+
+#     The configuration coordinate diagram represents two parabolas with some finite configuration shift ``dQ``.
+#     The two defects are ``sorted`` in the sense that the defect with the lower ``charge_state``
+#       is designated as ``defect_state_0``.
+
+#     Attributes:
+#         phonon_mode_0 : The defect with the lower charge state.
+#         phonon_mode_1 : The defect with the higher charge state.
+#         dQ : The finite configuration shift.
+#     """
+#     phonon_mode_0: HarmonicDefect
+#     phonon_mode_1: HarmonicDefect
+#     dQ: float
+
+#     def __post_init__(self):
+#         """Post-initialization."""
+#         if abs(self.phonon_mode_0.charge_state - self.phonon_mode_1.charge_state) != 1:
+#             raise ValueError(
+#                 "The charge states of the two defects must be 1 apart. "
+#                 "Got {} and {}".format(self.phonon_mode_0.charge_state, self.phonon_mode_1.charge_state)
+#             )
+#         if self.phonon_mode_0.charge_state > self.phonon_mode_1.charge_state:
+#             self.phonon_mode_0, self.phonon_mode_1 = self.phonon_mode_1, self.phonon_mode_0
+
+#     @property
+#     def omega0_eV(self) -> float:
+#         """The vibronic frequency of the defect with the lower charge state."""
+#         return self.phonon_mode_0.omega_eV
+
+#     @property
+#     def omega1_eV(self) -> float:
+#         """The vibronic frequency of the defect with the higher charge state."""
+#         return self.phonon_mode_1.omega_eV
 
 
 def get_dQ(ground: Structure, excited: Structure) -> float:
@@ -151,8 +407,8 @@ def get_dQ(ground: Structure, excited: Structure) -> float:
 
 
 def _get_omega(
-    Q: ArrayLike,
-    energy: ArrayLike,
+    Q: npt.ArrayLike,
+    E: npt.ArrayLike,
     Q0: float,
     E0: float,
 ) -> float:
@@ -162,24 +418,67 @@ def _get_omega(
 
     Args:
         Q: array of Q values (amu^{1/2} Angstrom) corresponding to each vasprun
-        energy: array of energy values (eV) corresponding to each vasprun
-        Q0: fix the value of the minimum of the parabola
+        E: array of energy values (eV) corresponding to each vasprun
+        Q0: fix the x-value of the minimum of the parabola
+        E0: fix the y-value of the minimum of the parabola
 
     Returns:
         omega: the harmonic phonon frequency in (eV)
     """
-    popt = _fit_parabola(Q, energy, Q0, E0)
-    return HBAR * popt[0] * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG))
+    popt = _fit_parabola(Q, E, Q0, E0)
+    return popt[0]
 
 
 def _fit_parabola(
-    Q: ArrayLike, energy: ArrayLike, Q0: float, E0: float
+    Q: npt.ArrayLike, energy: npt.ArrayLike, Q0: float, E0: float
 ) -> Tuple[float, float, float]:
     """Fit the parabola to the data."""
 
     def f(Q, omega):
-        """The parabola function."""
+        """Get the parabola function."""
         return 0.5 * omega**2 * (Q - Q0) ** 2 + E0
 
     popt, _ = curve_fit(f, Q, energy)
     return popt
+
+
+def _get_wswq_slope(distortions: list[float], wswqs: list[WSWQ]) -> npt.NDArray:
+    """Get the slopes of the overlap matrixs vs. Q.
+
+    Args:
+        distortions: List of Q values (amu^{1/2} Angstrom).
+        wswqs: List of WSWQ objects.
+
+    Returns:
+        npt.NDArray: slope matrix with the same shape as the ``WSWQ.data``.
+    """
+    yy = np.stack([np.abs(ww.data) * np.sign(qq) for qq, ww in zip(distortions, wswqs)])
+    _, *oldshape = yy.shape
+    return np.polyfit(distortions, yy.reshape(yy.shape[0], -1), deg=1)[0].reshape(
+        *oldshape
+    )
+
+
+def _get_ks_ediff(
+    bandstructure: BandStructure,
+    defect_band_index: int,
+) -> dict[Spin, npt.NDArray]:
+    """Calculate the Kohn-Sham energy between the defect state.
+
+    Get the eigenvalue differences to the defect band. Report this difference
+    on each k-point and each spin, the result should be shape [nspins, nkpoints, nbands].
+
+    Args:
+        bandstructure: A BandStructure object.
+        defect_band_index: The index of the defect band.
+
+    Returns:
+        npt.NDArray: The Kohn-Sham energy difference between the defect state and other states.
+        Indexed the same way as ``bandstructure.bands``.
+    """
+    res = dict()
+    for k, kpt_bands in bandstructure.bands.items():
+        e_at_def_band = kpt_bands[defect_band_index, :]
+        e_diff = kpt_bands - e_at_def_band
+        res[k] = e_diff
+    return res

@@ -16,7 +16,7 @@ classifiers = [
   "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-  "pymatgen>=2022.7.19",
+  'pymatgen@git+https://github.com/jmmshn/pymatgen@get_elphon',
   "dscribe>=1.2.1",
   "scikit-image>=0.19.3",
 ]
@@ -42,7 +42,7 @@ docs = [
 ]
 
 strict = [
-  "pymatgen==2022.7.19",
+  'pymatgen@git+https://github.com/jmmshn/pymatgen@get_elphon',
   "dscribe==1.2.1",
   "scikit-image==0.19.3",
 ]
@@ -99,7 +99,6 @@ show_missing = true
 skip_covered = true
 
 [tool.pydocstyle]
-convention = 'google'
-match = '^pymatgen/(?!_).*\.py'
-inherit = false
-add-ignore= "D107, "
+convention="google"
+match="^((?!(test|docs)).)*$"
+add-ignore="D107,"
