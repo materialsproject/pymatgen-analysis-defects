@@ -582,63 +582,6 @@ where <code class="docutils literal notranslate"><span class="pre">site_group</s
 
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.get_localized_state">
-<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">get_localized_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bandstructure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#get_localized_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.get_localized_state" title="Permalink to this definition">#</a></dt>
-<dd><p>Find the index of the localized state.</p>
-<p>Find the band index with the lowest inverse participation ratio (IPR) in a small window
-around the fermi level.  Since some of the core states can be very localized,
-we should only search near the valence.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>bandstructure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">BandStructure</span></code>) – The bandstructure object.
-The band just below the fermi level is used as the center of band window.</p></li>
-<li><p><strong>procar</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Procar</span></code>) – The procar object.</p></li>
-<li><p><strong>k_index</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The index of the k-point to use. If None, the IPR is averaged over all k-points.</p></li>
-<li><p><strong>band_range</strong> – The number of bands above and blow the fermi level to include in the search window.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The inverse participation ratio (IPR) and the index for each spin channel.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict[Spin, tuple(float, int)]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.sort_positive_definite">
-<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">sort_positive_definite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#sort_positive_definite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.sort_positive_definite" title="Permalink to this definition">#</a></dt>
-<dd><p>Sort a list where we can only compute a positive-definite distance.</p>
-<p>Sometimes, we can only compute a positive-definite distance between two objects.
-(E.g., the displacement between two structures). In these cases, standard
-sorting algorithms will not work. Here, we accept two reference points to give
-some sense of direction. We then sort the list based on the distance between the
-reference points. Note: this only works if the list falls on a line of some sort.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>list_in</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – The list to sort.</p></li>
-<li><p><strong>ref1</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>) – The first reference point, this will be the <cite>zero</cite> point.</p></li>
-<li><p><strong>ref2</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>) – The second reference point, this will determine the direction.</p></li>
-<li><p><strong>dist</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>) – Some positive definite distance function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><ul class="simple">
-<li><p>the sorted list of objects.</p></li>
-<li><p>the signed distance in the chosen direction.</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
 </section>
 
         </article>
