@@ -202,10 +202,16 @@ class HarmonicDefect(MSONable):
     def _get_ediff(self, output_order="skb") -> npt.NDArray:
         """Compute the eigenvalue difference to the defect band.
 
+        .. note::
+            Since the different matrix element output files have different index orders,
+            But most caluclations require the energies, we should always perform the
+            rearrangement here so that we have a single point of failure.
+
         Args:
             band_structure: The band structure of the relaxed defect calculation.
             output_order: The order of the output. Defaults to "skb" (spin, kpoint, band]).
                 You can also use "bks" (band, kpoint, spin).
+
 
         Returns:
             The eigenvalue difference to the defect band in the order specified by output_order.
