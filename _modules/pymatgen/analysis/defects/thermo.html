@@ -195,6 +195,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../tutorials/1-quickstart.html">Quick Start</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/materialsproject/pymatgen-analysis-defects">GitHub Repo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../genindex.html">Index</a></li>
 </ul>
 
@@ -360,7 +361,8 @@
 <span class="sd">        pd_entries:</span>
 <span class="sd">            The list of entries used to construct the phase diagram and chemical</span>
 <span class="sd">            potential diagram. They will be used to determine the stability region</span>
-<span class="sd">            of the bulk crystal.</span>
+<span class="sd">            of the bulk crystal.  The entries are used instead of the ``PhaseDiagram``</span>
+<span class="sd">            object to make serializing the object easier.</span>
 <span class="sd">        vbm:</span>
 <span class="sd">            The VBM of the bulk crystal.</span>
 <span class="sd">        band_gap:</span>
@@ -420,11 +422,11 @@
             <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_diagram</span><span class="o">.</span><span class="n">elements</span>
         <span class="p">}</span>
 
-<div class="viewcode-block" id="FormationEnergyDiagram.with_phase_diagram"><a class="viewcode-back" href="../../../../reference/thermo.html#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_phase_diagram">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">with_phase_diagram</span><span class="p">(</span>
+<div class="viewcode-block" id="FormationEnergyDiagram.with_atomic_entries"><a class="viewcode-back" href="../../../../reference/thermo.html#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_atomic_entries">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">with_atomic_entries</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">bulk_entry</span><span class="p">:</span> <span class="n">ComputedEntry</span><span class="p">,</span>
-        <span class="n">defect_entries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DefectEntry</span><span class="p">],</span>
+        <span class="n">defect_entries</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DefectEntry</span><span class="p">],</span>
         <span class="n">atomic_entries</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComputedEntry</span><span class="p">],</span>
         <span class="n">phase_diagram</span><span class="p">:</span> <span class="n">PhaseDiagram</span><span class="p">,</span>
         <span class="n">vbm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -432,12 +434,17 @@
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a FormationEnergyDiagram object using an existing phase diagram.</span>
 
+<span class="sd">        Since the Formation energy usually looks like:</span>
+
+<span class="sd">        E[Defect] - (E[Bulk] + ∑ E[Atom_i] + ∑ Chempot[Atom_i])</span>
+
+<span class="sd">        The most convenient, and likely most accurate way to obtain the chemical potentials</span>
+<span class="sd">        is to calculate the defect supercells and the atomic phases with the same level of theory.</span>
 <span class="sd">        As long as the atomic phase energies are computed using the same settings as</span>
 <span class="sd">        the defect supercell calculations, the method used to determine the enthalpy of</span>
 <span class="sd">        formation of the different competing phases is not important.</span>
-<span class="sd">        As such, we can use the enthalpy of formation of from any phase diagram</span>
-<span class="sd">        (e.g. the ones that include experimental corrections) to determine the</span>
-<span class="sd">        formation energy.</span>
+<span class="sd">        Then use the an exerimentally corrected ``PhaseDiagram`` object (like the ones you can</span>
+<span class="sd">        obtain from the Materials Project) to calculate the enthalpy of formation.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            bulk_entry:</span>
@@ -465,101 +472,14 @@
 <span class="sd">            FormationEnergyDiagram:</span>
 <span class="sd">                The FormationEnergyDiagram object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">def</span> <span class="nf">get_interp_en</span><span class="p">(</span><span class="n">entry</span><span class="p">:</span> <span class="n">ComputedEntry</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot;Get the interpolated energy of an entry.&quot;&quot;&quot;</span>
-            <span class="n">e_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">atomic_entries</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;Only single-element entries should be provided.&quot;</span>
-                    <span class="p">)</span>  <span class="c1"># pragma: no cover</span>
-                <span class="n">e_dict</span><span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">energy_per_atom</span>
-
-            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span>
-                <span class="n">entry</span><span class="o">.</span><span class="n">composition</span><span class="p">[</span><span class="n">el</span><span class="p">]</span> <span class="o">*</span> <span class="n">e_dict</span><span class="p">[</span><span class="n">el</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">elements</span>
-            <span class="p">)</span>
-
-        <span class="n">adjusted_entries</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">phase_diagram</span><span class="o">.</span><span class="n">stable_entries</span><span class="p">:</span>
-            <span class="n">d_</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-                <span class="n">energy</span><span class="o">=</span><span class="n">get_interp_en</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span> <span class="o">+</span> <span class="n">phase_diagram</span><span class="o">.</span><span class="n">get_form_energy</span><span class="p">(</span><span class="n">entry</span><span class="p">),</span>
-                <span class="n">composition</span><span class="o">=</span><span class="n">entry</span><span class="o">.</span><span class="n">composition</span><span class="p">,</span>
-                <span class="n">entry_id</span><span class="o">=</span><span class="n">entry</span><span class="o">.</span><span class="n">entry_id</span><span class="p">,</span>
-                <span class="n">correction</span><span class="o">=</span><span class="n">entry</span><span class="o">.</span><span class="n">correction</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">adjusted_entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ComputedEntry</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d_</span><span class="p">))</span>
+        <span class="n">adjusted_entries</span> <span class="o">=</span> <span class="n">_get_adjuected_pd_entries</span><span class="p">(</span>
+            <span class="n">phase_diagram</span><span class="o">=</span><span class="n">phase_diagram</span><span class="p">,</span> <span class="n">atomic_entries</span><span class="o">=</span><span class="n">atomic_entries</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">bulk_entry</span><span class="o">=</span><span class="n">bulk_entry</span><span class="p">,</span>
             <span class="n">defect_entries</span><span class="o">=</span><span class="n">defect_entries</span><span class="p">,</span>
             <span class="n">pd_entries</span><span class="o">=</span><span class="n">adjusted_entries</span><span class="p">,</span>
-            <span class="n">vbm</span><span class="o">=</span><span class="n">vbm</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-<div class="viewcode-block" id="FormationEnergyDiagram.with_alternate_phase_diagram"><a class="viewcode-back" href="../../../../reference/thermo.html#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_alternate_phase_diagram">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">with_alternate_phase_diagram</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span>
-        <span class="n">bulk_entry</span><span class="p">:</span> <span class="n">ComputedEntry</span><span class="p">,</span>
-        <span class="n">defect_entries</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DefectEntry</span><span class="p">],</span>
-        <span class="n">atomic_entries</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComputedEntry</span><span class="p">],</span>
-        <span class="n">vbm</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-        <span class="sd">&quot;&quot;&quot;Create a FormationEnergyDiagram object from existing phase diagram.</span>
-
-<span class="sd">        This function allows you to grab an existing phase diagram and use the</span>
-<span class="sd">        formation enthalpies from that to compute the chemical potentials.</span>
-<span class="sd">        As long as the atomic phase energies are computed using the same settings as</span>
-<span class="sd">        the defect supercell calculations, the method used to determine the enthalpy</span>
-<span class="sd">        of formation of the different competing phases is not important.</span>
-<span class="sd">        As such, we can use the enthalpy of formation of from any phase diagram</span>
-<span class="sd">        (e.g. the ones that include experimental corrections) to determine the</span>
-<span class="sd">        formation energy.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            bulk_entry:</span>
-<span class="sd">                The bulk computed entry to get the total energy of the bulk supercell.</span>
-<span class="sd">            defect_entries:</span>
-<span class="sd">                The list of defect entries for the different charge states.</span>
-<span class="sd">                The finite-size correction should already be applied to these.</span>
-<span class="sd">            atomic_entries:</span>
-<span class="sd">                The list of entries used to construct the phase diagram and chemical</span>
-<span class="sd">                potential diagram. They will be used to determine the stability region</span>
-<span class="sd">                of the bulk phase.</span>
-<span class="sd">            vbm:</span>
-<span class="sd">                The VBM of the bulk crystal.</span>
-<span class="sd">            api_key:</span>
-<span class="sd">                The api key to access the materials project database.</span>
-<span class="sd">                If None, the key from your ``~/.pmgrc.yaml`` file will be used.</span>
-<span class="sd">            band_gap:</span>
-<span class="sd">                The band gap of the bulk crystal.</span>
-<span class="sd">            inc_inf_values:</span>
-<span class="sd">                If False these boundary points at infinity are ignored when we look at</span>
-<span class="sd">                the chemical potential limits.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            FormationEnergyDiagram:</span>
-<span class="sd">                The FormationEnergyDiagram object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">pymatgen.ext.matproj</span> <span class="kn">import</span> <span class="n">MPRester</span>
-
-        <span class="n">need_elements</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">bulk_entry</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span>
-            <span class="n">defect_entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sc_entry</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">elements</span>
-        <span class="p">)</span>
-        <span class="n">chemsys</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">need_elements</span><span class="p">)))</span>
-        <span class="n">ents</span> <span class="o">=</span> <span class="n">MPRester</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span><span class="o">.</span><span class="n">get_entries_in_chemsys</span><span class="p">(</span>
-            <span class="n">chemsys</span><span class="p">,</span> <span class="n">additional_criteria</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;e_above_hull&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$lte&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">}}</span>
-        <span class="p">)</span>
-        <span class="n">phase_diagrams</span> <span class="o">=</span> <span class="n">PhaseDiagram</span><span class="p">(</span><span class="n">ents</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">with_phase_diagram</span><span class="p">(</span>
-            <span class="n">bulk_entry</span><span class="p">,</span>
-            <span class="n">defect_entries</span><span class="p">,</span>
-            <span class="n">atomic_entries</span><span class="p">,</span>
-            <span class="n">phase_diagrams</span><span class="p">,</span>
             <span class="n">vbm</span><span class="o">=</span><span class="n">vbm</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -889,6 +809,48 @@
         <span class="k">if</span> <span class="n">seen_right_most</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">==</span> <span class="n">left_most_idx</span><span class="p">:</span>
             <span class="k">break</span>
     <span class="k">return</span> <span class="n">upper_hull</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_adjuected_pd_entries</span><span class="p">(</span><span class="n">phase_diagram</span><span class="p">,</span> <span class="n">atomic_entries</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComputedEntry</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Get the adjusted entries for the phase diagram.</span>
+
+<span class="sd">    Combine the terminal energies from ``atomic_entries`` with the enthalpies of formation</span>
+<span class="sd">    for the provided ``phase_diagram``.  To create the entries for a new phase diagram.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        phase_diagram: Phase diagram where the enthalpies of formation are taken from.</span>
+<span class="sd">        atomic_entries: Entries for the terminal energies.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[ComputedEntry]: Entries for the new phase diagram.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get_interp_en</span><span class="p">(</span><span class="n">entry</span><span class="p">:</span> <span class="n">ComputedEntry</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the interpolated energy of an entry.&quot;&quot;&quot;</span>
+        <span class="n">e_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">atomic_entries</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Only single-element entries should be provided.&quot;</span>
+                <span class="p">)</span>  <span class="c1"># pragma: no cover</span>
+            <span class="n">e_dict</span><span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">energy_per_atom</span>
+
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span>
+            <span class="n">entry</span><span class="o">.</span><span class="n">composition</span><span class="p">[</span><span class="n">el</span><span class="p">]</span> <span class="o">*</span> <span class="n">e_dict</span><span class="p">[</span><span class="n">el</span><span class="p">]</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">entry</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">elements</span>
+        <span class="p">)</span>
+
+    <span class="n">adjusted_entries</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">phase_diagram</span><span class="o">.</span><span class="n">stable_entries</span><span class="p">:</span>
+        <span class="n">d_</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">energy</span><span class="o">=</span><span class="n">get_interp_en</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span> <span class="o">+</span> <span class="n">phase_diagram</span><span class="o">.</span><span class="n">get_form_energy</span><span class="p">(</span><span class="n">entry</span><span class="p">),</span>
+            <span class="n">composition</span><span class="o">=</span><span class="n">entry</span><span class="o">.</span><span class="n">composition</span><span class="p">,</span>
+            <span class="n">entry_id</span><span class="o">=</span><span class="n">entry</span><span class="o">.</span><span class="n">entry_id</span><span class="p">,</span>
+            <span class="n">correction</span><span class="o">=</span><span class="n">entry</span><span class="o">.</span><span class="n">correction</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">adjusted_entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ComputedEntry</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d_</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">adjusted_entries</span>
 </pre></div>
         </article>
       </div>

@@ -196,6 +196,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/1-quickstart.html">Quick Start</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/materialsproject/pymatgen-analysis-defects">GitHub Repo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
 </ul>
 
@@ -304,9 +305,16 @@ this will be determined automatically.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.core.Defect.get_charge_states">
-<span class="sig-name descname"><span class="pre">get_charge_states</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#Defect.get_charge_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.Defect.get_charge_states" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_charge_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#Defect.get_charge_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.Defect.get_charge_states" title="Permalink to this definition">#</a></dt>
 <dd><p>Potential charge states for a given oxidation state.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>padding</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – The number of charge states on the on either side of
+0 and the oxidation state.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
+</dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of possible charge states</p>
 </dd>

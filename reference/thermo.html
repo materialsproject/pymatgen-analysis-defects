@@ -196,6 +196,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/1-quickstart.html">Quick Start</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/materialsproject/pymatgen-analysis-defects">GitHub Repo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../genindex.html">Index</a></li>
 </ul>
 
@@ -279,7 +280,7 @@ If None, structures attributes of the locpot file will be used to
 automatically determine the defect location.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Optional[Union[numpy.typing._array_like._SupportsArray[numpy.dtype], numpy.typing._nested_sequence._NestedSequence[numpy.typing._array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy.typing._nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]]]</p>
+<dd class="field-odd"><p>Optional[Union[numpy._typing._array_like._SupportsArray[numpy.dtype], numpy._typing._nested_sequence._NestedSequence[numpy._typing._array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy._typing._nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -361,7 +362,8 @@ The finite-size correction should already be applied to these.</p>
 <span class="sig-name descname"><span class="pre">pd_entries</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.pd_entries" title="Permalink to this definition">#</a></dt>
 <dd><p>The list of entries used to construct the phase diagram and chemical
 potential diagram. They will be used to determine the stability region
-of the bulk crystal.</p>
+of the bulk crystal.  The entries are used instead of the <code class="docutils literal notranslate"><span class="pre">PhaseDiagram</span></code>
+object to make serializing the object easier.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list[pymatgen.entries.computed_entries.ComputedEntry]</p>
@@ -410,20 +412,23 @@ which should not have very negative chemical potential.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_phase_diagram">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_phase_diagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bulk_entry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defect_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomic_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_diagram</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vbm</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#FormationEnergyDiagram.with_phase_diagram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_phase_diagram" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_atomic_entries">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_atomic_entries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bulk_entry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defect_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomic_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_diagram</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vbm</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#FormationEnergyDiagram.with_atomic_entries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_atomic_entries" title="Permalink to this definition">#</a></dt>
 <dd><p>Create a FormationEnergyDiagram object using an existing phase diagram.</p>
-<p>As long as the atomic phase energies are computed using the same settings as
+<p>Since the Formation energy usually looks like:</p>
+<p>E[Defect] - (E[Bulk] + ∑ E[Atom_i] + ∑ Chempot[Atom_i])</p>
+<p>The most convenient, and likely most accurate way to obtain the chemical potentials
+is to calculate the defect supercells and the atomic phases with the same level of theory.
+As long as the atomic phase energies are computed using the same settings as
 the defect supercell calculations, the method used to determine the enthalpy of
 formation of the different competing phases is not important.
-As such, we can use the enthalpy of formation of from any phase diagram
-(e.g. the ones that include experimental corrections) to determine the
-formation energy.</p>
+Then use the an exerimentally corrected <code class="docutils literal notranslate"><span class="pre">PhaseDiagram</span></code> object (like the ones you can
+obtain from the Materials Project) to calculate the enthalpy of formation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>bulk_entry</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ComputedEntry</span></code>) – The bulk computed entry to get the total energy of the bulk supercell.</p></li>
-<li><p><strong>defect_entries</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#pymatgen.analysis.defects.thermo.DefectEntry" title="pymatgen.analysis.defects.thermo.DefectEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefectEntry</span></code></a>]) – The list of defect entries for the different charge states.
+<li><p><strong>defect_entries</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="#pymatgen.analysis.defects.thermo.DefectEntry" title="pymatgen.analysis.defects.thermo.DefectEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefectEntry</span></code></a>]) – The list of defect entries for the different charge states.
 The finite-size correction should already be applied to these.</p></li>
 <li><p><strong>atomic_entries</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ComputedEntry</span></code>]) – The list of entries used to construct the phase diagram and chemical
 potential diagram. They will be used to determine the stability region
@@ -434,44 +439,6 @@ of the bulk crystal.</p></li>
 <li><p><strong>inc_inf_values</strong> – If False these boundary points at infinity are ignored when we look at
 the chemical potential limits.</p></li>
 <li><p><strong>**kwargs</strong> – Additional keyword arguments for the FormationEnergyDiagram class.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The FormationEnergyDiagram object.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram" title="pymatgen.analysis.defects.thermo.FormationEnergyDiagram">FormationEnergyDiagram</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_alternate_phase_diagram">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_alternate_phase_diagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bulk_entry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defect_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomic_entries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vbm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#FormationEnergyDiagram.with_alternate_phase_diagram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.FormationEnergyDiagram.with_alternate_phase_diagram" title="Permalink to this definition">#</a></dt>
-<dd><p>Create a FormationEnergyDiagram object from existing phase diagram.</p>
-<p>This function allows you to grab an existing phase diagram and use the
-formation enthalpies from that to compute the chemical potentials.
-As long as the atomic phase energies are computed using the same settings as
-the defect supercell calculations, the method used to determine the enthalpy
-of formation of the different competing phases is not important.
-As such, we can use the enthalpy of formation of from any phase diagram
-(e.g. the ones that include experimental corrections) to determine the
-formation energy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>bulk_entry</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ComputedEntry</span></code>) – The bulk computed entry to get the total energy of the bulk supercell.</p></li>
-<li><p><strong>defect_entries</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<a class="reference internal" href="#pymatgen.analysis.defects.thermo.DefectEntry" title="pymatgen.analysis.defects.thermo.DefectEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefectEntry</span></code></a>]) – The list of defect entries for the different charge states.
-The finite-size correction should already be applied to these.</p></li>
-<li><p><strong>atomic_entries</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ComputedEntry</span></code>]) – The list of entries used to construct the phase diagram and chemical
-potential diagram. They will be used to determine the stability region
-of the bulk phase.</p></li>
-<li><p><strong>vbm</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The VBM of the bulk crystal.</p></li>
-<li><p><strong>api_key</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – The api key to access the materials project database.
-If None, the key from your <code class="docutils literal notranslate"><span class="pre">~/.pmgrc.yaml</span></code> file will be used.</p></li>
-<li><p><strong>band_gap</strong> – The band gap of the bulk crystal.</p></li>
-<li><p><strong>inc_inf_values</strong> – If False these boundary points at infinity are ignored when we look at
-the chemical potential limits.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

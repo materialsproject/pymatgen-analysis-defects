@@ -195,6 +195,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../tutorials/1-quickstart.html">Quick Start</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/materialsproject/pymatgen-analysis-defects">GitHub Repo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../genindex.html">Index</a></li>
 </ul>
 
@@ -333,8 +334,12 @@
 <span class="sd">            Dict[Element, int]: The species changes of the defect.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Defect.get_charge_states"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Defect.get_charge_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_charge_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Defect.get_charge_states"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Defect.get_charge_states">[docs]</a>    <span class="k">def</span> <span class="nf">get_charge_states</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">padding</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Potential charge states for a given oxidation state.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            padding: The number of charge states on the on either side of</span>
+<span class="sd">                0 and the oxidation state.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            list of possible charge states</span>
@@ -345,9 +350,9 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Oxidation state must be an integer&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">oxi_state</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">charges</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">oxi_state</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)]</span>
+            <span class="n">charges</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">padding</span><span class="p">,</span> <span class="n">oxi_state</span> <span class="o">+</span> <span class="n">padding</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">charges</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="n">oxi_state</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+            <span class="n">charges</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="n">oxi_state</span> <span class="o">-</span> <span class="n">padding</span><span class="p">,</span> <span class="n">padding</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
 
         <span class="k">return</span> <span class="n">charges</span></div>
 
