@@ -97,7 +97,7 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
         filter(lambda x: len(x.composition.elements) == 1, stable_entries_Mg_Ga_N)
     )
     pd = PhaseDiagram(stable_entries_Mg_Ga_N)
-    fed = FormationEnergyDiagram.with_phase_diagram(
+    fed = FormationEnergyDiagram.with_atomic_entries(
         bulk_entry=bulk_entry,
         defect_entries=def_ent_list,
         atomic_entries=atomic_entries,
