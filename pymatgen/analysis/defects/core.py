@@ -101,8 +101,12 @@ class Defect(MSONable, metaclass=ABCMeta):
             Dict[Element, int]: The species changes of the defect.
         """
 
-    def get_charge_states(self):
+    def get_charge_states(self, padding: int = 1) -> list[int]:
         """Potential charge states for a given oxidation state.
+
+        Args:
+            padding: The number of charge states on the on either side of
+                0 and the oxidation state.
 
         Returns:
             list of possible charge states
@@ -113,9 +117,9 @@ class Defect(MSONable, metaclass=ABCMeta):
             raise ValueError("Oxidation state must be an integer")
 
         if oxi_state >= 0:
-            charges = [*range(-1, oxi_state + 2)]
+            charges = [*range(-padding, oxi_state + padding + 1)]
         else:
-            charges = [*range(oxi_state - 1, 2)]
+            charges = [*range(oxi_state - padding, padding + 1)]
 
         return charges
 
