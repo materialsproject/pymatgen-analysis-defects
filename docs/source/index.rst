@@ -11,6 +11,7 @@
 
    API <reference/root>
    Tutorials <tutorials>
+   GitHub Repo <https://github.com/materialsproject/pymatgen-analysis-defects>
    genindex
 
 Introduction
