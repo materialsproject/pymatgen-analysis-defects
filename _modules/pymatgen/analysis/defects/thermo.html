@@ -472,7 +472,7 @@
 <span class="sd">            FormationEnergyDiagram:</span>
 <span class="sd">                The FormationEnergyDiagram object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">adjusted_entries</span> <span class="o">=</span> <span class="n">_get_adjuected_pd_entries</span><span class="p">(</span>
+        <span class="n">adjusted_entries</span> <span class="o">=</span> <span class="n">_get_adjusted_pd_entries</span><span class="p">(</span>
             <span class="n">phase_diagram</span><span class="o">=</span><span class="n">phase_diagram</span><span class="p">,</span> <span class="n">atomic_entries</span><span class="o">=</span><span class="n">atomic_entries</span>
         <span class="p">)</span>
 
@@ -811,7 +811,7 @@
     <span class="k">return</span> <span class="n">upper_hull</span></div>
 
 
-<span class="k">def</span> <span class="nf">_get_adjuected_pd_entries</span><span class="p">(</span><span class="n">phase_diagram</span><span class="p">,</span> <span class="n">atomic_entries</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComputedEntry</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">_get_adjusted_pd_entries</span><span class="p">(</span><span class="n">phase_diagram</span><span class="p">,</span> <span class="n">atomic_entries</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComputedEntry</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Get the adjusted entries for the phase diagram.</span>
 
 <span class="sd">    Combine the terminal energies from ``atomic_entries`` with the enthalpies of formation</span>
