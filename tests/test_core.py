@@ -19,7 +19,7 @@ def test_vacancy(gan_struct):
     assert vac.get_charge_states() == [-4, -3, -2, -1, 0, 1]
     assert vac.get_multiplicity() == 2
     assert vac.get_supercell_structure().formula == "Ga63 N64"
-    assert vac.name == "Va_Ga"
+    assert vac.name == "v_Ga"
     assert vac == vac
     assert vac.element_changes == {Element("Ga"): -1}
 

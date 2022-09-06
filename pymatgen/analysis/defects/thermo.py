@@ -239,7 +239,7 @@ class FormationEnergyDiagram(MSONable):
             FormationEnergyDiagram:
                 The FormationEnergyDiagram object.
         """
-        adjusted_entries = _get_adjuected_pd_entries(
+        adjusted_entries = _get_adjusted_pd_entries(
             phase_diagram=phase_diagram, atomic_entries=atomic_entries
         )
 
@@ -578,7 +578,7 @@ def get_upper_hull(points: ArrayLike) -> List[ArrayLike]:
     return upper_hull
 
 
-def _get_adjuected_pd_entries(phase_diagram, atomic_entries) -> list[ComputedEntry]:
+def _get_adjusted_pd_entries(phase_diagram, atomic_entries) -> list[ComputedEntry]:
     """Get the adjusted entries for the phase diagram.
 
     Combine the terminal energies from ``atomic_entries`` with the enthalpies of formation

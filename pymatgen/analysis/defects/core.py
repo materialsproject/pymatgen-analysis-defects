@@ -211,7 +211,7 @@ class Vacancy(Defect):
     @property
     def name(self) -> str:
         """Name of the defect."""
-        return f"Va_{get_element(self.defect_site.specie)}"
+        return f"v_{get_element(self.defect_site.specie)}"
 
     @property
     def defect_site(self):
