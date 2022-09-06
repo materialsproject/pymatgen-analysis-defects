@@ -204,7 +204,7 @@ class HarmonicDefect(MSONable):
 
         .. note::
             Since the different matrix element output files have different index orders,
-            But most caluclations require the energies, we should always perform the
+            But most calculations require the energies, we should always perform the
             rearrangement here so that we have a single point of failure.
 
         Args:

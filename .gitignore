@@ -136,4 +136,4 @@ dmypy.json
 docs_build
 examples/wip*
 
-.vscode
+.vscode/

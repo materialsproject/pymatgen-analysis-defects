@@ -128,7 +128,8 @@ class FormationEnergyDiagram(MSONable):
         pd_entries:
             The list of entries used to construct the phase diagram and chemical
             potential diagram. They will be used to determine the stability region
-            of the bulk crystal.
+            of the bulk crystal.  The entries are used instead of the ``PhaseDiagram``
+            object to make serializing the object easier.
         vbm:
             The VBM of the bulk crystal.
         band_gap:
@@ -189,10 +190,10 @@ class FormationEnergyDiagram(MSONable):
         }
 
     @classmethod
-    def with_phase_diagram(
+    def with_atomic_entries(
         cls,
         bulk_entry: ComputedEntry,
-        defect_entries: List[DefectEntry],
+        defect_entries: list[DefectEntry],
         atomic_entries: list[ComputedEntry],
         phase_diagram: PhaseDiagram,
         vbm: float,
@@ -200,12 +201,17 @@ class FormationEnergyDiagram(MSONable):
     ):
         """Create a FormationEnergyDiagram object using an existing phase diagram.
 
+        Since the Formation energy usually looks like:
+
+        E[Defect] - (E[Bulk] + ∑ E[Atom_i] + ∑ Chempot[Atom_i])
+
+        The most convenient, and likely most accurate way to obtain the chemical potentials
+        is to calculate the defect supercells and the atomic phases with the same level of theory.
         As long as the atomic phase energies are computed using the same settings as
         the defect supercell calculations, the method used to determine the enthalpy of
         formation of the different competing phases is not important.
-        As such, we can use the enthalpy of formation of from any phase diagram
-        (e.g. the ones that include experimental corrections) to determine the
-        formation energy.
+        Then use the an exerimentally corrected ``PhaseDiagram`` object (like the ones you can
+        obtain from the Materials Project) to calculate the enthalpy of formation.
 
         Args:
             bulk_entry:
@@ -233,101 +239,14 @@ class FormationEnergyDiagram(MSONable):
             FormationEnergyDiagram:
                 The FormationEnergyDiagram object.
         """
-
-        def get_interp_en(entry: ComputedEntry):
-            """Get the interpolated energy of an entry."""
-            e_dict = dict()
-            for e in atomic_entries:
-                if len(e.composition.elements) != 1:
-                    raise ValueError(
-                        "Only single-element entries should be provided."
-                    )  # pragma: no cover
-                e_dict[e.composition.elements[0]] = e.energy_per_atom
-
-            return sum(
-                entry.composition[el] * e_dict[el] for el in entry.composition.elements
-            )
-
-        adjusted_entries = []
-
-        for entry in phase_diagram.stable_entries:
-            d_ = dict(
-                energy=get_interp_en(entry) + phase_diagram.get_form_energy(entry),
-                composition=entry.composition,
-                entry_id=entry.entry_id,
-                correction=entry.correction,
-            )
-            adjusted_entries.append(ComputedEntry.from_dict(d_))
+        adjusted_entries = _get_adjusted_pd_entries(
+            phase_diagram=phase_diagram, atomic_entries=atomic_entries
+        )
 
         return cls(
             bulk_entry=bulk_entry,
             defect_entries=defect_entries,
             pd_entries=adjusted_entries,
-            vbm=vbm,
-            **kwargs,
-        )
-
-    @classmethod
-    def with_alternate_phase_diagram(
-        cls,
-        bulk_entry: ComputedEntry,
-        defect_entries: List[DefectEntry],
-        atomic_entries: list[ComputedEntry],
-        vbm: float,
-        api_key: str | None = None,
-        **kwargs,
-    ):  # pragma: no cover
-        """Create a FormationEnergyDiagram object from existing phase diagram.
-
-        This function allows you to grab an existing phase diagram and use the
-        formation enthalpies from that to compute the chemical potentials.
-        As long as the atomic phase energies are computed using the same settings as
-        the defect supercell calculations, the method used to determine the enthalpy
-        of formation of the different competing phases is not important.
-        As such, we can use the enthalpy of formation of from any phase diagram
-        (e.g. the ones that include experimental corrections) to determine the
-        formation energy.
-
-        Args:
-            bulk_entry:
-                The bulk computed entry to get the total energy of the bulk supercell.
-            defect_entries:
-                The list of defect entries for the different charge states.
-                The finite-size correction should already be applied to these.
-            atomic_entries:
-                The list of entries used to construct the phase diagram and chemical
-                potential diagram. They will be used to determine the stability region
-                of the bulk phase.
-            vbm:
-                The VBM of the bulk crystal.
-            api_key:
-                The api key to access the materials project database.
-                If None, the key from your ``~/.pmgrc.yaml`` file will be used.
-            band_gap:
-                The band gap of the bulk crystal.
-            inc_inf_values:
-                If False these boundary points at infinity are ignored when we look at
-                the chemical potential limits.
-
-        Returns:
-            FormationEnergyDiagram:
-                The FormationEnergyDiagram object.
-        """
-        from pymatgen.ext.matproj import MPRester
-
-        need_elements = set(bulk_entry.composition.elements) | set(
-            defect_entries[0].sc_entry.composition.elements
-        )
-        chemsys = "-".join(sorted(map(str, need_elements)))
-        ents = MPRester(api_key).get_entries_in_chemsys(
-            chemsys, additional_criteria={"e_above_hull": {"$lte": 0.001}}
-        )
-        phase_diagrams = PhaseDiagram(ents)
-        return cls.with_phase_diagram(
-            bulk_entry,
-            defect_entries,
-            atomic_entries,
-            phase_diagrams,
             vbm=vbm,
             **kwargs,
         )
@@ -657,3 +576,45 @@ def get_upper_hull(points: ArrayLike) -> List[ArrayLike]:
         if seen_right_most and i == left_most_idx:
             break
     return upper_hull
+
+
+def _get_adjusted_pd_entries(phase_diagram, atomic_entries) -> list[ComputedEntry]:
+    """Get the adjusted entries for the phase diagram.
+
+    Combine the terminal energies from ``atomic_entries`` with the enthalpies of formation
+    for the provided ``phase_diagram``.  To create the entries for a new phase diagram.
+
+    Args:
+        phase_diagram: Phase diagram where the enthalpies of formation are taken from.
+        atomic_entries: Entries for the terminal energies.
+
+    Returns:
+        List[ComputedEntry]: Entries for the new phase diagram.
+    """
+
+    def get_interp_en(entry: ComputedEntry):
+        """Get the interpolated energy of an entry."""
+        e_dict = dict()
+        for e in atomic_entries:
+            if len(e.composition.elements) != 1:
+                raise ValueError(
+                    "Only single-element entries should be provided."
+                )  # pragma: no cover
+            e_dict[e.composition.elements[0]] = e.energy_per_atom
+
+        return sum(
+            entry.composition[el] * e_dict[el] for el in entry.composition.elements
+        )
+
+    adjusted_entries = []
+
+    for entry in phase_diagram.stable_entries:
+        d_ = dict(
+            energy=get_interp_en(entry) + phase_diagram.get_form_energy(entry),
+            composition=entry.composition,
+            entry_id=entry.entry_id,
+            correction=entry.correction,
+        )
+        adjusted_entries.append(ComputedEntry.from_dict(d_))
+
+    return adjusted_entries
