@@ -3,7 +3,7 @@ build-backend = "setuptools.build_meta"
 requires = ["setuptools >= 42", "versioningit ~= 1.0", "wheel"]
 
 [project]
-authors = [{name = "Jimmy-Xuan Shen", email = "jmmshn@gmail.com"}]
+authors = [{ name = "Jimmy-Xuan Shen", email = "jmmshn@gmail.com" }]
 classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.8",
@@ -15,15 +15,11 @@ classifiers = [
   "Topic :: Other/Nonlisted Topic",
   "Topic :: Scientific/Engineering",
 ]
-dependencies = [
-  "pymatgen>=2022.7.19",
-  "dscribe>=1.2.1",
-  "scikit-image>=0.19.3",
-]
+dependencies = ["pymatgen>=2022.7.19", "dscribe>=1.2.1", "scikit-image>=0.19.3"]
 description = "Pymatgen extension for defects analysis"
 dynamic = ["version"]
 keywords = ["high-throughput", "automated", "dft", "defects"]
-license = {text = "modified BSD"}
+license = { text = "modified BSD" }
 name = "pymatgen-analysis-defects"
 readme = "README.rst"
 requires-python = '>="3.8"'
@@ -38,22 +34,15 @@ docs = [
   "nbsphinx==0.8.9",
   "nbsphinx-link==1.3.0",
   "sphinx-autodoc-typehints==1.18.3",
-  "nbmake==1.3.3"
+  "nbmake==1.3.3",
 ]
 
-strict = [
-  "pymatgen==2022.7.19",
-  "dscribe==1.2.1",
-  "scikit-image==0.19.3",
-]
+strict = ["pymatgen==2022.7.19", "dscribe==1.2.1", "scikit-image==0.19.3"]
 
-tests = [
-  "pytest==7.1.2",
-  "pytest-cov==3.0.0",
-]
+tests = ["pytest==7.1.2", "pytest-cov==3.0.0"]
 
 [tool.setuptools.dynamic]
-readme = {file = ["README.rst"]}
+readme = { file = ["README.rst"] }
 
 [project.urls]
 documentation = "https://materialsproject.github.io/pymatgen-analysis-defects/"
@@ -102,4 +91,11 @@ skip_covered = true
 convention = 'google'
 match = '^pymatgen/(?!_).*\.py'
 inherit = false
-add-ignore= "D107, "
+add-ignore = "D107, "
+
+[tool.autoflake]
+in-place = true
+remove-unused-variables = true
+remove-all-unused-imports = true
+expand-star-imports = true
+ignore-init-module-imports = true

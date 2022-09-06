@@ -111,8 +111,7 @@ class ConfigurationCoordinateDiagram(MSONable):
         """Plot the configuration coordinate diagram."""
         import matplotlib.pyplot as plt
 
-        if ax is None:
-            fig, ax = plt.subplots()
+        ax = ax or plt.gca()
         (l_gs,) = ax.plot(self.Q_gs, self.energies_gs, "o", label="gs", **kwargs)
         (l_es,) = ax.plot(self.Q_es, self.energies_es, "o", label="es", **kwargs)
 
