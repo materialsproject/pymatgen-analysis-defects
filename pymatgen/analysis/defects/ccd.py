@@ -37,6 +37,34 @@ AU2ANG = const.physical_constants["atomic unit of length"][0] / 1e-10
 RYD2EV = const.physical_constants["Rydberg constant times hc in eV"][0]
 EDEPS = 4 * np.pi * 2 * RYD2EV * AU2ANG  # exactly the same as VASP
 
+LOOKUP_TABLE = np.array(
+    [
+        1,
+        1,
+        2,
+        6,
+        24,
+        120,
+        720,
+        5040,
+        40320,
+        362880,
+        3628800,
+        39916800,
+        479001600,
+        6227020800,
+        87178291200,
+        1307674368000,
+        20922789888000,
+        355687428096000,
+        6402373705728000,
+        121645100408832000,
+        2432902008176640000,
+    ],
+    dtype=np.double,
+)
+factor = ANGS2M**2 * AMU2KG / HBAR / HBAR / EV2J
+
 
 def optical_prefactor(struct):
     """Prefactor for optical transition rate calculations."""
@@ -499,41 +527,6 @@ def _get_ks_ediff(
         e_diff = kpt_bands - e_at_def_band
         res[k] = e_diff
     return res
-
-
-HBAR = const.hbar / const.e  # in units of eV.s
-EV2J = const.e  # 1 eV in Joules
-AMU2KG = const.physical_constants["atomic mass constant"][0]
-ANGS2M = 1e-10  # angstrom in meters
-
-LOOKUP_TABLE = np.array(
-    [
-        1,
-        1,
-        2,
-        6,
-        24,
-        120,
-        720,
-        5040,
-        40320,
-        362880,
-        3628800,
-        39916800,
-        479001600,
-        6227020800,
-        87178291200,
-        1307674368000,
-        20922789888000,
-        355687428096000,
-        6402373705728000,
-        121645100408832000,
-        2432902008176640000,
-    ],
-    dtype=np.double,
-)
-
-factor = ANGS2M**2 * AMU2KG / HBAR / HBAR / EV2J
 
 
 @njit(cache=True)
