@@ -9,6 +9,7 @@ from typing import Optional, Tuple
 import numpy as np
 import numpy.typing as npt
 from monty.json import MSONable
+from numba import njit
 from pymatgen.electronic_structure.core import Spin
 from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun, Waveder
 from scipy import constants as const
@@ -498,3 +499,118 @@ def _get_ks_ediff(
         e_diff = kpt_bands - e_at_def_band
         res[k] = e_diff
     return res
+
+
+HBAR = const.hbar / const.e  # in units of eV.s
+EV2J = const.e  # 1 eV in Joules
+AMU2KG = const.physical_constants["atomic mass constant"][0]
+ANGS2M = 1e-10  # angstrom in meters
+
+LOOKUP_TABLE = np.array(
+    [
+        1,
+        1,
+        2,
+        6,
+        24,
+        120,
+        720,
+        5040,
+        40320,
+        362880,
+        3628800,
+        39916800,
+        479001600,
+        6227020800,
+        87178291200,
+        1307674368000,
+        20922789888000,
+        355687428096000,
+        6402373705728000,
+        121645100408832000,
+        2432902008176640000,
+    ],
+    dtype=np.double,
+)
+
+factor = ANGS2M**2 * AMU2KG / HBAR / HBAR / EV2J
+
+
+@njit(cache=True)
+def fact(n: int) -> float:
+    """Compute the factorial of n."""
+    if n > 20:
+        return LOOKUP_TABLE[-1] * np.prod(
+            np.array(list(range(21, n + 1)), dtype=np.double)
+        )
+    return LOOKUP_TABLE[n]
+
+
+@njit(cache=True)
+def herm(x: float, n: int) -> float:
+    """Recursive definition of hermite polynomial."""
+    if n == 0:
+        return 1.0
+    if n == 1:
+        return 2.0 * x
+
+    y1 = 2.0 * x
+    dy1 = 2.0
+    for i in range(2, n + 1):
+        yn = 2.0 * x * y1 - dy1
+        dyn = 2.0 * i * y1
+        y1 = yn
+        dy1 = dyn
+    return yn
+
+
+@njit(cache=True)
+def analytic_overlap_NM(DQ: float, w1: float, w2: float, n1: int, n2: int) -> float:
+    """Compute the overlap between two displaced harmonic oscillators.
+
+    This function computes the overlap integral between two harmonic
+    oscillators with frequencies w1, w2 that are displaced by DQ for the
+    quantum numbers n1, n2. The integral is computed using an analytic formula
+    for the overlap of two displaced harmonic oscillators. The method comes
+    from B.P. Zapol, Chem. Phys. Lett. 93, 549 (1982).
+
+    Taken from NONRAD.
+
+    Parameters
+    ----------
+    DQ : float
+        displacement between harmonic oscillators in amu^{1/2} Angstrom
+    w1, w2 : float
+        frequencies of the harmonic oscillators in eV
+    n1, n2 : integer
+        quantum number of the overlap integral to calculate
+    Returns
+    -------
+    np.longdouble
+        overlap of the two harmonic oscillator wavefunctions
+    """
+    w = np.double(w1 * w2 / (w1 + w2))
+    rho = np.sqrt(factor) * np.sqrt(w / 2) * DQ
+    sinfi = np.sqrt(w1) / np.sqrt(w1 + w2)
+    cosfi = np.sqrt(w2) / np.sqrt(w1 + w2)
+
+    Pr1 = (-1) ** n1 * np.sqrt(2 * cosfi * sinfi) * np.exp(-(rho**2))
+    Ix = 0.0
+    k1 = n2 // 2
+    k2 = n2 % 2
+    l1 = n1 // 2
+    l2 = n1 % 2
+    for kx in range(k1 + 1):
+        for lx in range(l1 + 1):
+            k = 2 * kx + k2
+            l = 2 * lx + l2  # noqa: E741
+            Pr2 = (
+                (fact(n1) * fact(n2)) ** 0.5
+                / (fact(k) * fact(l) * fact(k1 - kx) * fact(l1 - lx))
+                * 2 ** ((k + l - n2 - n1) / 2)
+            )
+            Pr3 = (sinfi**k) * (cosfi**l)
+            # f = hermval(rho, [0.]*(k+l) + [1.])
+            f = herm(np.float64(rho), k + l)
+            Ix = Ix + Pr1 * Pr2 * Pr3 * f
+    return Ix
