@@ -32,6 +32,16 @@ AMU2KG = const.physical_constants["atomic mass constant"][0]
 ANGS2M = 1e-10  # angstrom in meters
 KB = const.k / const.e  # Boltzmann constant in eV/K
 
+AU2ANG = const.physical_constants["atomic unit of length"][0] / 1e-10
+RYD2EV = const.physical_constants["Rydberg constant times hc in eV"][0]
+EDEPS = 4 * np.pi * 2 * RYD2EV * AU2ANG  # exactly the same as VASP
+
+
+def optical_prefactor(struct):
+    """Prefactor for optical transition rate calculations."""
+    return EDEPS * np.pi / struct.volume
+
+
 # __all__ = ["ConfigurationCoordinateDiagram", "HarmonicDefect", "get_dQ"]
 
 
