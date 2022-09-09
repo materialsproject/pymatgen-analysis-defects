@@ -49,20 +49,17 @@ def analytic_overlap_NM(DQ: float, w1: float, w2: float, n1: int, n2: int) -> fl
     for the overlap of two displaced harmonic oscillators. The method comes
     from B.P. Zapol, Chem. Phys. Lett. 93, 549 (1982).
 
-    Taken from NONRAD.
+    [Taken from NONRAD.]
 
-    Parameters
-    ----------
-    DQ : float
-        displacement between harmonic oscillators in amu^{1/2} Angstrom
-    w1, w2 : float
-        frequencies of the harmonic oscillators in eV
-    n1, n2 : integer
-        quantum number of the overlap integral to calculate
-    Returns
-    -------
-    np.longdouble
-        overlap of the two harmonic oscillator wavefunctions
+    Args:
+        DQ: Displacement between harmonic oscillators in amu^{1/2} Angstrom
+        w1: Frequency of oscillator 1 in eV
+        w2: Frequency of oscillator 2 in eV
+        n1: Quantum number of oscillator 1
+        n2: Quantum number of oscillator 2
+
+    Returns:
+        Overlap of the two harmonic oscillator wavefunctions
     """
     w = np.double(w1 * w2 / (w1 + w2))
     rho = np.sqrt(Factor1) * np.sqrt(w / 2) * DQ
