@@ -40,7 +40,9 @@ def herm(x: float, n: int) -> float:
 
 
 @njit(cache=True)
-def analytic_overlap_NM(DQ: float, w1: float, w2: float, n1: int, n2: int) -> float:
+def analytic_overlap_NM(
+    dQ: float, omega1: float, omega2: float, n1: int, n2: int
+) -> float:
     """Compute the overlap between two displaced harmonic oscillators.
 
     This function computes the overlap integral between two harmonic
@@ -53,18 +55,18 @@ def analytic_overlap_NM(DQ: float, w1: float, w2: float, n1: int, n2: int) -> fl
 
     Args:
         DQ: Displacement between harmonic oscillators in amu^{1/2} Angstrom
-        w1: Frequency of oscillator 1 in eV
-        w2: Frequency of oscillator 2 in eV
+        omega1: Frequency of oscillator 1 in eV
+        omega2: Frequency of oscillator 2 in eV
         n1: Quantum number of oscillator 1
         n2: Quantum number of oscillator 2
 
     Returns:
         Overlap of the two harmonic oscillator wavefunctions
     """
-    w = np.double(w1 * w2 / (w1 + w2))
-    rho = np.sqrt(Factor1) * np.sqrt(w / 2) * DQ
-    sinfi = np.sqrt(w1) / np.sqrt(w1 + w2)
-    cosfi = np.sqrt(w2) / np.sqrt(w1 + w2)
+    w = np.double(omega1 * omega2 / (omega1 + omega2))
+    rho = np.sqrt(Factor1) * np.sqrt(w / 2) * dQ
+    sinfi = np.sqrt(omega1) / np.sqrt(omega1 + omega2)
+    cosfi = np.sqrt(omega2) / np.sqrt(omega1 + omega2)
 
     Pr1 = (-1) ** n1 * np.sqrt(2 * cosfi * sinfi) * np.exp(-(rho**2))
     Ix = 0.0
