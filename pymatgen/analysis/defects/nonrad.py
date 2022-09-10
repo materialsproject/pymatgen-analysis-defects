@@ -4,11 +4,11 @@ import numpy as np
 from numba import njit
 from numpy import typing as npt
 
-from .constants import AMU2KG, ANGS2M, EV2J, HBAR, KB, LOOKUP_TABLE
+from .constants import AMU2KG, ANGS2M, EV2J, HBAR, HBAR_EV, KB, LOOKUP_TABLE
 
-Factor1 = ANGS2M**2 * AMU2KG / HBAR / HBAR / EV2J
+Factor1 = ANGS2M**2 * AMU2KG / HBAR_EV / HBAR_EV / EV2J
 Factor2 = HBAR / ANGS2M**2 / AMU2KG
-Factor3 = 1 / HBAR
+Factor3 = 1 / HBAR_EV
 
 
 @njit(cache=True)
@@ -107,8 +107,8 @@ def boltzmann_filling(
         shape ``(nstates, # temperature steps)``.
     """
     t_ = np.atleast_1d(temperature)
-    Z = 1.0 / (1 - np.exp(-omega_i / KB * t_))
-    m_omega = np.arange(1, n_states + 1) * omega_i
+    Z = 1.0 / (1 - np.exp(-omega_i / KB / t_))
+    m_omega = np.arange(0, n_states) * omega_i
     w = np.exp(-np.outer(m_omega, 1.0 / (KB * t_)))
     return np.multiply(w, 1 / Z)
 
@@ -140,8 +140,8 @@ def get_vibronic_matrix_elements(
     E = np.arange(0, Nf, omega_f) - m_init * omega_i
     if m_init == 0:
         matels = (
-            np.sqrt(Factor2 / 2 / omega_i) * ovl[1, :]
-            + np.sqrt(Factor3) * dQ * ovl[0, :]
+            np.sqrt(Factor2 / 2 / omega_i) * ovl[m_init + 1, :]
+            + np.sqrt(Factor3) * dQ * ovl[m_init, :]
         )
     else:
         matels = (
@@ -149,4 +149,4 @@ def get_vibronic_matrix_elements(
             + np.sqrt(m_init * Factor2 / 2 / omega_i) * ovl[m_init - 1, :]
             + np.sqrt(Factor3) * dQ * ovl[m_init, :]
         )
-    return E, np.abs(np.conj(matels) * matels)
+    return E, matels

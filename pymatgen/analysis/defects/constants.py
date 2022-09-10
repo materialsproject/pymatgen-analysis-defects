@@ -4,14 +4,15 @@
 import numpy as np
 from scipy import constants
 
-HBAR = constants.hbar / constants.e  # in units of eV.s
+HBAR_EV = constants.physical_constants["Planck constant over 2 pi in eV s"][0]
+HBAR = constants.physical_constants["Planck constant over 2 pi"][0]
 EV2J = constants.e  # 1 eV in Joules
-AMU2KG = constants.physical_constantsants["atomic mass constantsant"][0]
+AMU2KG = constants.physical_constants["atomic mass constant"][0]
 ANGS2M = 1e-10  # angstrom in meters
-KB = constants.physical_constantsants["Boltzmann constantsant in eV/K"][0]
+KB = constants.physical_constants["Boltzmann constant in eV/K"][0]
 
-AU2ANG = constants.physical_constantsants["atomic unit of length"][0] / 1e-10
-RYD2EV = constants.physical_constantsants["Rydberg constantsant times hc in eV"][0]
+AU2ANG = constants.physical_constants["atomic unit of length"][0] / 1e-10
+RYD2EV = constants.physical_constants["Rydberg constant times hc in eV"][0]
 EDEPS = 4 * np.pi * 2 * RYD2EV * AU2ANG  # exactly the same as VASP
 
 LOOKUP_TABLE = np.array(
