@@ -1,8 +1,9 @@
-"""Re-implementation of the  Nonrad code with more vectorization."""
+"""Re-implementation of the Nonrad code with more vectorization."""
 
 import numpy as np
 from numba import njit
 from numpy import typing as npt
+from scipy.interpolate import PchipInterpolator
 
 from .constants import AMU2KG, ANGS2M, EV2J, HBAR, HBAR_EV, KB, LOOKUP_TABLE
 
@@ -138,7 +139,6 @@ def get_vibronic_matrix_elements(
             This can be off-set by a constant value depending on the physical process you are studying.
         np.array: The matrix elements for those pairs of states.
     """
-    E, matels = (np.zeros(Nf), np.zeros(Nf))
     E = np.arange(0, Nf, omega_f) - m_init * omega_i
     if m_init == 0:
         matels = (
@@ -152,3 +152,39 @@ def get_vibronic_matrix_elements(
             + np.sqrt(Factor3) * dQ * ovl[m_init, :]
         )
     return E, matels
+
+
+def pchip_eval(
+    x: npt.ArrayLike | float,
+    x_coarse: npt.ArrayLike,
+    y_coarse: npt.ArrayLike,
+    pad_frac: float = 0.2,
+    n_points: int = 5000,
+):
+    """Evaluate a piecewise cubic Hermite interpolant.
+
+    Assuming a function is evenly sampleded on (``x_coarse``, ``y_coarse``),
+    Then we know the final shape of the function has to satisfy match the coarsely sampled data.
+    Thus, we can just interpolate the function on a finer grid and ensure that the interpolated function
+    Integrates to the same value as the sum of the coarsely sampled data.
+
+    Args:
+        x: The x value/values to evaluate the interpolant at.
+        x_coarse: The x values of the coarsely sampled data.
+        y_coarse: The y values of the coarsely sampled data.
+        pad_frac: The fraction of the domain to pad the interpolation by.
+        n_points: The number of points to evaluate the interpolant at.
+
+    Returns:
+        The interpolated values.
+
+    """
+    x_min, x_max = min(x_coarse), max(x_coarse)
+    x_pad = abs(x_max - x_min) * pad_frac
+    interp_domain = np.linspace(x_min - x_pad, x_max + x_pad, n_points)
+    interp_func = PchipInterpolator(x_coarse, y_coarse, extrapolate=False)
+    return (
+        interp_func(x)
+        * np.sum(y_coarse)
+        / np.trapz(np.nan_to_num(interp_func(interp_domain)), x=interp_domain)
+    )
