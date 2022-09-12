@@ -176,7 +176,8 @@ def pchip_eval(
         n_points: The number of points to evaluate the interpolant at.
 
     Returns:
-        The interpolated values.
+        The interpolated values. Note that if ``x`` or any of the elements of ``x`` are outside the domain,
+        then the returned value will be ``np.nan``.
 
     """
     x_min, x_max = min(x_coarse), max(x_coarse)
