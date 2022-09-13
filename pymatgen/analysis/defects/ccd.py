@@ -24,6 +24,7 @@ __copyright__ = "The Materials Project"
 __maintainer__ = "Jimmy Shen"
 __email__ = "jmmshn@gmail.com"
 __date__ = "Mar 15, 2022"
+
 _logger = logging.getLogger(__name__)
 
 HBAR = const.hbar / const.e  # in units of eV.s

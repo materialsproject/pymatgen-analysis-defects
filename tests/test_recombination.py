@@ -3,9 +3,10 @@ import itertools
 import numpy as np
 import pytest
 
-from pymatgen.analysis.defects.nonrad import (
+from pymatgen.analysis.defects.recombination import (
     analytic_overlap_NM,
     boltzmann_filling,
+    get_SRH_coef,
     get_vibronic_matrix_elements,
     pchip_eval,
 )
@@ -49,3 +50,18 @@ def test_pchip_eval():
     int_val = np.trapz(np.nan_to_num(fx), x=xx)
     int_ref = np.sum(y_c)
     pytest.approx(int_val, int_ref)
+
+
+def test_get_SRH_coef():
+    ref_res = [4.64530153e-14, 4.64752885e-14, 4.75265302e-14]
+    res = get_SRH_coef(
+        T=[100, 200, 300],
+        dQ=1.0,
+        dE=1.0,
+        omega_i=0.2,
+        omega_f=0.2,
+        el_phone_me=1,
+        volume=1,
+        g=1,
+    )
+    np.allclose(res, ref_res)

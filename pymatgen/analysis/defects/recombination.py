@@ -1,4 +1,12 @@
-"""Re-implementation of the Nonrad code with more vectorization."""
+"""Recombination algorithms pure function implementations.
+
+The the SRH recombination code is taken from the NonRad code (www.github.com/mturiansky/nonrad)
+"""
+__author__ = "Jimmy Shen"
+__copyright__ = "The Materials Project"
+__maintainer__ = "Jimmy Shen"
+__email__ = "jmmshn@gmail.com"
+__date__ = "Mar 15, 2022"
 
 import itertools
 
@@ -19,9 +27,9 @@ def fact(n: int) -> float:
     """Compute the factorial of n."""
     if n > 20:
         return LOOKUP_TABLE[-1] * np.prod(
-            np.array(list(range(21, n + 1)), dtype=np.longdouble)
+            np.array(list(range(21, n + 1)), dtype=np.double)
         )
-    return np.longdouble(LOOKUP_TABLE[n])
+    return LOOKUP_TABLE[n]
 
 
 @njit(cache=True)
@@ -87,7 +95,6 @@ def analytic_overlap_NM(
                 * 2 ** ((k + l - n2 - n1) / 2)
             )
             Pr3 = (sinfi**k) * (cosfi**l)
-            # f = hermval(rho, [0.]*(k+l) + [1.])
             f = herm(np.float64(rho), k + l)
             Ix = Ix + Pr1 * Pr2 * Pr3 * f
     return Ix
@@ -141,7 +148,7 @@ def get_vibronic_matrix_elements(
             This can be off-set by a constant value depending on the physical process you are studying.
         np.array: The matrix elements for those pairs of states.
     """
-    E = np.arange(0, Nf, omega_f) - m_init * omega_i
+    E = np.arange(0, Nf * omega_f, omega_f) - m_init * omega_i
     if m_init == 0:
         matels = (
             np.sqrt(Factor2 / 2 / omega_i) * ovl[m_init + 1, :]
@@ -203,9 +210,24 @@ def get_SRH_coef(
     volume: float,
     g: int = 1,
     occ_tol: float = 1e-3,
-) -> npt.NDArray:
-    """Compute the SRH recombination Coefficient."""
-    volume *= (1e-8) ** 3
+) -> npt.ArrayLike:
+    """Compute the SRH recombination Coefficient.
+
+    Args:
+        T: The temperature in Kelvin.
+        dQ: The displacement between the initial and final phonon states. In units of amu^{1/2} Angstrom.
+        dE: The energy difference between the initial and final phonon states. In units of eV.
+        omega_i: The initial phonon frequency in eV.
+        omega_f: The final phonon frequency in eV.
+        el_phone_me: The electron-phonon matrix element in units of eV amu^{-1/2} Angstrom^{-1}
+        volume: The volume of the simulation cell in Angstrom^3.
+        g: The degeneracy factor of the final state.
+        occ_tol : Ni is chosen so that (1 - occ_tol) of the total Bose-Einstein occupation is included.
+
+    Returns:
+        Resulting capture coefficient (unscaled) in cm^3 s^{-1}
+    """
+    volume *= (1e-8) ** 3  # Convert to cm^3
     T = np.atleast_1d(T)
     kT = KB * max(T)
     Ni, Nf = (17, 50)
@@ -213,11 +235,13 @@ def get_SRH_coef(
     Ni = max(Ni, tNi)
     tNf = np.ceil((dE + Ni * omega_i) / omega_f).astype(int)
     Nf = max(Nf, tNf)
+    print(Ni, Nf)
+    Ni = Ni - 1
 
-    ovl = np.zeros((Ni, Nf), dtype=np.longdouble)
-    for m, n in itertools.product(range(Ni), range(Nf)):
+    ovl = np.zeros((Ni + 1, Nf), dtype=np.longdouble)
+    for m, n in itertools.product(range(Ni + 1), range(Nf)):
         ovl[m, n] = analytic_overlap_NM(dQ, omega_i, omega_f, m, n)
-
+    return ovl
     weights = boltzmann_filling(omega_i, T, Ni)
     rate = np.zeros_like(T, dtype=np.longdouble)
     for m in range(Ni):
@@ -226,5 +250,4 @@ def get_SRH_coef(
             dE, E, np.abs(np.conj(me) * me), pad_frac=0.2, n_points=5000
         )
         rate += weights[m, :] * interp_me
-
     return 2 * np.pi * g * el_phone_me**2 * volume * rate

@@ -14,16 +14,16 @@ from pymatgen.symmetry.structure import SymmetrizedStructure
 
 from pymatgen.analysis.defects.supercells import get_sc_fromstruct
 
-__author__ = "Jimmy-Xuan Shen"
-__copyright__ = "Copyright 2022, The Materials Project"
-__maintainer__ = "Jimmy-Xuan Shen @jmmshn"
-__date__ = "Mar 15, 2022"
-
 # TODO Possible redesign idea: ``DefectSite`` class defined with a defect object.
 # This makes some of the accounting logic a bit harder since we will probably
 # just have one concrete ``Defect`` class so you can write custom multiplicity functions
 # but it makes the implementation of defect complexes trivial.
 # i.e. each defect will be defined by a structure and a collection of ``DefectSite``s
+
+__author__ = "Jimmy-Xuan Shen"
+__copyright__ = "Copyright 2022, The Materials Project"
+__maintainer__ = "Jimmy-Xuan Shen @jmmshn"
+__date__ = "Mar 15, 2022"
 
 logger = logging.getLogger(__name__)
 
