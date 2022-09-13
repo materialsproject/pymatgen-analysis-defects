@@ -19,9 +19,9 @@ def fact(n: int) -> float:
     """Compute the factorial of n."""
     if n > 20:
         return LOOKUP_TABLE[-1] * np.prod(
-            np.array(list(range(21, n + 1)), dtype=np.double)
+            np.array(list(range(21, n + 1)), dtype=np.longdouble)
         )
-    return LOOKUP_TABLE[n]
+    return np.longdouble(LOOKUP_TABLE[n])
 
 
 @njit(cache=True)
@@ -219,11 +219,12 @@ def get_SRH_coef(
         ovl[m, n] = analytic_overlap_NM(dQ, omega_i, omega_f, m, n)
 
     weights = boltzmann_filling(omega_i, T, Ni)
-    rate = 0
+    rate = np.zeros_like(T, dtype=np.longdouble)
     for m in range(Ni):
         E, me = get_vibronic_matrix_elements(omega_i, omega_f, m, Nf, dQ, ovl)
         interp_me = pchip_eval(
             dE, E, np.abs(np.conj(me) * me), pad_frac=0.2, n_points=5000
         )
-        rate += weights[m] * interp_me
+        rate += weights[m, :] * interp_me
+
     return 2 * np.pi * g * el_phone_me**2 * volume * rate
