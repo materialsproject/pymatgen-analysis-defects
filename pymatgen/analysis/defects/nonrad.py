@@ -1,5 +1,7 @@
 """Re-implementation of the Nonrad code with more vectorization."""
 
+import itertools
+
 import numpy as np
 from numba import njit
 from numpy import typing as npt
@@ -189,3 +191,39 @@ def pchip_eval(
         * np.sum(y_coarse)
         / np.trapz(np.nan_to_num(interp_func(interp_domain)), x=interp_domain)
     )
+
+
+def get_SRH_coef(
+    T: float | npt.ArrayLike,
+    dQ: float,
+    dE: float,
+    omega_i: float,
+    omega_f: float,
+    el_phone_me: float,
+    volume: float,
+    g: int = 1,
+    occ_tol: float = 1e-3,
+) -> npt.NDArray:
+    """Compute the SRH recombination Coefficient."""
+    volume *= (1e-8) ** 3
+    T = np.atleast_1d(T)
+    kT = KB * max(T)
+    Ni, Nf = (17, 50)
+    tNi = np.ceil(-np.max(kT) * np.log(occ_tol) / omega_i).astype(int)
+    Ni = max(Ni, tNi)
+    tNf = np.ceil((dE + Ni * omega_i) / omega_f).astype(int)
+    Nf = max(Nf, tNf)
+
+    ovl = np.zeros((Ni, Nf), dtype=np.longdouble)
+    for m, n in itertools.product(range(Ni), range(Nf)):
+        ovl[m, n] = analytic_overlap_NM(dQ, omega_i, omega_f, m, n)
+
+    weights = boltzmann_filling(omega_i, T, Ni)
+    rate = 0
+    for m in range(Ni):
+        E, me = get_vibronic_matrix_elements(omega_i, omega_f, m, Nf, dQ, ovl)
+        interp_me = pchip_eval(
+            dE, E, np.abs(np.conj(me) * me), pad_frac=0.2, n_points=5000
+        )
+        rate += weights[m] * interp_me
+    return 2 * np.pi * g * el_phone_me**2 * volume * rate

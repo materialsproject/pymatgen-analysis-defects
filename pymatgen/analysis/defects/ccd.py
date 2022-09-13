@@ -237,14 +237,6 @@ class HarmonicDefect(MSONable):
         ediffs = self._get_ediff(output_order="skb")
         return np.multiply(slopes, ediffs)
 
-    def _get_analytic_overlap(
-        self,
-        target_Q: float,
-        target_omega: float,
-        target_n_max: int = 30,
-    ):
-        pass
-
     def _get_ediff(self, output_order="skb") -> npt.NDArray:
         """Compute the eigenvalue difference to the defect band.
 
@@ -258,9 +250,9 @@ class HarmonicDefect(MSONable):
             output_order: The order of the output. Defaults to "skb" (spin, kpoint, band]).
                 You can also use "bks" (band, kpoint, spin).
 
-
         Returns:
             The eigenvalue difference to the defect band in the order specified by output_order.
+
         """
         if self.defect_band_index is None:
             raise ValueError(  # pragma: no cover
