@@ -11,9 +11,11 @@ import numpy.typing as npt
 from monty.json import MSONable
 from pymatgen.electronic_structure.core import Spin
 from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun, Waveder
-from scipy import constants as const
 from scipy.optimize import curve_fit
 
+from pymatgen.analysis.defects.recombination import get_SRH_coef
+
+from .constants import AMU2KG, ANGS2M, EDEPS, EV2J, HBAR_EV, KB
 from .utils import get_localized_state, sort_positive_definite
 
 # Copyright (c) Pymatgen Development Team.
@@ -26,44 +28,6 @@ __email__ = "jmmshn@gmail.com"
 __date__ = "Mar 15, 2022"
 
 _logger = logging.getLogger(__name__)
-
-HBAR = const.hbar / const.e  # in units of eV.s
-EV2J = const.e  # 1 eV in Joules
-AMU2KG = const.physical_constants["atomic mass constant"][0]
-ANGS2M = 1e-10  # angstrom in meters
-KB = const.physical_constants["Boltzmann constant in eV/K"][0]
-
-AU2ANG = const.physical_constants["atomic unit of length"][0] / 1e-10
-RYD2EV = const.physical_constants["Rydberg constant times hc in eV"][0]
-EDEPS = 4 * np.pi * 2 * RYD2EV * AU2ANG  # exactly the same as VASP
-
-LOOKUP_TABLE = np.array(
-    [
-        1,
-        1,
-        2,
-        6,
-        24,
-        120,
-        720,
-        5040,
-        40320,
-        362880,
-        3628800,
-        39916800,
-        479001600,
-        6227020800,
-        87178291200,
-        1307674368000,
-        20922789888000,
-        355687428096000,
-        6402373705728000,
-        121645100408832000,
-        2432902008176640000,
-    ],
-    dtype=np.double,
-)
-factor = ANGS2M**2 * AMU2KG / HBAR / HBAR / EV2J
 
 
 def optical_prefactor(struct):
@@ -85,6 +49,8 @@ class HarmonicDefect(MSONable):
         omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.
         charge: The charge state. This should be the charge of the defect
             simulation that gave rise to the minimum of the parabola.
+        kpt_index: The kpoint index in the simulation that correspond to the band edge.
+        spin_index: The spin index in the simulation that correspond to the band edge.
         distortions: The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
             This object's internal reference for the distoration should always be relaxed structure.
         structures: The list of structures that were used to compute the distortions.
@@ -96,6 +62,8 @@ class HarmonicDefect(MSONable):
 
     omega: float
     charge_state: int
+    kpt_index: int
+    spin_index: int
     distortions: Optional[list[float]] = None
     structures: Optional[list[Structure]] = None
     energies: Optional[list[float]] = None
@@ -108,6 +76,8 @@ class HarmonicDefect(MSONable):
         cls,
         vasp_runs: list[Vasprun],
         charge_state: int,
+        kpt_index: int,
+        spin_index: int | None = None,
         relaxed_index: int | None = None,
         defect_band_index: int | None = None,
         procar: Procar | None = None,
@@ -125,8 +95,13 @@ class HarmonicDefect(MSONable):
         Args:
             vasp_runs: A list of Vasprun objects.
             charge_state: The charge state for the defect.
+            kpt_index: The index of the kpoint that corresponds to the band edge.
+            spin_index: The index of the spin that corresponds to the band edge.
+                If None, we will assume that the band edge is spin-independent and we will use the
+                spin channel with the most localized state.
             relaxed_index: The index of the relaxed structure in the list of structures.
-            defect_band_index: The index of the defect band (0-indexed).
+            defect_band_index: The index of the defect band (0-indexed).  This is found by looking
+                at the inverse participation ratio of the different states.
             procar: A Procar object.  Used to identify the defect band if the defect_band_index is not provided.
             store_bandstructure: Whether to store the bandstructure of the relaxed defect calculation.
                 Defaults to False to save space.
@@ -168,21 +143,26 @@ class HarmonicDefect(MSONable):
         )
 
         if defect_band_index is None and procar is not None:
-            bandstructure = vasp_runs[relaxed_index].get_band_structure()
-            loc_res = get_localized_state(bandstructure=bandstructure, procar=procar)
-            _, (_, defect_band_index) = min(loc_res.items(), key=lambda x: x[1])
-
-        if store_bandstructure:
             get_band_structure_kwargs = get_band_structure_kwargs or {}
-            bs = vasp_runs[relaxed_index].get_band_structure(
+            bandstructure = vasp_runs[relaxed_index].get_band_structure(
                 **get_band_structure_kwargs
             )
+            loc_res = get_localized_state(bandstructure=bandstructure, procar=procar)
+            spin_e, (_, defect_band_index) = min(loc_res.items(), key=lambda x: x[1])
+
+        if spin_index is None:
+            spin_index = 0 if spin_e == Spin.up else 1
+
+        if store_bandstructure:
+            bs = bandstructure
         else:
             bs = None
 
         return cls(
             omega=omega,
             charge_state=charge_state,
+            kpt_index=kpt_index,
+            spin_index=spin_index,
             structures=structures,
             distortions=distortions,
             energies=energies,
@@ -195,7 +175,7 @@ class HarmonicDefect(MSONable):
     @property
     def omega_eV(self) -> float:
         """Get the vibronic frequency of the phonon state in (eV)."""
-        return self.omega * HBAR * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG))
+        return self.omega * HBAR_EV * np.sqrt(EV2J / (ANGS2M**2 * AMU2KG))
 
     def occupation(self, t: npt.ArrayLike | float) -> npt.ArrayLike:
         """Calculate the phonon occupation.
@@ -223,7 +203,8 @@ class HarmonicDefect(MSONable):
             bandstructure: The bandstructure of the relaxed defect calculation.
 
         Returns:
-            npt.NDArray: The electron phonon matrix elements.
+            npt.NDArray: The electron phonon matrix elements from the defect band to all other bands.
+                The indices are: [spin, kpoint, band_i, band_j]
         """
         if self.defect_band_index is None:
             raise ValueError("The ``defect_band_index`` must be already be set.")
@@ -362,6 +343,8 @@ class OpticalHarmonicDefect(HarmonicDefect):
         cls,
         vasp_runs: list[Vasprun],
         charge_state: int,
+        kpt_index: int,
+        spin_index: int | None = None,
         relaxed_index: int | None = None,
         defect_band_index: int | None = None,
         procar: Procar | None = None,
@@ -389,6 +372,68 @@ class OpticalHarmonicDefect(HarmonicDefect):
             shift: The shift to apply to the spectra.
         """
         return self._get_ediff(output_order="bks")
+
+
+@dataclass
+class SRHCapture(MSONable):
+    """Representation of SRH capture event.
+
+    Performs book keeping of initial and final states.
+
+    Args:
+        initial_state: The initial state of the SRH capture event.
+        final_state: The final state of the SRH capture event.
+        dQ: The distortion between the structures in units of amu^{-1/2} Angstrom^{-1}.
+            By convention, the final state should be on the +dQ side of the initial state.
+            This should only matter once we start considering anharmonic defects.
+    """
+
+    initial_state: HarmonicDefect
+    final_state: HarmonicDefect
+    dQ: float
+
+    def get_coeff(
+        self,
+        T: float | npt.ArrayLike,
+        dE: float,
+        wswqs: list[WSWQ],
+        volume: float,
+        g: int = 1,
+        occ_tol: float = 1e-3,
+        n_band_edge: int = 1,
+    ):
+        """Calculate the SRH recombination coefficient."""
+        elph_me_all = self.initial_state.get_elph_me(
+            wswqs
+        )  # indices: [spin, kpoint, band_i, band_j]
+        istate = self.initial_state
+
+        if self.initial_state.charge_state == self.final_state.charge_state + 1:
+            sl_bands = slice(
+                istate.defect_band_index + 1, istate.defect_band_index + 1 + n_band_edge
+            )
+        elif self.initial_state.charge_state == self.final_state.charge_state - 1:
+            sl_bands = slice(
+                istate.defect_band_index - n_band_edge, istate.defect_band_index
+            )
+        else:
+            raise ValueError(
+                "SRH capture event must involve a charge state change of 1."
+            )
+
+        elph_me_band_edge = elph_me_all[istate.spin_index, istate.kpt_index, sl_bands]
+
+        return get_SRH_coef(
+            T,
+            dQ=self.dQ,
+            dE=dE,
+            omega_i=self.initial_state.omega_eV,
+            omega_f=self.final_state.omega_eV,
+            elph_me=np.average(elph_me_band_edge),
+            volume=volume,
+            g=g,
+            occ_tol=occ_tol,
+        )
 
 
 # @dataclass

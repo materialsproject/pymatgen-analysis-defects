@@ -60,7 +60,7 @@ def test_get_SRH_coef():
         dE=1.0,
         omega_i=0.2,
         omega_f=0.2,
-        el_phone_me=1,
+        elph_me=1,
         volume=1,
         g=1,
     )

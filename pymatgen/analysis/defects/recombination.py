@@ -2,11 +2,8 @@
 
 The the SRH recombination code is taken from the NonRad code (www.github.com/mturiansky/nonrad)
 """
-__author__ = "Jimmy Shen"
-__copyright__ = "The Materials Project"
-__maintainer__ = "Jimmy Shen"
-__email__ = "jmmshn@gmail.com"
-__date__ = "Mar 15, 2022"
+
+from __future__ import annotations
 
 import itertools
 
@@ -15,10 +12,16 @@ from numba import njit
 from numpy import typing as npt
 from scipy.interpolate import PchipInterpolator
 
-from .constants import AMU2KG, ANGS2M, EV2J, HBAR, HBAR_EV, KB, LOOKUP_TABLE
+from .constants import AMU2KG, ANGS2M, EV2J, HBAR_EV, HBAR_J, KB, LOOKUP_TABLE
+
+__author__ = "Jimmy Shen"
+__copyright__ = "The Materials Project"
+__maintainer__ = "Jimmy Shen"
+__email__ = "jmmshn@gmail.com"
+__date__ = "Mar 15, 2022"
 
 Factor1 = ANGS2M**2 * AMU2KG / HBAR_EV / HBAR_EV / EV2J
-Factor2 = HBAR / ANGS2M**2 / AMU2KG
+Factor2 = HBAR_J / ANGS2M**2 / AMU2KG
 Factor3 = 1 / HBAR_EV
 
 
@@ -206,7 +209,7 @@ def get_SRH_coef(
     dE: float,
     omega_i: float,
     omega_f: float,
-    el_phone_me: float,
+    elph_me: float,
     volume: float,
     g: int = 1,
     occ_tol: float = 1e-3,
@@ -219,7 +222,7 @@ def get_SRH_coef(
         dE: The energy difference between the initial and final phonon states. In units of eV.
         omega_i: The initial phonon frequency in eV.
         omega_f: The final phonon frequency in eV.
-        el_phone_me: The electron-phonon matrix element in units of eV amu^{-1/2} Angstrom^{-1}
+        elph_me: The electron-phonon matrix element in units of eV amu^{-1/2} Angstrom^{-1}
         volume: The volume of the simulation cell in Angstrom^3.
         g: The degeneracy factor of the final state.
         occ_tol : Ni is chosen so that (1 - occ_tol) of the total Bose-Einstein occupation is included.
@@ -235,13 +238,11 @@ def get_SRH_coef(
     Ni = max(Ni, tNi)
     tNf = np.ceil((dE + Ni * omega_i) / omega_f).astype(int)
     Nf = max(Nf, tNf)
-    print(Ni, Nf)
     Ni = Ni - 1
 
     ovl = np.zeros((Ni + 1, Nf), dtype=np.longdouble)
     for m, n in itertools.product(range(Ni + 1), range(Nf)):
         ovl[m, n] = analytic_overlap_NM(dQ, omega_i, omega_f, m, n)
-    return ovl
     weights = boltzmann_filling(omega_i, T, Ni)
     rate = np.zeros_like(T, dtype=np.longdouble)
     for m in range(Ni):
@@ -250,4 +251,4 @@ def get_SRH_coef(
             dE, E, np.abs(np.conj(me) * me), pad_frac=0.2, n_points=5000
         )
         rate += weights[m, :] * interp_me
-    return 2 * np.pi * g * el_phone_me**2 * volume * rate
+    return 2 * np.pi * g * elph_me**2 * volume * rate

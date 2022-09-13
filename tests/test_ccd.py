@@ -3,7 +3,7 @@ from collections import namedtuple
 import numpy as np
 import pytest
 
-from pymatgen.analysis.defects.ccd import _get_wswq_slope
+from pymatgen.analysis.defects.ccd import _get_wswq_slope, get_dQ
 
 
 def test_HarmonicDefect(v_ga):
@@ -11,7 +11,10 @@ def test_HarmonicDefect(v_ga):
 
     vaspruns = v_ga[(0, -1)]["vaspruns"]
     procar = v_ga[(0, -1)]["procar"]
-    hd0 = HarmonicDefect.from_vaspruns(vaspruns, charge_state=0, procar=procar)
+    hd0 = HarmonicDefect.from_vaspruns(
+        vaspruns, charge_state=0, procar=procar, kpt_index=1
+    )
+    assert hd0.spin_index == 1
     pytest.approx(hd0.distortions[1], 0.0)
     pytest.approx(hd0.omega_eV, 0.032680)
     wswqs = v_ga[(0, -1)]["wswqs"]
@@ -20,7 +23,7 @@ def test_HarmonicDefect(v_ga):
         elph_me = hd0.get_elph_me(wswqs=wswqs)
 
     hd0 = HarmonicDefect.from_vaspruns(
-        vaspruns, charge_state=0, procar=procar, store_bandstructure=True
+        vaspruns, charge_state=0, procar=procar, store_bandstructure=True, kpt_index=1
     )
     elph_me = hd0.get_elph_me(wswqs=wswqs)
     assert np.allclose(elph_me[..., 138], 0.0)  # ediff should be zero for defect band
@@ -76,3 +79,29 @@ def test_wswq_slope():
 
     res = _get_wswq_slope([1.0, 0, -1.0], fake_wswqs)
     np.allclose(res, np.ones((3, 5)) * -1)
+
+
+def test_SRHCapture(v_ga):
+    from pymatgen.analysis.defects.ccd import HarmonicDefect, SRHCapture
+
+    vaspruns = v_ga[(0, -1)]["vaspruns"]
+    procar = v_ga[(0, -1)]["procar"]
+    hd0 = HarmonicDefect.from_vaspruns(
+        vaspruns, charge_state=0, procar=procar, kpt_index=1, store_bandstructure=True
+    )
+
+    vaspruns = v_ga[(-1, 0)]["vaspruns"]
+    procar = v_ga[(-1, 0)]["procar"]
+    hdm1 = HarmonicDefect.from_vaspruns(
+        vaspruns, charge_state=-1, procar=procar, kpt_index=1, store_bandstructure=True
+    )
+    dQ = get_dQ(hd0.structures[hd0.relaxed_index], hdm1.structures[hdm1.relaxed_index])
+    srh_cap = SRHCapture(hd0, hdm1, dQ=dQ)
+
+    c_n = srh_cap.get_coeff(
+        T=[100, 200, 300],
+        dE=1.0,
+        wswqs=v_ga[(0, -1)]["wswqs"],
+        volume=hd0.structures[hd0.relaxed_index].volume,
+    )
+    print(f"Capture rate: {c_n}")

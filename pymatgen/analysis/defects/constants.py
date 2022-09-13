@@ -5,7 +5,7 @@ import numpy as np
 from scipy import constants
 
 HBAR_EV = constants.physical_constants["Planck constant over 2 pi in eV s"][0]
-HBAR = constants.physical_constants["Planck constant over 2 pi"][0]
+HBAR_J = constants.physical_constants["Planck constant over 2 pi"][0]
 EV2J = constants.e  # 1 eV in Joules
 AMU2KG = constants.physical_constants["atomic mass constant"][0]
 ANGS2M = 1e-10  # angstrom in meters
