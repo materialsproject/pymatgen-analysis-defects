@@ -5,12 +5,18 @@ from collections import namedtuple
 from typing import List, Tuple
 
 import numpy as np
-from dscribe.descriptors import SOAP
 from monty.json import MSONable
 from numpy.typing import ArrayLike, NDArray
 from pymatgen.core.structure import Structure
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+
+# Optional imports
+try:
+    from dscribe.descriptors import SOAP
+except ImportError:
+    SOAP = None
+
 
 __author__ = "Jimmy Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -34,6 +40,10 @@ class DefectSiteFinder(MSONable):
             symprec (float): Symmetry tolerance parameter for SpacegroupAnalyzer
             angle_tolerance (float): Angle tolerance parameter for SpacegroupAnalyzer
         """
+        if SOAP is None:
+            raise ImportError(
+                "dscribe is required to use DefectSiteFinder. Install with ``pip install dscribe``."
+            )
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
 
