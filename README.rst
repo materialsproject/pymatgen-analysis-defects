@@ -36,14 +36,14 @@ The formation energy diagram is a powerful tool for understanding the
 thermodynamics of defects. This package provides a simple interface for
 calculating the formation energy diagram from first-principles results.
 This package handles the energy accounting of the chemical species for the chemical
-potential calcultions, which determines the y-offset of the formation energy.
+potential calculations, which determines the y-offset of the formation energy.
 This package also performs finite-size corrections for the formation energy which is required
 when studying charged defects in periodic simulation cells.
 
 Defect Position
 +++++++++++++++
 
-Identification of the defect postiions in a simulation cell after atomic relaxation
+Identification of the defect positions in a simulation cell after atomic relaxation
 is not trivial since the many atoms can collectively shift in response to the creation of
 the defect.
 Yet the exact location of the defect is required for the calculation of finite-size corrections
@@ -56,7 +56,7 @@ of how the defect was created.
 Capture coefficients
 ++++++++++++++++++++
 
-Coming Soon ... Radiative and Non-radative capture coefficients at defect centers using semi-classical
+Coming Soon ... Radiative and Non-radiative capture coefficients at defect centers using semi-classical
 approaches.
 
 
