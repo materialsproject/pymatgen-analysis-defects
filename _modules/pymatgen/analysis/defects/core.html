@@ -192,7 +192,7 @@
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../tutorials.html">Tutorials</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../../tutorials/1-quickstart.html">Computing Radiative Capture Rates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tutorials/1-quickstart.html">Quick Start</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/materialsproject/pymatgen-analysis-defects">GitHub Repo</a></li>
@@ -247,16 +247,16 @@
 
 <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.supercells</span> <span class="kn">import</span> <span class="n">get_sc_fromstruct</span>
 
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Jimmy-Xuan Shen&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2022, The Materials Project&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Jimmy-Xuan Shen @jmmshn&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;Mar 15, 2022&quot;</span>
+
 <span class="c1"># TODO Possible redesign idea: ``DefectSite`` class defined with a defect object.</span>
 <span class="c1"># This makes some of the accounting logic a bit harder since we will probably</span>
 <span class="c1"># just have one concrete ``Defect`` class so you can write custom multiplicity functions</span>
 <span class="c1"># but it makes the implementation of defect complexes trivial.</span>
 <span class="c1"># i.e. each defect will be defined by a structure and a collection of ``DefectSite``s</span>
-
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Jimmy-Xuan Shen&quot;</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2022, The Materials Project&quot;</span>
-<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Jimmy-Xuan Shen @jmmshn&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;Mar 15, 2022&quot;</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
