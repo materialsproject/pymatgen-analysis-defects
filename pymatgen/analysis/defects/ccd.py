@@ -76,8 +76,8 @@ class HarmonicDefect(MSONable):
     def from_vaspruns(
         cls,
         vasp_runs: list[Vasprun],
-        charge_state: int,
         kpt_index: int,
+        charge_state: int,
         spin_index: int | None = None,
         relaxed_index: int | None = None,
         defect_band_index: int | None = None,
@@ -174,15 +174,27 @@ class HarmonicDefect(MSONable):
         )
 
     @classmethod
-    def with_directories(cls, directories: list[Path], **kwargs) -> HarmonicDefect:
+    def with_directories(
+        cls,
+        directories: list[Path],
+        kpt_index: int,
+        charge_state: int | None = None,
+        spin_index: int | None = None,
+        relaxed_index: int | None = None,
+        defect_band_index: int | None = None,
+        procar: Procar | None = None,
+        store_bandstructure: bool = False,
+        get_band_structure_kwargs: dict | None = None,
+        **kwargs,
+    ) -> HarmonicDefect:
         """Create a HarmonicDefectPhonon from a list of directories.
 
         The directories should have the POTCAR so they can be parsed to obtain the charge state.
 
-
         Args:
             directories: A list of directories.
             kpt_index: The index of the kpoint that corresponds to the band edge.
+            charge_state: The charge state for the defect. If None, we will try to parse the POTCAR.
             spin_index: The index of the spin that corresponds to the band edge.
                 If None, we will assume that the band edge is spin-independent and we will use the
                 spin channel with the most localized state.
@@ -198,13 +210,24 @@ class HarmonicDefect(MSONable):
         Returns:
             A HarmonicDefect object.
         """
-        vaspruns = [
-            Vasprun(d / "vasprun.xml", parse_potcar_file=True) for d in directories
-        ]
-        charge_state = vaspruns[0].final_structure.charge
+        vaspruns = [Vasprun(d / "vasprun.xml") for d in directories]
+        if charge_state is None:
+            charge_state = vaspruns[0].final_structure.charge
         if any(v.final_structure.charge != charge_state for v in vaspruns):
             raise ValueError("All vaspruns must have the same charge state.")
-        return cls.from_vaspruns(vaspruns=vaspruns, charge_state=charge_state, **kwargs)
+
+        return cls.from_vaspruns(
+            vaspruns=vaspruns,
+            kpt_index=kpt_index,
+            charge_state=charge_state,
+            spin_index=spin_index,
+            relaxed_index=relaxed_index,
+            defect_band_index=defect_band_index,
+            procar=procar,
+            store_bandstructure=store_bandstructure,
+            get_band_structure_kwargs=get_band_structure_kwargs,
+            **kwargs,
+        )
 
     @property
     def omega_eV(self) -> float:
@@ -375,17 +398,9 @@ class OpticalHarmonicDefect(HarmonicDefect):
     @classmethod
     def from_vaspruns(
         cls,
-        vasp_runs: list[Vasprun],
-        charge_state: int,
-        kpt_index: int,
-        spin_index: int | None = None,
-        relaxed_index: int | None = None,
-        defect_band_index: int | None = None,
-        procar: Procar | None = None,
-        store_bandstructure: bool = False,
-        get_band_structure_kwargs: dict | None = None,
+        *args,
         **kwargs,
-    ) -> HarmonicDefect:
+    ) -> HarmonicDefect:  # noqa
         """Not implemented."""
         raise NotImplementedError("Use from_vaspruns_and_waveder instead.")
 
