@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 from ctypes import Structure
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional, Tuple
 
 import numpy as np
@@ -171,6 +172,39 @@ class HarmonicDefect(MSONable):
             relaxed_bandstructure=bs,
             **kwargs,
         )
+
+    @classmethod
+    def with_directories(cls, directories: list[Path], **kwargs) -> HarmonicDefect:
+        """Create a HarmonicDefectPhonon from a list of directories.
+
+        The directories should have the POTCAR so they can be parsed to obtain the charge state.
+
+
+        Args:
+            directories: A list of directories.
+            kpt_index: The index of the kpoint that corresponds to the band edge.
+            spin_index: The index of the spin that corresponds to the band edge.
+                If None, we will assume that the band edge is spin-independent and we will use the
+                spin channel with the most localized state.
+            relaxed_index: The index of the relaxed structure in the list of structures.
+            defect_band_index: The index of the defect band (0-indexed).  This is found by looking
+                at the inverse participation ratio of the different states.
+            procar: A Procar object.  Used to identify the defect band if the defect_band_index is not provided.
+            store_bandstructure: Whether to store the bandstructure of the relaxed defect calculation.
+                Defaults to False to save space.
+            get_band_structure_kwargs: Keyword arguments to pass to the ``get_band_structure`` method.
+            **kwargs: Additional keyword arguments to pass to the constructor.
+
+        Returns:
+            A HarmonicDefect object.
+        """
+        vaspruns = [
+            Vasprun(d / "vasprun.xml", parse_potcar_file=True) for d in directories
+        ]
+        charge_state = vaspruns[0].final_structure.charge
+        if any(v.final_structure.charge != charge_state for v in vaspruns):
+            raise ValueError("All vaspruns must have the same charge state.")
+        return cls.from_vaspruns(vaspruns=vaspruns, charge_state=charge_state, **kwargs)
 
     @property
     def omega_eV(self) -> float:

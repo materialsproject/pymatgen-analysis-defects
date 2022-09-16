@@ -128,22 +128,24 @@ def boltzmann_filling(
     return np.multiply(w, 1 / Z)
 
 
-def get_vibronic_matrix_elements(
+def get_mQn(
+    dQ: float,
     omega_i: float,
     omega_f: float,
     m_init: int,
     Nf: int,
-    dQ: float,
     ovl: npt.NDArray,
 ):
-    """Get the vibronic matrix element values.
+    """Get the matrix element values for the position operator.
+
+        <m_i|Q|n_f>
 
     Args:
+        dQ: The displacement between the initial and final phonon states.
         omega_i: The initial phonon frequency in eV.
         omega_f: The final phonon frequency in eV.
         m_init: The initial phonon quantum number.
         Nf: The number of final phonon states.
-        dQ: The displacement between the initial and final phonon states.
         ovl: The overlap between the initial and final phonon states.
 
     Returns:
@@ -162,6 +164,43 @@ def get_vibronic_matrix_elements(
             np.sqrt((m_init + 1) * Factor2 / 2 / omega_i) * ovl[m_init + 1, :]
             + np.sqrt(m_init * Factor2 / 2 / omega_i) * ovl[m_init - 1, :]
             + np.sqrt(Factor3) * dQ * ovl[m_init, :]
+        )
+    return E, matels
+
+
+def get_mn(
+    dQ: float,
+    omega_i: float,
+    omega_f: float,
+    m_init: int,
+    en_final: float,
+    en_pad: float = 0.5,
+):
+    """Get the matrix element values for the position operator.
+
+        <m_i|n_f>
+    Starting in state m_init and ending and ending on final states between
+    ``en_final - en_pad`` and ``en_final + en_pad`` reference to the bottom of the final state parabola.
+
+    Args:
+        omega_i: The initial phonon frequency in eV.
+        omega_f: The final phonon frequency in eV.
+        m_init: The initial phonon quantum number.
+        en_final: The final energy in eV.
+        en_pad: The energy window to consider in eV.
+
+    Returns:
+        np.array: The energy different different between energy states.
+            This can be off-set by a constant value depending on the physical process you are studying.
+        np.array: The matrix elements for those pairs of states.
+    """
+    n_min = max(int((en_final - en_pad) // omega_f), 0)
+    n_max = int((en_final + en_pad) // omega_f) + 2
+    E = np.arange(n_min, n_max) * omega_f
+    matels = np.zeros_like(E)
+    for n in range(n_min, n_max):
+        matels[n - n_min] = analytic_overlap_NM(
+            dQ=dQ, omega1=omega_i, omega2=omega_f, n1=m_init, n2=n
         )
     return E, matels
 
@@ -246,9 +285,67 @@ def get_SRH_coef(
     weights = boltzmann_filling(omega_i, T, Ni)
     rate = np.zeros_like(T, dtype=np.longdouble)
     for m in range(Ni):
-        E, me = get_vibronic_matrix_elements(omega_i, omega_f, m, Nf, dQ, ovl)
+        E, me = get_mQn(
+            dQ=dQ, omega_i=omega_i, omega_f=omega_f, m_init=m, Nf=Nf, ovl=ovl
+        )
         interp_me = pchip_eval(
             dE, E, np.abs(np.conj(me) * me), pad_frac=0.2, n_points=5000
         )
         rate += weights[m, :] * interp_me
     return 2 * np.pi * g * elph_me**2 * volume * rate
+
+
+def get_Rad_coef(
+    T: float | npt.ArrayLike,
+    dQ: float,
+    dE: float,
+    omega_i: float,
+    omega_f: float,
+    omega_photon: float,
+    dipole_me: float,
+    volume: float,
+    g: int = 1,
+    occ_tol: float = 1e-3,
+) -> npt.ArrayLike:
+    """Compute the Radiative recombination Coefficient.
+
+    We assumed that the transition takes each initial state to some final state.
+    We still use the interpolation method in place of numerical smearing, although
+    that might change if we start to consider broader photon frequencies.
+
+    Args:
+        T: The temperature in Kelvin.
+        dQ: The displacement between the initial and final phonon states. In units of amu^{1/2} Angstrom.
+        dE: The energy difference between the initial and final phonon states. In units of eV.
+        omega_i: The initial phonon frequency in eV.
+        omega_f: The final phonon frequency in eV.
+        omega_photon: The photon frequency in eV.
+        dipole_me: The dipole matrix element in units of eV amu^{-1/2} Angstrom^{-1}
+        volume: The volume of the simulation cell in Angstrom^3.
+        g: The degeneracy factor of the final state.
+        occ_tol : Ni is chosen so that (1 - occ_tol) of the total Bose-Einstein weight is included.
+
+    Returns:
+        Resulting capture coefficient (unscaled) in cm^3 s^{-1}
+    """
+    volume *= (1e-8) ** 3  # Convert to cm^3
+    T = np.atleast_1d(T)
+    kT = KB * max(T)
+    Ni = max(17, int(np.ceil(-np.max(kT) * np.log(occ_tol) / omega_i)))
+    weights = boltzmann_filling(omega_i, T, Ni)
+    rate = np.zeros_like(T, dtype=np.longdouble)
+
+    for m in range(Ni):
+        final_energy = (m * omega_i) - omega_photon
+        E, me = get_mn(
+            dQ=dQ,
+            omega_i=omega_i,
+            omega_f=omega_f,
+            m_init=m,
+            en_final=final_energy,
+        )
+
+        interp_me = pchip_eval(final_energy, E, me * me, pad_frac=0.2, n_points=5000)
+        rate += weights[m, :] * interp_me
+
+    return 2 * np.pi * g * dipole_me**2 * volume * rate
