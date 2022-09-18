@@ -1,9 +1,12 @@
 from collections import namedtuple
 
+import numba
 import numpy as np
 import pytest
 
 from pymatgen.analysis.defects.ccd import _get_wswq_slope, get_dQ
+
+numba.config.DISABLE_JIT = True
 
 
 def test_HarmonicDefect(v_ga):
