@@ -30,43 +30,43 @@ def test_HarmonicDefect(v_ga):
     assert np.linalg.norm(elph_me[..., 139]) > 0
 
 
-def test_OpticalHarmonicDefect(v_ga):
-    from pymatgen.analysis.defects.ccd import OpticalHarmonicDefect
+# def test_OpticalHarmonicDefect(v_ga):
+#     from pymatgen.analysis.defects.ccd import OpticalHarmonicDefect
 
-    vaspruns = v_ga[(0, -1)]["vaspruns"]
-    procar = v_ga[(0, -1)]["procar"]
-    wavder = v_ga[(0, -1)]["waveder"]
-    hd0 = OpticalHarmonicDefect.from_vaspruns_and_waveder(
-        vaspruns,
-        waveder=wavder,
-        charge_state=0,
-        procar=procar,
-    )
+#     vaspruns = v_ga[(0, -1)]["vaspruns"]
+#     procar = v_ga[(0, -1)]["procar"]
+#     wavder = v_ga[(0, -1)]["waveder"]
+#     hd0 = OpticalHarmonicDefect.from_vaspruns_and_waveder(
+#         vaspruns,
+#         waveder=wavder,
+#         charge_state=0,
+#         procar=procar,
+#     )
 
-    # the non-optical part should behave the same
-    wswqs = v_ga[(0, -1)]["wswqs"]
-    elph_me = hd0.get_elph_me(wswqs=wswqs)
-    assert np.allclose(elph_me[..., 138], 0.0)  # ediff should be zero for defect band
-    assert np.linalg.norm(elph_me[..., 139]) > 0
+#     # the non-optical part should behave the same
+#     wswqs = v_ga[(0, -1)]["wswqs"]
+#     elph_me = hd0.get_elph_me(wswqs=wswqs)
+#     assert np.allclose(elph_me[..., 138], 0.0)  # ediff should be zero for defect band
+#     assert np.linalg.norm(elph_me[..., 139]) > 0
 
-    # # check that waveder is symmetric
-    def is_symm(waveder, i, j):
-        assert (
-            np.max(
-                np.abs(
-                    np.abs(waveder.cder_data[i, j, :, :])
-                    - np.abs(waveder.cder_data[j, i, :, :])
-                )
-            )
-            <= 1e-10
-        )
+#     # # check that waveder is symmetric
+#     def is_symm(waveder, i, j):
+#         assert (
+#             np.max(
+#                 np.abs(
+#                     np.abs(waveder.cder_data[i, j, :, :])
+#                     - np.abs(waveder.cder_data[j, i, :, :])
+#                 )
+#             )
+#             <= 1e-10
+#         )
 
-    is_symm(hd0.waveder, 123, 42)
-    is_symm(hd0.waveder, 138, 69)
+#     is_symm(hd0.waveder, 123, 42)
+#     is_symm(hd0.waveder, 138, 69)
 
-    nbands_spectra, *_ = hd0._get_spectra().shape
-    nbands_dipole, *_ = hd0._get_defect_dipoles().shape
-    assert nbands_spectra == nbands_dipole
+#     nbands_spectra, *_ = hd0._get_spectra().shape
+#     nbands_dipole, *_ = hd0._get_defect_dipoles().shape
+#     assert nbands_spectra == nbands_dipole
 
 
 def test_wswq_slope():
@@ -96,12 +96,31 @@ def test_SRHCapture(v_ga):
         vaspruns, charge_state=-1, procar=procar, kpt_index=1, store_bandstructure=True
     )
     dQ = get_dQ(hd0.structures[hd0.relaxed_index], hdm1.structures[hdm1.relaxed_index])
-    srh_cap = SRHCapture(hd0, hdm1, dQ=dQ)
+    srh_cap = SRHCapture(hd0, hdm1, dQ=dQ, wswqs=v_ga[(0, -1)]["wswqs"])
 
     c_n = srh_cap.get_coeff(
         T=[100, 200, 300],
         dE=1.0,
-        wswqs=v_ga[(0, -1)]["wswqs"],
         volume=hd0.structures[hd0.relaxed_index].volume,
     )
-    print(f"Capture rate: {c_n}")
+    ref_results = [1.89187260e-34, 6.21019152e-33, 3.51501688e-31]
+    assert np.allclose(c_n, ref_results)
+
+
+def test_SRHCapture(test_dir):
+    from pymatgen.analysis.defects.ccd import SRHCapture
+
+    DEF_DIR = test_dir / "v_Ga"
+    srh = SRHCapture.from_directories(
+        initial_dirs=[DEF_DIR / "ccd_0_-1" / str(i) for i in [0, 1, 2]],
+        final_dirs=[DEF_DIR / "ccd_-1_0" / str(i) for i in [0, 1, 2]],
+        wswq_dir=DEF_DIR / "ccd_0_-1" / "wswqs",
+        kpt_index=1,
+        store_bandstructure=True,
+    )
+    c_n = srh.get_coeff(
+        T=[100, 200, 300],
+        dE=1.0,
+    )
+    ref_results = [1.89187260e-34, 6.21019152e-33, 3.51501688e-31]
+    assert np.allclose(c_n, ref_results)

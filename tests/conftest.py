@@ -99,13 +99,13 @@ def chgcar_fe3o4(test_dir):
 def v_ga(test_dir):
     res = dict()
     for q1, q2 in [(0, -1), (-1, 0)]:
-        ccd_dir = test_dir / f"V_Ga/ccd_{q1}_{q2}"
-        vaspruns = [Vasprun(ccd_dir / f"vasprun.xml.{i}.gz") for i in [0, 1, 2]]
-        wswqs = [WSWQ.from_file(ccd_dir / f"WSWQ.{i}.gz") for i in [0, 1, 2]]
+        ccd_dir = test_dir / f"v_Ga/ccd_{q1}_{q2}"
+        vaspruns = [Vasprun(ccd_dir / f"{i}/vasprun.xml") for i in [0, 1, 2]]
+        wswqs = [WSWQ.from_file(ccd_dir / "wswqs" / f"WSWQ.{i}.gz") for i in [0, 1, 2]]
         res[(q1, q2)] = {
             "vaspruns": vaspruns,
-            "procar": Procar(ccd_dir / "PROCAR.1.gz"),
-            "waveder": Waveder(ccd_dir / "WAVEDER.1"),
+            "procar": Procar(ccd_dir / "1/PROCAR"),
+            "waveder": Waveder(ccd_dir / "1/WAVEDER"),
             "wswqs": wswqs,
         }
     return res

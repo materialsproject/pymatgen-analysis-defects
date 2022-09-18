@@ -39,7 +39,7 @@ docs = [
 ]
 
 strict = [
-  'pymatgen@git+https://github.com/jmmshn/pymatgen@get_elphon',
+  "pymatgen@git+https://github.com/jmmshn/pymatgen@patch-vasprun-chg",
   "dscribe==1.2.1",
   "scikit-image==0.19.3",
 ]

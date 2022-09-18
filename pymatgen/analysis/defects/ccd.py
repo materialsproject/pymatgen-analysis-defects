@@ -11,13 +11,13 @@ import numpy as np
 import numpy.typing as npt
 from monty.json import MSONable
 from pymatgen.electronic_structure.core import Spin
-from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun, Waveder
+from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun
 from scipy.optimize import curve_fit
 
 from pymatgen.analysis.defects.recombination import get_SRH_coef
 
 from .constants import AMU2KG, ANGS2M, EDEPS, EV2J, HBAR_EV, KB
-from .utils import get_localized_state, sort_positive_definite
+from .utils import get_localized_state, get_zfile, sort_positive_definite
 
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
@@ -72,10 +72,38 @@ class HarmonicDefect(MSONable):
     relaxed_index: Optional[int] = None
     relaxed_bandstructure: Optional[BandStructure] = None
 
+    def __repr__(self) -> str:
+        """String representation of the harmonic defect."""
+        return (
+            f"HarmonicDefect("
+            f"omega={self.omega:.3f} eV, "
+            f"charge={self.charge_state}, "
+            f"relaxed_index={self.relaxed_index}, "
+            f"kpt={self.kpt_index}, "
+            f"spin={self.spin_index}, "
+            f"defect_band_index={self.defect_band_index}"
+            ")"
+        )
+
+    @property
+    def spin(self) -> Spin:
+        """The spin of the defect."""
+        if self.spin_index == 0:
+            return Spin.up
+        elif self.spin_index == 1:
+            return Spin.down
+        else:
+            raise ValueError(f"Invalid spin index: {self.spin_index}")
+
+    @property
+    def relaxed_structure(self) -> Structure:
+        """The relaxed structure."""
+        return self.structures[self.relaxed_index]
+
     @classmethod
     def from_vaspruns(
         cls,
-        vasp_runs: list[Vasprun],
+        vaspruns: list[Vasprun],
         kpt_index: int,
         charge_state: int,
         spin_index: int | None = None,
@@ -86,7 +114,7 @@ class HarmonicDefect(MSONable):
         get_band_structure_kwargs: dict | None = None,
         **kwargs,
     ) -> HarmonicDefect:
-        """Create a HarmonicDefectPhonon from a list of vasprun.
+        """Create a HarmonicDefect from a list of vasprun.
 
         .. note::
             The constructor check that you have the vaspruns sorted by the distortions
@@ -94,7 +122,7 @@ class HarmonicDefect(MSONable):
             ensure that the vaspruns are properly ordered.
 
         Args:
-            vasp_runs: A list of Vasprun objects.
+            vaspruns: A list of Vasprun objects.
             charge_state: The charge state for the defect.
             kpt_index: The index of the kpoint that corresponds to the band edge.
             spin_index: The index of the spin that corresponds to the band edge.
@@ -118,7 +146,7 @@ class HarmonicDefect(MSONable):
             struct = vasprun.final_structure
             return (energy, struct)
 
-        energy_struct = list(map(_parse_vasprun, vasp_runs))
+        energy_struct = list(map(_parse_vasprun, vaspruns))
         unsorted_e = [e for e, _ in energy_struct]
 
         if relaxed_index is None:
@@ -143,9 +171,13 @@ class HarmonicDefect(MSONable):
             E0=energies[relaxed_index],
         )
 
-        if defect_band_index is None and procar is not None:
+        if defect_band_index is None:
+            if procar is None:
+                raise ValueError(
+                    "If defect_band_index is not provided, you must provide a Procar object."
+                )
             get_band_structure_kwargs = get_band_structure_kwargs or {}
-            bandstructure = vasp_runs[relaxed_index].get_band_structure(
+            bandstructure = vaspruns[relaxed_index].get_band_structure(
                 **get_band_structure_kwargs
             )
             loc_res = get_localized_state(bandstructure=bandstructure, procar=procar)
@@ -174,7 +206,7 @@ class HarmonicDefect(MSONable):
         )
 
     @classmethod
-    def with_directories(
+    def from_directories(
         cls,
         directories: list[Path],
         kpt_index: int,
@@ -182,14 +214,11 @@ class HarmonicDefect(MSONable):
         spin_index: int | None = None,
         relaxed_index: int | None = None,
         defect_band_index: int | None = None,
-        procar: Procar | None = None,
         store_bandstructure: bool = False,
         get_band_structure_kwargs: dict | None = None,
         **kwargs,
     ) -> HarmonicDefect:
-        """Create a HarmonicDefectPhonon from a list of directories.
-
-        The directories should have the POTCAR so they can be parsed to obtain the charge state.
+        """Create a HarmonicDefect from a list of directories.
 
         Args:
             directories: A list of directories.
@@ -201,7 +230,6 @@ class HarmonicDefect(MSONable):
             relaxed_index: The index of the relaxed structure in the list of structures.
             defect_band_index: The index of the defect band (0-indexed).  This is found by looking
                 at the inverse participation ratio of the different states.
-            procar: A Procar object.  Used to identify the defect band if the defect_band_index is not provided.
             store_bandstructure: Whether to store the bandstructure of the relaxed defect calculation.
                 Defaults to False to save space.
             get_band_structure_kwargs: Keyword arguments to pass to the ``get_band_structure`` method.
@@ -211,8 +239,18 @@ class HarmonicDefect(MSONable):
             A HarmonicDefect object.
         """
         vaspruns = [Vasprun(d / "vasprun.xml") for d in directories]
+        min_idx = np.argmin([v.final_energy for v in vaspruns])
+        min_dir = directories[min_idx]
+        procar_file = get_zfile(min_dir, "PROCAR")
+        procar = Procar(procar_file) if procar_file else None
+
         if charge_state is None:
+            if vaspruns[0].final_structure._charge is None:
+                raise ValueError(
+                    "Charge state is not provided and cannot be parsed from the POTCAR."
+                )
             charge_state = vaspruns[0].final_structure.charge
+
         if any(v.final_structure.charge != charge_state for v in vaspruns):
             raise ValueError("All vaspruns must have the same charge state.")
 
@@ -323,104 +361,104 @@ class HarmonicDefect(MSONable):
             )  # pragma: no cover
 
 
-@dataclass
-class OpticalHarmonicDefect(HarmonicDefect):
-    """Representation of Harmonic defect with optical (dipole) matrix elements.
+# @dataclass
+# class OpticalHarmonicDefect(HarmonicDefect):
+#     """Representation of Harmonic defect with optical (dipole) matrix elements.
 
-    The dipole matrix elements are computed by VASP and reported in the WAVEDER file.
+#     The dipole matrix elements are computed by VASP and reported in the WAVEDER file.
 
-    Attributes:
-        omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.
-        charge: The charge state. This should be the charge of the defect
-            simulation that gave rise to the minimum of the parabola.
-        distortions: The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
-            This object's internal reference for the distoration should always be relaxed structure.
-        structures: The list of structures that were used to compute the distortions.
-        energies: The potential energy surface obtained by distorting the structure.A
-        defect_band_index: The index of the defect band.
-        relaxed_indices: The indices of the relaxed defect structure.
-        relaxed_bandstructure: The band structure of the relaxed defect calculation.
-        waveder: The WAVEDER object containing the dipole matrix elements.
-    """
+#     Attributes:
+#         omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.
+#         charge: The charge state. This should be the charge of the defect
+#             simulation that gave rise to the minimum of the parabola.
+#         distortions: The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
+#             This object's internal reference for the distoration should always be relaxed structure.
+#         structures: The list of structures that were used to compute the distortions.
+#         energies: The potential energy surface obtained by distorting the structure.A
+#         defect_band_index: The index of the defect band.
+#         relaxed_indices: The indices of the relaxed defect structure.
+#         relaxed_bandstructure: The band structure of the relaxed defect calculation.
+#         waveder: The WAVEDER object containing the dipole matrix elements.
+#     """
 
-    # TODO: use kw_only once we drop Python < 3.10
-    waveder: Waveder | None = None
+#     # TODO: use kw_only once we drop Python < 3.10
+#     waveder: Waveder | None = None
 
-    @classmethod
-    def from_vaspruns_and_waveder(
-        cls,
-        vasp_runs: list[Vasprun],
-        waveder: Waveder,
-        charge_state: int,
-        relaxed_index: int | None = None,
-        defect_band_index: int | None = None,
-        procar: Procar | None = None,
-        get_band_structure_kwargs: dict | None = None,
-        **kwargs,
-    ) -> OpticalHarmonicDefect:
-        """Create a HarmonicDefectPhonon from a list of vasprun.
+#     @classmethod
+#     def from_vaspruns_and_waveder(
+#         cls,
+#         vaspruns: list[Vasprun],
+#         waveder: Waveder,
+#         charge_state: int,
+#         relaxed_index: int | None = None,
+#         defect_band_index: int | None = None,
+#         procar: Procar | None = None,
+#         get_band_structure_kwargs: dict | None = None,
+#         **kwargs,
+#     ) -> OpticalHarmonicDefect:
+#         """Create a HarmonicDefectPhonon from a list of vasprun.
 
-        .. note::
-            The constructor check that you have the vaspruns sorted by the distortions
-            but does not order it for you.
+#         .. note::
+#             The constructor check that you have the vaspruns sorted by the distortions
+#             but does not order it for you.
 
-        Args:
-            vasp_runs: A list of Vasprun objects.
-            charge_state: The charge state for the defect.
-            relaxed_index: The index of the relaxed structure in the list of structures.
-            defect_band_index: The index of the defect band (0-indexed).
-            procar: The Procar object for the defect calculation.
+#         Args:
+#             vaspruns: A list of Vasprun objects.
+#             charge_state: The charge state for the defect.
+#             relaxed_index: The index of the relaxed structure in the list of structures.
+#             defect_band_index: The index of the defect band (0-indexed).
+#             procar: The Procar object for the defect calculation.
 
-        Returns:
-            An OpticalHarmonicDefect object.
-        """
-        obj = super().from_vaspruns(
-            vasp_runs,
-            charge_state,
-            relaxed_index,
-            waveder=waveder,
-            defect_band_index=defect_band_index,
-            procar=procar,
-            store_bandstructure=True,
-            get_band_structure_kwargs=get_band_structure_kwargs,
-            **kwargs,
-        )
-        if obj.defect_band_index is None:
-            raise ValueError(  # pragma: no cover
-                "You must provide `defect_band_index` or PROCAR to help indetify the `defect_band_index`."
-            )
-        if obj.relaxed_bandstructure is None:
-            raise ValueError(  # pragma: no cover
-                "The bandstructure was not populated properly check the constructor of the parent."
-            )
-        return obj
+#         Returns:
+#             An OpticalHarmonicDefect object.
+#         """
+#         obj = super().from_vaspruns(
+#             vaspruns,
+#             charge_state,
+#             relaxed_index,
+#             waveder=waveder,
+#             defect_band_index=defect_band_index,
+#             procar=procar,
+#             store_bandstructure=True,
+#             get_band_structure_kwargs=get_band_structure_kwargs,
+#             **kwargs,
+#         )
+#         if obj.defect_band_index is None:
+#             raise ValueError(  # pragma: no cover
+#                 "You must provide `defect_band_index` or PROCAR to help indetify the `defect_band_index`."
+#             )
+#         if obj.relaxed_bandstructure is None:
+#             raise ValueError(  # pragma: no cover
+#                 "The bandstructure was not populated properly check the constructor of the parent."
+#             )
+#         return obj
 
-    @classmethod
-    def from_vaspruns(
-        cls,
-        *args,
-        **kwargs,
-    ) -> HarmonicDefect:  # noqa
-        """Not implemented."""
-        raise NotImplementedError("Use from_vaspruns_and_waveder instead.")
+#     @classmethod
+#     def from_vaspruns(
+#         cls,
+#         *args,
+#         **kwargs,
+#     ) -> HarmonicDefect:  # noqa
+#         """Not implemented."""
+#         raise NotImplementedError("Use from_vaspruns_and_waveder instead.")
 
-    def _get_defect_dipoles(self) -> npt.NDArray:
-        """Get the dipole matrix elements for the defect.
+#     def _get_defect_dipoles(self) -> npt.NDArray:
+#         """Get the dipole matrix elements for the defect.
 
-        Returns:
-            The dipole matrix elements for the defect. The indices are:
-                ``[band index, k-point index, spin index, cart. direction]``.
-        """
-        return self.waveder.cder_data[self.defect_band_index, ...]
+#         Returns:
+#             The dipole matrix elements for the defect. The indices are:
+#                 ``[band index, k-point index, spin index, cart. direction]``.
+#         """
+#         return self.waveder.cder_data[self.defect_band_index, ...]
 
-    def _get_spectra(self) -> npt.NDArray:
-        """Get the spectra for the defect.
+#     def _get_spectra(self) -> npt.NDArray:
+#         """Get the spectra for the defect.
 
-        Args:
-            bandstructure: The band structure of the relaxed defect calculation.
-            shift: The shift to apply to the spectra.
-        """
-        return self._get_ediff(output_order="bks")
+#         Args:
+#             bandstructure: The band structure of the relaxed defect calculation.
+#             shift: The shift to apply to the spectra.
+#         """
+#         return self._get_ediff(output_order="bks")
 
 
 @dataclass
@@ -440,20 +478,22 @@ class SRHCapture(MSONable):
     initial_state: HarmonicDefect
     final_state: HarmonicDefect
     dQ: float
+    wswqs: list[WSWQ]
 
     def get_coeff(
         self,
         T: float | npt.ArrayLike,
         dE: float,
-        wswqs: list[WSWQ],
-        volume: float,
+        volume: float | None = None,
         g: int = 1,
         occ_tol: float = 1e-3,
         n_band_edge: int = 1,
     ):
         """Calculate the SRH recombination coefficient."""
+        if volume is None:
+            volume = self.initial_state.relaxed_structure.volume
         elph_me_all = self.initial_state.get_elph_me(
-            wswqs
+            self.wswqs
         )  # indices: [spin, kpoint, band_i, band_j]
         istate = self.initial_state
 
@@ -483,6 +523,67 @@ class SRHCapture(MSONable):
             g=g,
             occ_tol=occ_tol,
         )
+
+    @classmethod
+    def from_directories(
+        cls,
+        initial_dirs: list[Path],
+        final_dirs: list[Path],
+        wswq_dir: Path,
+        kpt_index: int,
+        initial_charge_state: int | None = None,
+        final_charge_state: int | None = None,
+        spin_index: int | None = None,
+        defect_band_index: int | None = None,
+        store_bandstructure: bool = False,
+        get_band_structure_kwargs: dict | None = None,
+        **kwargs,
+    ) -> SRHCapture:
+        """Create a SRHCapture from a list of directories.
+
+        Args:
+            initial_dirs: A list of directories for the initial state.
+            final_dirs: A list of directories for the final state.
+            dQ: The distortion between the structures in units of amu^{-1/2} Angstrom^{-1}.
+                By convention, the final state should be on the +dQ side of the initial state.
+                This should only matter once we start considering anharmonic defects.
+            charge_state: The charge state for the defect.
+            relaxed_index: The index of the relaxed structure in the list of structures.
+            defect_band_index: The index of the defect band (0-indexed).
+
+        Returns:
+            A SRHCapture object.
+        """
+        initial_defect = HarmonicDefect.from_directories(
+            directories=initial_dirs,
+            kpt_index=kpt_index,
+            charge_state=initial_charge_state,
+            spin_index=spin_index,
+            relaxed_index=None,
+            defect_band_index=defect_band_index,
+            store_bandstructure=store_bandstructure,
+            get_band_structure_kwargs=get_band_structure_kwargs,
+            **kwargs,
+        )
+
+        # the final state does not need the additional
+        # information about the electronic states
+        final_defect = HarmonicDefect.from_directories(
+            directories=final_dirs,
+            kpt_index=kpt_index,
+            charge_state=final_charge_state,
+            spin_index=spin_index,
+            relaxed_index=None,
+            defect_band_index=None,
+            store_bandstructure=None,
+            get_band_structure_kwargs=None,
+            **kwargs,
+        )
+        wswq_files = [f for f in wswq_dir.glob("WSWQ*")]
+        wswq_files.sort(key=lambda x: int(x.stem.split(".")[1]))
+        wswqs = [WSWQ.from_file(f) for f in wswq_files]
+        dQ = get_dQ(initial_defect.relaxed_structure, final_defect.relaxed_structure)
+        return cls(initial_defect, final_defect, dQ=dQ, wswqs=wswqs)
 
 
 # @dataclass
