@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Simulation of non-radiative capture" href="3-nonradiative-capture.html" /><link rel="prev" title="Tutorials" href="../tutorials.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Index" href="../genindex.html" /><link rel="prev" title="Quick Start" href="1-quickstart.html" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
-        <title>Quick Start - pymatgen-analysis-defects</title>
+        <title>Simulation of non-radiative capture - pymatgen-analysis-defects</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -193,8 +193,8 @@
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../tutorials.html">Tutorials</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Quick Start</a></li>
-<li class="toctree-l2"><a class="reference internal" href="3-nonradiative-capture.html">Simulation of non-radiative capture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1-quickstart.html">Quick Start</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Simulation of non-radiative capture</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/materialsproject/pymatgen-analysis-defects">GitHub Repo</a></li>
@@ -488,193 +488,79 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<section id="Quick-Start">
-<h1>Quick Start<a class="headerlink" href="#Quick-Start" title="Permalink to this heading">#</a></h1>
-<section id="Installation">
-<h2>Installation<a class="headerlink" href="#Installation" title="Permalink to this heading">#</a></h2>
-<p>The package can be installed from PyPI using <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pymatgen-analysis-defects</span></code>.</p>
-<p>Once installed, the different modules can be imported via the <code class="docutils literal notranslate"><span class="pre">pymatgen.analysis.defects</span></code> namespace.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.analysis.defects</span> <span class="kn">import</span> <span class="n">core</span><span class="p">,</span> <span class="n">ccd</span><span class="p">,</span> <span class="n">finder</span>
-</pre></div>
-</div>
-<p>To ensure that the namespace is installed properly run</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.core</span> <span class="kn">import</span> <span class="vm">__file__</span>
-</pre></div>
-</div>
-</div>
-<p>and look at the <code class="docutils literal notranslate"><span class="pre">__file__</span></code> variable to make sure that it is accessing the code from <code class="docutils literal notranslate"><span class="pre">pymatgen-analysis-defect</span></code> and not <code class="docutils literal notranslate"><span class="pre">pymatgen</span></code>.</p>
-</section>
-<section id="Definition-of-a-defect">
-<h2>Definition of a defect<a class="headerlink" href="#Definition-of-a-defect" title="Permalink to this heading">#</a></h2>
-<p>Our code defines defects using a combination of bulk structure and sites. Since the bulk primitive structure is, in principle, unique up to arbitrary translations, equivalence of defects can be now easily checked using <code class="docutils literal notranslate"><span class="pre">StructureMatcher</span></code>.</p>
-<p>Below we show how you can create a basic substitutional defect from a <code class="docutils literal notranslate"><span class="pre">pymatgen.core.Structure</span></code> object by replacing one of the Ga atoms in GaN with Mg.</p>
-<p>Note that we create a MgGa defect by creating a PeriodicSite Oject <code class="docutils literal notranslate"><span class="pre">mg_ga</span></code> with the data of the first Ga site but</p>
+<section id="Simulation-of-non-radiative-capture">
+<h1>Simulation of non-radiative capture<a class="headerlink" href="#Simulation-of-non-radiative-capture" title="Permalink to this heading">#</a></h1>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-
-<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.core</span> <span class="kn">import</span> <span class="n">Substitution</span>
-<span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">PeriodicSite</span><span class="p">,</span> <span class="n">Species</span><span class="p">,</span> <span class="n">Structure</span>
-
-<span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../tests/test_files&quot;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.ccd</span> <span class="kn">import</span> <span class="n">HarmonicDefect</span><span class="p">,</span> <span class="n">SRHCapture</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 </pre></div>
 </div>
 </div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../tests/test_files/v_Ga/&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="Read-a-single-Harmonic-Defect">
+<h2>Read a single Harmonic Defect<a class="headerlink" href="#Read-a-single-Harmonic-Defect" title="Permalink to this heading">#</a></h2>
+<p>We can parse an sorted list of directories with <code class="docutils literal notranslate"><span class="pre">HarmonicDefect.from_directories</span></code>. This will look into each directory for a <code class="docutils literal notranslate"><span class="pre">vasprun.xml</span></code> file from which the structures and energies will be extracted.</p>
+<p>The relax structure is automatically determined by the energies.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gan_struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;GaN.vasp&quot;</span><span class="p">)</span>
-<span class="c1"># make a substitution site</span>
-<span class="n">ga_site</span> <span class="o">=</span> <span class="n">gan_struct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">mg_site</span> <span class="o">=</span> <span class="n">PeriodicSite</span><span class="p">(</span>
-    <span class="n">species</span><span class="o">=</span><span class="n">Species</span><span class="p">(</span><span class="s2">&quot;Mg&quot;</span><span class="p">),</span> <span class="n">coords</span><span class="o">=</span><span class="n">ga_site</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="n">gan_struct</span><span class="o">.</span><span class="n">lattice</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dirs01</span> <span class="o">=</span> <span class="p">[</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]]</span>
+<span class="n">hd0</span> <span class="o">=</span> <span class="n">HarmonicDefect</span><span class="o">.</span><span class="n">from_directories</span><span class="p">(</span>
+    <span class="n">directories</span><span class="o">=</span><span class="n">dirs01</span><span class="p">,</span>
+    <span class="n">kpt_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">store_bandstructure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="c1"># instantiate the defect object</span>
-<span class="n">mg_ga</span> <span class="o">=</span> <span class="n">Substitution</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">gan_struct</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">mg_site</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">mg_ga</span><span class="p">)</span>
+<span class="n">hd0</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Mg subsitituted on the Ga site at at site #0
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mg_ga</span><span class="o">.</span><span class="n">defect_structure</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Structure Summary
-Lattice
-    abc : 3.2162901334217344 3.2162901334217344 5.239962
- angles : 90.0 90.0 120.00000274450079
- volume : 46.9428220153705
-      A : 1.608145 -2.785389 0.0
-      B : 1.608145 2.785389 0.0
-      C : 0.0 0.0 5.239962
-    pbc : True True True
-PeriodicSite: Mg2+ (1.6081, -0.9285, 2.6154) [0.6667, 0.3333, 0.4991]
-PeriodicSite: Ga3+ (1.6081, 0.9285, 5.2354) [0.3333, 0.6667, 0.9991]
-PeriodicSite: N3- (1.6081, -0.9285, 4.5896) [0.6667, 0.3333, 0.8759]
-PeriodicSite: N3- (1.6081, 0.9285, 1.9696) [0.3333, 0.6667, 0.3759]
-</pre></div></div>
-</div>
-</section>
-<section id="Instantiating-FormationEnergyDiagram">
-<h2>Instantiating <code class="docutils literal notranslate"><span class="pre">FormationEnergyDiagram</span></code><a class="headerlink" href="#Instantiating-FormationEnergyDiagram" title="Permalink to this heading">#</a></h2>
-<p>The object reposible for analysing the formation energy is described by the following fields.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">FormationEnergyDiagram</span><span class="p">(</span>
-    <span class="n">bulk_entry</span><span class="p">:</span> <span class="s1">&#39;ComputedStructureEntry&#39;</span><span class="p">,</span>
-    <span class="n">defect_entries</span><span class="p">:</span> <span class="s1">&#39;List[DefectEntry]&#39;</span><span class="p">,</span>
-    <span class="n">pd_entries</span><span class="p">:</span> <span class="s1">&#39;list[ComputedEntry]&#39;</span><span class="p">,</span>
-    <span class="n">vbm</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">,</span>
-    <span class="n">band_gap</span><span class="p">:</span> <span class="s1">&#39;Optional[float]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">inc_inf_values</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-<p>Using a convenience constructor <code class="docutils literal notranslate"><span class="pre">with_directories</span></code> you can just feed in dictionary of {<code class="docutils literal notranslate"><span class="pre">str</span></code>: <code class="docutils literal notranslate"><span class="pre">Path</span></code>} pointing to the directories where the supercell calculations are stored. The keys, other than <code class="docutils literal notranslate"><span class="pre">bulk</span></code> will be the charge states of the calculations. As long as the <code class="docutils literal notranslate"><span class="pre">vasprun.xml</span></code> and <code class="docutils literal notranslate"><span class="pre">LOCPOT</span></code> files are in the directories the <code class="docutils literal notranslate"><span class="pre">FormaitonEnergyDiagram</span></code> object can be constructed.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
-
-<span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="kn">import</span> <span class="n">loadfn</span>
-<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.thermo</span> <span class="kn">import</span> <span class="n">FormationEnergyDiagram</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">Vasprun</span>
-
-<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
-
-<span class="n">sc_dir</span> <span class="o">=</span> <span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;Mg_Ga&quot;</span>
-<span class="c1"># ents = MPRester().get_entries_in_chemsys(&quot;Mg-Ga-N&quot;) # Query from MPRester</span>
-<span class="n">ents</span> <span class="o">=</span> <span class="n">loadfn</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;Ga_Mg_N.json&quot;</span><span class="p">)</span>  <span class="c1"># Load from local</span>
-<span class="n">fed</span> <span class="o">=</span> <span class="n">FormationEnergyDiagram</span><span class="o">.</span><span class="n">with_directories</span><span class="p">(</span>
-    <span class="n">directory_map</span><span class="o">=</span><span class="p">{</span>
-        <span class="s2">&quot;bulk&quot;</span><span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;bulk_sc&quot;</span><span class="p">,</span>
-        <span class="mi">0</span><span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;q=0&quot;</span><span class="p">,</span>
-        <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;q=-1&quot;</span><span class="p">,</span>
-        <span class="mi">1</span><span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;q=1&quot;</span><span class="p">,</span>
-    <span class="p">},</span>
-    <span class="n">defect</span><span class="o">=</span><span class="n">mg_ga</span><span class="p">,</span>
-    <span class="n">pd_entries</span><span class="o">=</span><span class="n">ents</span><span class="p">,</span>
-    <span class="n">dielectric</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/shen9/repos/mp/pymatgen/pymatgen/analysis/phase_diagram.py:26: TqdmExperimentalWarning: Using `tqdm.autonotebook.tqdm` in notebook mode. Use `tqdm.tqdm` instead to force console mode (e.g. in jupyter console)
-  from tqdm.autonotebook import tqdm
+/Users/shen9/repos/mp/pymatgen/pymatgen/io/vasp/inputs.py:1822: UnknownPotcarWarning: POTCAR with symbol Ga_d has metadata that does not match                          any VASP POTCAR known to pymatgen. The data in this                          POTCAR is known to match the following functionals:                          [&#39;unvie_PBE_52&#39;, &#39;PBE_54&#39;, &#39;PBE_52&#39;]
+  warnings.warn(
+/Users/shen9/repos/mp/pymatgen/pymatgen/io/vasp/inputs.py:1822: UnknownPotcarWarning: POTCAR with symbol N has metadata that does not match                          any VASP POTCAR known to pymatgen. The data in this                          POTCAR is known to match the following functionals:                          [&#39;unvie_PBE_52&#39;, &#39;PBE_54&#39;, &#39;PBE_52&#39;]
+  warnings.warn(
 </pre></div></div>
-</div>
-</section>
-<section id="Getting-the-formation-energy-diagram">
-<h2>Getting the formation energy diagram<a class="headerlink" href="#Getting-the-formation-energy-diagram" title="Permalink to this heading">#</a></h2>
-<p>The chemical potential limits can be access using:</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fed</span><span class="o">.</span><span class="n">chempot_limits</span>
-</pre></div>
-</div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[{Element Mg: -1.7332014012500068,
-  Element Ga: -1.6746337375000024,
-  Element N: 0.0},
- {Element Mg: -0.6167789095833243,
-  Element Ga: 7.105427357601002e-15,
-  Element N: -1.6746337374999953}]
+HarmonicDefect(omega=0.505 eV, charge=0.0, relaxed_index=1, kpt=1, spin=1, defect_band_index=138)
 </pre></div></div>
 </div>
-<p>If you have <code class="docutils literal notranslate"><span class="pre">crystal_toolkit</span></code> and the its jupyter lab extensions installed you can view the chemical potential diagram by importing <code class="docutils literal notranslate"><span class="pre">crystal_toolkit</span></code> and running a cell with the the <code class="docutils literal notranslate"><span class="pre">chempot_diagram</span></code> on the last line.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">crystal_toolkit</span>
-<span class="n">fed</span><span class="o">.</span><span class="n">chempot_diagram</span>
-</pre></div>
+<p>The potential energy surface of the defect in a particular charge state is given by:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{1}{2} \omega^2 Q^2\]</div>
 </div>
-<p>Note that it is different from the hosted the material project because the elemental phases are set to zero energy.</p>
-<p><img alt="250214ac6d1841f0990190e52b6a5f33" class="no-scaled-link" src="https://github.com/materialsproject/pymatgen-analysis-defects/blob/main/docs/source/_static/img/mg_gan_chempot.png?raw=true" style="width: 600px;" /></p>
-<p>Now we can plot the formation energy diagram by calculating the <em>Fermi level</em> and <em>formation energy</em> at the different charge state transitions.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-
-<span class="n">ts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fed</span><span class="o">.</span><span class="n">get_transitions</span><span class="p">(</span><span class="n">fed</span><span class="o">.</span><span class="n">chempot_limits</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x_max</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ts</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ts</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;-o&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Fermi Level (eV)&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Formation Energy(eV)&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">hd0</span><span class="o">.</span><span class="n">distortions</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hd0</span><span class="o">.</span><span class="n">energies</span><span class="p">)</span> <span class="o">-</span> <span class="n">hd0</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="n">hd0</span><span class="o">.</span><span class="n">relaxed_index</span><span class="p">])</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="n">yy</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">hd0</span><span class="o">.</span><span class="n">omega</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">xx</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span><span class="n">yy</span><span class="o">*</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Q [amu$^{1/2}$Å]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Energy [meV]&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -683,14 +569,116 @@ PeriodicSite: N3- (1.6081, 0.9285, 1.9696) [0.3333, 0.6667, 0.3759]
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Text(0, 0.5, &#39;Formation Energy(eV)&#39;)
+Text(0, 0.5, &#39;Energy [meV]&#39;)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_1-quickstart_13_1.png" src="../_images/tutorials_1-quickstart_13_1.png" />
+<img alt="../_images/tutorials_3-nonradiative-capture_6_1.png" src="../_images/tutorials_3-nonradiative-capture_6_1.png" />
+</div>
+</div>
+<p>The band index is automatically determined by the inverse participation ratio.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The spin channel (</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">spin</span><span class="si">}</span><span class="s2">) is also automaticalliy determined by the IPR.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The spin channel (-1) is also automaticalliy determined by the IPR.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bs</span> <span class="o">=</span> <span class="n">hd0</span><span class="o">.</span><span class="n">relaxed_bandstructure</span>
+<span class="n">eigs</span> <span class="o">=</span> <span class="n">bs</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="n">hd0</span><span class="o">.</span><span class="n">spin</span><span class="p">][:,</span> <span class="n">hd0</span><span class="o">.</span><span class="n">kpt_index</span><span class="p">]</span>
+<span class="n">eigs_ref_efermi</span> <span class="o">=</span> <span class="n">eigs</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hlines</span><span class="p">([</span><span class="n">eigs_ref_efermi</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">eigs_ref_efermi</span><span class="p">[</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band_index</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">efermi</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span><span class="n">bs</span><span class="o">.</span><span class="n">efermi</span><span class="o">+</span><span class="mf">2.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">([]);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Energy Level Spin:</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">spin</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0, 0.5, &#39;Energy Level Spin:-1&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_3-nonradiative-capture_9_1.png" src="../_images/tutorials_3-nonradiative-capture_9_1.png" />
+</div>
+</div>
+<p>From the eigenvalue file:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>#   nband        eig (+1)        eig (-1)   occ (+1)   occ (-1)
+    138          4.281429        4.983887   0.999759   0.000000
+    139          4.341242        5.752503   0.963967   0.000000  &lt;- Defect band
+    140          6.269717        6.356752   0.000000   0.000000
+    141          8.441992        8.536628   0.000000   0.000000
+</pre></div>
+</div>
+<p>Read the information required for SRH recombination from directories.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">srh</span> <span class="o">=</span> <span class="n">SRHCapture</span><span class="o">.</span><span class="n">from_directories</span><span class="p">(</span>
+    <span class="n">initial_dirs</span><span class="o">=</span><span class="p">[</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]],</span>
+    <span class="n">final_dirs</span><span class="o">=</span><span class="p">[</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_-1_0&quot;</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]],</span>
+    <span class="n">wswq_dir</span> <span class="o">=</span> <span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="s2">&quot;wswqs&quot;</span><span class="p">,</span>
+    <span class="n">kpt_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">store_bandstructure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">srh</span><span class="o">.</span><span class="n">get_coeff</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">cc</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&lt;matplotlib.lines.Line2D at 0x299a3ce80&gt;]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_3-nonradiative-capture_14_1.png" src="../_images/tutorials_3-nonradiative-capture_14_1.png" />
 </div>
 </div>
 </section>
@@ -701,23 +689,23 @@ Text(0, 0.5, &#39;Formation Energy(eV)&#39;)
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="3-nonradiative-capture.html">
+          <a class="next-page" href="../genindex.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Simulation of non-radiative capture</div>
+                <div class="title">Index</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../tutorials.html">
+          <a class="prev-page" href="1-quickstart.html">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Tutorials</div>
+                <div class="title">Quick Start</div>
                 
               </div>
             </a>
@@ -752,11 +740,8 @@ Text(0, 0.5, &#39;Formation Energy(eV)&#39;)
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Quick Start</a><ul>
-<li><a class="reference internal" href="#Installation">Installation</a></li>
-<li><a class="reference internal" href="#Definition-of-a-defect">Definition of a defect</a></li>
-<li><a class="reference internal" href="#Instantiating-FormationEnergyDiagram">Instantiating <code class="docutils literal notranslate"><span class="pre">FormationEnergyDiagram</span></code></a></li>
-<li><a class="reference internal" href="#Getting-the-formation-energy-diagram">Getting the formation energy diagram</a></li>
+<li><a class="reference internal" href="#">Simulation of non-radiative capture</a><ul>
+<li><a class="reference internal" href="#Read-a-single-Harmonic-Defect">Read a single Harmonic Defect</a></li>
 </ul>
 </li>
 </ul>
