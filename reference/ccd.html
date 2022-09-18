@@ -234,28 +234,41 @@
           <section id="module-pymatgen.analysis.defects.ccd">
 <span id="pymatgen-analysis-defects-ccd"></span><h1>pymatgen.analysis.defects.ccd<a class="headerlink" href="#module-pymatgen.analysis.defects.ccd" title="Permalink to this heading">#</a></h1>
 <p>Configuration-coordinate diagram analysis.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.optical_prefactor">
+<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.ccd.</span></span><span class="sig-name descname"><span class="pre">optical_prefactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">struct</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#optical_prefactor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.optical_prefactor" title="Permalink to this definition">#</a></dt>
+<dd><p>Prefactor for optical transition rate calculations.</p>
+</dd></dl>
+
 <dl class="py class">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.ccd.</span></span><span class="sig-name descname"><span class="pre">ConfigurationCoordinateDiagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">charge_gs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge_es</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q_gs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q_es</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energies_gs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energies_es</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#ConfigurationCoordinateDiagram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.ccd.</span></span><span class="sig-name descname"><span class="pre">HarmonicDefect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">omega</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpt_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distortions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structures</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defect_band_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relaxed_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relaxed_bandstructure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#HarmonicDefect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
-<p>A class representing a configuration coordinate diagram.</p>
-<dl class="simple">
-<dt>Based on the NONRAD code:</dt><dd><ol class="upperalpha simple" start="13">
-<li><ol class="upperalpha simple" start="5">
-<li><p>Turiansky et al.: Comput. Phys. Commun. 267, 108056 (2021).</p></li>
-</ol>
-</li>
-</ol>
+<p>A class representing the a harmonic defect vibronic state.</p>
+<p>The vibronic part of a defect is often catured by a simple harmonic oscillator.
+This class store a representation of the SHO as well as some additional information for book-keeping purposes.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.omega">
+<span class="sig-name descname"><span class="pre">omega</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.omega" title="Permalink to this definition">#</a></dt>
+<dd><p>The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
-<p>Since configuration coordinate diagrams always represent some kind of a process
-in a defect. We will call one state <cite>gs</cite> for ground state and another state <cite>es</cite>
-for excited state.  The ground state is always lower in energy than the excited
-state.</p>
+</dd></dl>
+
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.charge_gs">
-<span class="sig-name descname"><span class="pre">charge_gs</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.charge_gs" title="Permalink to this definition">#</a></dt>
-<dd><p>The charge of the ground state.</p>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.charge">
+<span class="sig-name descname"><span class="pre">charge</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.charge" title="Permalink to this definition">#</a></dt>
+<dd><p>The charge state. This should be the charge of the defect
+simulation that gave rise to the minimum of the parabola.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.kpt_index">
+<span class="sig-name descname"><span class="pre">kpt_index</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.kpt_index" title="Permalink to this definition">#</a></dt>
+<dd><p>The kpoint index in the simulation that correspond to the band edge.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
@@ -264,9 +277,9 @@ state.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.charge_es">
-<span class="sig-name descname"><span class="pre">charge_es</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.charge_es" title="Permalink to this definition">#</a></dt>
-<dd><p>The charge of the excited state.</p>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.spin_index">
+<span class="sig-name descname"><span class="pre">spin_index</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.spin_index" title="Permalink to this definition">#</a></dt>
+<dd><p>The spin index in the simulation that correspond to the band edge.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
@@ -275,113 +288,260 @@ state.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.dQ">
-<span class="sig-name descname"><span class="pre">dQ</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.dQ" title="Permalink to this definition">#</a></dt>
-<dd><p>The configurational difference between the relaxed structures of the
-ground state and the excited state.</p>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.distortions">
+<span class="sig-name descname"><span class="pre">distortions</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.distortions" title="Permalink to this definition">#</a></dt>
+<dd><p>The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
+This object’s internal reference for the distoration should always be relaxed structure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-odd"><p>Optional[list[float]]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.dE">
-<span class="sig-name descname"><span class="pre">dE</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.dE" title="Permalink to this definition">#</a></dt>
-<dd><p>The energy difference between the ground state and the
-excited state.</p>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.structures">
+<span class="sig-name descname"><span class="pre">structures</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.structures" title="Permalink to this definition">#</a></dt>
+<dd><p>The list of structures that were used to compute the distortions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
+<dd class="field-odd"><p>Optional[list[_ctypes.Structure]]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.Q_gs">
-<span class="sig-name descname"><span class="pre">Q_gs</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.Q_gs" title="Permalink to this definition">#</a></dt>
-<dd><p>The list of the configurational coordinates of the
-ground state.</p>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.energies">
+<span class="sig-name descname"><span class="pre">energies</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.energies" title="Permalink to this definition">#</a></dt>
+<dd><p>The potential energy surface obtained by distorting the structure.A</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ArrayLike</p>
+<dd class="field-odd"><p>Optional[list[float]]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.Q_es">
-<span class="sig-name descname"><span class="pre">Q_es</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.Q_es" title="Permalink to this definition">#</a></dt>
-<dd><p>The list of the configurational coordinates of the
-excited state.</p>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.defect_band_index">
+<span class="sig-name descname"><span class="pre">defect_band_index</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.defect_band_index" title="Permalink to this definition">#</a></dt>
+<dd><p>The index of the defect band.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ArrayLike</p>
+<dd class="field-odd"><p>Optional[int]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.energies_gs">
-<span class="sig-name descname"><span class="pre">energies_gs</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.energies_gs" title="Permalink to this definition">#</a></dt>
-<dd><p>The list of the energies of the ground state.</p>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.relaxed_indices">
+<span class="sig-name descname"><span class="pre">relaxed_indices</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.relaxed_indices" title="Permalink to this definition">#</a></dt>
+<dd><p>The indices of the relaxed defect structure.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.relaxed_bandstructure">
+<span class="sig-name descname"><span class="pre">relaxed_bandstructure</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.relaxed_bandstructure" title="Permalink to this definition">#</a></dt>
+<dd><p>The band structure of the relaxed defect calculation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ArrayLike</p>
+<dd class="field-odd"><p>Optional[pymatgen.electronic_structure.bandstructure.BandStructure]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.energies_es">
-<span class="sig-name descname"><span class="pre">energies_es</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.energies_es" title="Permalink to this definition">#</a></dt>
-<dd><p>The list of the energies of the excited state.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.spin">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">spin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Spin</span></em><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.spin" title="Permalink to this definition">#</a></dt>
+<dd><p>The spin of the defect.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ArrayLike</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Spin</span></code></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.omega_gs">
-<span class="sig-name descname"><span class="pre">omega_gs</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.omega_gs" title="Permalink to this definition">#</a></dt>
-<dd><p>The frequency of the harmonic oscillator of the ground state.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.relaxed_structure">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">relaxed_structure</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Structure</span></em><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.relaxed_structure" title="Permalink to this definition">#</a></dt>
+<dd><p>The relaxed structure.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.omega_es">
-<span class="sig-name descname"><span class="pre">omega_es</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.omega_es" title="Permalink to this definition">#</a></dt>
-<dd><p>The frequency of the harmonic oscillator of the excited state.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.fit_gs">
-<span class="sig-name descname"><span class="pre">fit_gs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#ConfigurationCoordinateDiagram.fit_gs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.fit_gs" title="Permalink to this definition">#</a></dt>
-<dd><p>Fit the ground state energy to a parabola.</p>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.from_vaspruns">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_vaspruns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vaspruns</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpt_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relaxed_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defect_band_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_bandstructure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_band_structure_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#HarmonicDefect.from_vaspruns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.from_vaspruns" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a HarmonicDefect from a list of vasprun.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The constructor check that you have the vaspruns sorted by the distortions
+but does not perform the sorting for you.  This serves as a safety check to
+ensure that the vaspruns are properly ordered.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vaspruns</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Vasprun</span></code>]) – A list of Vasprun objects.</p></li>
+<li><p><strong>charge_state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – The charge state for the defect.</p></li>
+<li><p><strong>kpt_index</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – The index of the kpoint that corresponds to the band edge.</p></li>
+<li><p><strong>spin_index</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The index of the spin that corresponds to the band edge.
+If None, we will assume that the band edge is spin-independent and we will use the
+spin channel with the most localized state.</p></li>
+<li><p><strong>relaxed_index</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The index of the relaxed structure in the list of structures.</p></li>
+<li><p><strong>defect_band_index</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The index of the defect band (0-indexed).  This is found by looking
+at the inverse participation ratio of the different states.</p></li>
+<li><p><strong>procar</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Procar</span></code>]) – A Procar object.  Used to identify the defect band if the defect_band_index is not provided.</p></li>
+<li><p><strong>store_bandstructure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to store the bandstructure of the relaxed defect calculation.
+Defaults to False to save space.</p></li>
+<li><p><strong>get_band_structure_kwargs</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – Keyword arguments to pass to the <code class="docutils literal notranslate"><span class="pre">get_band_structure</span></code> method.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments to pass to the constructor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pymatgen.analysis.defects.ccd.HarmonicDefect" title="pymatgen.analysis.defects.ccd.HarmonicDefect"><code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonicDefect</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A HarmonicDefect object.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.fit_es">
-<span class="sig-name descname"><span class="pre">fit_es</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Q</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#ConfigurationCoordinateDiagram.fit_es"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.fit_es" title="Permalink to this definition">#</a></dt>
-<dd><p>Fit the excited state energy to a parabola.</p>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.from_directories">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_directories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directories</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpt_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relaxed_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defect_band_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_bandstructure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_band_structure_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#HarmonicDefect.from_directories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.from_directories" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a HarmonicDefect from a list of directories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directories</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – A list of directories.</p></li>
+<li><p><strong>kpt_index</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – The index of the kpoint that corresponds to the band edge.</p></li>
+<li><p><strong>charge_state</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The charge state for the defect. If None, we will try to parse the POTCAR.</p></li>
+<li><p><strong>spin_index</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The index of the spin that corresponds to the band edge.
+If None, we will assume that the band edge is spin-independent and we will use the
+spin channel with the most localized state.</p></li>
+<li><p><strong>relaxed_index</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The index of the relaxed structure in the list of structures.</p></li>
+<li><p><strong>defect_band_index</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The index of the defect band (0-indexed).  This is found by looking
+at the inverse participation ratio of the different states.</p></li>
+<li><p><strong>store_bandstructure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to store the bandstructure of the relaxed defect calculation.
+Defaults to False to save space.</p></li>
+<li><p><strong>get_band_structure_kwargs</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – Keyword arguments to pass to the <code class="docutils literal notranslate"><span class="pre">get_band_structure</span></code> method.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments to pass to the constructor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pymatgen.analysis.defects.ccd.HarmonicDefect" title="pymatgen.analysis.defects.ccd.HarmonicDefect"><code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonicDefect</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A HarmonicDefect object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.omega_eV">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">omega_eV</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.omega_eV" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the vibronic frequency of the phonon state in (eV).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#ConfigurationCoordinateDiagram.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.ConfigurationCoordinateDiagram.plot" title="Permalink to this definition">#</a></dt>
-<dd><p>Plot the configuration coordinate diagram.</p>
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.occupation">
+<span class="sig-name descname"><span class="pre">occupation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#HarmonicDefect.occupation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.occupation" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate the phonon occupation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>t</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">_NestedSequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_NestedSequence</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>]]]) – The temperature in Kelvin.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">_NestedSequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">_SupportsArray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code>]], <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_NestedSequence</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.HarmonicDefect.get_elph_me">
+<span class="sig-name descname"><span class="pre">get_elph_me</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wswqs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#HarmonicDefect.get_elph_me"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.HarmonicDefect.get_elph_me" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate the electron phonon matrix elements.</p>
+<p>Combine the data from the WSWQs to calculate the electron phonon matrix elements.
+The matrix elements are calculated by combining the finite difference from the matrix overlaps.</p>
+<p>d(&lt;W|S|W(Q)&gt;) / dQ</p>
+<p>And the eignvalue difference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wswqs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">WSWQ</span></code>]) – A list of WSWQ objects, assuming that they match the order of the distortions.</p></li>
+<li><p><strong>bandstructure</strong> – The bandstructure of the relaxed defect calculation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The electron phonon matrix elements from the defect band to all other bands.</dt><dd><p>The indices are: [spin, kpoint, band_i, band_j]</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>npt.NDArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.SRHCapture">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.ccd.</span></span><span class="sig-name descname"><span class="pre">SRHCapture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wswqs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#SRHCapture"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.SRHCapture" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
+<p>Representation of SRH capture event.</p>
+<p>Performs book keeping of initial and final states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initial_state</strong> (<a class="reference internal" href="#pymatgen.analysis.defects.ccd.HarmonicDefect" title="pymatgen.analysis.defects.ccd.HarmonicDefect"><code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonicDefect</span></code></a>) – The initial state of the SRH capture event.</p></li>
+<li><p><strong>final_state</strong> (<a class="reference internal" href="#pymatgen.analysis.defects.ccd.HarmonicDefect" title="pymatgen.analysis.defects.ccd.HarmonicDefect"><code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonicDefect</span></code></a>) – The final state of the SRH capture event.</p></li>
+<li><p><strong>dQ</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The distortion between the structures in units of amu^{-1/2} Angstrom^{-1}.
+By convention, the final state should be on the +dQ side of the initial state.
+This should only matter once we start considering anharmonic defects.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.SRHCapture.get_coeff">
+<span class="sig-name descname"><span class="pre">get_coeff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">occ_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_band_edge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#SRHCapture.get_coeff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.SRHCapture.get_coeff" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate the SRH recombination coefficient.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.SRHCapture.from_directories">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_directories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_dirs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_dirs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wswq_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpt_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_charge_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_charge_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defect_band_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_bandstructure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_band_structure_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#SRHCapture.from_directories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.SRHCapture.from_directories" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a SRHCapture from a list of directories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initial_dirs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – A list of directories for the initial state.</p></li>
+<li><p><strong>final_dirs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – A list of directories for the final state.</p></li>
+<li><p><strong>dQ</strong> – The distortion between the structures in units of amu^{-1/2} Angstrom^{-1}.
+By convention, the final state should be on the +dQ side of the initial state.
+This should only matter once we start considering anharmonic defects.</p></li>
+<li><p><strong>charge_state</strong> – The charge state for the defect.</p></li>
+<li><p><strong>relaxed_index</strong> – The index of the relaxed structure in the list of structures.</p></li>
+<li><p><strong>defect_band_index</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The index of the defect band (0-indexed).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pymatgen.analysis.defects.ccd.SRHCapture" title="pymatgen.analysis.defects.ccd.SRHCapture"><code class="xref py py-class docutils literal notranslate"><span class="pre">SRHCapture</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A SRHCapture object.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
