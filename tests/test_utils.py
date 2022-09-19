@@ -7,6 +7,7 @@ from pymatgen.analysis.defects.utils import (
     cluster_nodes,
     get_avg_chg,
     get_local_extrema,
+    get_localized_state,
 )
 
 
@@ -68,3 +69,20 @@ def test_chgcar_insertion(chgcar_fe3o4):
         fpos = sorted(group)
         pytest.approx(avg_chg, ref_chg)
         assert np.allclose(fpos, ref_fpos)
+
+
+def test_get_localized_states(v_ga):
+    vaspruns = v_ga[(0, -1)]["vaspruns"]
+    procar = v_ga[(0, -1)]["procar"]
+    vr = vaspruns[1]
+    bs = vr.get_band_structure()
+    res = get_localized_state(bs, procar=procar)
+    _, (_, min_indx) = min(res.items(), key=lambda x: x[1])
+    assert min_indx == 138
+
+    vaspruns = v_ga[(-1, 0)]["vaspruns"]
+    procar = v_ga[(-1, 0)]["procar"]
+    vr = vaspruns[1]
+    bs = vr.get_band_structure()
+    res = get_localized_state(bs, procar=procar)
+    assert min_indx == 138

@@ -68,7 +68,10 @@ repos:
     entry: codespell
     language: python
     types: [text]
-    args: [--ignore-words-list, 'titel,statics,ba,nd,te,mater,commun']
+    args: [
+      --ignore-words-list, 'titel,statics,ba,nd,te,mater,commun',
+      --skip, "*.ipynb"
+      ]
 - repo: https://github.com/kynan/nbstripout
   rev: 0.6.0
   hooks:
