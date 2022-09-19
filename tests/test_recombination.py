@@ -1,6 +1,5 @@
 import itertools
 
-import numba
 import numpy as np
 import pytest
 
@@ -11,8 +10,6 @@ from pymatgen.analysis.defects.recombination import (
     get_SRH_coef,
     pchip_eval,
 )
-
-numba.config.DISABLE_JIT = True
 
 
 def test_boltzmann():

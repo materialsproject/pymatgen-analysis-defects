@@ -26,7 +26,7 @@ Factor3 = 1 / HBAR_EV
 
 
 @njit(cache=True)
-def fact(n: int) -> float:
+def fact(n: int) -> float:  # pragma: no cover
     """Compute the factorial of n."""
     if n > 20:
         return LOOKUP_TABLE[-1] * np.prod(
@@ -36,7 +36,7 @@ def fact(n: int) -> float:
 
 
 @njit(cache=True)
-def herm(x: float, n: int) -> float:
+def herm(x: float, n: int) -> float:  # pragma: no cover
     """Recursive definition of hermite polynomial."""
     if n == 0:
         return 1.0
@@ -56,7 +56,7 @@ def herm(x: float, n: int) -> float:
 @njit(cache=True)
 def analytic_overlap_NM(
     dQ: float, omega1: float, omega2: float, n1: int, n2: int
-) -> float:
+) -> float:  # pragma: no cover
     """Compute the overlap between two displaced harmonic oscillators.
 
     This function computes the overlap integral between two harmonic
