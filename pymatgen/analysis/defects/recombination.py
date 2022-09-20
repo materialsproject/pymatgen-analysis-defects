@@ -336,7 +336,7 @@ def get_Rad_coef(
     rate = np.zeros_like(T, dtype=np.longdouble)
 
     for m in range(Ni):
-        final_energy = (m * omega_i) - omega_photon
+        final_energy = (m * omega_i) + dE - omega_photon
         E, me = get_mn(
             dQ=dQ,
             omega_i=omega_i,
