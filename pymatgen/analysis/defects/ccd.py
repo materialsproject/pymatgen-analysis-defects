@@ -638,44 +638,6 @@ class SRHCapture(MSONable):
         return cls(initial_defect, final_defect, dQ=dQ, wswqs=wswqs)
 
 
-# @dataclass
-# class ConfigurationCoordinateDiagram(MSONable):
-#     """A class representing a configuration coordinate diagram.
-
-#     The configuration coordinate diagram represents two parabolas with some finite configuration shift ``dQ``.
-#     The two defects are ``sorted`` in the sense that the defect with the lower ``charge_state``
-#       is designated as ``defect_state_0``.
-
-#     Attributes:
-#         phonon_mode_0 : The defect with the lower charge state.
-#         phonon_mode_1 : The defect with the higher charge state.
-#         dQ : The finite configuration shift.
-#     """
-#     phonon_mode_0: HarmonicDefect
-#     phonon_mode_1: HarmonicDefect
-#     dQ: float
-
-#     def __post_init__(self):
-#         """Post-initialization."""
-#         if abs(self.phonon_mode_0.charge_state - self.phonon_mode_1.charge_state) != 1:
-#             raise ValueError(
-#                 "The charge states of the two defects must be 1 apart. "
-#                 "Got {} and {}".format(self.phonon_mode_0.charge_state, self.phonon_mode_1.charge_state)
-#             )
-#         if self.phonon_mode_0.charge_state > self.phonon_mode_1.charge_state:
-#             self.phonon_mode_0, self.phonon_mode_1 = self.phonon_mode_1, self.phonon_mode_0
-
-#     @property
-#     def omega0_eV(self) -> float:
-#         """The vibronic frequency of the defect with the lower charge state."""
-#         return self.phonon_mode_0.omega_eV
-
-#     @property
-#     def omega1_eV(self) -> float:
-#         """The vibronic frequency of the defect with the higher charge state."""
-#         return self.phonon_mode_1.omega_eV
-
-
 def get_dQ(ground: Structure, excited: Structure) -> float:
     """Calculate configuration coordinate difference.
 

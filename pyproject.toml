@@ -15,7 +15,7 @@ classifiers = [
   "Topic :: Other/Nonlisted Topic",
   "Topic :: Scientific/Engineering",
 ]
-dependencies = ["pymatgen>=2022.7.19", "scikit-image>=0.19.3"]
+dependencies = ["pymatgen@git+https://github.com/jmmshn/pymatgen@patch-vasprun-chg", "scikit-image>=0.19.3"]
 description = "Pymatgen extension for defects analysis"
 dynamic = ["version"]
 keywords = ["high-throughput", "automated", "dft", "defects"]

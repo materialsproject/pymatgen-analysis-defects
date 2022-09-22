@@ -344,7 +344,9 @@ def get_Rad_coef(
             m_init=m,
             en_final=final_energy,
         )
-
+        if len(E) <= 1:
+            # The phonto took you to a energy range with no final states
+            continue
         interp_me = pchip_eval(final_energy, E, me * me, pad_frac=0.2, n_points=5000)
         rate += weights[m, :] * interp_me
 
