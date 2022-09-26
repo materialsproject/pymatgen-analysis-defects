@@ -245,11 +245,12 @@
 <span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
 <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MSONable</span>
 <span class="kn">from</span> <span class="nn">pymatgen.electronic_structure.core</span> <span class="kn">import</span> <span class="n">Spin</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.outputs</span> <span class="kn">import</span> <span class="n">WSWQ</span><span class="p">,</span> <span class="n">BandStructure</span><span class="p">,</span> <span class="n">Procar</span><span class="p">,</span> <span class="n">Vasprun</span><span class="p">,</span> <span class="n">Waveder</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.outputs</span> <span class="kn">import</span> <span class="n">WSWQ</span><span class="p">,</span> <span class="n">BandStructure</span><span class="p">,</span> <span class="n">Procar</span><span class="p">,</span> <span class="n">Vasprun</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">curve_fit</span>
 
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.recombination</span> <span class="kn">import</span> <span class="n">get_SRH_coef</span>
+
 <span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="n">AMU2KG</span><span class="p">,</span> <span class="n">ANGS2M</span><span class="p">,</span> <span class="n">EDEPS</span><span class="p">,</span> <span class="n">EV2J</span><span class="p">,</span> <span class="n">HBAR_EV</span><span class="p">,</span> <span class="n">KB</span>
-<span class="kn">from</span> <span class="nn">.recombination</span> <span class="kn">import</span> <span class="n">get_Rad_coef</span><span class="p">,</span> <span class="n">get_SRH_coef</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">get_localized_state</span><span class="p">,</span> <span class="n">get_zfile</span><span class="p">,</span> <span class="n">sort_positive_definite</span>
 
 <span class="c1"># Copyright (c) Pymatgen Development Team.</span>
@@ -594,164 +595,118 @@
             <span class="p">)</span>  <span class="c1"># pragma: no cover</span></div>
 
 
-<div class="viewcode-block" id="RadiativeCatpture"><a class="viewcode-back" href="../../../../reference/ccd.html#pymatgen.analysis.defects.ccd.RadiativeCatpture">[docs]</a><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">RadiativeCatpture</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Representation of a radiative capture event.</span>
+<span class="c1"># @dataclass</span>
+<span class="c1"># class OpticalHarmonicDefect(HarmonicDefect):</span>
+<span class="c1">#     &quot;&quot;&quot;Representation of Harmonic defect with optical (dipole) matrix elements.</span>
 
-<span class="sd">    Attributes:</span>
-<span class="sd">        initial_state: The initial state of the radiative capture event.</span>
-<span class="sd">        final_state: The final state of the radiative capture event.</span>
-<span class="sd">        dQ: The configuration coordinate change between the relaxed initial state and the final state.</span>
-<span class="sd">        waveder: The data from the WAVEDER file obtained with ``LOPTICS=.True.``.</span>
+<span class="c1">#     The dipole matrix elements are computed by VASP and reported in the WAVEDER file.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="c1">#     Attributes:</span>
+<span class="c1">#         omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.</span>
+<span class="c1">#         charge: The charge state. This should be the charge of the defect</span>
+<span class="c1">#             simulation that gave rise to the minimum of the parabola.</span>
+<span class="c1">#         distortions: The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.</span>
+<span class="c1">#             This object&#39;s internal reference for the distoration should always be relaxed structure.</span>
+<span class="c1">#         structures: The list of structures that were used to compute the distortions.</span>
+<span class="c1">#         energies: The potential energy surface obtained by distorting the structure.A</span>
+<span class="c1">#         defect_band_index: The index of the defect band.</span>
+<span class="c1">#         relaxed_indices: The indices of the relaxed defect structure.</span>
+<span class="c1">#         relaxed_bandstructure: The band structure of the relaxed defect calculation.</span>
+<span class="c1">#         waveder: The WAVEDER object containing the dipole matrix elements.</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
 
-    <span class="n">initial_state</span><span class="p">:</span> <span class="n">HarmonicDefect</span>
-    <span class="n">final_state</span><span class="p">:</span> <span class="n">HarmonicDefect</span>
-    <span class="n">dQ</span><span class="p">:</span> <span class="nb">float</span>
-    <span class="n">waveder</span><span class="p">:</span> <span class="n">Waveder</span>
+<span class="c1">#     # TODO: use kw_only once we drop Python &lt; 3.10</span>
+<span class="c1">#     waveder: Waveder | None = None</span>
 
-<div class="viewcode-block" id="RadiativeCatpture.get_coeff"><a class="viewcode-back" href="../../../../reference/ccd.html#pymatgen.analysis.defects.ccd.RadiativeCatpture.get_coeff">[docs]</a>    <span class="k">def</span> <span class="nf">get_coeff</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">T</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
-        <span class="n">dE</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">omega_photon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">volume</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">g</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">occ_tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span><span class="p">,</span>
-        <span class="n">n_band_edge</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculate the SRH recombination coefficient.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">volume</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">volume</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_state</span><span class="o">.</span><span class="n">relaxed_structure</span><span class="o">.</span><span class="n">volume</span>
+<span class="c1">#     @classmethod</span>
+<span class="c1">#     def from_vaspruns_and_waveder(</span>
+<span class="c1">#         cls,</span>
+<span class="c1">#         vaspruns: list[Vasprun],</span>
+<span class="c1">#         waveder: Waveder,</span>
+<span class="c1">#         charge_state: int,</span>
+<span class="c1">#         relaxed_index: int | None = None,</span>
+<span class="c1">#         defect_band_index: int | None = None,</span>
+<span class="c1">#         procar: Procar | None = None,</span>
+<span class="c1">#         get_band_structure_kwargs: dict | None = None,</span>
+<span class="c1">#         **kwargs,</span>
+<span class="c1">#     ) -&gt; OpticalHarmonicDefect:</span>
+<span class="c1">#         &quot;&quot;&quot;Create a HarmonicDefectPhonon from a list of vasprun.</span>
 
-        <span class="n">me_all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_defect_dipoles</span><span class="p">()</span>  <span class="c1"># indices: [band, kpoint, spin, coord]</span>
+<span class="c1">#         .. note::</span>
+<span class="c1">#             The constructor check that you have the vaspruns sorted by the distortions</span>
+<span class="c1">#             but does not order it for you.</span>
 
-        <span class="n">istate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_state</span>
+<span class="c1">#         Args:</span>
+<span class="c1">#             vaspruns: A list of Vasprun objects.</span>
+<span class="c1">#             charge_state: The charge state for the defect.</span>
+<span class="c1">#             relaxed_index: The index of the relaxed structure in the list of structures.</span>
+<span class="c1">#             defect_band_index: The index of the defect band (0-indexed).</span>
+<span class="c1">#             procar: The Procar object for the defect calculation.</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_state</span><span class="o">.</span><span class="n">charge_state</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_state</span><span class="o">.</span><span class="n">charge_state</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">band_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span>
-                <span class="n">istate</span><span class="o">.</span><span class="n">defect_band_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">istate</span><span class="o">.</span><span class="n">defect_band_index</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">n_band_edge</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_state</span><span class="o">.</span><span class="n">charge_state</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_state</span><span class="o">.</span><span class="n">charge_state</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">band_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span>
-                <span class="n">istate</span><span class="o">.</span><span class="n">defect_band_index</span> <span class="o">-</span> <span class="n">n_band_edge</span><span class="p">,</span> <span class="n">istate</span><span class="o">.</span><span class="n">defect_band_index</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;SRH capture event must involve a charge state change of 1.&quot;</span>
-            <span class="p">)</span>
+<span class="c1">#         Returns:</span>
+<span class="c1">#             An OpticalHarmonicDefect object.</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         obj = super().from_vaspruns(</span>
+<span class="c1">#             vaspruns,</span>
+<span class="c1">#             charge_state,</span>
+<span class="c1">#             relaxed_index,</span>
+<span class="c1">#             waveder=waveder,</span>
+<span class="c1">#             defect_band_index=defect_band_index,</span>
+<span class="c1">#             procar=procar,</span>
+<span class="c1">#             store_bandstructure=True,</span>
+<span class="c1">#             get_band_structure_kwargs=get_band_structure_kwargs,</span>
+<span class="c1">#             **kwargs,</span>
+<span class="c1">#         )</span>
+<span class="c1">#         if obj.defect_band_index is None:</span>
+<span class="c1">#             raise ValueError(  # pragma: no cover</span>
+<span class="c1">#                 &quot;You must provide `defect_band_index` or PROCAR to help indetify the `defect_band_index`.&quot;</span>
+<span class="c1">#             )</span>
+<span class="c1">#         if obj.relaxed_bandstructure is None:</span>
+<span class="c1">#             raise ValueError(  # pragma: no cover</span>
+<span class="c1">#                 &quot;The bandstructure was not populated properly check the constructor of the parent.&quot;</span>
+<span class="c1">#             )</span>
+<span class="c1">#         return obj</span>
 
-        <span class="n">me_band_edge</span> <span class="o">=</span> <span class="n">me_all</span><span class="p">[</span><span class="n">band_slice</span><span class="p">,</span> <span class="n">istate</span><span class="o">.</span><span class="n">kpt_index</span><span class="p">,</span> <span class="n">istate</span><span class="o">.</span><span class="n">spin_index</span><span class="p">]</span>
+<span class="c1">#     @classmethod</span>
+<span class="c1">#     def from_vaspruns(</span>
+<span class="c1">#         cls,</span>
+<span class="c1">#         *args,</span>
+<span class="c1">#         **kwargs,</span>
+<span class="c1">#     ) -&gt; HarmonicDefect:  # noqa</span>
+<span class="c1">#         &quot;&quot;&quot;Not implemented.&quot;&quot;&quot;</span>
+<span class="c1">#         raise NotImplementedError(&quot;Use from_vaspruns_and_waveder instead.&quot;)</span>
 
-        <span class="k">return</span> <span class="n">get_Rad_coef</span><span class="p">(</span>
-            <span class="n">T</span><span class="p">,</span>
-            <span class="n">dQ</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dQ</span><span class="p">,</span>
-            <span class="n">dE</span><span class="o">=</span><span class="n">dE</span><span class="p">,</span>
-            <span class="n">omega_i</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_state</span><span class="o">.</span><span class="n">omega_eV</span><span class="p">,</span>
-            <span class="n">omega_f</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">final_state</span><span class="o">.</span><span class="n">omega_eV</span><span class="p">,</span>
-            <span class="n">omega_photon</span><span class="o">=</span><span class="n">omega_photon</span><span class="p">,</span>
-            <span class="n">dipole_me</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">me_band_edge</span><span class="p">),</span>
-            <span class="n">volume</span><span class="o">=</span><span class="n">volume</span><span class="p">,</span>
-            <span class="n">g</span><span class="o">=</span><span class="n">g</span><span class="p">,</span>
-            <span class="n">occ_tol</span><span class="o">=</span><span class="n">occ_tol</span><span class="p">,</span>
-        <span class="p">)</span></div>
+<span class="c1">#     def _get_defect_dipoles(self) -&gt; npt.NDArray:</span>
+<span class="c1">#         &quot;&quot;&quot;Get the dipole matrix elements for the defect.</span>
 
-<div class="viewcode-block" id="RadiativeCatpture.from_directories"><a class="viewcode-back" href="../../../../reference/ccd.html#pymatgen.analysis.defects.ccd.RadiativeCatpture.from_directories">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_directories</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span>
-        <span class="n">initial_dirs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
-        <span class="n">final_dirs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
-        <span class="n">waveder_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
-        <span class="n">kpt_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">initial_charge_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">final_charge_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">spin_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">defect_band_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">store_bandstructure</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">get_band_structure_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RadiativeCatpture</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Create a RadiativeCapture object from a list of directories.</span>
+<span class="c1">#         Returns:</span>
+<span class="c1">#             The dipole matrix elements for the defect. The indices are:</span>
+<span class="c1">#                 ``[band index, k-point index, spin index, cart. direction]``.</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         return self.waveder.cder_data[self.defect_band_index, ...]</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            initial_dirs: A list of directories for the initial state.</span>
-<span class="sd">            final_dirs: A list of directories for the final state.</span>
-<span class="sd">            waveder_dir: The directory containing the WAVEDER file.</span>
-<span class="sd">            kpt_index: The index of the k-point to use.</span>
-<span class="sd">            initial_charge_state: The charge state of the initial state.</span>
-<span class="sd">                If None, the charge state is determined from the vasprun.xml and POTCAR files.</span>
-<span class="sd">            final_charge_state: The charge state of the final state.</span>
-<span class="sd">                If None, the charge state is determined from the vasprun.xml and POTCAR files.</span>
-<span class="sd">            spin_index: The index of the spin channel to use.</span>
-<span class="sd">                If None, the spin channel is determined by the channel with the most localized state.</span>
-<span class="sd">            defect_band_index: The index of the defect band (0-indexed).</span>
-<span class="sd">                If None, the defect band is determined by the band with the most localized state.</span>
-<span class="sd">            store_bandstructure: Whether to store the band structure.</span>
-<span class="sd">            get_band_structure_kwargs: Keyword arguments to pass to get_band_structure.</span>
-<span class="sd">            **kwargs: Keyword arguments to pass to the HarmonicDefect constructor.</span>
+<span class="c1">#     def _get_spectra(self) -&gt; npt.NDArray:</span>
+<span class="c1">#         &quot;&quot;&quot;Get the spectra for the defect.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            A SRHCapture object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">initial_defect</span> <span class="o">=</span> <span class="n">HarmonicDefect</span><span class="o">.</span><span class="n">from_directories</span><span class="p">(</span>
-            <span class="n">directories</span><span class="o">=</span><span class="n">initial_dirs</span><span class="p">,</span>
-            <span class="n">kpt_index</span><span class="o">=</span><span class="n">kpt_index</span><span class="p">,</span>
-            <span class="n">charge_state</span><span class="o">=</span><span class="n">initial_charge_state</span><span class="p">,</span>
-            <span class="n">spin_index</span><span class="o">=</span><span class="n">spin_index</span><span class="p">,</span>
-            <span class="n">relaxed_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">defect_band_index</span><span class="o">=</span><span class="n">defect_band_index</span><span class="p">,</span>
-            <span class="n">store_bandstructure</span><span class="o">=</span><span class="n">store_bandstructure</span><span class="p">,</span>
-            <span class="n">get_band_structure_kwargs</span><span class="o">=</span><span class="n">get_band_structure_kwargs</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="c1"># the final state does not need the additional</span>
-        <span class="c1"># information about the electronic states</span>
-        <span class="n">final_defect</span> <span class="o">=</span> <span class="n">HarmonicDefect</span><span class="o">.</span><span class="n">from_directories</span><span class="p">(</span>
-            <span class="n">directories</span><span class="o">=</span><span class="n">final_dirs</span><span class="p">,</span>
-            <span class="n">kpt_index</span><span class="o">=</span><span class="n">kpt_index</span><span class="p">,</span>
-            <span class="n">charge_state</span><span class="o">=</span><span class="n">final_charge_state</span><span class="p">,</span>
-            <span class="n">spin_index</span><span class="o">=</span><span class="n">spin_index</span><span class="p">,</span>
-            <span class="n">relaxed_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">defect_band_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">store_bandstructure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">get_band_structure_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="n">waveder_file</span> <span class="o">=</span> <span class="n">get_zfile</span><span class="p">(</span><span class="n">waveder_dir</span><span class="p">,</span> <span class="s2">&quot;WAVEDER&quot;</span><span class="p">)</span>
-        <span class="n">waveder</span> <span class="o">=</span> <span class="n">Waveder</span><span class="p">(</span><span class="n">waveder_file</span><span class="p">)</span>
-        <span class="n">dQ</span> <span class="o">=</span> <span class="n">get_dQ</span><span class="p">(</span><span class="n">initial_defect</span><span class="o">.</span><span class="n">relaxed_structure</span><span class="p">,</span> <span class="n">final_defect</span><span class="o">.</span><span class="n">relaxed_structure</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">initial_defect</span><span class="p">,</span> <span class="n">final_defect</span><span class="p">,</span> <span class="n">dQ</span><span class="o">=</span><span class="n">dQ</span><span class="p">,</span> <span class="n">waveder</span><span class="o">=</span><span class="n">waveder</span><span class="p">)</span></div>
-
-    <span class="k">def</span> <span class="nf">_get_defect_dipoles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Get the dipole matrix elements for the defect.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The dipole matrix elements for the defect. The indices are:</span>
-<span class="sd">                ``[band, k-point, spin, cart. direction]``.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">waveder</span><span class="o">.</span><span class="n">cder_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_state</span><span class="o">.</span><span class="n">defect_band_index</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-
-    <span class="k">def</span> <span class="nf">_get_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Get the spectra for the defect.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_state</span><span class="o">.</span><span class="n">_get_ediff</span><span class="p">(</span><span class="n">output_order</span><span class="o">=</span><span class="s2">&quot;bks&quot;</span><span class="p">)</span></div>
+<span class="c1">#         Args:</span>
+<span class="c1">#             bandstructure: The band structure of the relaxed defect calculation.</span>
+<span class="c1">#             shift: The shift to apply to the spectra.</span>
+<span class="c1">#         &quot;&quot;&quot;</span>
+<span class="c1">#         return self._get_ediff(output_order=&quot;bks&quot;)</span>
 
 
 <div class="viewcode-block" id="SRHCapture"><a class="viewcode-back" href="../../../../reference/ccd.html#pymatgen.analysis.defects.ccd.SRHCapture">[docs]</a><span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">SRHCapture</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Representation of a SRH capture event.</span>
+    <span class="sd">&quot;&quot;&quot;Representation of SRH capture event.</span>
 
 <span class="sd">    Performs book keeping of initial and final states.</span>
 
-<span class="sd">    Attributes:</span>
+<span class="sd">    Args:</span>
 <span class="sd">        initial_state: The initial state of the SRH capture event.</span>
 <span class="sd">        final_state: The final state of the SRH capture event.</span>
 <span class="sd">        dQ: The distortion between the structures in units of amu^{-1/2} Angstrom^{-1}.</span>
 <span class="sd">            By convention, the final state should be on the +dQ side of the initial state.</span>
 <span class="sd">            This should only matter once we start considering anharmonic defects.</span>
-<span class="sd">        wswqs: The PAW overlap matrix element &lt;W(0)|S|W(Q)&gt; stored as a list of WSWQ objects.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">initial_state</span><span class="p">:</span> <span class="n">HarmonicDefect</span>
@@ -777,11 +732,11 @@
         <span class="n">istate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_state</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_state</span><span class="o">.</span><span class="n">charge_state</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_state</span><span class="o">.</span><span class="n">charge_state</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">band_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span>
+            <span class="n">sl_bands</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span>
                 <span class="n">istate</span><span class="o">.</span><span class="n">defect_band_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">istate</span><span class="o">.</span><span class="n">defect_band_index</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">n_band_edge</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_state</span><span class="o">.</span><span class="n">charge_state</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_state</span><span class="o">.</span><span class="n">charge_state</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">band_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span>
+            <span class="n">sl_bands</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span>
                 <span class="n">istate</span><span class="o">.</span><span class="n">defect_band_index</span> <span class="o">-</span> <span class="n">n_band_edge</span><span class="p">,</span> <span class="n">istate</span><span class="o">.</span><span class="n">defect_band_index</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -789,7 +744,7 @@
                 <span class="s2">&quot;SRH capture event must involve a charge state change of 1.&quot;</span>
             <span class="p">)</span>
 
-        <span class="n">elph_me_band_edge</span> <span class="o">=</span> <span class="n">elph_me_all</span><span class="p">[</span><span class="n">istate</span><span class="o">.</span><span class="n">spin_index</span><span class="p">,</span> <span class="n">istate</span><span class="o">.</span><span class="n">kpt_index</span><span class="p">,</span> <span class="n">band_slice</span><span class="p">]</span>
+        <span class="n">elph_me_band_edge</span> <span class="o">=</span> <span class="n">elph_me_all</span><span class="p">[</span><span class="n">istate</span><span class="o">.</span><span class="n">spin_index</span><span class="p">,</span> <span class="n">istate</span><span class="o">.</span><span class="n">kpt_index</span><span class="p">,</span> <span class="n">sl_bands</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">get_SRH_coef</span><span class="p">(</span>
             <span class="n">T</span><span class="p">,</span>
@@ -823,19 +778,12 @@
 <span class="sd">        Args:</span>
 <span class="sd">            initial_dirs: A list of directories for the initial state.</span>
 <span class="sd">            final_dirs: A list of directories for the final state.</span>
-<span class="sd">            wswq_dir: The directory containing the WSWQ files.</span>
-<span class="sd">            kpt_index: The index of the k-point to use.</span>
-<span class="sd">            initial_charge_state: The charge state of the initial state.</span>
-<span class="sd">                If None, the charge state is determined from the vasprun.xml and POTCAR files.</span>
-<span class="sd">            final_charge_state: The charge state of the final state.</span>
-<span class="sd">                If None, the charge state is determined from the vasprun.xml and POTCAR files.</span>
-<span class="sd">            spin_index: The index of the spin channel to use.</span>
-<span class="sd">                If None, the spin channel is determined by the channel with the most localized state.</span>
+<span class="sd">            dQ: The distortion between the structures in units of amu^{-1/2} Angstrom^{-1}.</span>
+<span class="sd">                By convention, the final state should be on the +dQ side of the initial state.</span>
+<span class="sd">                This should only matter once we start considering anharmonic defects.</span>
+<span class="sd">            charge_state: The charge state for the defect.</span>
+<span class="sd">            relaxed_index: The index of the relaxed structure in the list of structures.</span>
 <span class="sd">            defect_band_index: The index of the defect band (0-indexed).</span>
-<span class="sd">                If None, the defect band is determined by the band with the most localized state.</span>
-<span class="sd">            store_bandstructure: Whether to store the band structure.</span>
-<span class="sd">            get_band_structure_kwargs: Keyword arguments to pass to get_band_structure.</span>
-<span class="sd">            **kwargs: Keyword arguments to pass to the HarmonicDefect constructor.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A SRHCapture object.</span>

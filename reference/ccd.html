@@ -497,147 +497,22 @@ The matrix elements are calculated by combining the finite difference from the m
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.RadiativeCatpture">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.ccd.</span></span><span class="sig-name descname"><span class="pre">RadiativeCatpture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#RadiativeCatpture"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.RadiativeCatpture" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
-<p>Representation of a radiative capture event.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.RadiativeCatpture.initial_state">
-<span class="sig-name descname"><span class="pre">initial_state</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.RadiativeCatpture.initial_state" title="Permalink to this definition">#</a></dt>
-<dd><p>The initial state of the radiative capture event.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pymatgen.analysis.defects.ccd.HarmonicDefect" title="pymatgen.analysis.defects.ccd.HarmonicDefect">pymatgen.analysis.defects.ccd.HarmonicDefect</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.RadiativeCatpture.final_state">
-<span class="sig-name descname"><span class="pre">final_state</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.RadiativeCatpture.final_state" title="Permalink to this definition">#</a></dt>
-<dd><p>The final state of the radiative capture event.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pymatgen.analysis.defects.ccd.HarmonicDefect" title="pymatgen.analysis.defects.ccd.HarmonicDefect">pymatgen.analysis.defects.ccd.HarmonicDefect</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.RadiativeCatpture.dQ">
-<span class="sig-name descname"><span class="pre">dQ</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.RadiativeCatpture.dQ" title="Permalink to this definition">#</a></dt>
-<dd><p>The configuration coordinate change between the relaxed initial state and the final state.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.RadiativeCatpture.waveder">
-<span class="sig-name descname"><span class="pre">waveder</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.RadiativeCatpture.waveder" title="Permalink to this definition">#</a></dt>
-<dd><p>The data from the WAVEDER file obtained with <code class="docutils literal notranslate"><span class="pre">LOPTICS=.True.</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pymatgen.io.vasp.outputs.Waveder</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.RadiativeCatpture.get_coeff">
-<span class="sig-name descname"><span class="pre">get_coeff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega_photon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">occ_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_band_edge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#RadiativeCatpture.get_coeff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.RadiativeCatpture.get_coeff" title="Permalink to this definition">#</a></dt>
-<dd><p>Calculate the SRH recombination coefficient.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.RadiativeCatpture.from_directories">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_directories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_dirs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_dirs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveder_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kpt_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_charge_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_charge_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spin_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defect_band_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_bandstructure</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_band_structure_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#RadiativeCatpture.from_directories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.RadiativeCatpture.from_directories" title="Permalink to this definition">#</a></dt>
-<dd><p>Create a RadiativeCapture object from a list of directories.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>initial_dirs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – A list of directories for the initial state.</p></li>
-<li><p><strong>final_dirs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – A list of directories for the final state.</p></li>
-<li><p><strong>waveder_dir</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>) – The directory containing the WAVEDER file.</p></li>
-<li><p><strong>kpt_index</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – The index of the k-point to use.</p></li>
-<li><p><strong>initial_charge_state</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The charge state of the initial state.
-If None, the charge state is determined from the vasprun.xml and POTCAR files.</p></li>
-<li><p><strong>final_charge_state</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The charge state of the final state.
-If None, the charge state is determined from the vasprun.xml and POTCAR files.</p></li>
-<li><p><strong>spin_index</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The index of the spin channel to use.
-If None, the spin channel is determined by the channel with the most localized state.</p></li>
-<li><p><strong>defect_band_index</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The index of the defect band (0-indexed).
-If None, the defect band is determined by the band with the most localized state.</p></li>
-<li><p><strong>store_bandstructure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to store the band structure.</p></li>
-<li><p><strong>get_band_structure_kwargs</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – Keyword arguments to pass to get_band_structure.</p></li>
-<li><p><strong>**kwargs</strong> – Keyword arguments to pass to the HarmonicDefect constructor.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#pymatgen.analysis.defects.ccd.RadiativeCatpture" title="pymatgen.analysis.defects.ccd.RadiativeCatpture"><code class="xref py py-class docutils literal notranslate"><span class="pre">RadiativeCatpture</span></code></a></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A SRHCapture object.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.SRHCapture">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.ccd.</span></span><span class="sig-name descname"><span class="pre">SRHCapture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wswqs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#SRHCapture"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.SRHCapture" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
-<p>Representation of a SRH capture event.</p>
+<p>Representation of SRH capture event.</p>
 <p>Performs book keeping of initial and final states.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.SRHCapture.initial_state">
-<span class="sig-name descname"><span class="pre">initial_state</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.SRHCapture.initial_state" title="Permalink to this definition">#</a></dt>
-<dd><p>The initial state of the SRH capture event.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pymatgen.analysis.defects.ccd.HarmonicDefect" title="pymatgen.analysis.defects.ccd.HarmonicDefect">pymatgen.analysis.defects.ccd.HarmonicDefect</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.SRHCapture.final_state">
-<span class="sig-name descname"><span class="pre">final_state</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.SRHCapture.final_state" title="Permalink to this definition">#</a></dt>
-<dd><p>The final state of the SRH capture event.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pymatgen.analysis.defects.ccd.HarmonicDefect" title="pymatgen.analysis.defects.ccd.HarmonicDefect">pymatgen.analysis.defects.ccd.HarmonicDefect</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.SRHCapture.dQ">
-<span class="sig-name descname"><span class="pre">dQ</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.SRHCapture.dQ" title="Permalink to this definition">#</a></dt>
-<dd><p>The distortion between the structures in units of amu^{-1/2} Angstrom^{-1}.
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>initial_state</strong> (<a class="reference internal" href="#pymatgen.analysis.defects.ccd.HarmonicDefect" title="pymatgen.analysis.defects.ccd.HarmonicDefect"><code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonicDefect</span></code></a>) – The initial state of the SRH capture event.</p></li>
+<li><p><strong>final_state</strong> (<a class="reference internal" href="#pymatgen.analysis.defects.ccd.HarmonicDefect" title="pymatgen.analysis.defects.ccd.HarmonicDefect"><code class="xref py py-class docutils literal notranslate"><span class="pre">HarmonicDefect</span></code></a>) – The final state of the SRH capture event.</p></li>
+<li><p><strong>dQ</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The distortion between the structures in units of amu^{-1/2} Angstrom^{-1}.
 By convention, the final state should be on the +dQ side of the initial state.
-This should only matter once we start considering anharmonic defects.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
+This should only matter once we start considering anharmonic defects.</p></li>
+</ul>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.SRHCapture.wswqs">
-<span class="sig-name descname"><span class="pre">wswqs</span></span><a class="headerlink" href="#pymatgen.analysis.defects.ccd.SRHCapture.wswqs" title="Permalink to this definition">#</a></dt>
-<dd><p>The PAW overlap matrix element &lt;W(0)|S|W(Q)&gt; stored as a list of WSWQ objects.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[pymatgen.io.vasp.outputs.WSWQ]</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.ccd.SRHCapture.get_coeff">
 <span class="sig-name descname"><span class="pre">get_coeff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">occ_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_band_edge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/ccd.html#SRHCapture.get_coeff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.ccd.SRHCapture.get_coeff" title="Permalink to this definition">#</a></dt>
@@ -653,19 +528,12 @@ This should only matter once we start considering anharmonic defects.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>initial_dirs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – A list of directories for the initial state.</p></li>
 <li><p><strong>final_dirs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>]) – A list of directories for the final state.</p></li>
-<li><p><strong>wswq_dir</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>) – The directory containing the WSWQ files.</p></li>
-<li><p><strong>kpt_index</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – The index of the k-point to use.</p></li>
-<li><p><strong>initial_charge_state</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The charge state of the initial state.
-If None, the charge state is determined from the vasprun.xml and POTCAR files.</p></li>
-<li><p><strong>final_charge_state</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The charge state of the final state.
-If None, the charge state is determined from the vasprun.xml and POTCAR files.</p></li>
-<li><p><strong>spin_index</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The index of the spin channel to use.
-If None, the spin channel is determined by the channel with the most localized state.</p></li>
-<li><p><strong>defect_band_index</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The index of the defect band (0-indexed).
-If None, the defect band is determined by the band with the most localized state.</p></li>
-<li><p><strong>store_bandstructure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to store the band structure.</p></li>
-<li><p><strong>get_band_structure_kwargs</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – Keyword arguments to pass to get_band_structure.</p></li>
-<li><p><strong>**kwargs</strong> – Keyword arguments to pass to the HarmonicDefect constructor.</p></li>
+<li><p><strong>dQ</strong> – The distortion between the structures in units of amu^{-1/2} Angstrom^{-1}.
+By convention, the final state should be on the +dQ side of the initial state.
+This should only matter once we start considering anharmonic defects.</p></li>
+<li><p><strong>charge_state</strong> – The charge state for the defect.</p></li>
+<li><p><strong>relaxed_index</strong> – The index of the relaxed structure in the list of structures.</p></li>
+<li><p><strong>defect_band_index</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – The index of the defect band (0-indexed).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
