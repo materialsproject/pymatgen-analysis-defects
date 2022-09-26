@@ -391,7 +391,7 @@ class RadiativeCatpture(MSONable):
         if volume is None:
             volume = self.initial_state.relaxed_structure.volume
 
-        me_all = self._get_defect_dipoles()  # indices: [band, kpoint, spin, coord]
+        me_all = self.get_dipoles()  # indices: [band, kpoint, spin, coord]
 
         istate = self.initial_state
 
@@ -491,8 +491,10 @@ class RadiativeCatpture(MSONable):
         dQ = get_dQ(initial_defect.relaxed_structure, final_defect.relaxed_structure)
         return cls(initial_defect, final_defect, dQ=dQ, waveder=waveder)
 
-    def _get_defect_dipoles(self) -> npt.NDArray:
-        """Get the dipole matrix elements for the defect.
+    def get_dipoles(self) -> npt.NDArray:
+        """Get the dipole matrix elements associated with the defect.
+
+        Return
 
         Returns:
             The dipole matrix elements for the defect. The indices are:
@@ -500,8 +502,14 @@ class RadiativeCatpture(MSONable):
         """
         return self.waveder.cder_data[self.initial_state.defect_band_index, ...]
 
-    def _get_spectra(self) -> npt.NDArray:
-        """Get the spectra for the defect."""
+    def get_spectra(self) -> npt.NDArray:
+        """Get the spectra for the defect.
+
+        Compute the energy differences between all the bands and he defect band.
+
+        Returns:
+            Array of size ``[n_bands, n_kpoints, n_spins]``.
+        """
         return self.initial_state._get_ediff(output_order="bks")
 
 
