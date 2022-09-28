@@ -268,7 +268,7 @@ class GhostVacancy(Vacancy):
     """
     Alternate definition of vacancy for simulation packages using a localized basis.
     Vacancies are normally just structures with an atom removed, but with a local basis
-    we retain the site and turn off its interaction potential (Ghost atom) in order to 
+    we retain the site and turn off its interaction potential (Ghost atom) in order to
     avoid Basis set superposition error.
     """
 
@@ -276,7 +276,9 @@ class GhostVacancy(Vacancy):
     def defect_structure(self):
         """Returns the defect structure with the proper oxidation state"""
         struct = self.structure.copy()
-        struct.add_site_property("ghost", [i == self.defect_site_index for i in range(len(struct))])
+        struct.add_site_property(
+            "ghost", [i == self.defect_site_index for i in range(len(struct))]
+        )
         return struct
 
 
