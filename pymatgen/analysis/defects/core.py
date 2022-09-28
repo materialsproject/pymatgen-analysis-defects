@@ -266,17 +266,19 @@ class Vacancy(Defect):
 
 class GhostVacancy(Vacancy):
     """
-    Alternate definition of vacancy for simulation packages using a localized basis.
-    Vacancies are normally just structures with an atom removed, but with a local basis
-    we retain the site and turn off its interaction potential (Ghost atom) in order to 
-    avoid Basis set superposition error.
+    Alternate definition of vacancy for simulation packages using a localized
+    basis. Vacancies are normally just structures with an atom removed, but
+    with a local basis we retain the site and turn off its interaction
+    potential (Ghost atom) in order to avoid Basis set superposition error.
     """
 
     @property
     def defect_structure(self):
-        """Returns the defect structure with the proper oxidation state"""
+        """Returns the defect structure with the proper oxidation state."""
         struct = self.structure.copy()
-        struct.add_site_property("ghost", [i == self.defect_site_index for i in range(len(struct))])
+        struct.add_site_property(
+            "ghost", [i == self.defect_site_index for i in range(len(struct))]
+        )
         return struct
 
 
@@ -484,16 +486,17 @@ class Interstitial(Defect):
 
 class Adsorbate(Interstitial):
     """
-    Subclass of Interstitial with a different name. Used for keeping track of adsorbate, which are
-    treated the same algorithmically as interstitials, but are conceptually separate.
+    Subclass of Interstitial with a different name. Used for keeping track of
+    adsorbate, which are treated the same algorithmically as interstitials,
+    but are conceptually separate.
     """
 
     @property
     def name(self) -> str:
         """
-        Returns a name for this defect
+        Returns a name for this defect.
         """
-        return "{}_\{ads\}".format(get_element(self.site.specie))
+        return f"{get_element(self.site.specie)}_{{ads}}"
 
 
 def get_element(sp_el: Species | Element) -> Element:
