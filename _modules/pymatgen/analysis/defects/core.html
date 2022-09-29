@@ -700,6 +700,19 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sub_species</span><span class="si">}</span><span class="s2"> intersitial site at &quot;</span> <span class="sa">f</span><span class="s2">&quot;at site [</span><span class="si">{</span><span class="n">fpos_str</span><span class="si">}</span><span class="s2">]&quot;</span></div>
 
 
+<div class="viewcode-block" id="Adsorbate"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Adsorbate">[docs]</a><span class="k">class</span> <span class="nc">Adsorbate</span><span class="p">(</span><span class="n">Interstitial</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Subclass of Interstitial with a different name.</span>
+
+<span class="sd">    Used for keeping track of adsorbate, which are treated the same</span>
+<span class="sd">    algorithmically as interstitials, but are conceptually separate.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns a name for this defect.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">get_element</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">)</span><span class="si">}</span><span class="s2">_</span><span class="se">{{</span><span class="s2">ads</span><span class="se">}}</span><span class="s2">&quot;</span></div>
+
+
 <div class="viewcode-block" id="get_element"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.get_element">[docs]</a><span class="k">def</span> <span class="nf">get_element</span><span class="p">(</span><span class="n">sp_el</span><span class="p">:</span> <span class="n">Species</span> <span class="o">|</span> <span class="n">Element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Element</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Get the element from a species or element.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sp_el</span><span class="p">,</span> <span class="n">Species</span><span class="p">):</span>
