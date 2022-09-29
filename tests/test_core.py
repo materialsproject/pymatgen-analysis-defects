@@ -2,10 +2,13 @@ import numpy as np
 from pymatgen.core.periodic_table import Element, Specie
 
 from pymatgen.analysis.defects.core import (
+    Adsorbate,
     Interstitial,
     PeriodicSite,
     Substitution,
     Vacancy,
+    GhostVacancy,
+    Adsorbate
 )
 
 
@@ -23,6 +26,14 @@ def test_vacancy(gan_struct):
     assert vac == vac
     assert vac.element_changes == {Element("Ga"): -1}
 
+def test_ghostvacancy(gan_struct):
+    s = gan_struct.copy()
+    vac = GhostVacancy(s, s.sites[0])
+    vac2 = GhostVacancy(s, s.sites[1])
+    assert vac == vac2 == vac
+    assert vac.get_supercell_structure().formula == "Ga64 N64"
+    assert vac.element_changes == {Element("Ga"): -1}
+    assert vac.defect_structure.site_properties["ghost"][vac.defect_site_index] == True
 
 def test_substitution(gan_struct):
     s = gan_struct.copy()
@@ -57,3 +68,10 @@ def test_interstitial(gan_struct):
     assert inter.name == "N_i"
     assert str(inter) == "N intersitial site at at site [0.00,0.00,0.75]"
     assert inter.element_changes == {Element("N"): 1}
+
+def test_adsorbate(gan_struct):
+    s = gan_struct.copy()
+    ads_fpos = [0, 0, 0.75]
+    n_site = PeriodicSite(Specie("N"), ads_fpos, s.lattice)
+    ads = Adsorbate(s, n_site)
+    assert ads.name == "N_{ads}"
