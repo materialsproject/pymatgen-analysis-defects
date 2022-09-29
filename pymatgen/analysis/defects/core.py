@@ -265,11 +265,12 @@ class Vacancy(Defect):
 
 
 class GhostVacancy(Vacancy):
-    """
-    Alternate definition of vacancy for simulation packages using a localized
-    basis. Vacancies are normally just structures with an atom removed, but
-    with a local basis we retain the site and turn off its interaction
-    potential (Ghost atom) in order to avoid Basis set superposition error.
+    """Alternate definition of vacancy.
+
+    Used for simulation packages with localized basis set. Vacancies are
+    normally just structures with an atom removed, but with a local basis
+    we retain the site and turn off its interaction potential (Ghost atom)
+    in order to avoid Basis set superposition error.
     """
 
     @property
@@ -485,17 +486,15 @@ class Interstitial(Defect):
 
 
 class Adsorbate(Interstitial):
-    """
-    Subclass of Interstitial with a different name. Used for keeping track of
-    adsorbate, which are treated the same algorithmically as interstitials,
-    but are conceptually separate.
+    """Subclass of Interstitial with a different name.
+
+    Used for keeping track of adsorbate, which are treated the same
+    algorithmically as interstitials, but are conceptually separate.
     """
 
     @property
     def name(self) -> str:
-        """
-        Returns a name for this defect.
-        """
+        """Returns a name for this defect."""
         return f"{get_element(self.site.specie)}_{{ads}}"
 
 
