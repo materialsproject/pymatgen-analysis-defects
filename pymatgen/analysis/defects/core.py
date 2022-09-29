@@ -466,6 +466,19 @@ class Interstitial(Defect):
         return f"{sub_species} intersitial site at " f"at site [{fpos_str}]"
 
 
+class Adsorbate(Interstitial):
+    """Subclass of Interstitial with a different name.
+
+    Used for keeping track of adsorbate, which are treated the same
+    algorithmically as interstitials, but are conceptually separate.
+    """
+
+    @property
+    def name(self) -> str:
+        """Returns a name for this defect."""
+        return f"{get_element(self.site.specie)}_{{ads}}"
+
+
 def get_element(sp_el: Species | Element) -> Element:
     """Get the element from a species or element."""
     if isinstance(sp_el, Species):
