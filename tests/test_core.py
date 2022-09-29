@@ -2,6 +2,7 @@ import numpy as np
 from pymatgen.core.periodic_table import Element, Specie
 
 from pymatgen.analysis.defects.core import (
+    Adsorbate,
     Interstitial,
     PeriodicSite,
     Substitution,
@@ -57,3 +58,11 @@ def test_interstitial(gan_struct):
     assert inter.name == "N_i"
     assert str(inter) == "N intersitial site at at site [0.00,0.00,0.75]"
     assert inter.element_changes == {Element("N"): 1}
+
+
+def test_adsorbate(gan_struct):
+    s = gan_struct.copy()
+    ads_fpos = [0, 0, 0.75]
+    n_site = PeriodicSite(Specie("N"), ads_fpos, s.lattice)
+    ads = Adsorbate(s, n_site)
+    assert ads.name == "N_{ads}"

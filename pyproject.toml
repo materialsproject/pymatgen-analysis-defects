@@ -52,7 +52,7 @@ readme = { file = ["README.rst"] }
 [project.urls]
 documentation = "https://materialsproject.github.io/pymatgen-analysis-defects/"
 homepage = "https://materialsproject.github.io/pymatgen-analysis-defects/"
-repository = "https://github.com/hackingmaterials/pymatgen-analysis-defects"
+repository = "https://github.com/materialsproject/pymatgen-analysis-defects"
 
 [tool.setuptools.packages.find]
 exclude = ["tests"]
