@@ -264,25 +264,6 @@ class Vacancy(Defect):
         return f"{vac_species} Vacancy defect at site #{self.defect_site_index}"
 
 
-class GhostVacancy(Vacancy):
-    """Alternate definition of vacancy.
-
-    Used for simulation packages with localized basis set. Vacancies are
-    normally just structures with an atom removed, but with a local basis
-    we retain the site and turn off its interaction potential (Ghost atom)
-    in order to avoid Basis set superposition error.
-    """
-
-    @property
-    def defect_structure(self):
-        """Returns the defect structure with the proper oxidation state."""
-        struct = self.structure.copy()
-        struct.add_site_property(
-            "ghost", [i == self.defect_site_index for i in range(len(struct))]
-        )
-        return struct
-
-
 class Substitution(Defect):
     """Single-site substitutional defects."""
 

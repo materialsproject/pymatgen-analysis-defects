@@ -26,16 +26,6 @@ def test_vacancy(gan_struct):
     assert vac.element_changes == {Element("Ga"): -1}
 
 
-def test_ghostvacancy(gan_struct):
-    s = gan_struct.copy()
-    vac = GhostVacancy(s, s.sites[0])
-    vac2 = GhostVacancy(s, s.sites[1])
-    assert vac == vac2 == vac
-    assert vac.get_supercell_structure().formula == "Ga64 N64"
-    assert vac.element_changes == {Element("Ga"): -1}
-    assert vac.defect_structure.site_properties["ghost"][vac.defect_site_index] == True
-
-
 def test_substitution(gan_struct):
     s = gan_struct.copy()
     n_site = s.sites[3]
