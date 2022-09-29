@@ -3,7 +3,6 @@ from pymatgen.core.periodic_table import Element, Specie
 
 from pymatgen.analysis.defects.core import (
     Adsorbate,
-    GhostVacancy,
     Interstitial,
     PeriodicSite,
     Substitution,
