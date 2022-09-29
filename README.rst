@@ -70,7 +70,7 @@ Contributor
 -----------
 
 * Lead developer: Dr. Jimmy-Xuan Shen
-* This code is a re-write of the defects analysis module of ``pymatgen`` from Dr. Danny Broberg and Dr. Shyam Dwaraknath.
+* This code is contains crontributions from the original the defects analysis module of ``pymatgen`` from Dr. Danny Broberg and Dr. Shyam Dwaraknath.
 
 
 .. |testing| image:: https://github.com/materialsproject/pymatgen-analysis-defects/actions/workflows/testing.yml/badge.svg?branch=main
