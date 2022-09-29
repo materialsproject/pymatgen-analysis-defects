@@ -105,7 +105,7 @@ def v_ga(test_dir):
         res[(q1, q2)] = {
             "vaspruns": vaspruns,
             "procar": Procar(ccd_dir / "1/PROCAR"),
-            "waveder": Waveder(ccd_dir / "1/WAVEDER"),
+            "waveder": Waveder.from_binary(ccd_dir / "1/WAVEDER"),
             "wswqs": wswqs,
         }
     return res
