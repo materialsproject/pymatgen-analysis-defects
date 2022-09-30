@@ -1,6 +1,7 @@
 """Classes representing defects."""
 from __future__ import annotations
 
+import collections
 import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 from enum import Enum
@@ -491,31 +492,52 @@ class Interstitial(Defect):
         return f"{sub_species} intersitial site at " f"at site [{fpos_str}]"
 
 
-class DefectComplex(MSONable):
+class DefectComplex(Defect):
     """A complex of defects."""
 
-    def __init__(self, defects: list[Defect]) -> None:
+    def __init__(
+        self,
+        defects: list[Defect],
+        oxi_state: float | None = None,
+    ) -> None:
         """Initialize a complex defect object.
 
         Args:
             defects: List of defects.
+            oxi_state: The oxidation state of the defect, if not specified,
+                this will be determined automatically.
         """
-        self.defects = sorted(defects)
-
-    def __post_init__(self) -> None:
-        """Post initialization."""
+        self.defects = defects
         self.structure = self.defects[0].defect_structure
-        # sort the defects by the defect site index
-        for defect in self.defects:
-            if defect.defect_structure != self.defect_structure:
-                raise ValueError(
-                    "All defects in a complex defect must have the same structure."
-                )
-            self.oxi_state += defect.oxi_state
+        self.oxi_state = self._guess_oxi_state() if oxi_state is None else oxi_state
 
     def __repr__(self) -> str:
         """Representation of a complex defect."""
         return f"Complex defect containing: {[d.name for d in self.defects]}"
+
+    def get_multiplicity(self) -> int:
+        """Determine the multiplicity of the defect site within the structure."""
+        raise NotImplementedError("Complex defect multiplicity is not implemented.")
+
+    @property
+    def element_changes(self) -> Dict[Element, int]:
+        """Determine the species changes of the complex defect."""
+        cnt: dict[Element, int] = collections.defaultdict(int)
+        for defect in self.defects:
+            for el, change in defect.element_changes.items():
+                cnt[el] += change
+        return dict(cnt)
+
+    @property
+    def name(self) -> str:
+        """Name of the defect."""
+        return "_".join([d.name for d in self.defects])
+
+    def _guess_oxi_state(self) -> float:
+        oxi_state = 0.0
+        for defect in self.defects:
+            oxi_state += defect.oxi_state
+        return oxi_state
 
     def defect_structure(self) -> Structure:
         """Returns the defect structure."""
@@ -529,6 +551,7 @@ class DefectComplex(MSONable):
     def get_supercell_structure(
         self,
         sc_mat: np.ndarray | None = None,
+        dummy_species: str | None = None,
         min_atoms: int = 80,
         max_atoms: int = 240,
         min_length: float = 10.0,
