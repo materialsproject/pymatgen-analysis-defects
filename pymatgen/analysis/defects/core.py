@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
+from enum import Enum
 from typing import Dict
 
 import numpy as np
@@ -26,6 +27,15 @@ __maintainer__ = "Jimmy-Xuan Shen @jmmshn"
 __date__ = "Mar 15, 2022"
 
 logger = logging.getLogger(__name__)
+
+
+class DefectType(Enum):
+    """Defect type, for sorting purposes."""
+
+    VACANDY = 0
+    SUBSTITUTION = 1
+    INTERSTITIAL = 2
+    OTHER = 3
 
 
 class Defect(MSONable, metaclass=ABCMeta):
@@ -190,6 +200,23 @@ class Defect(MSONable, metaclass=ABCMeta):
         sm = StructureMatcher(comparator=ElementComparator())
         return sm.fit(self.defect_structure, __o.defect_structure)
 
+    @property
+    def defect_type(self) -> int:
+        """Get the defect type.
+
+        Returns:
+            int: The defect type.
+        """
+        return getattr(DefectType, self.__class__.__name__)
+
+    def __lt__(self, __o: Defect) -> bool:
+        """Less than operator."""
+        return self.defect_type < __o.defect_type
+
+    def __gt__(self, __o: Defect) -> bool:
+        """Greater than operator."""
+        return self.defect_type > __o.defect_type
+
 
 class Vacancy(Defect):
     """Class representing a vacancy defect."""
@@ -222,8 +249,6 @@ class Vacancy(Defect):
             ),
             key=lambda x: x[1],
         )
-        if len(res) == 0:
-            raise ValueError("No site found in structure")
         return res
 
     @property
@@ -464,6 +489,122 @@ class Interstitial(Defect):
         sub_species = get_element(self.site.specie)
         fpos_str = ",".join(f"{x:.2f}" for x in self.site.frac_coords)
         return f"{sub_species} intersitial site at " f"at site [{fpos_str}]"
+
+
+class DefectComplex(MSONable):
+    """A complex of defects."""
+
+    def __init__(self, defects: list[Defect]) -> None:
+        """Initialize a complex defect object.
+
+        Args:
+            defects: List of defects.
+        """
+        self.defects = sorted(defects)
+
+    def __post_init__(self) -> None:
+        """Post initialization."""
+        self.structure = self.defects[0].defect_structure
+        # sort the defects by the defect site index
+        for defect in self.defects:
+            if defect.defect_structure != self.defect_structure:
+                raise ValueError(
+                    "All defects in a complex defect must have the same structure."
+                )
+            self.oxi_state += defect.oxi_state
+
+    def __repr__(self) -> str:
+        """Representation of a complex defect."""
+        return f"Complex defect containing: {[d.name for d in self.defects]}"
+
+    def defect_structure(self) -> Structure:
+        """Returns the defect structure."""
+        defect_structure = self.structure.copy()
+        for defect in self.defects:
+            update_structure(
+                defect_structure, defect.site, defect_type=defect.defect_type
+            )
+        return defect_structure
+
+    def get_supercell_structure(
+        self,
+        sc_mat: np.ndarray | None = None,
+        min_atoms: int = 80,
+        max_atoms: int = 240,
+        min_length: float = 10.0,
+        force_diagonal: bool = False,
+    ) -> Structure:
+        """Generate the supercell for a defect.
+
+        Args:
+            sc_mat: supercell matrix if None, the supercell will be determined by `CubicSupercellAnalyzer`.
+            max_atoms: Maximum number of atoms allowed in the supercell.
+            min_atoms: Minimum number of atoms allowed in the supercell.
+            min_length: Minimum length of the smallest supercell lattice vector.
+            force_diagonal: If True, return a transformation with a diagonal transformation matrix.
+
+        Returns:
+            Structure: The supercell structure.
+        """
+        if sc_mat is None:
+            sc_mat = get_sc_fromstruct(
+                self.structure,
+                min_atoms=min_atoms,
+                max_atoms=max_atoms,
+                min_length=min_length,
+                force_diagonal=force_diagonal,
+            )
+        sc_structure = self.structure * sc_mat
+        sc_mat_inv = np.linalg.inv(sc_mat)
+        for defect in self.defects:
+            sc_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
+            sc_site = PeriodicSite(defect.site.specie, sc_pos, sc_structure.lattice)
+            update_structure(sc_structure, sc_site, defect_type=defect.defect_type)
+        return sc_structure
+
+
+def update_structure(structure, site, defect_type):
+    """Update the structure with the defect site.
+
+    Types of operations:
+        1. Vacancy: remove the site.
+        2. Substitution: replace the site with the defect species.
+        3. Interstitial: insert the defect species at the site.
+
+    Args:
+        structure: The structure to be updated.
+        site: The defect site.
+        defect_type: The type of the defect.
+
+    Returns:
+        Structure: The updated structure.
+    """
+
+    def _update(structure, site, rm: bool, replace: bool):
+        rep_site = min(
+            structure.get_sites_in_sphere(site.coords, 0.1, include_index=True),
+            key=lambda x: x[1],
+        )
+        rep_index = rep_site.index
+        if rm or replace:
+            structure.remove_sites([rep_index])
+        if rm:
+            return
+        sub_specie = Element(site.specie.symbol)
+        structure.insert(
+            0,
+            species=sub_specie,
+            coords=site.frac_coords,
+        )
+
+    if defect_type == DefectType.Vacancy:
+        _update(structure, site, rm=True, replace=False)
+    elif defect_type == DefectType.Substitution:
+        _update(structure, site, rm=False, replace=True)
+    elif defect_type == DefectType.Interstitial:
+        _update(structure, site, rm=False, replace=False)
+    else:
+        raise ValueError("Unknown point defect type.")
 
 
 class Adsorbate(Interstitial):
