@@ -1,8 +1,10 @@
 """Classes representing defects."""
 from __future__ import annotations
 
+import collections
 import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
+from enum import Enum
 from typing import Dict
 
 import numpy as np
@@ -26,6 +28,15 @@ __maintainer__ = "Jimmy-Xuan Shen @jmmshn"
 __date__ = "Mar 15, 2022"
 
 logger = logging.getLogger(__name__)
+
+
+class DefectType(Enum):
+    """Defect type, for sorting purposes."""
+
+    Vacancy = 0
+    Substitution = 1
+    Interstitial = 2
+    Other = 3
 
 
 class Defect(MSONable, metaclass=ABCMeta):
@@ -190,6 +201,15 @@ class Defect(MSONable, metaclass=ABCMeta):
         sm = StructureMatcher(comparator=ElementComparator())
         return sm.fit(self.defect_structure, __o.defect_structure)
 
+    @property
+    def defect_type(self) -> int:
+        """Get the defect type.
+
+        Returns:
+            int: The defect type.
+        """
+        return getattr(DefectType, self.__class__.__name__)
+
 
 class Vacancy(Defect):
     """Class representing a vacancy defect."""
@@ -222,8 +242,6 @@ class Vacancy(Defect):
             ),
             key=lambda x: x[1],
         )
-        if len(res) == 0:
-            raise ValueError("No site found in structure")
         return res
 
     @property
@@ -464,6 +482,164 @@ class Interstitial(Defect):
         sub_species = get_element(self.site.specie)
         fpos_str = ",".join(f"{x:.2f}" for x in self.site.frac_coords)
         return f"{sub_species} intersitial site at " f"at site [{fpos_str}]"
+
+
+class DefectComplex(Defect):
+    """A complex of defects."""
+
+    def __init__(
+        self,
+        defects: list[Defect],
+        oxi_state: float | None = None,
+    ) -> None:
+        """Initialize a complex defect object.
+
+        Args:
+            defects: List of defects.
+            oxi_state: The oxidation state of the defect, if not specified,
+                this will be determined automatically.
+        """
+        self.defects = defects
+        self.structure = self.defects[0].structure
+        self.oxi_state = self._guess_oxi_state() if oxi_state is None else oxi_state
+
+    def __repr__(self) -> str:
+        """Representation of a complex defect."""
+        return f"Complex defect containing: {[d.name for d in self.defects]}"
+
+    def get_multiplicity(self) -> int:
+        """Determine the multiplicity of the defect site within the structure."""
+        raise NotImplementedError("Complex defect multiplicity is not implemented.")
+
+    @property
+    def element_changes(self) -> Dict[Element, int]:
+        """Determine the species changes of the complex defect."""
+        cnt: dict[Element, int] = collections.defaultdict(int)
+        for defect in self.defects:
+            for el, change in defect.element_changes.items():
+                cnt[el] += change
+        return dict(cnt)
+
+    @property
+    def name(self) -> str:
+        """Name of the defect."""
+        return "_".join([d.name for d in self.defects])
+
+    def _guess_oxi_state(self) -> float:
+        oxi_state = 0.0
+        for defect in self.defects:
+            oxi_state += defect.oxi_state
+        return oxi_state
+
+    @property
+    def defect_structure(self) -> Structure:
+        """Returns the defect structure."""
+        defect_structure = self.structure.copy()
+        for defect in self.defects:
+            update_structure(
+                defect_structure, defect.site, defect_type=defect.defect_type
+            )
+        return defect_structure
+
+    def get_supercell_structure(
+        self,
+        sc_mat: np.ndarray | None = None,
+        dummy_species: Species | None = None,
+        min_atoms: int = 80,
+        max_atoms: int = 240,
+        min_length: float = 10.0,
+        force_diagonal: bool = False,
+    ) -> Structure:
+        """Generate the supercell for a defect.
+
+        Args:
+            sc_mat: supercell matrix if None, the supercell will be determined by `CubicSupercellAnalyzer`.
+            dummy_species: Dummy species used for visualization. Will be placed at the average
+                position of the defect sites.
+            max_atoms: Maximum number of atoms allowed in the supercell.
+            min_atoms: Minimum number of atoms allowed in the supercell.
+            min_length: Minimum length of the smallest supercell lattice vector.
+            force_diagonal: If True, return a transformation with a diagonal transformation matrix.
+
+        Returns:
+            Structure: The supercell structure.
+        """
+        if sc_mat is None:
+            sc_mat = get_sc_fromstruct(
+                self.structure,
+                min_atoms=min_atoms,
+                max_atoms=max_atoms,
+                min_length=min_length,
+                force_diagonal=force_diagonal,
+            )
+        sc_structure = self.structure * sc_mat
+        sc_mat_inv = np.linalg.inv(sc_mat)
+        complex_pos = np.zeros(3)
+        for defect in self.defects:
+            sc_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
+            complex_pos += sc_pos
+            sc_site = PeriodicSite(defect.site.specie, sc_pos, sc_structure.lattice)
+            update_structure(sc_structure, sc_site, defect_type=defect.defect_type)
+        complex_pos /= len(self.defects)
+        if dummy_species is not None:
+            sc_structure.insert(
+                0,
+                species=dummy_species,
+                coords=np.mod(complex_pos, 1),
+            )
+
+        return sc_structure
+
+
+def update_structure(structure, site, defect_type):
+    """Update the structure with the defect site.
+
+    Types of operations:
+        1. Vacancy: remove the site.
+        2. Substitution: replace the site with the defect species.
+        3. Interstitial: insert the defect species at the site.
+
+    Args:
+        structure: The structure to be updated.
+        site: The defect site.
+        defect_type: The type of the defect.
+
+    Returns:
+        Structure: The updated structure.
+    """
+
+    def _update(structure, site, rm: bool, replace: bool):
+        in_sphere = structure.get_sites_in_sphere(site.coords, 0.1, include_index=True)
+
+        if len(in_sphere) == 0 and rm:  # pragma: no cover
+            raise ValueError("No site found to remove.")
+
+        if rm or replace:
+            rm_site = min(
+                in_sphere,
+                key=lambda x: x[1],
+            )
+            rm_index = rm_site.index
+            structure.remove_sites([rm_index])
+
+        if rm:
+            return
+
+        sub_specie = Element(site.specie.symbol)
+        structure.insert(
+            0,
+            species=sub_specie,
+            coords=site.frac_coords,
+        )
+
+    if defect_type == DefectType.Vacancy:
+        _update(structure, site, rm=True, replace=False)
+    elif defect_type == DefectType.Substitution:
+        _update(structure, site, rm=False, replace=True)
+    elif defect_type == DefectType.Interstitial:
+        _update(structure, site, rm=False, replace=False)
+    else:
+        raise ValueError("Unknown point defect type.")
 
 
 class Adsorbate(Interstitial):
