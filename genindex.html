@@ -233,7 +233,7 @@
           
 <section class="genindex-section">
   <h1 id="index">Index</h1>
-  <div class="genindex-jumpbox"><a href="#A"><strong>A</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#K"><strong>K</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#O"><strong>O</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#Q"><strong>Q</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#V"><strong>V</strong></a> | <a href="#W"><strong>W</strong></a></div>
+  <div class="genindex-jumpbox"><a href="#A"><strong>A</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#K"><strong>K</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#O"><strong>O</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#Q"><strong>Q</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#U"><strong>U</strong></a> | <a href="#V"><strong>V</strong></a> | <a href="#W"><strong>W</strong></a></div>
 </section>
 <section id="A" class="genindex-section">
   <h2>A</h2>
@@ -345,8 +345,6 @@
           <li><a href="reference/core.html#pymatgen.analysis.defects.core.Vacancy.defect_site_index">(pymatgen.analysis.defects.core.Vacancy property)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="reference/core.html#pymatgen.analysis.defects.core.Defect.defect_structure">defect_structure (pymatgen.analysis.defects.core.Defect property)</a>
 
         <ul>
@@ -357,11 +355,21 @@
           <li><a href="reference/core.html#pymatgen.analysis.defects.core.Vacancy.defect_structure">(pymatgen.analysis.defects.core.Vacancy property)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="reference/core.html#pymatgen.analysis.defects.core.DefectComplex.defect_structure">defect_structure() (pymatgen.analysis.defects.core.DefectComplex method)</a>
+</li>
+        <li><a href="reference/core.html#pymatgen.analysis.defects.core.Defect.defect_type">defect_type (pymatgen.analysis.defects.core.Defect property)</a>
+</li>
+        <li><a href="reference/core.html#pymatgen.analysis.defects.core.DefectComplex">DefectComplex (class in pymatgen.analysis.defects.core)</a>
+</li>
         <li><a href="reference/thermo.html#pymatgen.analysis.defects.thermo.DefectEntry">DefectEntry (class in pymatgen.analysis.defects.thermo)</a>
 </li>
         <li><a href="reference/generators.html#pymatgen.analysis.defects.generators.DefectGenerator">DefectGenerator (class in pymatgen.analysis.defects.generators)</a>
 </li>
         <li><a href="reference/finder.html#pymatgen.analysis.defects.finder.DefectSiteFinder">DefectSiteFinder (class in pymatgen.analysis.defects.finder)</a>
+</li>
+        <li><a href="reference/core.html#pymatgen.analysis.defects.core.DefectType">DefectType (class in pymatgen.analysis.defects.core)</a>
 </li>
         <li><a href="reference/ccd.html#pymatgen.analysis.defects.ccd.HarmonicDefect.distortions">distortions (pymatgen.analysis.defects.ccd.HarmonicDefect attribute)</a>
 </li>
@@ -459,10 +467,10 @@
 </li>
         <li><a href="reference/thermo.html#pymatgen.analysis.defects.thermo.DefectEntry.get_freysoldt_correction">get_freysoldt_correction() (pymatgen.analysis.defects.thermo.DefectEntry method)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="reference/finder.html#pymatgen.analysis.defects.finder.DefectSiteFinder.get_impurity_position">get_impurity_position() (pymatgen.analysis.defects.finder.DefectSiteFinder method)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="reference/utils.html#pymatgen.analysis.defects.utils.get_local_extrema">get_local_extrema() (in module pymatgen.analysis.defects.utils)</a>
 </li>
         <li><a href="reference/utils.html#pymatgen.analysis.defects.utils.get_localized_state">get_localized_state() (in module pymatgen.analysis.defects.utils)</a>
@@ -490,7 +498,11 @@
         <li><a href="reference/finder.html#pymatgen.analysis.defects.finder.get_soap_vec">get_soap_vec() (in module pymatgen.analysis.defects.finder)</a>
 </li>
         <li><a href="reference/core.html#pymatgen.analysis.defects.core.Defect.get_supercell_structure">get_supercell_structure() (pymatgen.analysis.defects.core.Defect method)</a>
+
+        <ul>
+          <li><a href="reference/core.html#pymatgen.analysis.defects.core.DefectComplex.get_supercell_structure">(pymatgen.analysis.defects.core.DefectComplex method)</a>
 </li>
+        </ul></li>
         <li><a href="reference/thermo.html#pymatgen.analysis.defects.thermo.get_transitions">get_transitions() (in module pymatgen.analysis.defects.thermo)</a>
 
         <ul>
@@ -791,6 +803,16 @@
           <li><a href="reference/generators.html#pymatgen.analysis.defects.generators.VacancyGenerator.symprec">(pymatgen.analysis.defects.generators.VacancyGenerator attribute)</a>
 </li>
         </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="U" class="genindex-section">
+  <h2>U</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="reference/core.html#pymatgen.analysis.defects.core.update_structure">update_structure() (in module pymatgen.analysis.defects.core)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>
