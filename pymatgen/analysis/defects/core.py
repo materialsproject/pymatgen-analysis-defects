@@ -33,10 +33,10 @@ logger = logging.getLogger(__name__)
 class DefectType(Enum):
     """Defect type, for sorting purposes."""
 
-    VACANDY = 0
-    SUBSTITUTION = 1
-    INTERSTITIAL = 2
-    OTHER = 3
+    Vacancy = 0
+    Substitution = 1
+    Interstitial = 2
+    Other = 3
 
 
 class Defect(MSONable, metaclass=ABCMeta):
@@ -508,7 +508,7 @@ class DefectComplex(Defect):
                 this will be determined automatically.
         """
         self.defects = defects
-        self.structure = self.defects[0].defect_structure
+        self.structure = self.defects[0].structure
         self.oxi_state = self._guess_oxi_state() if oxi_state is None else oxi_state
 
     def __repr__(self) -> str:
@@ -539,6 +539,7 @@ class DefectComplex(Defect):
             oxi_state += defect.oxi_state
         return oxi_state
 
+    @property
     def defect_structure(self) -> Structure:
         """Returns the defect structure."""
         defect_structure = self.structure.copy()
@@ -551,7 +552,7 @@ class DefectComplex(Defect):
     def get_supercell_structure(
         self,
         sc_mat: np.ndarray | None = None,
-        dummy_species: str | None = None,
+        dummy_species: Species | None = None,
         min_atoms: int = 80,
         max_atoms: int = 240,
         min_length: float = 10.0,
@@ -561,6 +562,8 @@ class DefectComplex(Defect):
 
         Args:
             sc_mat: supercell matrix if None, the supercell will be determined by `CubicSupercellAnalyzer`.
+            dummy_species: Dummy species used for visualization. Will be placed at the average
+                position of the defect sites.
             max_atoms: Maximum number of atoms allowed in the supercell.
             min_atoms: Minimum number of atoms allowed in the supercell.
             min_length: Minimum length of the smallest supercell lattice vector.
@@ -579,10 +582,20 @@ class DefectComplex(Defect):
             )
         sc_structure = self.structure * sc_mat
         sc_mat_inv = np.linalg.inv(sc_mat)
+        complex_pos = np.zeros(3)
         for defect in self.defects:
             sc_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
+            complex_pos += sc_pos
             sc_site = PeriodicSite(defect.site.specie, sc_pos, sc_structure.lattice)
             update_structure(sc_structure, sc_site, defect_type=defect.defect_type)
+        complex_pos /= len(self.defects)
+        if dummy_species is not None:
+            sc_structure.insert(
+                0,
+                species=dummy_species,
+                coords=np.mod(complex_pos, 1),
+            )
+
         return sc_structure
 
 
@@ -604,15 +617,22 @@ def update_structure(structure, site, defect_type):
     """
 
     def _update(structure, site, rm: bool, replace: bool):
-        rep_site = min(
-            structure.get_sites_in_sphere(site.coords, 0.1, include_index=True),
-            key=lambda x: x[1],
-        )
-        rep_index = rep_site.index
+        in_sphere = structure.get_sites_in_sphere(site.coords, 0.1, include_index=True)
+
+        if len(in_sphere) == 0 and rm:
+            raise ValueError("No site found to remove.")
+
         if rm or replace:
-            structure.remove_sites([rep_index])
+            rm_site = min(
+                in_sphere,
+                key=lambda x: x[1],
+            )
+            rm_index = rm_site.index
+            structure.remove_sites([rm_index])
+
         if rm:
             return
+
         sub_specie = Element(site.specie.symbol)
         structure.insert(
             0,
