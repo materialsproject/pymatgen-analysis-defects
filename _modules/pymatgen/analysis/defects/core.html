@@ -235,6 +235,7 @@
 <span></span><span class="sd">&quot;&quot;&quot;Classes representing defects.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">abstractproperty</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
@@ -266,10 +267,10 @@
 <div class="viewcode-block" id="DefectType"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.DefectType">[docs]</a><span class="k">class</span> <span class="nc">DefectType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Defect type, for sorting purposes.&quot;&quot;&quot;</span>
 
-    <span class="n">VACANDY</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">SUBSTITUTION</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">INTERSTITIAL</span> <span class="o">=</span> <span class="mi">2</span>
-    <span class="n">OTHER</span> <span class="o">=</span> <span class="mi">3</span></div>
+    <span class="n">Vacancy</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">Substitution</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">Interstitial</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">Other</span> <span class="o">=</span> <span class="mi">3</span></div>
 
 
 <div class="viewcode-block" id="Defect"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Defect">[docs]</a><span class="k">class</span> <span class="nc">Defect</span><span class="p">(</span><span class="n">MSONable</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
@@ -725,44 +726,67 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sub_species</span><span class="si">}</span><span class="s2"> intersitial site at &quot;</span> <span class="sa">f</span><span class="s2">&quot;at site [</span><span class="si">{</span><span class="n">fpos_str</span><span class="si">}</span><span class="s2">]&quot;</span></div>
 
 
-<div class="viewcode-block" id="DefectComplex"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.DefectComplex">[docs]</a><span class="k">class</span> <span class="nc">DefectComplex</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
+<div class="viewcode-block" id="DefectComplex"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.DefectComplex">[docs]</a><span class="k">class</span> <span class="nc">DefectComplex</span><span class="p">(</span><span class="n">Defect</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A complex of defects.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">defects</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Defect</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">defects</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Defect</span><span class="p">],</span>
+        <span class="n">oxi_state</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Initialize a complex defect object.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            defects: List of defects.</span>
+<span class="sd">            oxi_state: The oxidation state of the defect, if not specified,</span>
+<span class="sd">                this will be determined automatically.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">defects</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">defects</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Post initialization.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defects</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">defect_structure</span>
-        <span class="c1"># sort the defects by the defect site index</span>
-        <span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defects</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">defect</span><span class="o">.</span><span class="n">defect_structure</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defect_structure</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;All defects in a complex defect must have the same structure.&quot;</span>
-                <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">oxi_state</span> <span class="o">+=</span> <span class="n">defect</span><span class="o">.</span><span class="n">oxi_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defects</span> <span class="o">=</span> <span class="n">defects</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defects</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">structure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oxi_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guess_oxi_state</span><span class="p">()</span> <span class="k">if</span> <span class="n">oxi_state</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">oxi_state</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Representation of a complex defect.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Complex defect containing: </span><span class="si">{</span><span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defects</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
 
-<div class="viewcode-block" id="DefectComplex.defect_structure"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.DefectComplex.defect_structure">[docs]</a>    <span class="k">def</span> <span class="nf">defect_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Structure</span><span class="p">:</span>
+<div class="viewcode-block" id="DefectComplex.get_multiplicity"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.DefectComplex.get_multiplicity">[docs]</a>    <span class="k">def</span> <span class="nf">get_multiplicity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Determine the multiplicity of the defect site within the structure.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Complex defect multiplicity is not implemented.&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">element_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Element</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Determine the species changes of the complex defect.&quot;&quot;&quot;</span>
+        <span class="n">cnt</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Element</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defects</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">el</span><span class="p">,</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">defect</span><span class="o">.</span><span class="n">element_changes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">cnt</span><span class="p">[</span><span class="n">el</span><span class="p">]</span> <span class="o">+=</span> <span class="n">change</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">cnt</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Name of the defect.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">d</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defects</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_guess_oxi_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="n">oxi_state</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defects</span><span class="p">:</span>
+            <span class="n">oxi_state</span> <span class="o">+=</span> <span class="n">defect</span><span class="o">.</span><span class="n">oxi_state</span>
+        <span class="k">return</span> <span class="n">oxi_state</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">defect_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Structure</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns the defect structure.&quot;&quot;&quot;</span>
         <span class="n">defect_structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defects</span><span class="p">:</span>
             <span class="n">update_structure</span><span class="p">(</span>
                 <span class="n">defect_structure</span><span class="p">,</span> <span class="n">defect</span><span class="o">.</span><span class="n">site</span><span class="p">,</span> <span class="n">defect_type</span><span class="o">=</span><span class="n">defect</span><span class="o">.</span><span class="n">defect_type</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="n">defect_structure</span></div>
+        <span class="k">return</span> <span class="n">defect_structure</span>
 
 <div class="viewcode-block" id="DefectComplex.get_supercell_structure"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.DefectComplex.get_supercell_structure">[docs]</a>    <span class="k">def</span> <span class="nf">get_supercell_structure</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">sc_mat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dummy_species</span><span class="p">:</span> <span class="n">Species</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">min_atoms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">80</span><span class="p">,</span>
         <span class="n">max_atoms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">240</span><span class="p">,</span>
         <span class="n">min_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>
@@ -772,6 +796,8 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            sc_mat: supercell matrix if None, the supercell will be determined by `CubicSupercellAnalyzer`.</span>
+<span class="sd">            dummy_species: Dummy species used for visualization. Will be placed at the average</span>
+<span class="sd">                position of the defect sites.</span>
 <span class="sd">            max_atoms: Maximum number of atoms allowed in the supercell.</span>
 <span class="sd">            min_atoms: Minimum number of atoms allowed in the supercell.</span>
 <span class="sd">            min_length: Minimum length of the smallest supercell lattice vector.</span>
@@ -790,10 +816,20 @@
             <span class="p">)</span>
         <span class="n">sc_structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">*</span> <span class="n">sc_mat</span>
         <span class="n">sc_mat_inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">sc_mat</span><span class="p">)</span>
+        <span class="n">complex_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defects</span><span class="p">:</span>
             <span class="n">sc_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">defect</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">,</span> <span class="n">sc_mat_inv</span><span class="p">)</span>
+            <span class="n">complex_pos</span> <span class="o">+=</span> <span class="n">sc_pos</span>
             <span class="n">sc_site</span> <span class="o">=</span> <span class="n">PeriodicSite</span><span class="p">(</span><span class="n">defect</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">,</span> <span class="n">sc_pos</span><span class="p">,</span> <span class="n">sc_structure</span><span class="o">.</span><span class="n">lattice</span><span class="p">)</span>
             <span class="n">update_structure</span><span class="p">(</span><span class="n">sc_structure</span><span class="p">,</span> <span class="n">sc_site</span><span class="p">,</span> <span class="n">defect_type</span><span class="o">=</span><span class="n">defect</span><span class="o">.</span><span class="n">defect_type</span><span class="p">)</span>
+        <span class="n">complex_pos</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defects</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dummy_species</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sc_structure</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                <span class="mi">0</span><span class="p">,</span>
+                <span class="n">species</span><span class="o">=</span><span class="n">dummy_species</span><span class="p">,</span>
+                <span class="n">coords</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">complex_pos</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="p">)</span>
+
         <span class="k">return</span> <span class="n">sc_structure</span></div></div>
 
 
@@ -815,15 +851,22 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">rm</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">replace</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
-        <span class="n">rep_site</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
-            <span class="n">structure</span><span class="o">.</span><span class="n">get_sites_in_sphere</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">include_index</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-        <span class="p">)</span>
-        <span class="n">rep_index</span> <span class="o">=</span> <span class="n">rep_site</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">in_sphere</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get_sites_in_sphere</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">include_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_sphere</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">rm</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No site found to remove.&quot;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">rm</span> <span class="ow">or</span> <span class="n">replace</span><span class="p">:</span>
-            <span class="n">structure</span><span class="o">.</span><span class="n">remove_sites</span><span class="p">([</span><span class="n">rep_index</span><span class="p">])</span>
+            <span class="n">rm_site</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+                <span class="n">in_sphere</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="n">rm_index</span> <span class="o">=</span> <span class="n">rm_site</span><span class="o">.</span><span class="n">index</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">remove_sites</span><span class="p">([</span><span class="n">rm_index</span><span class="p">])</span>
+
         <span class="k">if</span> <span class="n">rm</span><span class="p">:</span>
             <span class="k">return</span>
+
         <span class="n">sub_specie</span> <span class="o">=</span> <span class="n">Element</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
         <span class="n">structure</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
             <span class="mi">0</span><span class="p">,</span>

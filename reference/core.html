@@ -624,18 +624,55 @@ this will be determined automatically.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.core.DefectComplex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.core.</span></span><span class="sig-name descname"><span class="pre">DefectComplex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defects</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#DefectComplex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.DefectComplex" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.core.</span></span><span class="sig-name descname"><span class="pre">DefectComplex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oxi_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#DefectComplex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.DefectComplex" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymatgen.analysis.defects.core.Defect" title="pymatgen.analysis.defects.core.Defect"><code class="xref py py-class docutils literal notranslate"><span class="pre">Defect</span></code></a></p>
 <p>A complex of defects.</p>
 <p>Initialize a complex defect object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>defects</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="#pymatgen.analysis.defects.core.Defect" title="pymatgen.analysis.defects.core.Defect"><code class="xref py py-class docutils literal notranslate"><span class="pre">Defect</span></code></a>]) – List of defects.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>defects</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="#pymatgen.analysis.defects.core.Defect" title="pymatgen.analysis.defects.core.Defect"><code class="xref py py-class docutils literal notranslate"><span class="pre">Defect</span></code></a>]) – List of defects.</p></li>
+<li><p><strong>oxi_state</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – The oxidation state of the defect, if not specified,
+this will be determined automatically.</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.core.DefectComplex.get_multiplicity">
+<span class="sig-name descname"><span class="pre">get_multiplicity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#DefectComplex.get_multiplicity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.DefectComplex.get_multiplicity" title="Permalink to this definition">#</a></dt>
+<dd><p>Determine the multiplicity of the defect site within the structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.core.DefectComplex.element_changes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_changes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Element</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pymatgen.analysis.defects.core.DefectComplex.element_changes" title="Permalink to this definition">#</a></dt>
+<dd><p>Determine the species changes of the complex defect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.core.DefectComplex.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pymatgen.analysis.defects.core.DefectComplex.name" title="Permalink to this definition">#</a></dt>
+<dd><p>Name of the defect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.core.DefectComplex.defect_structure">
-<span class="sig-name descname"><span class="pre">defect_structure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#DefectComplex.defect_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.DefectComplex.defect_structure" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">defect_structure</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Structure</span></em><a class="headerlink" href="#pymatgen.analysis.defects.core.DefectComplex.defect_structure" title="Permalink to this definition">#</a></dt>
 <dd><p>Returns the defect structure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -646,12 +683,14 @@ this will be determined automatically.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.core.DefectComplex.get_supercell_structure">
-<span class="sig-name descname"><span class="pre">get_supercell_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sc_mat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">240</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_diagonal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#DefectComplex.get_supercell_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.DefectComplex.get_supercell_structure" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_supercell_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sc_mat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dummy_species</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_atoms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">240</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_diagonal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/core.html#DefectComplex.get_supercell_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.core.DefectComplex.get_supercell_structure" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate the supercell for a defect.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sc_mat</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]) – supercell matrix if None, the supercell will be determined by <cite>CubicSupercellAnalyzer</cite>.</p></li>
+<li><p><strong>dummy_species</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Species</span></code>]) – Dummy species used for visualization. Will be placed at the average
+position of the defect sites.</p></li>
 <li><p><strong>max_atoms</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Maximum number of atoms allowed in the supercell.</p></li>
 <li><p><strong>min_atoms</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Minimum number of atoms allowed in the supercell.</p></li>
 <li><p><strong>min_length</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Minimum length of the smallest supercell lattice vector.</p></li>
