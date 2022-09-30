@@ -442,15 +442,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            int: The defect type.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">DefectType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__o</span><span class="p">:</span> <span class="n">Defect</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Less than operator.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">defect_type</span> <span class="o">&lt;</span> <span class="n">__o</span><span class="o">.</span><span class="n">defect_type</span>
-
-    <span class="k">def</span> <span class="fm">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__o</span><span class="p">:</span> <span class="n">Defect</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Greater than operator.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">defect_type</span> <span class="o">&gt;</span> <span class="n">__o</span><span class="o">.</span><span class="n">defect_type</span></div>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">DefectType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Vacancy"><a class="viewcode-back" href="../../../../reference/core.html#pymatgen.analysis.defects.core.Vacancy">[docs]</a><span class="k">class</span> <span class="nc">Vacancy</span><span class="p">(</span><span class="n">Defect</span><span class="p">):</span>
@@ -853,7 +845,7 @@
     <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">site</span><span class="p">,</span> <span class="n">rm</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">replace</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="n">in_sphere</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get_sites_in_sphere</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">include_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_sphere</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">rm</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">in_sphere</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">rm</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No site found to remove.&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">rm</span> <span class="ow">or</span> <span class="n">replace</span><span class="p">:</span>
