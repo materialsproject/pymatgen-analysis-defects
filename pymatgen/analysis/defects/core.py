@@ -210,14 +210,6 @@ class Defect(MSONable, metaclass=ABCMeta):
         """
         return getattr(DefectType, self.__class__.__name__)
 
-    def __lt__(self, __o: Defect) -> bool:
-        """Less than operator."""
-        return self.defect_type < __o.defect_type
-
-    def __gt__(self, __o: Defect) -> bool:
-        """Greater than operator."""
-        return self.defect_type > __o.defect_type
-
 
 class Vacancy(Defect):
     """Class representing a vacancy defect."""
