@@ -83,6 +83,7 @@ def test_complex(gan_struct):
     assert sc_struct.formula == "Ga63 N63 O1"
     dc.oxi_state == sub.oxi_state + vac.oxi_state
     dc.element_changes == {Element("Ga"): -1, Element("N"): -1, Element("O"): 1}
+    dc.defect_structure.formula == "Ga1 N1 O1"
 
     dc2 = DefectComplex([sub, vac, inter])
     assert dc2.name == "O_N_v_Ga_H_i"

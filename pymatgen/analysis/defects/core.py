@@ -611,7 +611,7 @@ def update_structure(structure, site, defect_type):
     def _update(structure, site, rm: bool, replace: bool):
         in_sphere = structure.get_sites_in_sphere(site.coords, 0.1, include_index=True)
 
-        if len(in_sphere) == 0 and rm:
+        if len(in_sphere) == 0 and rm:  # pragma: no cover
             raise ValueError("No site found to remove.")
 
         if rm or replace:
