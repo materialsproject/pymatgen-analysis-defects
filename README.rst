@@ -54,7 +54,7 @@ Note, this method only requires the reference pristine supercell and does not ne
 of how the defect was created.
 
 Defect Complexes
-+++++++++++++++
+++++++++++++++++
 
 Multiple defects can be composed into defect complexes.
 The complex is can be treateded as a normal defect object for subsequent analysis.
