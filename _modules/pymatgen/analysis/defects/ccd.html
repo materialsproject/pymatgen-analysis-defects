@@ -405,25 +405,36 @@
             <span class="n">E0</span><span class="o">=</span><span class="n">energies</span><span class="p">[</span><span class="n">relaxed_index</span><span class="p">],</span>
         <span class="p">)</span>
 
+        <span class="n">get_band_structure_kwargs</span> <span class="o">=</span> <span class="n">get_band_structure_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">bandstructure</span> <span class="o">=</span> <span class="n">vaspruns</span><span class="p">[</span><span class="n">relaxed_index</span><span class="p">]</span><span class="o">.</span><span class="n">get_band_structure</span><span class="p">(</span>
+            <span class="o">**</span><span class="n">get_band_structure_kwargs</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">store_bandstructure</span><span class="p">:</span>
+            <span class="n">bs</span> <span class="o">=</span> <span class="n">bandstructure</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bs</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">if</span> <span class="n">defect_band_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">procar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;If defect_band_index is not provided, you must provide a Procar object.&quot;</span>
                 <span class="p">)</span>
-            <span class="n">get_band_structure_kwargs</span> <span class="o">=</span> <span class="n">get_band_structure_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
-            <span class="n">bandstructure</span> <span class="o">=</span> <span class="n">vaspruns</span><span class="p">[</span><span class="n">relaxed_index</span><span class="p">]</span><span class="o">.</span><span class="n">get_band_structure</span><span class="p">(</span>
-                <span class="o">**</span><span class="n">get_band_structure_kwargs</span>
+            <span class="n">loc_res</span> <span class="o">=</span> <span class="n">get_localized_state</span><span class="p">(</span>
+                <span class="n">bandstructure</span><span class="o">=</span><span class="n">bandstructure</span><span class="p">,</span> <span class="n">procar</span><span class="o">=</span><span class="n">procar</span><span class="p">,</span> <span class="n">k_index</span><span class="o">=</span><span class="n">kpt_index</span>
             <span class="p">)</span>
-            <span class="n">loc_res</span> <span class="o">=</span> <span class="n">get_localized_state</span><span class="p">(</span><span class="n">bandstructure</span><span class="o">=</span><span class="n">bandstructure</span><span class="p">,</span> <span class="n">procar</span><span class="o">=</span><span class="n">procar</span><span class="p">)</span>
             <span class="n">spin_e</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">defect_band_index</span><span class="p">)</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">loc_res</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">spin_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;If ``defect_band_index`` is provided, you must provide also ``spin_index``.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">kpt_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;If ``defect_band_index`` is provided, you must provide also ``kpt_index``.&quot;</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">spin_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">spin_index</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">spin_e</span> <span class="o">==</span> <span class="n">Spin</span><span class="o">.</span><span class="n">up</span> <span class="k">else</span> <span class="mi">1</span>
-
-        <span class="k">if</span> <span class="n">store_bandstructure</span><span class="p">:</span>
-            <span class="n">bs</span> <span class="o">=</span> <span class="n">bandstructure</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">bs</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">omega</span><span class="o">=</span><span class="n">omega</span><span class="p">,</span>
@@ -814,7 +825,9 @@
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">wswq_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">wswq_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;WSWQ*&quot;</span><span class="p">)]</span>
-        <span class="n">wswq_files</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">wswq_files</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+            <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span>  <span class="c1"># does stem work for non-zipped files?</span>
         <span class="n">wswqs</span> <span class="o">=</span> <span class="p">[</span><span class="n">WSWQ</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">wswq_files</span><span class="p">]</span>
         <span class="n">dQ</span> <span class="o">=</span> <span class="n">get_dQ</span><span class="p">(</span><span class="n">initial_defect</span><span class="o">.</span><span class="n">relaxed_structure</span><span class="p">,</span> <span class="n">final_defect</span><span class="o">.</span><span class="n">relaxed_structure</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">initial_defect</span><span class="p">,</span> <span class="n">final_defect</span><span class="p">,</span> <span class="n">dQ</span><span class="o">=</span><span class="n">dQ</span><span class="p">,</span> <span class="n">wswqs</span><span class="o">=</span><span class="n">wswqs</span><span class="p">)</span></div></div>
