@@ -29,6 +29,22 @@ def test_HarmonicDefect(v_ga):
     assert np.allclose(elph_me[..., 138], 0.0)  # ediff should be zero for defect band
     assert np.linalg.norm(elph_me[..., 139]) > 0
 
+    hd2 = HarmonicDefect.from_vaspruns(
+        vaspruns,
+        charge_state=0,
+        procar=procar,
+        kpt_index=1,
+        defect_band_index=139,
+        spin_index=1,
+    )
+    hd2.spin_index == 1
+
+    # check for ValueError
+    with pytest.raises(ValueError):
+        HarmonicDefect.from_vaspruns(
+            vaspruns, charge_state=0, procar=procar, kpt_index=1, defect_band_index=139
+        )
+
 
 # def test_OpticalHarmonicDefect(v_ga):
 #     from pymatgen.analysis.defects.ccd import OpticalHarmonicDefect
