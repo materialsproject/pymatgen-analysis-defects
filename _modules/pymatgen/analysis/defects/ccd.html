@@ -415,7 +415,7 @@
             <span class="n">bs</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">defect_band_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">procar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">procar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;If defect_band_index is not provided, you must provide a Procar object.&quot;</span>
                 <span class="p">)</span>
@@ -428,7 +428,7 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;If ``defect_band_index`` is provided, you must provide also ``spin_index``.&quot;</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="n">kpt_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kpt_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;If ``defect_band_index`` is provided, you must provide also ``kpt_index``.&quot;</span>
                 <span class="p">)</span>
