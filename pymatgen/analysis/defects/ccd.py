@@ -181,7 +181,7 @@ class HarmonicDefect(MSONable):
             bs = None
 
         if defect_band_index is None:
-            if procar is None:
+            if procar is None:  # pragma: no cover
                 raise ValueError(
                     "If defect_band_index is not provided, you must provide a Procar object."
                 )
@@ -194,7 +194,7 @@ class HarmonicDefect(MSONable):
                 raise ValueError(
                     "If ``defect_band_index`` is provided, you must provide also ``spin_index``."
                 )
-            if kpt_index is None:
+            if kpt_index is None:  # pragma: no cover
                 raise ValueError(
                     "If ``defect_band_index`` is provided, you must provide also ``kpt_index``."
                 )
