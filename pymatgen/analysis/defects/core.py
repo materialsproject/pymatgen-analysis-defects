@@ -62,8 +62,8 @@ class Defect(MSONable, metaclass=ABCMeta):
                 this will be determined automatically.
             symprec: Tolerance for symmetry finding.
             angle_tolerance: Angle tolerance for symmetry finding.
-            user_charges: User specified charge states states. If specified,
-                `get_charge_states` will return this list. If None or empty list
+            user_charges: User specified charge states. If specified,
+                ``get_charge_states`` will return this list. If ``None`` or empty list
                 the charge states will be determined automatically.
         """
         self.structure = structure
