@@ -50,6 +50,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         oxi_state: float | None = None,
         symprec: float = 0.01,
         angle_tolerance: float = 5,
+        user_charges: list[int] | None = None,
     ) -> None:
         """Initialize a defect object.
 
@@ -61,6 +62,9 @@ class Defect(MSONable, metaclass=ABCMeta):
                 this will be determined automatically.
             symprec: Tolerance for symmetry finding.
             angle_tolerance: Angle tolerance for symmetry finding.
+            user_charges: User specified charge states states. If specified,
+                `get_charge_states` will return this list. If None or empty list
+                the charge states will be determined automatically.
         """
         self.structure = structure
         self.site = site
@@ -69,6 +73,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         self.multiplicity = (
             multiplicity if multiplicity is not None else self.get_multiplicity()
         )
+        self.user_charges = user_charges if user_charges else []
         if oxi_state is None:
             # TODO this step might take time so wrap it in a timer
             self.structure.add_oxidation_state_by_guess()
@@ -115,6 +120,11 @@ class Defect(MSONable, metaclass=ABCMeta):
     def get_charge_states(self, padding: int = 1) -> list[int]:
         """Potential charge states for a given oxidation state.
 
+        If user charges are specified, these will be returned.
+        Otherwise, the charge states will be determined automatically based
+        on the oxidation state with a padding on either sites of 0 and the
+        oxidation state value.
+
         Args:
             padding: The number of charge states on the on either side of
                 0 and the oxidation state.
@@ -122,6 +132,9 @@ class Defect(MSONable, metaclass=ABCMeta):
         Returns:
             list of possible charge states
         """
+        if self.user_charges:
+            return self.user_charges
+
         if isinstance(self.oxi_state, int) or self.oxi_state.is_integer():
             oxi_state = int(self.oxi_state)
         else:
