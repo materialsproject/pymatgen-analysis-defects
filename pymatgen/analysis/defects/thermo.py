@@ -46,6 +46,10 @@ class DefectEntry(MSONable):
             automatically determine the defect location.
         corrections:
             A dictionary of corrections to the energy.
+        correction_summaries:
+            A dictionary that acts as a generic container for storing information
+            about how the corrections were calculated.  These should are only used
+            for debugging and plotting purposes.
     """
 
     defect: Defect
@@ -53,6 +57,7 @@ class DefectEntry(MSONable):
     sc_entry: ComputedStructureEntry
     sc_defect_frac_coords: Optional[ArrayLike] = None
     corrections: Optional[Dict[str, float]] = None
+    corrections_summaries: Optional[Dict[str, Dict]] = None
 
     def __post_init__(self):
         """Post-initialization."""
@@ -105,8 +110,8 @@ class DefectEntry(MSONable):
             defect_frac_coords=defect_fpos,
             **kwargs,
         )
-
         self.corrections.update(frey_corr)  # type: ignore
+        self.corrections_summaries["frey_corr"] = plot_data
         return plot_data
 
     @property
