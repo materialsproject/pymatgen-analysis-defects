@@ -27,7 +27,7 @@ def test_lower_envelope():
     ]
 
 
-def test_defect_entry2(defect_entries_Mg_Ga):
+def test_defect_entry(defect_entries_Mg_Ga):
     defect_entries, plot_data = defect_entries_Mg_Ga
 
     def_entry = defect_entries[0]
@@ -48,6 +48,13 @@ def test_defect_entry2(defect_entries_Mg_Ga):
 
     # test that the plotting code runs
     plot_plnr_avg(plot_data[0][1])
+    plot_plnr_avg(defect_entries[1].corrections_summaries["freysoldt_corrections"][1])
+
+    vr1 = plot_data[0][1]["pot_plot_data"]["Vr"]
+    vr2 = defect_entries[0].corrections_summaries["freysoldt_corrections"][1][
+        "pot_plot_data"
+    ]["Vr"]
+    assert np.allclose(vr1, vr2)
 
 
 def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):

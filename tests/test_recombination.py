@@ -22,9 +22,9 @@ def test_boltzmann():
         3.901200631921917e-09,
     ]
     results = boltzmann_filling(0.1, 300, n_states=6)
-    np.testing.assert_allclose(results.flatten(), ref_results)
+    assert np.testing.assert_allclose(results.flatten(), ref_results)
     results2 = boltzmann_filling(0.1, [100, 300], n_states=6)
-    np.testing.assert_allclose(results2[:, 1], ref_results)
+    assert np.testing.assert_allclose(results2[:, 1], ref_results, rtol=1e-3)
 
 
 def test_get_vibronic_matrix_elements():
@@ -39,7 +39,7 @@ def test_get_vibronic_matrix_elements():
         omega_i=omega_i, omega_f=omega_f, m_init=0, Nf=Nf, dQ=dQ, ovl=ovl
     )
     ref_result = [0.0, 3984589.0407885523, 0.0, 0.0, 0.0]
-    np.allclose(matel, ref_result)
+    assert np.allclose(matel, ref_result)
 
 
 def test_pchip_eval():
@@ -49,7 +49,7 @@ def test_pchip_eval():
     fx = pchip_eval(xx, x_coarse=x_c, y_coarse=y_c)
     int_val = np.trapz(np.nan_to_num(fx), x=xx)
     int_ref = np.sum(y_c)
-    pytest.approx(int_val, int_ref)
+    assert pytest.approx(int_val, int_ref)
 
 
 def test_get_SRH_coef():
@@ -64,4 +64,4 @@ def test_get_SRH_coef():
         volume=1,
         g=1,
     )
-    np.allclose(res, ref_res)
+    assert np.allclose(res, ref_res)

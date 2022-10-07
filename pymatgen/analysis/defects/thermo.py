@@ -17,7 +17,7 @@ from pymatgen.io.vasp import Locpot, Vasprun
 from scipy.spatial import ConvexHull
 
 from pymatgen.analysis.defects.core import Defect
-from pymatgen.analysis.defects.corrections import get_correction
+from pymatgen.analysis.defects.corrections import get_freysoldt_correction
 from pymatgen.analysis.defects.finder import DefectSiteFinder
 from pymatgen.analysis.defects.utils import get_zfile
 
@@ -63,6 +63,9 @@ class DefectEntry(MSONable):
         """Post-initialization."""
         self.charge_state = int(self.charge_state)
         self.corrections: dict = {} if self.corrections is None else self.corrections
+        self.corrections_summaries: dict = (
+            {} if self.corrections_summaries is None else self.corrections_summaries
+        )
 
     def get_freysoldt_correction(
         self,
@@ -102,7 +105,7 @@ class DefectEntry(MSONable):
         else:
             defect_fpos = self.sc_defect_frac_coords
 
-        frey_corr, plot_data = get_correction(
+        frey_corr, plot_data = get_freysoldt_correction(
             q=self.charge_state,
             dielectric=dielectric,
             defect_locpot=defect_locpot,
@@ -111,7 +114,7 @@ class DefectEntry(MSONable):
             **kwargs,
         )
         self.corrections.update(frey_corr)  # type: ignore
-        self.corrections_summaries["frey_corr"] = plot_data
+        self.corrections_summaries["freysoldt_corrections"] = plot_data.copy()
         return plot_data
 
     @property

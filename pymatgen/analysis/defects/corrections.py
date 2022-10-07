@@ -35,7 +35,7 @@ Rewritten to be functional instead of object oriented.
 """
 
 
-def get_correction(
+def get_freysoldt_correction(
     q: int,
     dielectric: float,
     defect_locpot: Locpot,
