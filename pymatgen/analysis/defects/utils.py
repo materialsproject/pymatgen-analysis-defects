@@ -520,12 +520,54 @@ class ChargeInsertionAnalyzer(MSONable):
         return res
 
 
+def _get_ipr(spin, k_index, procar):
+    states = procar.data[spin][k_index, ...]
+    flat_states = states.reshape(states.shape[0], -1)
+    return 1 / np.sum(flat_states**2, axis=1)
+
+
+def get_ipr_in_window(
+    bandstructure: BandStructure,
+    procar: Procar,
+    band_window: int = 5,
+) -> dict[Spin, npt.NDArray]:
+    """Get the inverse participation ratio (IPR) of the states in a given band window.
+
+    For a given number of bands above and below the Fermi level, the IPR is calculated.
+
+    Args:
+        bandstructure: The bandstructure object.
+            The band just below the fermi level is used as the center of band window.
+        procar: The procar object.
+        k_index: The index of the k-point to use. If None, the IPR is averaged over all k-points.
+        band_range: The number of bands above and blow the fermi level to include in the search window.
+
+    Returns:
+        dict[Spin, npt.NDArray]: The IPR of the states in the band window.
+    """
+    res = dict()
+    for spin in bandstructure.bands.keys():
+        # last band that is fully below the fermi level
+        last_occ_idx = bisect.bisect_left(
+            bandstructure.bands[spin].max(1), bandstructure.efermi
+        )
+        lbound = max(last_occ_idx - band_window, 0)
+        ubound = min(last_occ_idx + band_window, bandstructure.nb_bands)
+        ib_ipr = np.array([])
+        for k_idx, _ in enumerate(bandstructure.kpoints):
+            ipr = _get_ipr(spin, k_idx, procar)
+            ib_ipr_ = np.stack((np.arange(lbound, ubound), ipr[lbound:ubound])).T
+            ib_ipr = np.stack((ib_ipr, ib_ipr_), axis=0) if ib_ipr.size else ib_ipr_
+        res[spin] = ib_ipr
+    return res
+
+
 def get_localized_state(
     bandstructure: BandStructure,
     procar: Procar,
     k_index: int | None = None,
     band_window: int = 5,
-) -> dict[Spin, tuple[float, int]]:
+) -> dict[Spin, tuple[int, float]]:
     """Find the index of the localized state.
 
     Find the band index with the lowest inverse participation ratio (IPR) in a small window
@@ -540,37 +582,27 @@ def get_localized_state(
         band_range: The number of bands above and blow the fermi level to include in the search window.
 
     Returns:
-        dict[Spin, tuple(float, int)]:
-            The inverse participation ratio (IPR) and the index for each spin channel.
+        dict[Spin, tuple(int, float)]:
+            The band index and inverse participation ratio (IPR) of the most localized state for each spin channel.
     """
+    d_ib_ipr = get_ipr_in_window(bandstructure, procar, band_window)
     res = dict()
-    for spin in bandstructure.bands.keys():
-        # last band that is fully below the fermi level
-        last_occ_idx = bisect.bisect_left(
-            bandstructure.bands[spin].max(1), bandstructure.efermi
-        )
-        lbound = max(last_occ_idx - band_window, 0)
+    for spin, ib_ipr in d_ib_ipr.items():
+        # collape the first dimension by averaging over k-points
+        # This whole thing is not accurate enough to worry about k-weighting
         if k_index is None:
-            # average over all k
-            ipr = np.average(
-                [
-                    _get_ipr(spin, ik, procar)
-                    for ik in range(len(bandstructure.kpoints))
-                ],
-                axis=0,
+            ib_ipr = np.mean(ib_ipr, axis=0)
+            ib_ipr = np.expand_dims(ib_ipr, axis=0)
+            k_index = 0
+        # find the index of the minimum IPR
+        min_idx = np.argmin(ib_ipr[k_index, :, 1])
+        if not ib_ipr[k_index, min_idx, 0].is_integer():
+            raise ValueError(
+                "Since the band indices are synced across "
+                "different k points this should always be an integer."
             )
-        else:
-            ipr = _get_ipr(spin, k_index, procar)
-
-        idx = ipr[lbound:].argmin() + lbound
-        res[spin] = (ipr[idx], idx)
+        res[spin] = (int(ib_ipr[k_index, min_idx, 0]), ib_ipr[k_index, min_idx, 1])
     return res
-
-
-def _get_ipr(spin, k_index, procar):
-    states = procar.data[spin][k_index, ...]
-    flat_states = states.reshape(states.shape[0], -1)
-    return 1 / np.sum(flat_states**2, axis=1)
 
 
 def sort_positive_definite(
