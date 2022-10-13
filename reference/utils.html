@@ -585,6 +585,30 @@ where <code class="docutils literal notranslate"><span class="pre">site_group</s
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.get_ipr_in_window">
+<span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">get_ipr_in_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bandstructure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#get_ipr_in_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.get_ipr_in_window" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the inverse participation ratio (IPR) of the states in a given band window.</p>
+<p>For a given number of bands above and below the Fermi level, the IPR is calculated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bandstructure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">BandStructure</span></code>) – The bandstructure object.
+The band just below the fermi level is used as the center of band window.</p></li>
+<li><p><strong>procar</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Procar</span></code>) – The procar object.</p></li>
+<li><p><strong>k_index</strong> – The index of the k-point to use. If None, the IPR is averaged over all k-points.</p></li>
+<li><p><strong>band_range</strong> – The number of bands above and blow the fermi level to include in the search window.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The IPR of the states in the band window.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[Spin, npt.NDArray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.utils.get_localized_state">
 <span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.utils.</span></span><span class="sig-name descname"><span class="pre">get_localized_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bandstructure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band_window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/utils.html#get_localized_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.utils.get_localized_state" title="Permalink to this definition">#</a></dt>
 <dd><p>Find the index of the localized state.</p>
@@ -602,10 +626,10 @@ The band just below the fermi level is used as the center of band window.</p></l
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The inverse participation ratio (IPR) and the index for each spin channel.</p>
+<dd class="field-even"><p>The band index and inverse participation ratio (IPR) of the most localized state for each spin channel.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict[Spin, tuple(float, int)]</p>
+<dd class="field-odd"><p>dict[Spin, tuple(int, float)]</p>
 </dd>
 </dl>
 </dd></dl>

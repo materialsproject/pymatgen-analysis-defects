@@ -754,12 +754,54 @@
         <span class="k">return</span> <span class="n">res</span></div></div>
 
 
+<span class="k">def</span> <span class="nf">_get_ipr</span><span class="p">(</span><span class="n">spin</span><span class="p">,</span> <span class="n">k_index</span><span class="p">,</span> <span class="n">procar</span><span class="p">):</span>
+    <span class="n">states</span> <span class="o">=</span> <span class="n">procar</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">spin</span><span class="p">][</span><span class="n">k_index</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="n">flat_states</span> <span class="o">=</span> <span class="n">states</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">states</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">flat_states</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_ipr_in_window"><a class="viewcode-back" href="../../../../reference/utils.html#pymatgen.analysis.defects.utils.get_ipr_in_window">[docs]</a><span class="k">def</span> <span class="nf">get_ipr_in_window</span><span class="p">(</span>
+    <span class="n">bandstructure</span><span class="p">:</span> <span class="n">BandStructure</span><span class="p">,</span>
+    <span class="n">procar</span><span class="p">:</span> <span class="n">Procar</span><span class="p">,</span>
+    <span class="n">band_window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Spin</span><span class="p">,</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Get the inverse participation ratio (IPR) of the states in a given band window.</span>
+
+<span class="sd">    For a given number of bands above and below the Fermi level, the IPR is calculated.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        bandstructure: The bandstructure object.</span>
+<span class="sd">            The band just below the fermi level is used as the center of band window.</span>
+<span class="sd">        procar: The procar object.</span>
+<span class="sd">        k_index: The index of the k-point to use. If None, the IPR is averaged over all k-points.</span>
+<span class="sd">        band_range: The number of bands above and blow the fermi level to include in the search window.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict[Spin, npt.NDArray]: The IPR of the states in the band window.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">spin</span> <span class="ow">in</span> <span class="n">bandstructure</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="c1"># last band that is fully below the fermi level</span>
+        <span class="n">last_occ_idx</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect_left</span><span class="p">(</span>
+            <span class="n">bandstructure</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="n">spin</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">bandstructure</span><span class="o">.</span><span class="n">efermi</span>
+        <span class="p">)</span>
+        <span class="n">lbound</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">last_occ_idx</span> <span class="o">-</span> <span class="n">band_window</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">ubound</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">last_occ_idx</span> <span class="o">+</span> <span class="n">band_window</span><span class="p">,</span> <span class="n">bandstructure</span><span class="o">.</span><span class="n">nb_bands</span><span class="p">)</span>
+        <span class="n">ib_ipr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">k_idx</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bandstructure</span><span class="o">.</span><span class="n">kpoints</span><span class="p">):</span>
+            <span class="n">ipr</span> <span class="o">=</span> <span class="n">_get_ipr</span><span class="p">(</span><span class="n">spin</span><span class="p">,</span> <span class="n">k_idx</span><span class="p">,</span> <span class="n">procar</span><span class="p">)</span>
+            <span class="n">ib_ipr_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">lbound</span><span class="p">,</span> <span class="n">ubound</span><span class="p">),</span> <span class="n">ipr</span><span class="p">[</span><span class="n">lbound</span><span class="p">:</span><span class="n">ubound</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">ib_ipr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">ib_ipr</span><span class="p">,</span> <span class="n">ib_ipr_</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">ib_ipr</span><span class="o">.</span><span class="n">size</span> <span class="k">else</span> <span class="n">ib_ipr_</span>
+        <span class="n">res</span><span class="p">[</span><span class="n">spin</span><span class="p">]</span> <span class="o">=</span> <span class="n">ib_ipr</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
 <div class="viewcode-block" id="get_localized_state"><a class="viewcode-back" href="../../../../reference/utils.html#pymatgen.analysis.defects.utils.get_localized_state">[docs]</a><span class="k">def</span> <span class="nf">get_localized_state</span><span class="p">(</span>
     <span class="n">bandstructure</span><span class="p">:</span> <span class="n">BandStructure</span><span class="p">,</span>
     <span class="n">procar</span><span class="p">:</span> <span class="n">Procar</span><span class="p">,</span>
     <span class="n">k_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">band_window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Spin</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Spin</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;Find the index of the localized state.</span>
 
 <span class="sd">    Find the band index with the lowest inverse participation ratio (IPR) in a small window</span>
@@ -774,37 +816,27 @@
 <span class="sd">        band_range: The number of bands above and blow the fermi level to include in the search window.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        dict[Spin, tuple(float, int)]:</span>
-<span class="sd">            The inverse participation ratio (IPR) and the index for each spin channel.</span>
+<span class="sd">        dict[Spin, tuple(int, float)]:</span>
+<span class="sd">            The band index and inverse participation ratio (IPR) of the most localized state for each spin channel.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">d_ib_ipr</span> <span class="o">=</span> <span class="n">get_ipr_in_window</span><span class="p">(</span><span class="n">bandstructure</span><span class="p">,</span> <span class="n">procar</span><span class="p">,</span> <span class="n">band_window</span><span class="p">)</span>
     <span class="n">res</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">spin</span> <span class="ow">in</span> <span class="n">bandstructure</span><span class="o">.</span><span class="n">bands</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="c1"># last band that is fully below the fermi level</span>
-        <span class="n">last_occ_idx</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect_left</span><span class="p">(</span>
-            <span class="n">bandstructure</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="n">spin</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">bandstructure</span><span class="o">.</span><span class="n">efermi</span>
-        <span class="p">)</span>
-        <span class="n">lbound</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">last_occ_idx</span> <span class="o">-</span> <span class="n">band_window</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">spin</span><span class="p">,</span> <span class="n">ib_ipr</span> <span class="ow">in</span> <span class="n">d_ib_ipr</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># collape the first dimension by averaging over k-points</span>
+        <span class="c1"># This whole thing is not accurate enough to worry about k-weighting</span>
         <span class="k">if</span> <span class="n">k_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># average over all k</span>
-            <span class="n">ipr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span>
-                <span class="p">[</span>
-                    <span class="n">_get_ipr</span><span class="p">(</span><span class="n">spin</span><span class="p">,</span> <span class="n">ik</span><span class="p">,</span> <span class="n">procar</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">ik</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bandstructure</span><span class="o">.</span><span class="n">kpoints</span><span class="p">))</span>
-                <span class="p">],</span>
-                <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">ib_ipr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ib_ipr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">ib_ipr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">ib_ipr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">k_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># find the index of the minimum IPR</span>
+        <span class="n">min_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">ib_ipr</span><span class="p">[</span><span class="n">k_index</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ib_ipr</span><span class="p">[</span><span class="n">k_index</span><span class="p">,</span> <span class="n">min_idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Since the band indices are synced across &quot;</span>
+                <span class="s2">&quot;different k points this should always be an integer.&quot;</span>
             <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">ipr</span> <span class="o">=</span> <span class="n">_get_ipr</span><span class="p">(</span><span class="n">spin</span><span class="p">,</span> <span class="n">k_index</span><span class="p">,</span> <span class="n">procar</span><span class="p">)</span>
-
-        <span class="n">idx</span> <span class="o">=</span> <span class="n">ipr</span><span class="p">[</span><span class="n">lbound</span><span class="p">:]</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span> <span class="o">+</span> <span class="n">lbound</span>
-        <span class="n">res</span><span class="p">[</span><span class="n">spin</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ipr</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">idx</span><span class="p">)</span>
+        <span class="n">res</span><span class="p">[</span><span class="n">spin</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ib_ipr</span><span class="p">[</span><span class="n">k_index</span><span class="p">,</span> <span class="n">min_idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">ib_ipr</span><span class="p">[</span><span class="n">k_index</span><span class="p">,</span> <span class="n">min_idx</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">res</span></div>
-
-
-<span class="k">def</span> <span class="nf">_get_ipr</span><span class="p">(</span><span class="n">spin</span><span class="p">,</span> <span class="n">k_index</span><span class="p">,</span> <span class="n">procar</span><span class="p">):</span>
-    <span class="n">states</span> <span class="o">=</span> <span class="n">procar</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">spin</span><span class="p">][</span><span class="n">k_index</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-    <span class="n">flat_states</span> <span class="o">=</span> <span class="n">states</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">states</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">flat_states</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="sort_positive_definite"><a class="viewcode-back" href="../../../../reference/utils.html#pymatgen.analysis.defects.utils.sort_positive_definite">[docs]</a><span class="k">def</span> <span class="nf">sort_positive_definite</span><span class="p">(</span>
