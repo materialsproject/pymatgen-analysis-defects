@@ -170,25 +170,36 @@ class HarmonicDefect(MSONable):
             E0=energies[relaxed_index],
         )
 
-        if defect_band_index is None:
-            if procar is None:
-                raise ValueError(
-                    "If defect_band_index is not provided, you must provide a Procar object."
-                )
-            get_band_structure_kwargs = get_band_structure_kwargs or {}
-            bandstructure = vaspruns[relaxed_index].get_band_structure(
-                **get_band_structure_kwargs
-            )
-            loc_res = get_localized_state(bandstructure=bandstructure, procar=procar)
-            spin_e, (_, defect_band_index) = min(loc_res.items(), key=lambda x: x[1])
-
-        if spin_index is None:
-            spin_index = 0 if spin_e == Spin.up else 1
-
+        get_band_structure_kwargs = get_band_structure_kwargs or {}
+        bandstructure = vaspruns[relaxed_index].get_band_structure(
+            **get_band_structure_kwargs
+        )
         if store_bandstructure:
             bs = bandstructure
         else:
             bs = None
+
+        if defect_band_index is None:
+            if procar is None:  # pragma: no cover
+                raise ValueError(
+                    "If defect_band_index is not provided, you must provide a Procar object."
+                )
+            loc_res = get_localized_state(
+                bandstructure=bandstructure, procar=procar, k_index=kpt_index
+            )
+            spin_e, (_, defect_band_index) = min(loc_res.items(), key=lambda x: x[1])
+        else:
+            if spin_index is None:
+                raise ValueError(
+                    "If ``defect_band_index`` is provided, you must provide also ``spin_index``."
+                )
+            if kpt_index is None:  # pragma: no cover
+                raise ValueError(
+                    "If ``defect_band_index`` is provided, you must provide also ``kpt_index``."
+                )
+
+        if spin_index is None:
+            spin_index = 0 if spin_e == Spin.up else 1
 
         return cls(
             omega=omega,
@@ -640,7 +651,9 @@ class SRHCapture(MSONable):
             **kwargs,
         )
         wswq_files = [f for f in wswq_dir.glob("WSWQ*")]
-        wswq_files.sort(key=lambda x: int(x.stem.split(".")[1]))
+        wswq_files.sort(
+            key=lambda x: int(x.stem.split(".")[1])
+        )  # does stem work for non-zipped files?
         wswqs = [WSWQ.from_file(f) for f in wswq_files]
         dQ = get_dQ(initial_defect.relaxed_structure, final_defect.relaxed_structure)
         return cls(initial_defect, final_defect, dQ=dQ, wswqs=wswqs)
