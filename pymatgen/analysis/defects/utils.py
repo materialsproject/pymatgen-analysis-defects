@@ -596,7 +596,7 @@ def get_localized_state(
             k_index = 0
         # find the index of the minimum IPR
         min_idx = np.argmin(ib_ipr[k_index, :, 1])
-        if not ib_ipr[k_index, min_idx, 0].is_integer():
+        if not ib_ipr[k_index, min_idx, 0].is_integer():  # pragma: no cover
             raise ValueError(
                 "Since the band indices are synced across "
                 "different k points this should always be an integer."
