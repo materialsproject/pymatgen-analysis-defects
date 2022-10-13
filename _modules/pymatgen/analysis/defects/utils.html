@@ -830,7 +830,7 @@
             <span class="n">k_index</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="c1"># find the index of the minimum IPR</span>
         <span class="n">min_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">ib_ipr</span><span class="p">[</span><span class="n">k_index</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">])</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">ib_ipr</span><span class="p">[</span><span class="n">k_index</span><span class="p">,</span> <span class="n">min_idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ib_ipr</span><span class="p">[</span><span class="n">k_index</span><span class="p">,</span> <span class="n">min_idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;Since the band indices are synced across &quot;</span>
                 <span class="s2">&quot;different k points this should always be an integer.&quot;</span>
