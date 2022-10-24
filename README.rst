@@ -85,5 +85,3 @@ Contributor
    :target: https://codecov.io/gh/materialsproject/pymatgen-analysis-defects
 .. |zenodo| image:: https://zenodo.org/badge/452872799.svg
    :target: https://zenodo.org/badge/latestdoi/452872799
-
-
