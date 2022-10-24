@@ -1,7 +1,7 @@
 pymatgen-analysis-defects
 =========================
 
-|testing| |codecov|
+|testing| |codecov| |zenodo|
 
 📄 `Full Documentation <https://materialsproject.github.io/pymatgen-analysis-defects/>`_
 
@@ -83,3 +83,7 @@ Contributor
    :target: https://github.com/materialsproject/pymatgen-analysis-defects/actions/workflows/testing.yml
 .. |codecov| image:: https://codecov.io/gh/materialsproject/pymatgen-analysis-defects/branch/main/graph/badge.svg?token=FOKXRCZTXZ
    :target: https://codecov.io/gh/materialsproject/pymatgen-analysis-defects
+.. |zenodo| image:: https://zenodo.org/badge/452872799.svg
+   :target: https://zenodo.org/badge/latestdoi/452872799
+
+
