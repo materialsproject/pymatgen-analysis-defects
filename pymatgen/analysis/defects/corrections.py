@@ -366,3 +366,228 @@ def plot_plnr_avg(plot_data, title=None, saved=False):
         plt.savefig(str(title) + "FreyplnravgPlot.pdf")
         return None
     return plt
+
+
+# TODO Currently requires using the implementation in sxdefectalign2d
+# TODO Should be done natively since the IO of writing the potential
+# is a bottleneck at production,.
+def get_freysoldt2d_correction(
+    q: int,
+    dielectric: float,
+    defect_locpot: Locpot,
+    bulk_locpot: Locpot,
+    defect_frac_coords: Optional[ArrayLike] = None,
+    energy_cutoff: float = 520,
+    dielectric: float,
+    slab_buffer=2,
+):
+    sxdefectalign2d = which("sxdefectalign2d") or which("sxdefectalign2d.exe")
+    if not sxdefectalign2d:
+        raise RuntimeError("sxdefectalign2d is not in PATH")
+
+    if float(q) == 0.0:
+        return {'2d_electrostatic': 0.0}, {}
+        
+    slab_bottom = np.argmin(bulk_locpot.structure.cart_coords[:, 2])
+    slab_bottom = bulk_locpot.structure[slab_bottom].coords[2]
+    slab_top = np.argmax(bulk_locpot.structure.cart_coords[:, 2])
+    slab_top = bulk_locpot.structure[slab_top].coords[2]
+    defect_cart_coords = structure.lattice.get_cartesian_coords(defect_frac_coords)
+
+    write_sphinx_input(
+        dielectric_const=dielectric,
+        lattice_matrix=bulk_locpot.structure.lattice.matrix,
+        defect_sc_coords=defect_cart_coords, q=q,
+        slab_bottom=slab_bottom, slab_top=slab_top, slab_buffer=slab_buffer,
+    )
+    out = optimize(
+        q=q, sxdefectalign2d=sxdefectalign2d, encut=encut, vref=bulk_locpot, 
+        vdef=defect_locpot, q=q, slab_bottom=slab_bottom, slab_buffer=slab_buffer,
+        )
+    es_corr, metadata = parse_output(out)
+    return {"2d_electrostatic": es_corr}, metadata
+
+    def write_sphinx_input(dielectric_const, lattice_matrix, defect_sc_coords, q, slab_bottom, slab_top, slab_buffer):
+        """
+        Write the sphinx (sxdefectalign2d) input file.
+
+        Args:
+            lattice_matrix: 3x3 matrix of lattice vectors in Angstrom.
+            defect_sc_coords (list): Defect fractional coordinates w.r.t the lattice vectors
+            q (float): Charge of defect (standard convention. 1 electron has q=-1)
+            slab_bottom (float): Bottom of slab in Angstroms
+            slab_top (float): Top of slab in Angstroms
+        """
+        lines = []
+        lines.append("structure {\n")
+        m = [list(l) for l in np.multiply(1.88973, lattice_matrix)]
+        lines.append("\t cell = {};\n".format(str(m)))
+        lines.append("}\n\n")
+
+        lines.append("slab {\n")
+        lines.append("\t fromZ = {};\n".format(1.88973 * slab_bottom))
+        lines.append("\t toZ = {};\n".format(1.88973 * slab_top))
+        lines.append("\t epsilon = {};\n".format(dielectric_const))
+        lines.append("}\n\n")
+
+        lines.append("charge {\n")
+        lines.append("\t posZ = {};\n".format(1.88973 * defect_sc_coords[2]))
+        lines.append("\t Q = {};\n".format(-q))
+        lines.append("}\n\n")
+
+        lines.append("isolated { \n")
+        lines.append("\t fromZ = {};\n".format(1.88973 * (slab_bottom - slab_buffer)))
+        lines.append("\t toZ = {};\n".format(1.88973 * (slab_top + slab_buffer)))
+        lines.append("}\n\n")
+
+        with open("system.sx", "w") as f:
+            f.writelines(lines)
+
+    def run_sxdefectalign2d(sxdefectalign2d, encut, vref, vdef, shift=0, C=0, only_profile=False):
+        """
+        Run sxdefectalign2d.
+
+        Args:
+            shift (ev): Shift in potential
+            C (float): Alignment constant for potential
+            only_profile (bool): If True, only determine the potential profile,
+                and do not calculate the electrostatic energies.
+        """
+
+        command = [
+            sxdefectalign2d,
+            "--vasp",
+            "--ecut",
+            str(encut / 13.6057),  # convert eV to Ry
+            "--vref",
+            vref,
+            "--vdef",
+            vdef,
+            "--shift",
+            str(shift),
+            "-C",
+            str(C),
+        ]
+        if only_profile:
+            command.append("--onlyProfile")
+
+        with subprocess.Popen(command, stdout=subprocess.PIPE, stdin=subprocess.PIPE, close_fds=True) as rs:
+            stdout, stderr = rs.communicate()
+            if rs.returncode != 0:
+                raise RuntimeError("exited with return code %d. " "Please check your installation." % rs.returncode)
+
+            return stdout.decode("utf-8")
+
+    def optimize(q, sxdefectalign, encut, vref, vdef, max_iter=1000, threshold_slope=1e-3, threshold_C=1e-3):
+        """
+        Optimize the alignment constant C and shift for the potentials.
+
+        Args:
+            q (float): Charge of defect
+            max_iter (int): Maximum number of iterations
+            threshold_slope (float): Threshold for slope
+            threshold_C (float): Threshold for alignment constant
+        """
+        # initialize the range of shift values bracketing the optimal shift
+        smin, smax = -np.inf, np.inf
+        shift = 0.0
+        shifting = "right"
+        done = False
+        counter = -1
+
+        while not done and counter < max_iter:
+            counter += 1
+            run_sxdefectalign2d(sxdefectalign2d, encut, vref, vdef, shift=shift, C=0, only_profile=True)
+            data = np.loadtxt("vline-eV.dat")
+
+            # TODO assumes that the slab is in the center of the cell vertically
+            # select datapoints corresponding to 2 bohrs at the top and bottom of the supercell
+            z1 = np.min([i for i, z in enumerate(data[:, 0]) if z > 2.0])
+            z2 = np.min([i for i, z in enumerate(data[:, 0]) if z > (data[-1, 0] - 2.0)])
+
+            # fit straight lines through each subset of datapoints
+            m1, C1 = np.polyfit(data[:z1, 0], data[:z1, -1], 1)
+            m2, C2 = np.polyfit(data[z2:, 0], data[z2:, -1], 1)
+            logger.debug("Slopes: %.8f %.8f; Intercepts: %.8f %.8f" % (m1, m2, C1, C2))
+
+            # check the slopes and intercepts of the lines
+            # and shift the charge along z until the lines are flat
+            if abs(m1) < threshold_slope and abs(m2) < threshold_slope and abs(C1 - C2) < threshold_C:
+                done = True
+                break
+            if m1 * m2 < 0:
+                logger.info("undetermined...make a tiny shift and try again")
+                if shifting == "right":
+                    shift += 0.01
+                else:
+                    shift -= 0.01
+                logger.info("try shift = %.8f" % shift)
+            elif (m1 + m2) * np.sign(q) > 0:
+                smin = shift
+                if smax == np.inf:
+                    shift += 1.0
+                else:
+                    shift = (smin + smax) / 2.0
+                shifting = "right"
+                logger.debug("optimal shift is in [%.8f, %.8f]" % (smin, smax))
+                logger.info("shift charge in +z direction; try shift = %.8f" % shift)
+            elif (m1 + m2) * np.sign(q) < 0:
+                smax = shift
+                if smin == -np.inf:
+                    shift -= 1.0
+                else:
+                    shift = (smin + smax) / 2.0
+                shifting = "left"
+                logger.debug("optimal shift is in [%.8f, %.8f]" % (smin, smax))
+                logger.info("shift charge in -z direction; try shift = %.8f" % shift)
+
+        C_ave = (C1 + C2) / 2
+        if done:
+            logger.info("DONE! shift = %.8f & alignment correction = %.8f" % (shift, C_ave))
+            return run_sxdefectalign2d(sxdefectalign2d, encut, vref, vdef, shift=shift, C=C_ave, only_profile=False)
+        logger.info("Could not find optimal shift after %d tries :(" % max_iter)
+        return run_sxdefectalign2d(sxdefectalign2d, encut, vref, vdef, shift=0, C=0, only_profile=False)
+
+    def parse_output(output):
+        """
+        Parse the output of sxdefectalign2d. Including reading in the potential
+        profiles from vline-eV.dat.
+
+        Args:
+            output (str): Output of sxdefectalign2d as a string.
+
+        Returns: float corresponding to the correction in eV
+        """
+        data = np.loadtxt("vline-eV.dat")
+        metadata = {"Vdiff": data[:, 2], "Vmodel": data[:, 1], "z": data[:, 0], "Vsr": data[:, 3]}
+        return float(output.split("\n")[-2].split()[-2]), metadata
+
+def plot_freysoldt2d(metadata, savefig=False):
+    """
+    Plot the potential profiles.
+
+    Args:
+        savefig (bool): If True, save the figure.
+    """
+    plt.figure()
+    plt.plot(
+        metadata["pot_plot_data"]["z"],
+        metadata["pot_plot_data"]["Vdiff"],
+        "r",
+        label=r"$V_{def}-V_{bulk}$",
+    )
+    plt.plot(
+        metadata["pot_plot_data"]["z"], metadata["pot_plot_data"]["Vmodel"], "g", label=r"$V_{model}$"
+    )
+    plt.plot(
+        metadata["pot_plot_data"]["z"],
+        metadata["pot_plot_data"]["Vsr"],
+        "b",
+        label=r"$V_{def}-V_{bulk}-V_{model}$",
+    )
+    plt.xlabel("distance along z axis (bohr)")
+    plt.ylabel("potential (eV)")
+    plt.xlim(metadata["pot_plot_data"]["z"].min(), metadata["pot_plot_data"]["z"].max())
+    plt.legend()
+    if savefig:
+        plt.savefig("alignment.png")
