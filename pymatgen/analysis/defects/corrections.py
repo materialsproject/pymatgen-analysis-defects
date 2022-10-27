@@ -378,7 +378,6 @@ def get_freysoldt2d_correction(
     bulk_locpot: Locpot,
     defect_frac_coords: Optional[ArrayLike] = None,
     energy_cutoff: float = 520,
-    dielectric: float,
     slab_buffer=2,
 ):
     sxdefectalign2d = which("sxdefectalign2d") or which("sxdefectalign2d.exe")
@@ -402,7 +401,7 @@ def get_freysoldt2d_correction(
     )
     out = optimize(
         q=q, sxdefectalign2d=sxdefectalign2d, encut=encut, vref=bulk_locpot, 
-        vdef=defect_locpot, q=q, slab_bottom=slab_bottom, slab_buffer=slab_buffer,
+        vdef=defect_locpot, slab_bottom=slab_bottom, slab_buffer=slab_buffer,
         )
     es_corr, metadata = parse_output(out)
     return {"2d_electrostatic": es_corr}, metadata
