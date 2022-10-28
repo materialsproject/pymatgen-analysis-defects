@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import logging
 from typing import Optional
+from shutil import which
+import subprocess
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -38,7 +40,7 @@ Rewritten to be functional instead of object oriented.
 def get_freysoldt_correction(
     q: int,
     dielectric: float,
-    defect_locpot: Locpot,
+    defect_locpot: Locpot, #TODO Change to VolumetricData eventually
     bulk_locpot: Locpot,
     defect_frac_coords: Optional[ArrayLike] = None,
     energy_cutoff: float = 520,
@@ -391,20 +393,7 @@ def get_freysoldt2d_correction(
     slab_bottom = bulk_locpot.structure[slab_bottom].coords[2]
     slab_top = np.argmax(bulk_locpot.structure.cart_coords[:, 2])
     slab_top = bulk_locpot.structure[slab_top].coords[2]
-    defect_cart_coords = structure.lattice.get_cartesian_coords(defect_frac_coords)
-
-    write_sphinx_input(
-        dielectric_const=dielectric,
-        lattice_matrix=bulk_locpot.structure.lattice.matrix,
-        defect_sc_coords=defect_cart_coords, q=q,
-        slab_bottom=slab_bottom, slab_top=slab_top, slab_buffer=slab_buffer,
-    )
-    out = optimize(
-        q=q, sxdefectalign2d=sxdefectalign2d, encut=encut, vref=bulk_locpot, 
-        vdef=defect_locpot, slab_bottom=slab_bottom, slab_buffer=slab_buffer,
-        )
-    es_corr, metadata = parse_output(out)
-    return {"2d_electrostatic": es_corr}, metadata
+    defect_cart_coords = defect_locpot.structure.lattice.get_cartesian_coords(defect_frac_coords)
 
     def write_sphinx_input(dielectric_const, lattice_matrix, defect_sc_coords, q, slab_bottom, slab_top, slab_buffer):
         """
@@ -477,7 +466,7 @@ def get_freysoldt2d_correction(
 
             return stdout.decode("utf-8")
 
-    def optimize(q, sxdefectalign, encut, vref, vdef, max_iter=1000, threshold_slope=1e-3, threshold_C=1e-3):
+    def optimize(q, sxdefectalign2d, encut, vref, vdef, max_iter=1000, threshold_slope=1e-3, threshold_C=1e-3):
         """
         Optimize the alignment constant C and shift for the potentials.
 
@@ -560,6 +549,19 @@ def get_freysoldt2d_correction(
         data = np.loadtxt("vline-eV.dat")
         metadata = {"Vdiff": data[:, 2], "Vmodel": data[:, 1], "z": data[:, 0], "Vsr": data[:, 3]}
         return float(output.split("\n")[-2].split()[-2]), metadata
+
+    write_sphinx_input(
+        dielectric_const=dielectric,
+        lattice_matrix=bulk_locpot.structure.lattice.matrix,
+        defect_sc_coords=defect_cart_coords, q=q,
+        slab_bottom=slab_bottom, slab_top=slab_top, slab_buffer=slab_buffer,
+    )
+    out = optimize(
+        q=q, sxdefectalign2d=sxdefectalign2d, encut=energy_cutoff, vref=bulk_locpot, 
+        vdef=defect_locpot, slab_bottom=slab_bottom, slab_buffer=slab_buffer,
+        )
+    es_corr, metadata = parse_output(out)
+    return {"2d_electrostatic": es_corr}, metadata
 
 def plot_freysoldt2d(metadata, savefig=False):
     """
