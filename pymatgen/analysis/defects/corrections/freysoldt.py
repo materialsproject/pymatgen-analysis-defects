@@ -1,4 +1,4 @@
-"""Defect corrections module."""
+"""Freysoldt defect corrections module."""
 
 from __future__ import annotations
 

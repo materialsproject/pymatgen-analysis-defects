@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 
-from pymatgen.analysis.defects.corrections import plot_plnr_avg
+from pymatgen.analysis.defects.corrections.freysoldt import plot_plnr_avg
 from pymatgen.analysis.defects.thermo import (
     FormationEnergyDiagram,
     get_lower_envelope,
