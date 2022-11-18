@@ -111,14 +111,15 @@ class SubstitutionGenerator(DefectGenerator):
         self.angle_tolerance = angle_tolerance
 
     def generate(
-        self, structure: Structure, substitution: dict[str, str], **kwargs
+        self, structure: Structure, substitution: dict[str, str | list], **kwargs
     ) -> Generator[Substitution, None, None]:
         """Generate subsitutional defects.
 
         Args:
             structure: The bulk structure the vacancies are generated from.
             substitution: The substitutions to be made given as a dictionary.
-                e.g. {"Ga": "Ca"} means that Ga is substituted with Ca.
+                e.g. {"Ga": "Ca"} means that Ga is substituted with Ca. You
+                can also specify a list of elements to substitute with.
             **kwargs: Additional keyword arguments for the ``Substitution`` constructor.
 
         Returns:
@@ -132,13 +133,23 @@ class SubstitutionGenerator(DefectGenerator):
             if el_str not in substitution.keys():
                 continue
             sub_el = substitution[el_str]
-            sub_site = PeriodicSite(
-                Species(sub_el),
-                site.frac_coords,
-                structure.lattice,
-                properties=site.properties,
-            )
-            yield Substitution(structure, sub_site, **kwargs)
+            if isinstance(sub_el, str):
+                sub_site = PeriodicSite(
+                    Species(sub_el),
+                    site.frac_coords,
+                    structure.lattice,
+                    properties=site.properties,
+                )
+                yield Substitution(structure, sub_site, **kwargs)
+            elif isinstance(sub_el, list):
+                for el in sub_el:
+                    sub_site = PeriodicSite(
+                        Species(el),
+                        site.frac_coords,
+                        structure.lattice,
+                        properties=site.properties,
+                    )
+                    yield Substitution(structure, sub_site, **kwargs)
 
 
 class AntiSiteGenerator(DefectGenerator):
