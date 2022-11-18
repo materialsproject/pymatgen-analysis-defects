@@ -320,8 +320,9 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – The bulk structure the vacancies are generated from.</p></li>
-<li><p><strong>substitution</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]]) – The substitutions to be made given as a dictionary.
-e.g. {“Ga”: [“Mg”, “Ca”]} means that Ga is substituted with Mg or Ca.</p></li>
+<li><p><strong>substitution</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>]) – The substitutions to be made given as a dictionary.
+e.g. {“Ga”: “Ca”} means that Ga is substituted with Ca. You
+can also specify a list of elements to substitute with.</p></li>
 <li><p><strong>**kwargs</strong> – Additional keyword arguments for the <code class="docutils literal notranslate"><span class="pre">Substitution</span></code> constructor.</p></li>
 </ul>
 </dd>
@@ -359,7 +360,10 @@ e.g. {“Ga”: [“Mg”, “Ca”]} means that Ga is substituted with Mg or Ca
 <dd><p>Generate anti-site defects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – The bulk structure the anti-site defects are generated from.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>structure</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Structure</span></code>) – The bulk structure the anti-site defects are generated from.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments for the <code class="docutils literal notranslate"><span class="pre">Substitution.generate</span></code> function.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code>[<a class="reference internal" href="core.html#pymatgen.analysis.defects.core.Substitution" title="pymatgen.analysis.defects.core.Substitution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Substitution</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</p>
