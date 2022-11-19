@@ -10,15 +10,22 @@ NOTE that equations 8 and 9 from Kumagai et al. reference are divided by (4 pi) 
 from __future__ import annotations
 
 import logging
+from collections import namedtuple
 
 import numpy as np
 import numpy.typing as npt
 import scipy
+from matplotlib import pyplot as plt
 from pymatgen.core import Lattice, Site, Structure
 
 from pymatgen.analysis.defects.utils import generate_R_and_G_vecs, kumagai_to_V
 
 _logger = logging.getLogger(__name__)
+
+# named tuple for storing result of kumagai correction
+KumagaiSummary = namedtuple(
+    "KumagaiSummary", ["electrostatic", "potential_alignment", "metadata"]
+)
 
 # class KumagaiCorrection(DefectCorrection):
 #     """
@@ -54,90 +61,6 @@ _logger = logging.getLogger(__name__)
 #             self.dielectric = np.identity(3) * dielectric_tensor
 #         else:
 #             self.dielectric = np.array(dielectric_tensor)
-
-
-#     def plot(self, title=None, saved=False):
-#         """
-#         Plots the AtomicSite electrostatic potential against the Long range and short range models
-#         from Kumagai and Oba (doi: 10.1103/PhysRevB.89.195205)
-#         """
-#         if "pot_plot_data" not in self.metadata.keys():
-#             raise ValueError(
-#                 "Cannot plot potential alignment before running correction!"
-#             )
-
-#         sampling_radius = self.metadata["sampling_radius"]
-#         site_dict = self.metadata["pot_plot_data"]
-#         potalign = self.metadata["potalign"]
-
-#         plt.figure()
-#         plt.clf()
-
-#         distances, sample_region = [], []
-#         Vqb_list, Vpc_list, diff_list = [], [], []
-#         for site_ind, site_dict in site_dict.items():
-#             dist = site_dict["dist_to_defect"]
-#             distances.append(dist)
-
-#             Vqb = site_dict["Vqb"]
-#             Vpc = site_dict["Vpc"]
-
-#             Vqb_list.append(Vqb)
-#             Vpc_list.append(Vpc)
-#             diff_list.append(Vqb - Vpc)
-
-#             if dist > sampling_radius:
-#                 sample_region.append(Vqb - Vpc)
-
-#         plt.plot(
-#             distances,
-#             Vqb_list,
-#             color="r",
-#             marker="^",
-#             linestyle="None",
-#             label="$V_{q/b}$",
-#         )
-
-#         plt.plot(
-#             distances,
-#             Vpc_list,
-#             color="g",
-#             marker="o",
-#             linestyle="None",
-#             label="$V_{pc}$",
-#         )
-
-#         plt.plot(
-#             distances,
-#             diff_list,
-#             color="b",
-#             marker="x",
-#             linestyle="None",
-#             label="$V_{q/b}$ - $V_{pc}$",
-#         )
-
-#         x = np.arange(sampling_radius, max(distances) * 1.05, 0.01)
-#         y_max = max(max(Vqb_list), max(Vpc_list), max(diff_list)) + 0.1
-#         y_min = min(min(Vqb_list), min(Vpc_list), min(diff_list)) - 0.1
-#         plt.fill_between(
-#             x, y_min, y_max, facecolor="red", alpha=0.15, label="sampling region"
-#         )
-#         plt.axhline(y=potalign, linewidth=0.5, color="red", label="pot. align. / -q")
-
-#         plt.legend(loc=0)
-#         plt.axhline(y=0, linewidth=0.2, color="black")
-
-#         plt.ylim([y_min, y_max])
-#         plt.xlim([0, max(distances) * 1.1])
-
-#         plt.xlabel(r"Distance from defect ($\AA$)", fontsize=20)
-#         plt.ylabel("Potential (V)", fontsize=20)
-#         plt.title(str(title) + " atomic site potential plot", fontsize=20)
-
-#         if saved:
-#             plt.savefig(str(title) + "KumagaiESPavgPlot.pdf")
-#             return None
-#         return plt
 
 
 def perform_es_corr(
@@ -201,7 +124,7 @@ def get_potential_shift(gamma: float, volume: float) -> float:
     return -0.25 / (volume * gamma**2.0)
 
 
-def get_real_summation(gamma: float, dielectric: npt.NDArray, real_vectors):
+def get_real_summation(gamma: float, dielectric: npt.NDArray, real_vectors) -> float:
     """Get real summation term from list of real-space vectors.
 
     Args:
@@ -254,124 +177,6 @@ def get_recip_summation(
     recip_part /= volume
 
     return recip_part
-
-
-def perform_pot_corr(
-    defect_structure: Structure,
-    defect_frac_coords: npt.ArrayLike,
-    site_list: list[tuple[Site, int]],
-    sampling_radius: float,
-    q: int,
-    r_vecs: list,
-    g_vecs: list,
-    gamma: float,
-    dielectric: npt.NDArray,
-):
-    """Function performing potential alignment in manner described by Kumagai et al.
-
-    Args:
-        defect_structure: Pymatgen Structure object corresponding to the defect supercell
-        defect_frac_coords (array): Defect Position in fractional coordinates of the supercell given in bulk_structure
-        site_list: List of corresponding site index values for
-            bulk and defect site structures EXCLUDING the defect site itself
-            (ex. [[bulk structure site index, defect structure"s corresponding site index], ... ]
-        sampling_radius (float): Radius (in Angstrom) which sites must be outside
-            of to be included in the correction. Publication by Kumagai advises to
-            use Wigner-Seitz radius of defect supercell, so this is default value.
-        q (int): Defect charge
-        r_vecs: List of real lattice vectors to use in summation
-        g_vecs: List of reciprocal lattice vectors to use in summation
-        gamma (float): Modified Ewald parameter from Kumagai et al. 2014
-        dielectric (np.ndarray): Dielectric tensor
-
-    Return:
-        float:
-            Potential alignment contribution to Kumagai Correction (float)
-        dict:
-            metadata for plotting and analysis.
-    """
-    volume = defect_structure.lattice.volume
-    potential_shift = get_potential_shift(gamma, volume)
-
-    pot_dict = {}  # keys will be site index in the defect structure
-    for_correction = []  # region to sample for correction
-    metadata = {}  # metadata for plotting and analysis
-
-    # for each atom, do the following:
-    # (a) get relative_vector from defect_site to site in defect_supercell structure
-    # (b) recalculate the recip and real summation values based on this r_vec
-    # (c) get information needed for pot align
-    for site, Vqb in site_list:
-        dist, jimage = site.distance_and_image_from_frac_coords(defect_frac_coords)
-        vec_defect_to_site = defect_structure.lattice.get_cartesian_coords(
-            site.frac_coords - jimage - defect_frac_coords
-        )
-        dist_to_defect = np.linalg.norm(vec_defect_to_site)
-        if abs(dist_to_defect - dist) > 0.001:
-            raise ValueError("Error in computing vector to defect")
-
-        relative_real_vectors = [r_vec - vec_defect_to_site for r_vec in r_vecs[:]]
-
-        real_sum = get_real_summation(gamma, dielectric, relative_real_vectors)
-        recip_sum = get_recip_summation(
-            gamma, dielectric, g_vecs, volume, r=vec_defect_to_site[:]
-        )
-
-        Vpc = (real_sum + recip_sum + potential_shift) * kumagai_to_V * q
-
-        defect_struct_index = defect_structure.index(site)
-        pot_dict[defect_struct_index] = {
-            "Vpc": Vpc,
-            "Vqb": Vqb,
-            "dist_to_defect": dist_to_defect,
-        }
-
-        _logger.debug(
-            f"For atom {defect_struct_index}\n\tbulk/defect DFT potential difference = {Vqb}"
-        )
-        _logger.debug(f"\tanisotropic model charge: {Vpc}")
-        _logger.debug(f"\t\treciprocal part: {recip_sum * kumagai_to_V * q}")
-        _logger.debug(f"\t\treal part: {real_sum * kumagai_to_V * q}")
-        _logger.debug(
-            f"\t\tself interaction part: {potential_shift * kumagai_to_V * q}"
-        )
-        _logger.debug(f"\trelative_vector to defect: {vec_defect_to_site}")
-
-        if dist_to_defect > sampling_radius:
-            _logger.debug(
-                "\tdistance to defect is {} which is outside minimum sampling "
-                "radius {}".format(dist_to_defect, sampling_radius)
-            )
-            for_correction.append(Vqb - Vpc)
-        else:
-            _logger.debug(
-                "\tdistance to defect is {} which is inside minimum sampling "
-                "radius {} (so will not include for correction)"
-                "".format(dist_to_defect, sampling_radius)
-            )
-
-    if len(for_correction) > 0:
-        pot_alignment = np.mean(for_correction)
-    else:
-        _logger.info(
-            "No atoms sampled for_correction radius! Assigning potential alignment value of 0."
-        )
-        pot_alignment = 0.0
-
-    metadata["potalign"] = pot_alignment
-    pot_corr = -q * pot_alignment
-
-    # log uncertainty stats:
-    metadata["pot_corr_uncertainty_md"] = {
-        "stats": scipy.stats.describe(for_correction)._asdict(),
-        "number_sampled": len(for_correction),
-    }
-    metadata["pot_plot_data"] = pot_dict
-
-    _logger.info("Kumagai potential alignment (site averaging): %f", pot_alignment)
-    _logger.info("Kumagai potential alignment correction energy: %f eV", pot_corr)
-
-    return pot_corr
 
 
 def tune_for_gamma(lattice, epsilon):
@@ -521,7 +326,7 @@ def get_kumagai_correction(
         )
         site_list.append((defect_sc_structure[int(ds_ind)], Vqb))
 
-    pot_corr = perform_pot_corr(
+    pot_corr, metadata = perform_pot_corr(
         defect_sc_structure,
         defect_frac_sc_coords,
         site_list,
@@ -533,10 +338,217 @@ def get_kumagai_correction(
         dielectric,
     )
 
-    # entry.parameters["kumagai_meta"] = dict(self.metadata)
-    # entry.parameters["potalign"] = pot_corr / (-q) if q else 0.0
+    return KumagaiSummary(
+        electrostatic=es_corr,
+        potential_alignment=pot_corr / (-q) if q else 0.0,
+        metadata=metadata,
+    )
 
-    return {
-        "kumagai_electrostatic": es_corr,
-        "kumagai_potential_alignment": pot_corr,
+
+def perform_pot_corr(
+    defect_structure: Structure,
+    defect_frac_coords: npt.ArrayLike,
+    site_list: list[tuple[Site, int]],
+    sampling_radius: float,
+    q: int,
+    r_vecs: list,
+    g_vecs: list,
+    gamma: float,
+    dielectric: npt.NDArray,
+):
+    """Function performing potential alignment in manner described by Kumagai et al.
+
+    Args:
+        defect_structure: Pymatgen Structure object corresponding to the defect supercell
+        defect_frac_coords (array): Defect Position in fractional coordinates of the supercell given in bulk_structure
+        site_list: List of corresponding site index values for
+            bulk and defect site structures EXCLUDING the defect site itself
+            (ex. [[bulk structure site index, defect structure"s corresponding site index], ... ]
+        sampling_radius (float): Radius (in Angstrom) which sites must be outside
+            of to be included in the correction. Publication by Kumagai advises to
+            use Wigner-Seitz radius of defect supercell, so this is default value.
+        q (int): Defect charge
+        r_vecs: List of real lattice vectors to use in summation
+        g_vecs: List of reciprocal lattice vectors to use in summation
+        gamma (float): Modified Ewald parameter from Kumagai et al. 2014
+        dielectric (np.ndarray): Dielectric tensor
+
+    Return:
+        float:
+            Potential alignment contribution to Kumagai Correction (float)
+        dict:
+            metadata for plotting and analysis.
+    """
+    volume = defect_structure.lattice.volume
+    potential_shift = get_potential_shift(gamma, volume)
+
+    pot_dict = {}  # keys will be site index in the defect structure
+    for_correction = []  # region to sample for correction
+    metadata = {}  # metadata for plotting and analysis
+
+    # for each atom, do the following:
+    # (a) get relative_vector from defect_site to site in defect_supercell structure
+    # (b) recalculate the recip and real summation values based on this r_vec
+    # (c) get information needed for pot align
+    for site, Vqb in site_list:
+        dist, jimage = site.distance_and_image_from_frac_coords(defect_frac_coords)
+        vec_defect_to_site = defect_structure.lattice.get_cartesian_coords(
+            site.frac_coords - jimage - defect_frac_coords
+        )
+        dist_to_defect = np.linalg.norm(vec_defect_to_site)
+        if abs(dist_to_defect - dist) > 0.001:
+            raise ValueError("Error in computing vector to defect")
+
+        relative_real_vectors = [r_vec - vec_defect_to_site for r_vec in r_vecs[:]]
+
+        real_sum = get_real_summation(gamma, dielectric, relative_real_vectors)
+        recip_sum = get_recip_summation(
+            gamma, dielectric, g_vecs, volume, r=vec_defect_to_site[:]
+        )
+
+        Vpc = (real_sum + recip_sum + potential_shift) * kumagai_to_V * q
+
+        defect_struct_index = defect_structure.index(site)
+        pot_dict[defect_struct_index] = {
+            "Vpc": Vpc,
+            "Vqb": Vqb,
+            "dist_to_defect": dist_to_defect,
+        }
+
+        _logger.debug(
+            f"For atom {defect_struct_index}\n\tbulk/defect DFT potential difference = {Vqb}"
+        )
+        _logger.debug(f"\tanisotropic model charge: {Vpc}")
+        _logger.debug(f"\t\treciprocal part: {recip_sum * kumagai_to_V * q}")
+        _logger.debug(f"\t\treal part: {real_sum * kumagai_to_V * q}")
+        _logger.debug(
+            f"\t\tself interaction part: {potential_shift * kumagai_to_V * q}"
+        )
+        _logger.debug(f"\trelative_vector to defect: {vec_defect_to_site}")
+
+        if dist_to_defect > sampling_radius:
+            _logger.debug(
+                "\tdistance to defect is {} which is outside minimum sampling "
+                "radius {}".format(dist_to_defect, sampling_radius)
+            )
+            for_correction.append(Vqb - Vpc)
+        else:
+            _logger.debug(
+                "\tdistance to defect is {} which is inside minimum sampling "
+                "radius {} (so will not include for correction)"
+                "".format(dist_to_defect, sampling_radius)
+            )
+
+    if len(for_correction) > 0:
+        pot_alignment = np.mean(for_correction)
+    else:
+        _logger.info(
+            "No atoms sampled for_correction radius! Assigning potential alignment value of 0."
+        )
+        pot_alignment = 0.0
+
+    metadata["potalign"] = pot_alignment
+    pot_corr = -q * pot_alignment
+
+    # log uncertainty stats:
+    metadata["pot_corr_uncertainty_md"] = {
+        "stats": scipy.stats.describe(for_correction)._asdict(),
+        "number_sampled": len(for_correction),
     }
+    metadata["pot_plot_data"] = pot_dict
+
+    _logger.info("Kumagai potential alignment (site averaging): %f", pot_alignment)
+    _logger.info("Kumagai potential alignment correction energy: %f eV", pot_corr)
+
+    return pot_corr, metadata
+
+
+def plot(ks: KumagaiSummary, title=None, saved=False):
+    """Summary plotter for Kumagai Correction.
+
+    Plots the AtomicSite electrostatic potential against the Long range and short range models
+    from Kumagai and Oba (doi: 10.1103/PhysRevB.89.195205)
+
+    Args:
+        ks (KumagaiSummary): KumagaiSummary object
+        title (str): Title for plot
+        saved (bool): Whether to save the plot to a file
+
+    Returns:
+        matplotlib.pyplot: Plotting module state.
+    """
+    if "pot_plot_data" not in ks.metadata.keys():
+        raise ValueError("Cannot plot potential alignment before running correction!")
+
+    sampling_radius = ks.metadata["sampling_radius"]
+    site_dict = ks.metadata["pot_plot_data"]
+    potalign = ks.metadata["potalign"]
+
+    plt.figure()
+    plt.clf()
+
+    distances, sample_region = [], []
+    Vqb_list, Vpc_list, diff_list = [], [], []
+    for _site_ind, sd in site_dict.items():
+        dist = sd["dist_to_defect"]
+        distances.append(dist)
+
+        Vqb = sd["Vqb"]
+        Vpc = sd["Vpc"]
+
+        Vqb_list.append(Vqb)
+        Vpc_list.append(Vpc)
+        diff_list.append(Vqb - Vpc)
+
+        if dist > sampling_radius:
+            sample_region.append(Vqb - Vpc)
+
+    plt.plot(
+        distances,
+        Vqb_list,
+        color="r",
+        marker="^",
+        linestyle="None",
+        label="$V_{q/b}$",
+    )
+
+    plt.plot(
+        distances,
+        Vpc_list,
+        color="g",
+        marker="o",
+        linestyle="None",
+        label="$V_{pc}$",
+    )
+
+    plt.plot(
+        distances,
+        diff_list,
+        color="b",
+        marker="x",
+        linestyle="None",
+        label="$V_{q/b}$ - $V_{pc}$",
+    )
+
+    x = np.arange(sampling_radius, max(distances) * 1.05, 0.01)
+    y_max = max(max(Vqb_list), max(Vpc_list), max(diff_list)) + 0.1
+    y_min = min(min(Vqb_list), min(Vpc_list), min(diff_list)) - 0.1
+    plt.fill_between(
+        x, y_min, y_max, facecolor="red", alpha=0.15, label="sampling region"
+    )
+    plt.axhline(y=potalign, linewidth=0.5, color="red", label="pot. align. / -q")
+
+    plt.legend(loc=0)
+    plt.axhline(y=0, linewidth=0.2, color="black")
+
+    plt.ylim([y_min, y_max])
+    plt.xlim([0, max(distances) * 1.1])
+
+    plt.xlabel(r"Distance from defect ($\AA$)", fontsize=20)
+    plt.ylabel("Potential (V)", fontsize=20)
+    plt.title(str(title) + " atomic site potential plot", fontsize=20)
+
+    if saved:
+        plt.savefig(str(title) + "KumagaiESPavgPlot.pdf")
+        return None
+    return plt
