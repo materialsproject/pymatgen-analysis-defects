@@ -585,7 +585,7 @@ def generate_R_and_G_vecs(
     rd_epsilon = np.sqrt(np.linalg.det(epsilon))
 
     # generate reciprocal vector set (for each prec_set)
-    recip_set: list[list] = [[] for prec in prec_set]
+    recip_set: list[list[npt.ArrayLike]] = [[] for prec in prec_set]
     recip_summation_values = [0.0 for prec in prec_set]
     recip_cut_set = [(2 * gamma * prec) for prec in prec_set]
 
@@ -611,7 +611,7 @@ def generate_R_and_G_vecs(
     recip_summation_values /= volume
 
     # generate real vector set (for each prec_set)
-    real_set: list[list] = [[] for prec in prec_set]
+    real_set: list[list[npt.ArrayLike]] = [[] for prec in prec_set]
     real_summation_values = [0.0 for prec in prec_set]
     real_cut_set = [(prec / gamma) for prec in prec_set]
 
