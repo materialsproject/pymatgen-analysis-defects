@@ -21,7 +21,7 @@ __copyright__ = "Copyright 2022, The Materials Project"
 __maintainer__ = "Jimmy-Xuan Shen @jmmshn"
 __date__ = "Mar 15, 2022"
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 class DefectGenerator(MSONable, metaclass=ABCMeta):
@@ -168,7 +168,7 @@ class AntiSiteGenerator(DefectGenerator):
         for u, v in combinations(all_species, 2):
             subs[u].append(v)
             subs[v].append(u)
-        logger.debug(f"All anti-site pairings: {subs}")
+        _logger.debug(f"All anti-site pairings: {subs}")
         return SubstitutionGenerator.generate(self, structure, subs)
 
 

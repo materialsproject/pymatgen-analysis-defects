@@ -17,7 +17,7 @@ from pymatgen.io.vasp import Locpot, Vasprun
 from scipy.spatial import ConvexHull
 
 from pymatgen.analysis.defects.core import Defect
-from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
+from pymatgen.analysis.defects.corrections import get_freysoldt_correction
 from pymatgen.analysis.defects.finder import DefectSiteFinder
 from pymatgen.analysis.defects.utils import get_zfile
 
@@ -93,8 +93,6 @@ class DefectEntry(MSONable):
             dict:
                 The plotting data to analyze the planar averaged electrostatic potential
                 in the three periodic lattice directions.
-
-
         """
         if self.sc_defect_frac_coords is None:
             finder = DefectSiteFinder()

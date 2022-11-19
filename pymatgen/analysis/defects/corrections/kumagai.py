@@ -10,6 +10,7 @@ NOTE that equations 8 and 9 from Kumagai et al. reference are divided by (4 pi) 
 from __future__ import annotations
 
 import logging
+import math
 from collections import namedtuple
 
 import numpy as np
@@ -18,11 +19,18 @@ import scipy
 from matplotlib import pyplot as plt
 from pymatgen.core import Lattice, Site, Structure
 
-from pymatgen.analysis.defects.utils import generate_R_and_G_vecs, kumagai_to_V
+from pymatgen.analysis.defects.utils import kumagai_to_V
 
 _logger = logging.getLogger(__name__)
 
-# named tuple for storing result of kumagai correction
+"""
+Named tuple for storing result of kumagai correction.
+
+Metadata contains:
+    "gamma": gamma,
+    "sampling_radius": sampling_radius,
+    "potalign": None,
+"""
 KumagaiSummary = namedtuple(
     "KumagaiSummary", ["electrostatic", "potential_alignment", "metadata"]
 )
@@ -52,9 +60,6 @@ KumagaiSummary = namedtuple(
 #                     Code will automatically determine this if set to None.
 #         """
 #         self.metadata = {
-#             "gamma": gamma,
-#             "sampling_radius": sampling_radius,
-#             "potalign": None,
 #         }
 
 #         if isinstance(dielectric_tensor, (int, float)):
@@ -463,7 +468,7 @@ def perform_pot_corr(
     return pot_corr, metadata
 
 
-def plot(ks: KumagaiSummary, title=None, saved=False):
+def plot_kumagai(ks: KumagaiSummary, title=None, saved=False):
     """Summary plotter for Kumagai Correction.
 
     Plots the AtomicSite electrostatic potential against the Long range and short range models
@@ -552,3 +557,83 @@ def plot(ks: KumagaiSummary, title=None, saved=False):
         plt.savefig(str(title) + "KumagaiESPavgPlot.pdf")
         return None
     return plt
+
+
+def generate_R_and_G_vecs(
+    gamma: float, prec_set: list | float, lattice: Lattice, epsilon: npt.NDArray
+) -> tuple[npt.ArrayLike, npt.ArrayLike, npt.ArrayLike, npt.ArrayLike]:
+    """Generate real and reciprocal space vectors for Kumagai correction.
+
+    This returns a set of real and reciprocal lattice vectors.
+    (and real/recip summation values)
+    based on a list of precision values (prec_set)
+
+    Args:
+        gamma: Ewald parameter
+        prec_set (list or number): for prec values to consider (20, 25, 30 are sensible numbers)
+        lattice (Lattic): Lattice object of supercell in question
+        epsilon: Dielectric tensor
+
+    """
+    if type(prec_set) != list:
+        prec_set = [prec_set]
+
+    [a1, a2, a3] = lattice.matrix  # Angstrom
+    volume = lattice.volume
+    [b1, b2, b3] = lattice.reciprocal_lattice.matrix  # 1/ Angstrom
+    invepsilon = np.linalg.inv(epsilon)
+    rd_epsilon = np.sqrt(np.linalg.det(epsilon))
+
+    # generate reciprocal vector set (for each prec_set)
+    recip_set: list[list] = [[] for prec in prec_set]
+    recip_summation_values = [0.0 for prec in prec_set]
+    recip_cut_set = [(2 * gamma * prec) for prec in prec_set]
+
+    i_max = int(math.ceil(max(recip_cut_set) / np.linalg.norm(b1)))
+    j_max = int(math.ceil(max(recip_cut_set) / np.linalg.norm(b2)))
+    k_max = int(math.ceil(max(recip_cut_set) / np.linalg.norm(b3)))
+    for i in np.arange(-i_max, i_max + 1):
+        for j in np.arange(-j_max, j_max + 1):
+            for k in np.arange(-k_max, k_max + 1):
+                if not i and not j and not k:
+                    continue
+                gvec = i * b1 + j * b2 + k * b3
+                normgvec = np.linalg.norm(gvec)
+                for recip_cut_ind, recip_cut in enumerate(recip_cut_set):
+                    if normgvec <= recip_cut:
+                        recip_set[recip_cut_ind].append(gvec)
+
+                        Gdotdiel = np.dot(gvec, np.dot(epsilon, gvec))
+                        summand = math.exp(-Gdotdiel / (4 * (gamma**2))) / Gdotdiel
+                        recip_summation_values[recip_cut_ind] += summand
+
+    recip_summation_values = np.array(recip_summation_values)
+    recip_summation_values /= volume
+
+    # generate real vector set (for each prec_set)
+    real_set: list[list] = [[] for prec in prec_set]
+    real_summation_values = [0.0 for prec in prec_set]
+    real_cut_set = [(prec / gamma) for prec in prec_set]
+
+    i_max = int(math.ceil(max(real_cut_set) / np.linalg.norm(a1)))
+    j_max = int(math.ceil(max(real_cut_set) / np.linalg.norm(a2)))
+    k_max = int(math.ceil(max(real_cut_set) / np.linalg.norm(a3)))
+    for i in np.arange(-i_max, i_max + 1):
+        for j in np.arange(-j_max, j_max + 1):
+            for k in np.arange(-k_max, k_max + 1):
+                rvec = i * a1 + j * a2 + k * a3
+                normrvec = np.linalg.norm(rvec)
+                for real_cut_ind, real_cut in enumerate(real_cut_set):
+                    if normrvec <= real_cut:
+                        real_set[real_cut_ind].append(rvec)
+                        if normrvec > 1e-8:
+                            sqrt_loc_res = np.sqrt(
+                                np.dot(rvec, np.dot(invepsilon, rvec))
+                            )
+                            nmr = math.erfc(gamma * sqrt_loc_res)
+                            real_summation_values[real_cut_ind] += nmr / sqrt_loc_res
+
+    real_summation_values = np.array(real_summation_values)
+    real_summation_values /= 4 * np.pi * rd_epsilon
+
+    return recip_set, recip_summation_values, real_set, real_summation_values
