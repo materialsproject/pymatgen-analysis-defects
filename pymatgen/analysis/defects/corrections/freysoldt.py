@@ -1,8 +1,9 @@
-"""Defect corrections module."""
+"""Freysoldt defect corrections module."""
 
 from __future__ import annotations
 
 import logging
+from collections import namedtuple
 from typing import Optional
 
 import matplotlib.pyplot as plt
@@ -34,6 +35,16 @@ Adapted from the original code by Danny and Shyam.
 Rewritten to be functional instead of object oriented.
 """
 
+"""
+Named tuple for storing result of correction result.
+
+Metadata contains plotting data for the planar average electrostatic potential.
+key 0, 1, 2 correspond to the x, y, z axes respectively.
+"""
+FreysoldtSummary = namedtuple(
+    "FreysoldtSummary", ["electrostatic", "potential_alignment", "metadata"]
+)
+
 
 def get_freysoldt_correction(
     q: int,
@@ -45,7 +56,7 @@ def get_freysoldt_correction(
     mad_tol: float = 1e-4,
     q_model: Optional[QModel] = None,
     step: float = 1e-4,
-):
+) -> FreysoldtSummary:
     """Gets the Freysoldt correction for a defect entry.
 
     Get the Freysoldt correction for a defect. The result is given
@@ -127,14 +138,13 @@ def get_freysoldt_correction(
         pot_corrs[axis] = tmp_pot_corr
         plot_data[axis] = md
 
-    # defect_entry.parameters["freysoldt_meta"] = dict(self.metadata)
-    # defect_entry.parameters["potalign"] = pot_corr / (-q) if q else 0.0
     pot_corr = np.mean(list(pot_corrs.values()))
-    frey_corr = {
-        "freysoldt_electrostatic": es_corr,
-        "freysoldt_potential_alignment": pot_corr,
-    }
-    return frey_corr, plot_data
+
+    return FreysoldtSummary(
+        electrostatic=es_corr,
+        potential_alignment=pot_corr / (-q) if q else 0,
+        metadata=plot_data,
+    )
 
 
 def perform_es_corr(

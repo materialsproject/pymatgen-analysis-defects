@@ -76,17 +76,17 @@ def defect_entries_Mg_Ga(data_Mg_Ga, defect_Mg_Ga):
         def_entry = DefectEntry(
             defect=defect_Mg_Ga, charge_state=q, sc_entry=computed_entry
         )
-        plot_data = def_entry.get_freysoldt_correction(
+        frey_summary = def_entry.get_freysoldt_correction(
             defect_locpot=defect_locpot, bulk_locpot=bulk_locpot, dielectric=14
         )
-        return def_entry, plot_data
+        return def_entry, frey_summary
 
     defect_entries = dict()
     plot_data = dict()
     for qq in [-2, -1, 0, 1]:
-        defect_entry, p_data = get_data(qq)
+        defect_entry, frey_summary = get_data(qq)
         defect_entries[qq] = defect_entry
-        plot_data[qq] = p_data
+        plot_data[qq] = frey_summary.metadata
     return defect_entries, plot_data
 
 
