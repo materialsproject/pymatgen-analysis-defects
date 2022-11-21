@@ -137,3 +137,5 @@ docs_build
 examples/wip*
 
 .vscode/
+
+pymatgen/analysis/defects/corrections/kumagai_old.py

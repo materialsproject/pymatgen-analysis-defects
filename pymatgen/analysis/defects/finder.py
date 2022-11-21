@@ -23,7 +23,7 @@ __copyright__ = "Copyright 2022, The Materials Project"
 __maintainer__ = "Jimmy Shen @jmmshn"
 __date__ = "Jan 24, 2022"
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 DUMMY_SPECIES = "Si"
 
 SiteVec = namedtuple("SiteVec", ["species", "site", "vec"])

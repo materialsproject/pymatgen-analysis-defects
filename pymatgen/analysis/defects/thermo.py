@@ -17,7 +17,10 @@ from pymatgen.io.vasp import Locpot, Vasprun
 from scipy.spatial import ConvexHull
 
 from pymatgen.analysis.defects.core import Defect
-from pymatgen.analysis.defects.corrections import get_freysoldt_correction
+from pymatgen.analysis.defects.corrections.freysoldt import (
+    FreysoldtSummary,
+    get_freysoldt_correction,
+)
 from pymatgen.analysis.defects.finder import DefectSiteFinder
 from pymatgen.analysis.defects.utils import get_zfile
 
@@ -50,6 +53,7 @@ class DefectEntry(MSONable):
             A dictionary that acts as a generic container for storing information
             about how the corrections were calculated.  These should are only used
             for debugging and plotting purposes.
+            PLEASE DO NOT USE THIS FOR REAL DATA.
     """
 
     defect: Defect
@@ -57,14 +61,15 @@ class DefectEntry(MSONable):
     sc_entry: ComputedStructureEntry
     sc_defect_frac_coords: Optional[ArrayLike] = None
     corrections: Optional[Dict[str, float]] = None
-    corrections_summaries: Optional[Dict[str, Dict]] = None
+    correction_metadata: Optional[Dict[str, Dict]] = None
 
     def __post_init__(self):
         """Post-initialization."""
         self.charge_state = int(self.charge_state)
         self.corrections: dict = {} if self.corrections is None else self.corrections
-        self.corrections_summaries: dict = (
-            {} if self.corrections_summaries is None else self.corrections_summaries
+        self.correction_type: str = "Freysoldt"
+        self.correction_metadata: dict = (
+            {} if self.correction_metadata is None else self.correction_metadata
         )
 
     def get_freysoldt_correction(
@@ -73,7 +78,7 @@ class DefectEntry(MSONable):
         bulk_locpot: Locpot,
         dielectric: float | NDArray,
         **kwargs,
-    ):
+    ) -> FreysoldtSummary:
         """Calculate the Freysoldt correction.
 
         Updates the corrections dictionary with the Freysoldt correction
@@ -103,7 +108,7 @@ class DefectEntry(MSONable):
         else:
             defect_fpos = self.sc_defect_frac_coords
 
-        frey_corr, plot_data = get_freysoldt_correction(
+        frey_corr = get_freysoldt_correction(
             q=self.charge_state,
             dielectric=dielectric,
             defect_locpot=defect_locpot,
@@ -111,12 +116,18 @@ class DefectEntry(MSONable):
             defect_frac_coords=defect_fpos,
             **kwargs,
         )
-        self.corrections.update(frey_corr)  # type: ignore
-        self.corrections_summaries["freysoldt_corrections"] = plot_data.copy()
-        return plot_data
+        self.corrections.update(
+            {
+                "electrostatic": frey_corr.electrostatic,
+                "potential_alignment": frey_corr.potential_alignment,
+            }
+        )
+        self.correction_metadata.update(frey_corr.metadata.copy())
+        self.correction_type = "Freysoldt"
+        return frey_corr
 
     @property
-    def corrected_energy(self):
+    def corrected_energy(self) -> float:
         """The energy of the defect entry with all corrections applied."""
         return self.sc_entry.energy + sum(self.corrections.values())
 
