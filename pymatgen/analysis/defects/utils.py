@@ -40,7 +40,7 @@ __email__ = "jmmshn@gmail.com"
 __status__ = "Development"
 __date__ = "Aug 15, 2022"
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 hart_to_ev = 27.2114
 ang_to_bohr = 1.8897
 invang_to_ev = 3.80986
@@ -306,7 +306,7 @@ def remove_collisions(
         fcoord (numpy.ndarray): The filtered coordinates.
     """
     s_fcoord = structure.frac_coords
-    logger.info(s_fcoord)
+    _logger.info(s_fcoord)
     dist_matrix = structure.lattice.get_all_distances(fcoords, s_fcoord)
     all_dist = np.min(dist_matrix, axis=1)
     return np.array(
