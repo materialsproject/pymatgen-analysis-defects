@@ -274,7 +274,7 @@
 <span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Development&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;Aug 15, 2022&quot;</span>
 
-<span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 <span class="n">hart_to_ev</span> <span class="o">=</span> <span class="mf">27.2114</span>
 <span class="n">ang_to_bohr</span> <span class="o">=</span> <span class="mf">1.8897</span>
 <span class="n">invang_to_ev</span> <span class="o">=</span> <span class="mf">3.80986</span>
@@ -540,7 +540,7 @@
 <span class="sd">        fcoord (numpy.ndarray): The filtered coordinates.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">s_fcoord</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">frac_coords</span>
-    <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">s_fcoord</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">s_fcoord</span><span class="p">)</span>
     <span class="n">dist_matrix</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">get_all_distances</span><span class="p">(</span><span class="n">fcoords</span><span class="p">,</span> <span class="n">s_fcoord</span><span class="p">)</span>
     <span class="n">all_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dist_matrix</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>

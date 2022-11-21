@@ -237,7 +237,7 @@
 <p>Classes and methods related to thermodynamics and energy.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.DefectEntry">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.thermo.</span></span><span class="sig-name descname"><span class="pre">DefectEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_entry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_defect_frac_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction_metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#DefectEntry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymatgen.analysis.defects.thermo.</span></span><span class="sig-name descname"><span class="pre">DefectEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_entry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sc_defect_frac_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corrections_summaries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymatgen/analysis/defects/thermo.html#DefectEntry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">MSONable</span></code></p>
 <p>Data for completed defect supercell calculation.</p>
 <dl class="py attribute">
@@ -302,8 +302,7 @@ automatically determine the defect location.</p>
 <span class="sig-name descname"><span class="pre">correction_summaries</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry.correction_summaries" title="Permalink to this definition">#</a></dt>
 <dd><p>A dictionary that acts as a generic container for storing information
 about how the corrections were calculated.  These should are only used
-for debugging and plotting purposes.
-PLEASE DO NOT USE THIS FOR REAL DATA.</p>
+for debugging and plotting purposes.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -333,13 +332,8 @@ in the three periodic lattice directions.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pymatgen.analysis.defects.thermo.DefectEntry.corrected_energy">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">corrected_energy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry.corrected_energy" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">corrected_energy</span></span><a class="headerlink" href="#pymatgen.analysis.defects.thermo.DefectEntry.corrected_energy" title="Permalink to this definition">#</a></dt>
 <dd><p>The energy of the defect entry with all corrections applied.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
