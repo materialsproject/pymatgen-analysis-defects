@@ -38,6 +38,15 @@ def test_substitution_generators(gan_struct):
         replaced_atoms.add(defect.site.specie.symbol)
     assert replaced_atoms == {"Mg", "Ca"}
 
+    sub_generator = SubstitutionGenerator().get_defects(gan_struct, {"Ga": "Mg"})
+    replaced_atoms = set()
+    for defect in sub_generator:
+        assert isinstance(defect, Substitution)
+        replaced_atoms.add(defect.site.specie.symbol)
+    assert replaced_atoms == {
+        "Mg",
+    }
+
 
 def test_antisite_generator(gan_struct):
     anti_gen = AntiSiteGenerator().get_defects(gan_struct)
