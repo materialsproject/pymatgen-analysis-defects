@@ -56,6 +56,9 @@ repos:
   hooks:
   - id: mypy
     files: ^pymatgen/
+    args:
+    - --namespace-packages
+    - --explicit-package-bases
     additional_dependencies:
     - tokenize-rt==4.1.0
     - types-pkg_resources==0.1.2
