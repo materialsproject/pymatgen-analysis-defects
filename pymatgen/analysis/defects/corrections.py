@@ -496,7 +496,7 @@ def get_freysoldt2d_correction(
             # fit straight lines through each subset of datapoints
             m1, C1 = np.polyfit(data[:z1, 0], data[:z1, -1], 1)
             m2, C2 = np.polyfit(data[z2:, 0], data[z2:, -1], 1)
-            logger.debug("Slopes: %.8f %.8f; Intercepts: %.8f %.8f" % (m1, m2, C1, C2))
+            _logger.debug("Slopes: %.8f %.8f; Intercepts: %.8f %.8f" % (m1, m2, C1, C2))
 
             # check the slopes and intercepts of the lines
             # and shift the charge along z until the lines are flat
@@ -504,12 +504,12 @@ def get_freysoldt2d_correction(
                 done = True
                 break
             if m1 * m2 < 0:
-                logger.info("undetermined...make a tiny shift and try again")
+                _logger.info("undetermined...make a tiny shift and try again")
                 if shifting == "right":
                     shift += 0.01
                 else:
                     shift -= 0.01
-                logger.info("try shift = %.8f" % shift)
+                _logger.info("try shift = %.8f" % shift)
             elif (m1 + m2) * np.sign(q) > 0:
                 smin = shift
                 if smax == np.inf:
@@ -517,8 +517,8 @@ def get_freysoldt2d_correction(
                 else:
                     shift = (smin + smax) / 2.0
                 shifting = "right"
-                logger.debug("optimal shift is in [%.8f, %.8f]" % (smin, smax))
-                logger.info("shift charge in +z direction; try shift = %.8f" % shift)
+                _logger.debug("optimal shift is in [%.8f, %.8f]" % (smin, smax))
+                _logger.info("shift charge in +z direction; try shift = %.8f" % shift)
             elif (m1 + m2) * np.sign(q) < 0:
                 smax = shift
                 if smin == -np.inf:
@@ -526,14 +526,14 @@ def get_freysoldt2d_correction(
                 else:
                     shift = (smin + smax) / 2.0
                 shifting = "left"
-                logger.debug("optimal shift is in [%.8f, %.8f]" % (smin, smax))
-                logger.info("shift charge in -z direction; try shift = %.8f" % shift)
+                _logger.debug("optimal shift is in [%.8f, %.8f]" % (smin, smax))
+                _logger.info("shift charge in -z direction; try shift = %.8f" % shift)
 
         C_ave = (C1 + C2) / 2
         if done:
-            logger.info("DONE! shift = %.8f & alignment correction = %.8f" % (shift, C_ave))
+            _logger.info("DONE! shift = %.8f & alignment correction = %.8f" % (shift, C_ave))
             return run_sxdefectalign2d(sxdefectalign2d, encut, vref, vdef, shift=shift, C=C_ave, only_profile=False)
-        logger.info("Could not find optimal shift after %d tries :(" % max_iter)
+        _logger.info("Could not find optimal shift after %d tries :(" % max_iter)
         return run_sxdefectalign2d(sxdefectalign2d, encut, vref, vdef, shift=0, C=0, only_profile=False)
 
     def parse_output(output):
@@ -557,8 +557,7 @@ def get_freysoldt2d_correction(
         slab_bottom=slab_bottom, slab_top=slab_top, slab_buffer=slab_buffer,
     )
     out = optimize(
-        q=q, sxdefectalign2d=sxdefectalign2d, encut=energy_cutoff, vref=bulk_locpot, 
-        vdef=defect_locpot, slab_bottom=slab_bottom, slab_buffer=slab_buffer,
+        q=q, sxdefectalign2d=sxdefectalign2d, encut=energy_cutoff, vref="LOCPOT.ref", vdef="LOCPOT.def",
         )
     es_corr, metadata = parse_output(out)
     return {"2d_electrostatic": es_corr}, metadata
@@ -572,23 +571,23 @@ def plot_freysoldt2d(metadata, savefig=False):
     """
     plt.figure()
     plt.plot(
-        metadata["pot_plot_data"]["z"],
-        metadata["pot_plot_data"]["Vdiff"],
+        metadata["z"],
+        metadata["Vdiff"],
         "r",
         label=r"$V_{def}-V_{bulk}$",
     )
     plt.plot(
-        metadata["pot_plot_data"]["z"], metadata["pot_plot_data"]["Vmodel"], "g", label=r"$V_{model}$"
+        metadata["z"], metadata["Vmodel"], "g", label=r"$V_{model}$"
     )
     plt.plot(
-        metadata["pot_plot_data"]["z"],
-        metadata["pot_plot_data"]["Vsr"],
+        metadata["z"],
+        metadata["Vsr"],
         "b",
         label=r"$V_{def}-V_{bulk}-V_{model}$",
     )
     plt.xlabel("distance along z axis (bohr)")
     plt.ylabel("potential (eV)")
-    plt.xlim(metadata["pot_plot_data"]["z"].min(), metadata["pot_plot_data"]["z"].max())
+    plt.xlim(metadata["z"].min(), metadata["z"].max())
     plt.legend()
     if savefig:
         plt.savefig("alignment.png")
