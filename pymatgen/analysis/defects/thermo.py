@@ -200,7 +200,6 @@ class FormationEnergyDiagram(MSONable):
                 ~np.any(chempot_limits == boundary_value, axis=1)
             ]
 
-        self.el_change = self.defect_entries[0].defect.element_changes
         self.dft_energies = {
             el: self.phase_diagram.get_hull_energy_per_atom(Composition(str(el)))
             for el in self.phase_diagram.elements
@@ -373,7 +372,7 @@ class FormationEnergyDiagram(MSONable):
         en_change = sum(
             [
                 (self.dft_energies[el] + chempots[el]) * fac
-                for el, fac in self.el_change.items()
+                for el, fac in defect_entry.defect.element_change.items()
             ]
         )
         formation_en = (
