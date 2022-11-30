@@ -372,7 +372,7 @@ class FormationEnergyDiagram(MSONable):
         en_change = sum(
             [
                 (self.dft_energies[el] + chempots[el]) * fac
-                for el, fac in defect_entry.defect.element_change.items()
+                for el, fac in defect_entry.defect.element_changes.items()
             ]
         )
         formation_en = (
