@@ -23,6 +23,16 @@ def test_freysoldt(data_Mg_Ga):
     # simple check that the plotter works
     plot_plnr_avg(freysoldt_summary.metadata[0])
 
+    # different ways to specify the locpot
+    freysoldt_summary = get_freysoldt_correction(
+        q=0,
+        dielectric=14,
+        lattice=defect_locpot.structure.lattice,
+        defect_locpot=defect_locpot,
+        bulk_locpot=bulk_locpot,
+        defect_frac_coords=[0.5, 0.5, 0.5],
+    )
+
     freysoldt_summary = get_freysoldt_correction(
         q=0,
         dielectric=14,
