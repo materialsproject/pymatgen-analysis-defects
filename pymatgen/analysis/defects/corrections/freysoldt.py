@@ -94,8 +94,14 @@ def get_freysoldt_correction(
     # dielectric has to be a float
     if isinstance(dielectric, (int, float)):
         dielectric = float(dielectric)
+    elif np.ndim(dielectric) == 1:
+        dielectric = float(np.mean(dielectric))
+    elif np.ndim(dielectric) == 2:
+        dielectric = float(np.mean(dielectric.diagonal()))
     else:
-        dielectric = float(np.mean(np.diag(dielectric)))
+        raise ValueError(
+            f"Dielectric constant is cannot be converted into a scalar. Currently of type {type(dielectric)}"
+        )
 
     q_model = QModel() if q_model is None else q_model
 
