@@ -434,7 +434,6 @@
                 <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">chempot_limits</span> <span class="o">==</span> <span class="n">boundary_value</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">el_change</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defect_entries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">defect</span><span class="o">.</span><span class="n">element_changes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dft_energies</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">el</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_diagram</span><span class="o">.</span><span class="n">get_hull_energy_per_atom</span><span class="p">(</span><span class="n">Composition</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">el</span><span class="p">)))</span>
             <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase_diagram</span><span class="o">.</span><span class="n">elements</span>
@@ -607,7 +606,7 @@
         <span class="n">en_change</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dft_energies</span><span class="p">[</span><span class="n">el</span><span class="p">]</span> <span class="o">+</span> <span class="n">chempots</span><span class="p">[</span><span class="n">el</span><span class="p">])</span> <span class="o">*</span> <span class="n">fac</span>
-                <span class="k">for</span> <span class="n">el</span><span class="p">,</span> <span class="n">fac</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">el_change</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">el</span><span class="p">,</span> <span class="n">fac</span> <span class="ow">in</span> <span class="n">defect_entry</span><span class="o">.</span><span class="n">defect</span><span class="o">.</span><span class="n">element_changes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="n">formation_en</span> <span class="o">=</span> <span class="p">(</span>
