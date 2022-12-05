@@ -16,6 +16,11 @@ from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEn
 from pymatgen.io.vasp import Locpot, Vasprun
 from scipy.spatial import ConvexHull
 
+from itertools import groupby
+from matplotlib.lines import Line2D
+from matplotlib import pyplot as plt
+import matplotlib.cm as cm
+
 from pymatgen.analysis.defects.core import Defect
 from pymatgen.analysis.defects.corrections import get_freysoldt_correction
 from pymatgen.analysis.defects.finder import DefectSiteFinder
@@ -176,13 +181,14 @@ class FormationEnergyDiagram(MSONable):
         entries = []
         for entry in self.phase_diagram.stable_entries:
             d_ = entry.as_dict()
-            d_["energy"] = self.phase_diagram.get_form_energy(entry)
+            d_["energy"] = self.phase_diagram.get_form_energy(entry) - entry.correction
             entries.append(ComputedEntry.from_dict(d_))
 
         self.chempot_diagram = ChemicalPotentialDiagram(entries)
         chempot_limits = self.chempot_diagram.domains[
             self.bulk_entry.composition.reduced_formula
-        ]
+        ].dot(1 / self.bulk_entry.composition.reduced_composition.num_atoms)
+
         if self.inc_inf_values:
             self._chempot_limits_arr = chempot_limits
         else:
@@ -191,7 +197,6 @@ class FormationEnergyDiagram(MSONable):
                 ~np.any(chempot_limits == boundary_value, axis=1)
             ]
 
-        self.el_change = self.defect_entries[0].defect.element_changes
         self.dft_energies = {
             el: self.phase_diagram.get_hull_energy_per_atom(Composition(str(el)))
             for el in self.phase_diagram.elements
@@ -364,7 +369,7 @@ class FormationEnergyDiagram(MSONable):
         en_change = sum(
             [
                 (self.dft_energies[el] + chempots[el]) * fac
-                for el, fac in self.el_change.items()
+                for el, fac in defect_entry.defect.element_changes.items()
             ]
         )
         formation_en = (
@@ -382,7 +387,7 @@ class FormationEnergyDiagram(MSONable):
             res.append(dict(zip(self.chempot_diagram.elements, vertex)))
         return res
 
-    def _get_lines(self, chempots: dict) -> list[tuple[float, float]]:
+    def _get_lines(self, defect_entries, chempots: dict) -> list[tuple[float, float]]:
         """Get the lines for the formation energy diagram.
 
         Args:
@@ -398,7 +403,7 @@ class FormationEnergyDiagram(MSONable):
         """
         chempots = self._parse_chempots(chempots)
         lines = []
-        for def_ent in self.defect_entries:
+        for def_ent in defect_entries:
             b = self._vbm_formation_energy(def_ent, chempots)
             m = float(def_ent.charge_state)
             lines.append((m, b))
@@ -428,9 +433,15 @@ class FormationEnergyDiagram(MSONable):
         chempots = self._parse_chempots(chempots)
         if x_max is None:
             x_max = self.band_gap
-        lines = self._get_lines(chempots)
-        lines = get_lower_envelope(lines)
-        return get_transitions(lines, x_min, x_max)
+
+        transitions = {}
+        sents = sorted(self.defect_entries, key=lambda x: x.defect.__repr__())
+        for k, group in groupby(sents, key=lambda x: x.defect.__repr__()):
+            lines = self._get_lines(self, group, chempots)
+            lines = get_lower_envelope(lines)
+            transitions[k] = get_transitions(lines, x_min, x_max)
+
+        return transitions
 
     def _get_formation_energy(self, fermi_level: float, chempot_dict: dict):
         """Get the formation energy at a given Fermi level.
@@ -450,6 +461,91 @@ class FormationEnergyDiagram(MSONable):
         # linearly interpolate between the set of points
         return np.interp(fermi_level, transitions[:, 0], transitions[:, 1])
 
+    def plot(
+        self, chempots, xlim=None, ylim=None, only_lower_envelope=True,
+        show=True, save=False, **kwargs
+):
+        if not xlim and not self.band_gap:
+            raise ValueError("Must specify xlim or set band_gap attribute")
+
+        fig, axs = plt.subplots()
+        chempots = self._parse_chempots(chempots)
+        xmin = xlim[0] if xlim else -0.2
+        xmax = xlim[1] if xlim else self.band_gap + 0.2
+        ymin, ymax = 10, 0
+        legends_txt = []
+        artists = []
+        fontwidth = 12
+        ax_fontsize = 1.3
+        lg_fontsize = 10
+
+
+        sents = sorted(self.defect_entries, key=lambda x: x.defect.__repr__())
+        dat = []
+        for _, group in groupby(sents, key=lambda x: x.defect.__repr__()):
+            dat.append(list(group))
+
+        if len(dat) <= 8:
+            colors = iter(cm.Dark2(np.linspace(0, 1, len(dat))))
+        else:
+            colors = iter(cm.gist_rainbow(np.linspace(0, 1, len(dat))))
+
+        for dfcts in dat:
+            color = next(colors)
+            lines = self._get_lines(dfcts, chempots)
+            lowerlines = get_lower_envelope(lines)
+            trans = get_transitions(lowerlines, xmin, xmax)
+
+            # plot lines
+            if not only_lower_envelope:
+                for ln in lines:
+                    x = np.linspace(xmin, xmax)
+                    y = ln[0]*x + ln[1]
+                    axs.plot(x,y, color=color, alpha=0.5)
+
+            # plot connecting lines
+            for i, (_x, _y) in enumerate(trans[:-1]):
+                x = np.linspace(_x, trans[i+1][0])
+                y = ((trans[i+1][1]-_y)/(trans[i+1][0]-_x)) * (x - _x)  + _y
+                axs.plot(x,y, color=color, lw=4, alpha=0.8)
+
+            # Plot transitions
+            for x, y in trans:
+                ymax = max((ymax, y))
+                ymin = min((ymin, y))
+                axs.plot(x, y, marker="*", color=color, markersize=16)
+
+            # get latex-like legend titles
+            dfct = dfcts[0].defect
+            flds = dfct.name.split('_')
+            legends_txt.append(f"${flds[0]}_{{{flds[1]}}}$")
+            artists.append(Line2D([0],[0],color=color,lw=4))
+
+        axs.set_xlim(xmin, xmax)
+        axs.set_ylim(ylim[0] if ylim else ymin - 0.1, ylim[1] if ylim else ymax + 0.1)
+        axs.set_xlabel("Fermi energy (eV)", size=ax_fontsize * fontwidth)
+        axs.set_ylabel("Defect Formation\nEnergy (eV)", size=ax_fontsize * fontwidth)
+        axs.minorticks_on()
+        axs.tick_params(which="major", length=8, width=2, direction="in", top=True, right=True, labelsize=fontwidth * ax_fontsize)
+        axs.tick_params(which="minor", length=2, width=2, direction="in", top=True, right=True, labelsize=fontwidth * ax_fontsize)
+        for x in axs.spines.values():
+            x.set_linewidth(1.5)
+
+        axs.axvline(0, ls="--", color='k', lw=2, alpha=0.2)
+        if self.band_gap:
+            axs.axvline(self.band_gap, ls="--", color='k', lw=2, alpha=0.2)
+
+        plt.legend(artists, legends_txt, fontsize=lg_fontsize * ax_fontsize, ncol=3, loc='lower center')
+
+        if save:
+            save = save if isinstance(save, str) else "formation_energy_diagram.png"
+            plt.savefig(save)
+        if not show:
+            plt.close()
+
+        plt.show()
+
+        return fig, axs
 
 def ensure_stable_bulk(
     pd: PhaseDiagram, entry: ComputedEntry, use_pd_energy: bool = True
@@ -618,7 +714,7 @@ def _get_adjusted_pd_entries(phase_diagram, atomic_entries) -> list[ComputedEntr
 
     for entry in phase_diagram.stable_entries:
         d_ = dict(
-            energy=get_interp_en(entry) + phase_diagram.get_form_energy(entry),
+            energy=get_interp_en(entry) + phase_diagram.get_form_energy(entry) - entry.correction,
             composition=entry.composition,
             entry_id=entry.entry_id,
             correction=entry.correction,

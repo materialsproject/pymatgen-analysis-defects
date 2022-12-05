@@ -395,7 +395,7 @@ class Substitution(Defect):
         return sub_site.specie.oxi_state - orig_site.specie.oxi_state
 
     def __repr__(self) -> str:
-        """Representation of a vacancy defect."""
+        """Representation of a substitutional defect."""
         rm_species = get_element(self.defect_site.specie)
         sub_species = get_element(self.site.specie)
         return (
@@ -491,7 +491,7 @@ class Interstitial(Defect):
         return sub_site.specie.oxi_state
 
     def __repr__(self) -> str:
-        """Representation of a vacancy defect."""
+        """Representation of a interstitial defect."""
         sub_species = get_element(self.site.specie)
         fpos_str = ",".join(f"{x:.2f}" for x in self.site.frac_coords)
         return f"{sub_species} intersitial site at " f"at site [{fpos_str}]"
@@ -522,7 +522,12 @@ class DefectComplex(Defect):
 
     def get_multiplicity(self) -> int:
         """Determine the multiplicity of the defect site within the structure."""
-        raise NotImplementedError("Complex defect multiplicity is not implemented.")
+
+        symm_struct = self.defects[0].symmetrized_structure
+        for defect in self.defects:
+            defect_site = self.structure[defect.defect_site_index]
+            update_structure(symm_struct, defect_site, defect_type=defect.defect_type)
+        return len(symm_struct.find_equivalent_sites(defect_site))
 
     @property
     def element_changes(self) -> Dict[Element, int]:
@@ -595,11 +600,10 @@ class DefectComplex(Defect):
             update_structure(sc_structure, sc_site, defect_type=defect.defect_type)
         complex_pos /= len(self.defects)
         if dummy_species is not None:
-            sc_structure.insert(
-                0,
-                species=dummy_species,
-                coords=np.mod(complex_pos, 1),
-            )
+            for defect in self.defects:
+                dummy_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
+                dummy_pos = np.mod(dummy_pos, 1)
+                sc_structure.insert(len(sc_structure), dummy_species, dummy_pos)
 
         return sc_structure
 
@@ -666,6 +670,12 @@ class Adsorbate(Interstitial):
     def name(self) -> str:
         """Returns a name for this defect."""
         return f"{get_element(self.site.specie)}_{{ads}}"
+
+    def __repr__(self) -> str:
+        """Representation of a adsorbate defect."""
+        sub_species = get_element(self.site.specie)
+        fpos_str = ",".join(f"{x:.2f}" for x in self.site.frac_coords)
+        return f"{sub_species} adsorbate site at " f"at site [{fpos_str}]"
 
 
 def get_element(sp_el: Species | Element) -> Element:
