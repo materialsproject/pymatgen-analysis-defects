@@ -3,10 +3,14 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from itertools import groupby
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
+import matplotlib.cm as cm
 import numpy as np
+from matplotlib import pyplot as plt
+from matplotlib.lines import Line2D
 from monty.json import MSONable
 from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
@@ -15,11 +19,6 @@ from pymatgen.core import Composition
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
 from pymatgen.io.vasp import Locpot, Vasprun
 from scipy.spatial import ConvexHull
-
-from itertools import groupby
-from matplotlib.lines import Line2D
-from matplotlib import pyplot as plt
-import matplotlib.cm as cm
 
 from pymatgen.analysis.defects.core import Defect
 from pymatgen.analysis.defects.corrections import get_freysoldt_correction
@@ -462,9 +461,15 @@ class FormationEnergyDiagram(MSONable):
         return np.interp(fermi_level, transitions[:, 0], transitions[:, 1])
 
     def plot(
-        self, chempots, xlim=None, ylim=None, only_lower_envelope=True,
-        show=True, save=False, **kwargs
-):
+        self,
+        chempots,
+        xlim=None,
+        ylim=None,
+        only_lower_envelope=True,
+        show=True,
+        save=False,
+        **kwargs,
+    ):
         if not xlim and not self.band_gap:
             raise ValueError("Must specify xlim or set band_gap attribute")
 
@@ -478,7 +483,6 @@ class FormationEnergyDiagram(MSONable):
         fontwidth = 12
         ax_fontsize = 1.3
         lg_fontsize = 10
-
 
         sents = sorted(self.defect_entries, key=lambda x: x.defect.__repr__())
         dat = []
@@ -500,14 +504,14 @@ class FormationEnergyDiagram(MSONable):
             if not only_lower_envelope:
                 for ln in lines:
                     x = np.linspace(xmin, xmax)
-                    y = ln[0]*x + ln[1]
-                    axs.plot(x,y, color=color, alpha=0.5)
+                    y = ln[0] * x + ln[1]
+                    axs.plot(x, y, color=color, alpha=0.5)
 
             # plot connecting lines
             for i, (_x, _y) in enumerate(trans[:-1]):
-                x = np.linspace(_x, trans[i+1][0])
-                y = ((trans[i+1][1]-_y)/(trans[i+1][0]-_x)) * (x - _x)  + _y
-                axs.plot(x,y, color=color, lw=4, alpha=0.8)
+                x = np.linspace(_x, trans[i + 1][0])
+                y = ((trans[i + 1][1] - _y) / (trans[i + 1][0] - _x)) * (x - _x) + _y
+                axs.plot(x, y, color=color, lw=4, alpha=0.8)
 
             # Plot transitions
             for x, y in trans:
@@ -517,25 +521,47 @@ class FormationEnergyDiagram(MSONable):
 
             # get latex-like legend titles
             dfct = dfcts[0].defect
-            flds = dfct.name.split('_')
+            flds = dfct.name.split("_")
             legends_txt.append(f"${flds[0]}_{{{flds[1]}}}$")
-            artists.append(Line2D([0],[0],color=color,lw=4))
+            artists.append(Line2D([0], [0], color=color, lw=4))
 
         axs.set_xlim(xmin, xmax)
         axs.set_ylim(ylim[0] if ylim else ymin - 0.1, ylim[1] if ylim else ymax + 0.1)
         axs.set_xlabel("Fermi energy (eV)", size=ax_fontsize * fontwidth)
         axs.set_ylabel("Defect Formation\nEnergy (eV)", size=ax_fontsize * fontwidth)
         axs.minorticks_on()
-        axs.tick_params(which="major", length=8, width=2, direction="in", top=True, right=True, labelsize=fontwidth * ax_fontsize)
-        axs.tick_params(which="minor", length=2, width=2, direction="in", top=True, right=True, labelsize=fontwidth * ax_fontsize)
+        axs.tick_params(
+            which="major",
+            length=8,
+            width=2,
+            direction="in",
+            top=True,
+            right=True,
+            labelsize=fontwidth * ax_fontsize,
+        )
+        axs.tick_params(
+            which="minor",
+            length=2,
+            width=2,
+            direction="in",
+            top=True,
+            right=True,
+            labelsize=fontwidth * ax_fontsize,
+        )
         for x in axs.spines.values():
             x.set_linewidth(1.5)
 
-        axs.axvline(0, ls="--", color='k', lw=2, alpha=0.2)
+        axs.axvline(0, ls="--", color="k", lw=2, alpha=0.2)
         if self.band_gap:
-            axs.axvline(self.band_gap, ls="--", color='k', lw=2, alpha=0.2)
+            axs.axvline(self.band_gap, ls="--", color="k", lw=2, alpha=0.2)
 
-        plt.legend(artists, legends_txt, fontsize=lg_fontsize * ax_fontsize, ncol=3, loc='lower center')
+        plt.legend(
+            artists,
+            legends_txt,
+            fontsize=lg_fontsize * ax_fontsize,
+            ncol=3,
+            loc="lower center",
+        )
 
         if save:
             save = save if isinstance(save, str) else "formation_energy_diagram.png"
@@ -546,6 +572,7 @@ class FormationEnergyDiagram(MSONable):
         plt.show()
 
         return fig, axs
+
 
 def ensure_stable_bulk(
     pd: PhaseDiagram, entry: ComputedEntry, use_pd_energy: bool = True
@@ -714,7 +741,9 @@ def _get_adjusted_pd_entries(phase_diagram, atomic_entries) -> list[ComputedEntr
 
     for entry in phase_diagram.stable_entries:
         d_ = dict(
-            energy=get_interp_en(entry) + phase_diagram.get_form_energy(entry) - entry.correction,
+            energy=get_interp_en(entry)
+            + phase_diagram.get_form_energy(entry)
+            - entry.correction,
             composition=entry.composition,
             entry_id=entry.entry_id,
             correction=entry.correction,
