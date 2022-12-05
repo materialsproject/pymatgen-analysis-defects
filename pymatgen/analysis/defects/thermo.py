@@ -437,7 +437,7 @@ class FormationEnergyDiagram(MSONable):
         transitions = {}
         sents = sorted(self.defect_entries, key=lambda x: x.defect.__repr__())
         for k, group in groupby(sents, key=lambda x: x.defect.__repr__()):
-            lines = self._get_lines(self, group, chempots)
+            lines = self._get_lines(group, chempots)
             lines = get_lower_envelope(lines)
             transitions[k] = get_transitions(lines, x_min, x_max)
 
