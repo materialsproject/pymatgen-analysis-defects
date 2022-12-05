@@ -410,7 +410,7 @@ class FormationEnergyDiagram(MSONable):
 
     def get_transitions(
         self, chempots: dict, x_min: float = 0, x_max: float = 10
-    ) -> list[tuple[float, float]]:
+    ) -> dict[list[tuple[float, float]]]:
         """Get the transition levels for the formation energy diagram.
 
         Get all of the kinks in the formation energy diagram.
@@ -468,10 +468,8 @@ class FormationEnergyDiagram(MSONable):
         only_lower_envelope: bool = True,
         show: bool = True,
         save: bool | str = False,
-        **kwargs,
     ):
-        """
-        Plot the formation energy diagram.
+        """Plot the formation energy diagram.
 
         Args:
             chempots: Chemical potentials at which to plot the formation energy lines
@@ -480,7 +478,7 @@ class FormationEnergyDiagram(MSONable):
                 VBM up to the band gap, plus a buffer of 0.2eV on each side
             ylim: Limits (low, high) to use for y-axis. Default is to use the minimum and
                 maximum formation energy value of all defects, plus a buffer of 0.1eV
-            only_lower_envelop: Whether to only plot the lower envolope (concave hull). If
+            only_lower_envelope: Whether to only plot the lower envolope (concave hull). If
                 False, then the lower envolope will be highlighted, but all lines will be
                 plotted.
             show: Whether to show the plot.
