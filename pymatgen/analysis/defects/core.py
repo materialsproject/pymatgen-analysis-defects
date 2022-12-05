@@ -522,7 +522,6 @@ class DefectComplex(Defect):
 
     def get_multiplicity(self) -> int:
         """Determine the multiplicity of the defect site within the structure."""
-
         symm_struct = self.defects[0].symmetrized_structure
         for defect in self.defects:
             defect_site = self.structure[defect.defect_site_index]

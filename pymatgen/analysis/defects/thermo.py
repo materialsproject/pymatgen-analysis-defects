@@ -462,14 +462,34 @@ class FormationEnergyDiagram(MSONable):
 
     def plot(
         self,
-        chempots,
-        xlim=None,
-        ylim=None,
-        only_lower_envelope=True,
-        show=True,
-        save=False,
+        chempots: dict,
+        xlim: ArrayLike | None = None,
+        ylim: ArrayLike | None = None,
+        only_lower_envelope: bool = True,
+        show: bool = True,
+        save: bool | str = False,
         **kwargs,
     ):
+        """
+        Plot the formation energy diagram.
+
+        Args:
+            chempots: Chemical potentials at which to plot the formation energy lines
+                Should be bounded by the chempot_limits property
+            xlim: Limits (low, high) to use for the x-axis. Default is to use 0eV for the
+                VBM up to the band gap, plus a buffer of 0.2eV on each side
+            ylim: Limits (low, high) to use for y-axis. Default is to use the minimum and
+                maximum formation energy value of all defects, plus a buffer of 0.1eV
+            only_lower_envelop: Whether to only plot the lower envolope (concave hull). If
+                False, then the lower envolope will be highlighted, but all lines will be
+                plotted.
+            show: Whether to show the plot.
+            save: Whether to save the plot. A string can be provided to save to a specific
+                file. If True, will be saved to current working directory under the name,
+                formation_energy_diagram.png
+        Returns:
+            (Figure, Axis) from matplotlib.pyplot module
+        """
         if not xlim and not self.band_gap:
             raise ValueError("Must specify xlim or set band_gap attribute")
 
