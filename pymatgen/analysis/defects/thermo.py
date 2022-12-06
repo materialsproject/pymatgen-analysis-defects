@@ -386,7 +386,7 @@ class FormationEnergyDiagram(MSONable):
 
     def _get_lines(
         self, defect_entries, chempots: Dict
-    ) -> Iterable[tuple[float, float]]:
+    ) -> list[tuple[float, float]]:
         """Get the lines for the formation energy diagram.
 
         Args:
