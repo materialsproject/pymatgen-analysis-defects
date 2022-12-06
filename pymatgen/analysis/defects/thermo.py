@@ -346,9 +346,7 @@ class FormationEnergyDiagram(MSONable):
             }
         return chempots
 
-    def _vbm_formation_energy(
-        self, defect_entry: DefectEntry, chempots: dict
-    ) -> float:
+    def _vbm_formation_energy(self, defect_entry: DefectEntry, chempots: dict) -> float:
         """Compute the formation energy at the VBM.
 
         Compute the formation energy at the VBM (essentially the y-intercept)
@@ -386,7 +384,9 @@ class FormationEnergyDiagram(MSONable):
             res.append(dict(zip(self.chempot_diagram.elements, vertex)))
         return res
 
-    def _get_lines(self, defect_entries, chempots: Dict) -> list[tuple[float, float]]:
+    def _get_lines(
+        self, defect_entries, chempots: Dict
+    ) -> Iterable[tuple[float, float]]:
         """Get the lines for the formation energy diagram.
 
         Args:
