@@ -325,7 +325,7 @@ class FormationEnergyDiagram(MSONable):
             **kwargs,
         )
 
-    def _parse_chempots(self, chempots: dict | ArrayLike) -> dict:
+    def _parse_chempots(self, chempots: dict) -> dict:
         """Parse the chemical potentials.
 
         Make sure that the chemical potential is represented as a dictionary.
@@ -347,7 +347,7 @@ class FormationEnergyDiagram(MSONable):
         return chempots
 
     def _vbm_formation_energy(
-        self, defect_entry: DefectEntry, chempots: dict | Iterable
+        self, defect_entry: DefectEntry, chempots: dict
     ) -> float:
         """Compute the formation energy at the VBM.
 
@@ -386,7 +386,7 @@ class FormationEnergyDiagram(MSONable):
             res.append(dict(zip(self.chempot_diagram.elements, vertex)))
         return res
 
-    def _get_lines(self, defect_entries, chempots: dict) -> list[tuple[float, float]]:
+    def _get_lines(self, defect_entries, chempots: Dict) -> Iterable[tuple[float, float]]:
         """Get the lines for the formation energy diagram.
 
         Args:
@@ -410,7 +410,7 @@ class FormationEnergyDiagram(MSONable):
 
     def get_transitions(
         self, chempots: dict, x_min: float = 0, x_max: float = 10
-    ) -> dict[list[tuple[float, float]]]:
+    ) -> Dict[str, Iterable[tuple[float, float]]]:
         """Get the transition levels for the formation energy diagram.
 
         Get all of the kinks in the formation energy diagram.
@@ -424,10 +424,10 @@ class FormationEnergyDiagram(MSONable):
                 potential diagram.
 
         Returns:
-            list[tuple[float, float]]:
-                Transition levels and the formation energy at each transition level.
-                The first and last points are the intercepts with the
-                VBM and CBM respectively.
+            Transition levels and the formation energy at each transition level.
+            Organized as a dictionary keyed by defect __repr__
+            The first and last points are the intercepts with the
+            VBM and CBM respectively.
         """
         chempots = self._parse_chempots(chempots)
         if x_max is None:
@@ -462,7 +462,7 @@ class FormationEnergyDiagram(MSONable):
 
     def plot(
         self,
-        chempots: dict,
+        chempots: Dict,
         xlim: ArrayLike | None = None,
         ylim: ArrayLike | None = None,
         only_lower_envelope: bool = True,
@@ -566,8 +566,8 @@ class FormationEnergyDiagram(MSONable):
             right=True,
             labelsize=fontwidth * ax_fontsize,
         )
-        for x in axs.spines.values():
-            x.set_linewidth(1.5)
+        for _ax in axs.spines.values():
+            _ax.set_linewidth(1.5)
 
         axs.axvline(0, ls="--", color="k", lw=2, alpha=0.2)
         if self.band_gap:
