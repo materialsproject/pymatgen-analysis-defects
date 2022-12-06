@@ -5,7 +5,7 @@ import logging
 from dataclasses import dataclass
 from itertools import groupby
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, List, Optional
 
 import matplotlib.cm as cm
 import numpy as np
@@ -384,9 +384,7 @@ class FormationEnergyDiagram(MSONable):
             res.append(dict(zip(self.chempot_diagram.elements, vertex)))
         return res
 
-    def _get_lines(
-        self, defect_entries, chempots: Dict
-    ) -> list[tuple[float, float]]:
+    def _get_lines(self, defect_entries, chempots: Dict) -> list[tuple[float, float]]:
         """Get the lines for the formation energy diagram.
 
         Args:
