@@ -386,7 +386,7 @@ class FormationEnergyDiagram(MSONable):
             res.append(dict(zip(self.chempot_diagram.elements, vertex)))
         return res
 
-    def _get_lines(self, defect_entries, chempots: Dict) -> Iterable[tuple[float, float]]:
+    def _get_lines(self, defect_entries, chempots: Dict) -> list[tuple[float, float]]:
         """Get the lines for the formation energy diagram.
 
         Args:
@@ -410,7 +410,7 @@ class FormationEnergyDiagram(MSONable):
 
     def get_transitions(
         self, chempots: dict, x_min: float = 0, x_max: float = 10
-    ) -> Dict[str, Iterable[tuple[float, float]]]:
+    ) -> Dict[str, list[tuple[float, float]]]:
         """Get the transition levels for the formation energy diagram.
 
         Get all of the kinks in the formation energy diagram.
