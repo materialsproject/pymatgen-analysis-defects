@@ -499,11 +499,8 @@ class MultiFormationEnergyDiagram(MSONable):
         """Set some attributes after initialization."""
         self.band_gap = self.formation_energy_diagrams[0].band_gap
         self.vbm = self.formation_energy_diagrams[0].vbm
-
-    @property
-    def chempot_limits(self):
-        """Get chempot limits from the first FormationEnergyDiagram."""
-        return self.formation_energy_diagrams[0].chempot_limits
+        self.chempot_limits = self.formation_energy_diagrams[0].chempot_limits
+        self.chempot_diagram = self.formation_energy_diagrams[0].chempot_diagram
 
     @classmethod
     def with_atomic_entries(
