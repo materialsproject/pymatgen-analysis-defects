@@ -454,7 +454,7 @@ class FormationEnergyDiagram(MSONable):
         lines = get_lower_envelope(lines)
         return get_transitions(lines, x_min, x_max)
 
-    def get_formation_energy(self, fermi_level: float, chempot_dict: dict) -> float:
+    def get_formation_energy(self, fermi_level: float, chempot_dict: dict):
         """Get the formation energy at a given Fermi level.
 
         Linearly interpolate between the transition levels.
@@ -478,8 +478,8 @@ class FormationEnergyDiagram(MSONable):
         """Get equilibrium defect concentration assuming the dilute limit.
 
         Args:
-            fermi level: fermi level with respect to the VBM
-            chemical potential: Chemical potentials
+            fermi_level: fermi level with respect to the VBM
+            chempots: Chemical potentials
             temperature: in Kelvin
         """
         chempots = self._parse_chempots(chempots=chempots)
@@ -537,8 +537,7 @@ class MultiFormationEnergyDiagram(MSONable):
     def solve_for_fermi_level(
         self, chempots: dict, temperature: int | float, dos: Dos
     ) -> float:
-        """
-        Solves for the equilibrium fermi level at a given chempot, temperature, density of states.
+        """Solves for the equilibrium fermi level at a given chempot, temperature, density of states.
 
         Args:
             chempots: dictionary of chemical potentials to use
