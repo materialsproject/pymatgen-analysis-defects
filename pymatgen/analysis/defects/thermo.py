@@ -532,7 +532,9 @@ class MultiFormationEnergyDiagram(MSONable):
 
         return cls(formation_energy_diagrams=single_form_en_diagrams)
 
-    def solve_for_fermi_level(self, chempots: dict, temperature: int | float, dos: Dos) -> float:
+    def solve_for_fermi_level(
+        self, chempots: dict, temperature: int | float, dos: Dos
+    ) -> float:
         """
         Solves for the equilibrium fermi level at a given chempot, temperature, density of states.
 
