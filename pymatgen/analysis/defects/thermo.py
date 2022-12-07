@@ -424,7 +424,7 @@ class FormationEnergyDiagram(MSONable):
 
     def get_transitions(
         self, chempots: dict, x_min: float = 0, x_max: float = 10
-    ) -> Dict[str, list[tuple[float, float]]]:
+    ) -> list[tuple[float, float]]:
         """Get the transition levels for the formation energy diagram.
 
         Get all of the kinks in the formation energy diagram.
@@ -504,7 +504,7 @@ class MultiFormationEnergyDiagram(MSONable):
         atomic_entries: list[ComputedEntry],
         phase_diagram: PhaseDiagram,
         vbm: float,
-        **kwargs):
+        **kwargs) -> MultiFormationEnergyDiagram:
         """Initializes by grouping defect types, and creating a list of single
         FormationEnergyDiagram using the with_atomic_entries method (see above)
         """
@@ -520,7 +520,7 @@ class MultiFormationEnergyDiagram(MSONable):
 
         return cls(formation_energy_diagrams=single_form_en_diagrams)
 
-    def solve_for_fermi_level(self, chempots: dict, temperature: int | float, dos: Dos):
+    def solve_for_fermi_level(self, chempots: dict, temperature: int | float, dos: Dos) -> float:
         """
         Solves for the equilibrium fermi level at a given chempot, temperature, density of states.
 
