@@ -454,7 +454,7 @@ class FormationEnergyDiagram(MSONable):
         lines = get_lower_envelope(lines)
         return get_transitions(lines, x_min, x_max)
 
-    def get_formation_energy(self, fermi_level: float, chempot_dict: dict):
+    def get_formation_energy(self, fermi_level: float, chempot_dict: dict) -> float:
         """Get the formation energy at a given Fermi level.
 
         Linearly interpolate between the transition levels.
@@ -513,7 +513,7 @@ class MultiFormationEnergyDiagram(MSONable):
         phase_diagram: PhaseDiagram,
         vbm: float,
         **kwargs,
-    ):
+    ) -> MultiFormationEnergyDiagram:
         """Initializes by grouping defect types, and creating a list of single
         FormationEnergyDiagram using the with_atomic_entries method (see above)
         """
