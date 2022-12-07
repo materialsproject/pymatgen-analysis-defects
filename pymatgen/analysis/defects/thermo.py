@@ -176,7 +176,6 @@ class FormationEnergyDiagram(MSONable):
         - Make sure that the bulk entry is stable
         - create the chemical potential diagram using only the formation energies
         """
-
         g = group_defects(self.defect_entries)
         if next(g, True) and next(g, False):
             raise ValueError(
@@ -401,6 +400,7 @@ class FormationEnergyDiagram(MSONable):
 
     @property
     def defect(self):
+        """Get the defect that this FormationEnergyDiagram represents."""
         return self.defect_entries[0].defect
 
     def _get_lines(self, chempots: Dict) -> list[tuple[float, float]]:
@@ -475,10 +475,14 @@ class FormationEnergyDiagram(MSONable):
     def get_concentration(
         self, fermi_level: float, chempots: dict, temperature: int | float
     ) -> float:
+        """Get equilibrium defect concentration assuming the dilute limit.
+
+        Args:
+            fermi level: fermi level with respect to the VBM
+            chemical potential: Chemical potentials
+            temperature: in Kelvin
         """
-        Gets the defects equilibrium concentration at a particular fermi level, chemical potential,
-        and temperature (in Kelvin), assuming dilue limit thermodynamics (non-interacting defects)
-        """
+        chempots = self._parse_chempots(chempots=chempots)
         fe = self.get_formation_energy(fermi_level, chempots)
         return self.defect_entries[0].defect.multiplicity * fermi_dirac(
             energy=fe, temperature=temperature
@@ -492,16 +496,13 @@ class MultiFormationEnergyDiagram(MSONable):
     formation_energy_diagrams: List[FormationEnergyDiagram]
 
     def __post_init__(self):
-        """Set some attributes"""
+        """Set some attributes after initialization."""
         self.band_gap = self.formation_energy_diagrams[0].band_gap
         self.vbm = self.formation_energy_diagrams[0].vbm
 
     @property
-    def defect(self):
-        return self.formation_energy_diagrams[0].defect
-
-    @property
     def chempot_limits(self):
+        """Get chempot limits from the first FormationEnergyDiagram."""
         return self.formation_energy_diagrams[0].chempot_limits
 
     @classmethod
@@ -514,10 +515,11 @@ class MultiFormationEnergyDiagram(MSONable):
         vbm: float,
         **kwargs,
     ) -> MultiFormationEnergyDiagram:
-        """Initializes by grouping defect types, and creating a list of single
+        """Initialize using atomic entries.
+
+        Initializes by grouping defect types, and creating a list of single
         FormationEnergyDiagram using the with_atomic_entries method (see above)
         """
-
         single_form_en_diagrams = []
         for _, defect_group in group_defects(defect_entries=defect_entries):
             _fd = FormationEnergyDiagram.with_atomic_entries(
@@ -574,6 +576,7 @@ class MultiFormationEnergyDiagram(MSONable):
 
 
 def group_defects(defect_entries: list[DefectEntry]):
+    """Group defects by their representation."""
     sents = sorted(defect_entries, key=lambda x: x.defect.__repr__())
     for k, group in groupby(sents, key=lambda x: x.defect.__repr__()):
         yield k, list(group)
@@ -759,10 +762,11 @@ def _get_adjusted_pd_entries(phase_diagram, atomic_entries) -> list[ComputedEntr
 
 
 def fermi_dirac(energy: float, temperature: int | float) -> float:
-    """
+    """Get value of fermi dirac distribution.
+
     Gets the defects equilibrium concentration (up to the multiplicity factor)
     at a particular fermi level, chemical potential, and temperature (in Kelvin),
-    assuming dilue limit thermodynamics (non-interacting defects)
+    assuming dilue limit thermodynamics (non-interacting defects) using FD statistics.
     """
     return 1.0 / (1.0 + np.exp((energy) / (boltzman_eV_K * temperature)))
 
@@ -823,7 +827,6 @@ def plot_formation_energy_diagrams(
     Returns:
         Axis subplot
     """
-
     if isinstance(formation_energy_diagrams, MultiFormationEnergyDiagram):
         formation_energy_diagrams = formation_energy_diagrams.formation_energy_diagrams
     elif isinstance(formation_energy_diagrams, FormationEnergyDiagram):
