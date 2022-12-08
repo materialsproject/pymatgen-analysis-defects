@@ -837,18 +837,23 @@ def plot_formation_energy_diagrams(
     if not axis:
         _, axis = plt.subplots()
     if not xlim and band_gap:
-        xmin, xmax = np.subtract(-0.2, alignment), np.subtract(band_gap + 0.2, alignment)
-    ymin, ymax = 0., 1.
+        xmin, xmax = np.subtract(-0.2, alignment), np.subtract(
+            band_gap + 0.2, alignment
+        )
+    ymin, ymax = 0.0, 1.0
     legends_txt = []
     artists = []
     fontwidth = 12
     ax_fontsize = 1.3
     lg_fontsize = 10
 
-    colors = colors if colors \
-        else cm.Dark2(np.linspace(0, 1, len(formation_energy_diagrams))) \
-            if len(formation_energy_diagrams) <= 8 \
-                else cm.gist_rainbow(np.linspace(0, 1, len(formation_energy_diagrams)))
+    colors = (
+        colors
+        if colors
+        else cm.Dark2(np.linspace(0, 1, len(formation_energy_diagrams)))
+        if len(formation_energy_diagrams) <= 8
+        else cm.gist_rainbow(np.linspace(0, 1, len(formation_energy_diagrams)))
+    )
 
     for i, single_fed in enumerate(formation_energy_diagrams):
         lines = single_fed._get_lines(chempots=chempots)
@@ -862,7 +867,9 @@ def plot_formation_energy_diagrams(
             for ln in lines:
                 x = np.linspace(xmin, xmax)
                 y = ln[0] * x + ln[1]
-                axis.plot(np.subtract(x, alignment), y, color=colors[i], alpha=line_alpha)
+                axis.plot(
+                    np.subtract(x, alignment), y, color=colors[i], alpha=line_alpha
+                )
 
         # plot connecting envelop lines
         for i, (_x, _y) in enumerate(trans[:-1]):
