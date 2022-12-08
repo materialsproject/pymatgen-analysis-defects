@@ -206,7 +206,7 @@ class FormationEnergyDiagram(MSONable):
             self._chempot_limits_arr = chempot_limits[
                 ~np.any(chempot_limits == boundary_value, axis=1)
             ]
-        self._chempot_limits_arr.dot(
+        self._chempot_limits_arr = self._chempot_limits_arr.dot(
             1 / self.bulk_entry.composition.reduced_composition.num_atoms
         )
 
@@ -775,12 +775,12 @@ def plot_formation_energy_diagrams(
     | MultiFormationEnergyDiagram,
     chempots: Dict,
     alignment: float = 0.0,
-    xlim: ArrayLike | None = None,
-    ylim: ArrayLike | None = None,
+    xlim: list | None = None,
+    ylim: list | None = None,
     only_lower_envelope: bool = True,
     show: bool = True,
     save: bool | str = False,
-    colors: List | None = None,
+    colors: list | None = None,
     legend_prefix: str | None = None,
     transition_marker: str = "*",
     transition_markersize: int = 16,
@@ -836,24 +836,21 @@ def plot_formation_energy_diagrams(
 
     if not axis:
         _, axis = plt.subplots()
-    xmin = xlim[0] if xlim else np.subtract(-0.2, alignment)
-    xmax = xlim[1] if xlim else np.subtract(band_gap + 0.2, alignment)
-    ymin, ymax = 10, 0
+    if not xlim and band_gap:
+        xmin, xmax = np.subtract(-0.2, alignment), np.subtract(band_gap + 0.2, alignment)
+    ymin, ymax = 0., 1.
     legends_txt = []
     artists = []
     fontwidth = 12
     ax_fontsize = 1.3
     lg_fontsize = 10
 
-    if not colors and len(formation_energy_diagrams) <= 8:
-        colors = iter(cm.Dark2(np.linspace(0, 1, len(formation_energy_diagrams))))
-    elif not colors:
-        colors = iter(
-            cm.gist_rainbow(np.linspace(0, 1, len(formation_energy_diagrams)))
-        )
+    colors = colors if colors \
+        else cm.Dark2(np.linspace(0, 1, len(formation_energy_diagrams))) \
+            if len(formation_energy_diagrams) <= 8 \
+                else cm.gist_rainbow(np.linspace(0, 1, len(formation_energy_diagrams)))
 
-    for single_fed in formation_energy_diagrams:
-        color = next(colors)
+    for i, single_fed in enumerate(formation_energy_diagrams):
         lines = single_fed._get_lines(chempots=chempots)
         lowerlines = get_lower_envelope(lines)
         trans = get_transitions(
@@ -865,7 +862,7 @@ def plot_formation_energy_diagrams(
             for ln in lines:
                 x = np.linspace(xmin, xmax)
                 y = ln[0] * x + ln[1]
-                axis.plot(np.subtract(x, alignment), y, color=color, alpha=line_alpha)
+                axis.plot(np.subtract(x, alignment), y, color=colors[i], alpha=line_alpha)
 
         # plot connecting envelop lines
         for i, (_x, _y) in enumerate(trans[:-1]):
@@ -874,21 +871,21 @@ def plot_formation_energy_diagrams(
             axis.plot(
                 np.subtract(x, alignment),
                 y,
-                color=color,
+                color=colors[i],
                 ls=linestyle,
                 lw=linewidth,
                 alpha=envelope_alpha,
             )
 
         # Plot transitions
-        for x, y in trans:
-            ymax = max((ymax, y))
-            ymin = min((ymin, y))
+        for _x, _y in trans:
+            ymax = max((ymax, _y))
+            ymin = max((ymin, _y))
             axis.plot(
-                np.subtract(x, alignment),
-                y,
+                np.subtract(_x, alignment),
+                _y,
                 marker=transition_marker,
-                color=color,
+                color=colors[i],
                 markersize=transition_markersize,
             )
 
@@ -899,7 +896,7 @@ def plot_formation_energy_diagrams(
         if legend_prefix:
             latexname = f"{legend_prefix} {latexname}"
         legends_txt.append(latexname)
-        artists.append(Line2D([0], [0], color=color, lw=4))
+        artists.append(Line2D([0], [0], color=colors[i], lw=4))
 
     axis.set_xlim(xmin, xmax)
     axis.set_ylim(ylim[0] if ylim else ymin - 0.1, ylim[1] if ylim else ymax + 0.1)
