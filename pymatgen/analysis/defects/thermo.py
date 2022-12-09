@@ -190,8 +190,12 @@ class FormationEnergyDiagram(MSONable):
 
         entries = []
         for entry in self.phase_diagram.stable_entries:
-            d_ = entry.as_dict()
-            d_["energy"] = self.phase_diagram.get_form_energy(entry) - entry.correction
+            d_ = dict(
+                energy = self.phase_diagram.get_form_energy(entry),
+                composition = entry.composition,
+                entry_id=entry.entry_id,
+            )
+            adjusted_entries.append(ComputedEntry.from_dict(d_))
             entries.append(ComputedEntry.from_dict(d_))
 
         self.chempot_diagram = ChemicalPotentialDiagram(entries)
@@ -749,10 +753,8 @@ def _get_adjusted_pd_entries(phase_diagram, atomic_entries) -> list[ComputedEntr
         d_ = dict(
             energy=get_interp_en(entry)
             + phase_diagram.get_form_energy(entry)
-            - entry.correction,
             composition=entry.composition,
             entry_id=entry.entry_id,
-            correction=entry.correction,
         )
         adjusted_entries.append(ComputedEntry.from_dict(d_))
 
