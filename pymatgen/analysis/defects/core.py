@@ -337,7 +337,7 @@ class Substitution(Defect):
         return f"{get_element(self.site.specie)}_{get_element(self.defect_site.specie)}"
 
     @property
-    def defect_structure(self):
+    def defect_structure(self) -> Structure:
         """Returns the defect structure."""
         struct: Structure = self.structure.copy()
         rm_oxi = struct.sites[self.defect_site_index].specie.oxi_state
@@ -440,7 +440,7 @@ class Interstitial(Defect):
         return f"{get_element(self.site.specie)}_i"
 
     @property
-    def defect_structure(self):
+    def defect_structure(self) -> Structure:
         """Returns the defect structure."""
         struct: Structure = self.structure.copy()
         # use the highest value oxidation state among the two most popular ones

@@ -22,7 +22,7 @@ keywords = ["high-throughput", "automated", "dft", "defects"]
 license = { text = "modified BSD" }
 name = "pymatgen-analysis-defects"
 readme = "README.rst"
-requires-python = '>="3.8"'
+requires-python = '>=3.8'
 
 [project.optional-dependencies]
 finder = ["dscribe>=1.2.1"]
