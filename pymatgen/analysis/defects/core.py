@@ -27,7 +27,7 @@ __copyright__ = "Copyright 2022, The Materials Project"
 __maintainer__ = "Jimmy-Xuan Shen @jmmshn"
 __date__ = "Mar 15, 2022"
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 class DefectType(Enum):
@@ -337,7 +337,7 @@ class Substitution(Defect):
         return f"{get_element(self.site.specie)}_{get_element(self.defect_site.specie)}"
 
     @property
-    def defect_structure(self):
+    def defect_structure(self) -> Structure:
         """Returns the defect structure."""
         struct: Structure = self.structure.copy()
         rm_oxi = struct.sites[self.defect_site_index].specie.oxi_state
@@ -440,14 +440,14 @@ class Interstitial(Defect):
         return f"{get_element(self.site.specie)}_i"
 
     @property
-    def defect_structure(self):
+    def defect_structure(self) -> Structure:
         """Returns the defect structure."""
         struct: Structure = self.structure.copy()
         # use the highest value oxidation state among the two most popular ones
         # found in the ICSD
         inter_states = self.site.specie.icsd_oxidation_states[:2]
         if len(inter_states) == 0:
-            logger.warning(
+            _logger.warning(
                 f"No oxidation states found for {self.site.specie.symbol}. "
                 "in ICSD using `oxidation_states` without frequencuy ranking."
             )

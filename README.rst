@@ -57,7 +57,7 @@ Defect Complexes
 ++++++++++++++++
 
 Multiple defects can be composed into defect complexes.
-The complex is can be treateded as a normal defect object for subsequent analysis.
+The complex is can be treated as a normal defect object for subsequent analysis.
 
 Capture coefficients
 ++++++++++++++++++++
@@ -76,8 +76,7 @@ Contributor
 -----------
 
 * Lead developer: Dr. Jimmy-Xuan Shen
-* This code is contains crontributions from the original the defects analysis module of ``pymatgen`` from Dr. Danny Broberg and Dr. Shyam Dwaraknath.
-
+* This code contains contributions from the original defects analysis module of ``pymatgen`` from Dr. Danny Broberg and Dr. Shyam Dwaraknath.
 
 .. |testing| image:: https://github.com/materialsproject/pymatgen-analysis-defects/actions/workflows/testing.yml/badge.svg?branch=main
    :target: https://github.com/materialsproject/pymatgen-analysis-defects/actions/workflows/testing.yml
@@ -85,5 +84,3 @@ Contributor
    :target: https://codecov.io/gh/materialsproject/pymatgen-analysis-defects
 .. |zenodo| image:: https://zenodo.org/badge/452872799.svg
    :target: https://zenodo.org/badge/latestdoi/452872799
-
-
