@@ -820,7 +820,7 @@ def plot_formation_energy_diagrams(
         envelope_alpha: Alpha for the envelope
         line_alpha: Alpha for the lines (if the are shown)
         band_edge_color: Color for VBM/CBM vertical lines
-        axis: Previous axis to ammend
+        axis: Previous axis to amend
 
     Returns:
         Axis subplot
