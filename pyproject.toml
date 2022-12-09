@@ -40,7 +40,7 @@ docs = [
 
 strict = [
   "pymatgen==2022.11.7",
-  "dscribe==1.2.1",
+  "dscribe==1.2.2",
   "scikit-image==0.19.3",
 ]
 
