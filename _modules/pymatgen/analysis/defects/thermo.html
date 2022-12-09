@@ -245,7 +245,7 @@
 <span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">NDArray</span>
 <span class="kn">from</span> <span class="nn">pymatgen.analysis.chempot_diagram</span> <span class="kn">import</span> <span class="n">ChemicalPotentialDiagram</span>
 <span class="kn">from</span> <span class="nn">pymatgen.analysis.phase_diagram</span> <span class="kn">import</span> <span class="n">PhaseDiagram</span>
-<span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">Composition</span>
+<span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">Composition</span><span class="p">,</span> <span class="n">Structure</span>
 <span class="kn">from</span> <span class="nn">pymatgen.entries.computed_entries</span> <span class="kn">import</span> <span class="n">ComputedEntry</span><span class="p">,</span> <span class="n">ComputedStructureEntry</span>
 <span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">Locpot</span><span class="p">,</span> <span class="n">Vasprun</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">ConvexHull</span>
@@ -297,7 +297,7 @@
     <span class="n">corrections</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">correction_metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Post-initialization.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">charge_state</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">charge_state</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">corrections</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">corrections</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">corrections</span>
@@ -308,9 +308,11 @@
 
 <div class="viewcode-block" id="DefectEntry.get_freysoldt_correction"><a class="viewcode-back" href="../../../../reference/thermo.html#pymatgen.analysis.defects.thermo.DefectEntry.get_freysoldt_correction">[docs]</a>    <span class="k">def</span> <span class="nf">get_freysoldt_correction</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">defect_locpot</span><span class="p">:</span> <span class="n">Locpot</span><span class="p">,</span>
-        <span class="n">bulk_locpot</span><span class="p">:</span> <span class="n">Locpot</span><span class="p">,</span>
+        <span class="n">defect_locpot</span><span class="p">:</span> <span class="n">Locpot</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">bulk_locpot</span><span class="p">:</span> <span class="n">Locpot</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
         <span class="n">dielectric</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">NDArray</span><span class="p">,</span>
+        <span class="n">defect_struct</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Structure</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bulk_struct</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Structure</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FreysoldtSummary</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Calculate the Freysoldt correction.</span>
@@ -321,10 +323,18 @@
 <span class="sd">        Args:</span>
 <span class="sd">            defect_locpot:</span>
 <span class="sd">                The Locpot object for the defect supercell.</span>
+<span class="sd">                Or a dictionary of the planar averaged locpot</span>
 <span class="sd">            bulk_locpot:</span>
 <span class="sd">                The Locpot object for the bulk supercell.</span>
+<span class="sd">                Or a dictionary of the planar averaged locpot</span>
 <span class="sd">            dielectric:</span>
 <span class="sd">                The dielectric tensor or constant for the bulk material.</span>
+<span class="sd">            defect_struct:</span>
+<span class="sd">                The defect structure. If None, the structure of the defect_locpot</span>
+<span class="sd">                will be used.</span>
+<span class="sd">            bulk_struct:</span>
+<span class="sd">                The bulk structure. If None, the structure of the bulk_locpot</span>
+<span class="sd">                will be used.</span>
 <span class="sd">            kwargs:</span>
 <span class="sd">                Additional keyword arguments for the get_correction method.</span>
 
@@ -333,11 +343,21 @@
 <span class="sd">                The plotting data to analyze the planar averaged electrostatic potential</span>
 <span class="sd">                in the three periodic lattice directions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">defect_struct</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">defect_struct</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">defect_locpot</span><span class="p">,</span> <span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bulk_struct</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">bulk_struct</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">bulk_locpot</span><span class="p">,</span> <span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">defect_struct</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">bulk_struct</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;defect_struct and/or bulk_struct is missing either provide the structure or provide the complete locpot.&quot;</span>
+            <span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sc_defect_frac_coords</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">finder</span> <span class="o">=</span> <span class="n">DefectSiteFinder</span><span class="p">()</span>
             <span class="n">defect_fpos</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">get_defect_fpos</span><span class="p">(</span>
-                <span class="n">defect_structure</span><span class="o">=</span><span class="n">defect_locpot</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span>
-                <span class="n">base_structure</span><span class="o">=</span><span class="n">bulk_locpot</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span>
+                <span class="n">defect_structure</span><span class="o">=</span><span class="n">defect_struct</span><span class="p">,</span>
+                <span class="n">base_structure</span><span class="o">=</span><span class="n">bulk_struct</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">defect_fpos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sc_defect_frac_coords</span>
@@ -348,6 +368,7 @@
             <span class="n">defect_locpot</span><span class="o">=</span><span class="n">defect_locpot</span><span class="p">,</span>
             <span class="n">bulk_locpot</span><span class="o">=</span><span class="n">bulk_locpot</span><span class="p">,</span>
             <span class="n">defect_frac_coords</span><span class="o">=</span><span class="n">defect_fpos</span><span class="p">,</span>
+            <span class="n">lattice</span><span class="o">=</span><span class="n">defect_struct</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">corrections</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>

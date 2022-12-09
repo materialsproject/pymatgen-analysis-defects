@@ -571,7 +571,7 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">get_element</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">)</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">get_element</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_site</span><span class="o">.</span><span class="n">specie</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">defect_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">defect_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Structure</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns the defect structure.&quot;&quot;&quot;</span>
         <span class="n">struct</span><span class="p">:</span> <span class="n">Structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">rm_oxi</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_site_index</span><span class="p">]</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">oxi_state</span>
@@ -674,7 +674,7 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">get_element</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">)</span><span class="si">}</span><span class="s2">_i&quot;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">defect_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">defect_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Structure</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns the defect structure.&quot;&quot;&quot;</span>
         <span class="n">struct</span><span class="p">:</span> <span class="n">Structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="c1"># use the highest value oxidation state among the two most popular ones</span>
