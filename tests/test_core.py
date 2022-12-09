@@ -98,4 +98,4 @@ def test_complex(gan_struct):
     dc2 = DefectComplex([sub, vac, inter])
     assert dc2.name == "O_N_v_Ga_H_i"
     sc_struct = dc2.get_supercell_structure(dummy_species="Xe")
-    assert sc_struct.formula == "Ga63 H1 Xe1 N63 O1"
+    assert sc_struct.formula == "Ga63 H1 Xe3 N63 O1"  # Three defects three dummies
