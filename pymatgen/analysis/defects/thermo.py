@@ -11,13 +11,16 @@ from monty.json import MSONable
 from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
 from pymatgen.analysis.phase_diagram import PhaseDiagram
-from pymatgen.core import Composition
+from pymatgen.core import Composition, Structure
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
 from pymatgen.io.vasp import Locpot, Vasprun
 from scipy.spatial import ConvexHull
 
 from pymatgen.analysis.defects.core import Defect
-from pymatgen.analysis.defects.corrections import get_correction
+from pymatgen.analysis.defects.corrections.freysoldt import (
+    FreysoldtSummary,
+    get_freysoldt_correction,
+)
 from pymatgen.analysis.defects.finder import DefectSiteFinder
 from pymatgen.analysis.defects.utils import get_zfile
 
@@ -46,6 +49,11 @@ class DefectEntry(MSONable):
             automatically determine the defect location.
         corrections:
             A dictionary of corrections to the energy.
+        correction_summaries:
+            A dictionary that acts as a generic container for storing information
+            about how the corrections were calculated.  These should are only used
+            for debugging and plotting purposes.
+            PLEASE DO NOT USE THIS FOR REAL DATA.
     """
 
     defect: Defect
@@ -53,19 +61,26 @@ class DefectEntry(MSONable):
     sc_entry: ComputedStructureEntry
     sc_defect_frac_coords: Optional[ArrayLike] = None
     corrections: Optional[Dict[str, float]] = None
+    correction_metadata: Optional[Dict[str, Dict]] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization."""
         self.charge_state = int(self.charge_state)
         self.corrections: dict = {} if self.corrections is None else self.corrections
+        self.correction_type: str = "Freysoldt"
+        self.correction_metadata: dict = (
+            {} if self.correction_metadata is None else self.correction_metadata
+        )
 
     def get_freysoldt_correction(
         self,
-        defect_locpot: Locpot,
-        bulk_locpot: Locpot,
+        defect_locpot: Locpot | dict,
+        bulk_locpot: Locpot | dict,
         dielectric: float | NDArray,
+        defect_struct: Optional[Structure] = None,
+        bulk_struct: Optional[Structure] = None,
         **kwargs,
-    ):
+    ) -> FreysoldtSummary:
         """Calculate the Freysoldt correction.
 
         Updates the corrections dictionary with the Freysoldt correction
@@ -74,10 +89,18 @@ class DefectEntry(MSONable):
         Args:
             defect_locpot:
                 The Locpot object for the defect supercell.
+                Or a dictionary of the planar averaged locpot
             bulk_locpot:
                 The Locpot object for the bulk supercell.
+                Or a dictionary of the planar averaged locpot
             dielectric:
                 The dielectric tensor or constant for the bulk material.
+            defect_struct:
+                The defect structure. If None, the structure of the defect_locpot
+                will be used.
+            bulk_struct:
+                The bulk structure. If None, the structure of the bulk_locpot
+                will be used.
             kwargs:
                 Additional keyword arguments for the get_correction method.
 
@@ -85,32 +108,47 @@ class DefectEntry(MSONable):
             dict:
                 The plotting data to analyze the planar averaged electrostatic potential
                 in the three periodic lattice directions.
-
-
         """
+        if defect_struct is None:
+            defect_struct = getattr(defect_locpot, "structure", None)
+        if bulk_struct is None:
+            bulk_struct = getattr(bulk_locpot, "structure", None)
+
+        if defect_struct is None or bulk_struct is None:
+            raise ValueError(
+                "defect_struct and/or bulk_struct is missing either provide the structure or provide the complete locpot."
+            )
+
         if self.sc_defect_frac_coords is None:
             finder = DefectSiteFinder()
             defect_fpos = finder.get_defect_fpos(
-                defect_structure=defect_locpot.structure,
-                base_structure=bulk_locpot.structure,
+                defect_structure=defect_struct,
+                base_structure=bulk_struct,
             )
         else:
             defect_fpos = self.sc_defect_frac_coords
 
-        frey_corr, plot_data = get_correction(
+        frey_corr = get_freysoldt_correction(
             q=self.charge_state,
             dielectric=dielectric,
             defect_locpot=defect_locpot,
             bulk_locpot=bulk_locpot,
             defect_frac_coords=defect_fpos,
+            lattice=defect_struct.lattice,
             **kwargs,
         )
-
-        self.corrections.update(frey_corr)  # type: ignore
-        return plot_data
+        self.corrections.update(
+            {
+                "electrostatic": frey_corr.electrostatic,
+                "potential_alignment": frey_corr.potential_alignment,
+            }
+        )
+        self.correction_metadata.update(frey_corr.metadata.copy())
+        self.correction_type = "Freysoldt"
+        return frey_corr
 
     @property
-    def corrected_energy(self):
+    def corrected_energy(self) -> float:
         """The energy of the defect entry with all corrections applied."""
         return self.sc_entry.energy + sum(self.corrections.values())
 
@@ -183,7 +221,6 @@ class FormationEnergyDiagram(MSONable):
                 ~np.any(chempot_limits == boundary_value, axis=1)
             ]
 
-        self.el_change = self.defect_entries[0].defect.element_changes
         self.dft_energies = {
             el: self.phase_diagram.get_hull_energy_per_atom(Composition(str(el)))
             for el in self.phase_diagram.elements
@@ -356,7 +393,7 @@ class FormationEnergyDiagram(MSONable):
         en_change = sum(
             [
                 (self.dft_energies[el] + chempots[el]) * fac
-                for el, fac in self.el_change.items()
+                for el, fac in defect_entry.defect.element_changes.items()
             ]
         )
         formation_en = (

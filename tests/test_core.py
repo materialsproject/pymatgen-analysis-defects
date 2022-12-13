@@ -45,6 +45,16 @@ def test_substitution(gan_struct):
     assert sub == sub
     assert sub.element_changes == {Element("N"): -1, Element("O"): 1}
 
+    # test for user defined charge
+    dd = sub.as_dict()
+    dd["user_charges"] = [-100, 102]
+    sub_ = Substitution.from_dict(dd)
+    assert sub_.get_charge_states() == [-100, 102]
+
+    dd["user_charges"] = []  # empty list == None => use oxidation state info
+    sub_ = Substitution.from_dict(dd)
+    assert sub_.get_charge_states() == [-1, 0, 1, 2]
+
 
 def test_interstitial(gan_struct):
     s = gan_struct.copy()

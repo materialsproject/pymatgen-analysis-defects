@@ -21,7 +21,7 @@ __copyright__ = "Copyright 2022, The Materials Project"
 __maintainer__ = "Jimmy-Xuan Shen @jmmshn"
 __date__ = "Mar 15, 2022"
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 class DefectGenerator(MSONable, metaclass=ABCMeta):
@@ -111,14 +111,15 @@ class SubstitutionGenerator(DefectGenerator):
         self.angle_tolerance = angle_tolerance
 
     def generate(
-        self, structure: Structure, substitution: dict[str, list[str]], **kwargs
+        self, structure: Structure, substitution: dict[str, str | list], **kwargs
     ) -> Generator[Substitution, None, None]:
         """Generate subsitutional defects.
 
         Args:
             structure: The bulk structure the vacancies are generated from.
             substitution: The substitutions to be made given as a dictionary.
-                e.g. {"Ga": ["Mg", "Ca"]} means that Ga is substituted with Mg or Ca.
+                e.g. {"Ga": "Ca"} means that Ga is substituted with Ca. You
+                can also specify a list of elements to substitute with.
             **kwargs: Additional keyword arguments for the ``Substitution`` constructor.
 
         Returns:
@@ -131,7 +132,8 @@ class SubstitutionGenerator(DefectGenerator):
             el_str = _element_str(site.specie)
             if el_str not in substitution.keys():
                 continue
-            for sub_el in substitution[el_str]:
+            sub_el = substitution[el_str]
+            if isinstance(sub_el, str):
                 sub_site = PeriodicSite(
                     Species(sub_el),
                     site.frac_coords,
@@ -139,6 +141,15 @@ class SubstitutionGenerator(DefectGenerator):
                     properties=site.properties,
                 )
                 yield Substitution(structure, sub_site, **kwargs)
+            elif isinstance(sub_el, list):
+                for el in sub_el:
+                    sub_site = PeriodicSite(
+                        Species(el),
+                        site.frac_coords,
+                        structure.lattice,
+                        properties=site.properties,
+                    )
+                    yield Substitution(structure, sub_site, **kwargs)
 
 
 class AntiSiteGenerator(DefectGenerator):
@@ -152,6 +163,7 @@ class AntiSiteGenerator(DefectGenerator):
     def __init__(self, symprec: float = 0.01, angle_tolerance: float = 5):
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
+        self._sub_gen = SubstitutionGenerator(symprec, angle_tolerance)
 
     def generate(
         self,
@@ -162,14 +174,17 @@ class AntiSiteGenerator(DefectGenerator):
 
         Args:
             structure: The bulk structure the anti-site defects are generated from.
+            **kwargs: Additional keyword arguments for the ``Substitution.generate`` function.
         """
         all_species = [*map(_element_str, structure.composition.elements)]
         subs = collections.defaultdict(list)
         for u, v in combinations(all_species, 2):
             subs[u].append(v)
             subs[v].append(u)
-        logger.debug(f"All anti-site pairings: {subs}")
-        return SubstitutionGenerator.generate(self, structure, subs)
+        _logger.debug(f"All anti-site pairings: {subs}")
+        for site, species in subs.items():
+            for sub in species:
+                yield from self._sub_gen.generate(structure, {site: sub}, **kwargs)
 
 
 class InterstitialGenerator(DefectGenerator):

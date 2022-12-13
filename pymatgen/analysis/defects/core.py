@@ -27,7 +27,7 @@ __copyright__ = "Copyright 2022, The Materials Project"
 __maintainer__ = "Jimmy-Xuan Shen @jmmshn"
 __date__ = "Mar 15, 2022"
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 class DefectType(Enum):
@@ -50,6 +50,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         oxi_state: float | None = None,
         symprec: float = 0.01,
         angle_tolerance: float = 5,
+        user_charges: list[int] | None = None,
     ) -> None:
         """Initialize a defect object.
 
@@ -61,6 +62,9 @@ class Defect(MSONable, metaclass=ABCMeta):
                 this will be determined automatically.
             symprec: Tolerance for symmetry finding.
             angle_tolerance: Angle tolerance for symmetry finding.
+            user_charges: User specified charge states. If specified,
+                ``get_charge_states`` will return this list. If ``None`` or empty list
+                the charge states will be determined automatically.
         """
         self.structure = structure
         self.site = site
@@ -69,6 +73,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         self.multiplicity = (
             multiplicity if multiplicity is not None else self.get_multiplicity()
         )
+        self.user_charges = user_charges if user_charges else []
         if oxi_state is None:
             # TODO this step might take time so wrap it in a timer
             self.structure.add_oxidation_state_by_guess()
@@ -115,6 +120,11 @@ class Defect(MSONable, metaclass=ABCMeta):
     def get_charge_states(self, padding: int = 1) -> list[int]:
         """Potential charge states for a given oxidation state.
 
+        If user charges are specified, these will be returned.
+        Otherwise, the charge states will be determined automatically based
+        on the oxidation state with a padding on either sites of 0 and the
+        oxidation state value.
+
         Args:
             padding: The number of charge states on the on either side of
                 0 and the oxidation state.
@@ -122,6 +132,9 @@ class Defect(MSONable, metaclass=ABCMeta):
         Returns:
             list of possible charge states
         """
+        if self.user_charges:
+            return self.user_charges
+
         if isinstance(self.oxi_state, int) or self.oxi_state.is_integer():
             oxi_state = int(self.oxi_state)
         else:
@@ -324,7 +337,7 @@ class Substitution(Defect):
         return f"{get_element(self.site.specie)}_{get_element(self.defect_site.specie)}"
 
     @property
-    def defect_structure(self):
+    def defect_structure(self) -> Structure:
         """Returns the defect structure."""
         struct: Structure = self.structure.copy()
         rm_oxi = struct.sites[self.defect_site_index].specie.oxi_state
@@ -427,14 +440,14 @@ class Interstitial(Defect):
         return f"{get_element(self.site.specie)}_i"
 
     @property
-    def defect_structure(self):
+    def defect_structure(self) -> Structure:
         """Returns the defect structure."""
         struct: Structure = self.structure.copy()
         # use the highest value oxidation state among the two most popular ones
         # found in the ICSD
         inter_states = self.site.specie.icsd_oxidation_states[:2]
         if len(inter_states) == 0:
-            logger.warning(
+            _logger.warning(
                 f"No oxidation states found for {self.site.specie.symbol}. "
                 "in ICSD using `oxidation_states` without frequencuy ranking."
             )

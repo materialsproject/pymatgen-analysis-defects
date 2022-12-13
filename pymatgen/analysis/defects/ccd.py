@@ -187,7 +187,7 @@ class HarmonicDefect(MSONable):
             loc_res = get_localized_state(
                 bandstructure=bandstructure, procar=procar, k_index=kpt_index
             )
-            spin_e, (_, defect_band_index) = min(loc_res.items(), key=lambda x: x[1])
+            spin_e, (defect_band_index, _) = min(loc_res.items(), key=lambda x: x[1])
         else:
             if spin_index is None:
                 raise ValueError(

@@ -1,14 +1,16 @@
-"""Defect corrections module."""
+"""Freysoldt defect corrections module."""
 
 from __future__ import annotations
 
 import logging
+from collections import namedtuple
 from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from numpy.typing import ArrayLike
+from pymatgen.core import Lattice
 from pymatgen.io.vasp.outputs import Locpot
 from scipy import stats
 
@@ -34,18 +36,29 @@ Adapted from the original code by Danny and Shyam.
 Rewritten to be functional instead of object oriented.
 """
 
+"""
+Named tuple for storing result of correction result.
 
-def get_correction(
+Metadata contains plotting data for the planar average electrostatic potential.
+key 0, 1, 2 correspond to the x, y, z axes respectively.
+"""
+FreysoldtSummary = namedtuple(
+    "FreysoldtSummary", ["electrostatic", "potential_alignment", "metadata"]
+)
+
+
+def get_freysoldt_correction(
     q: int,
     dielectric: float,
     defect_locpot: Locpot,
     bulk_locpot: Locpot,
     defect_frac_coords: Optional[ArrayLike] = None,
+    lattice: Optional[Lattice] = None,
     energy_cutoff: float = 520,
     mad_tol: float = 1e-4,
     q_model: Optional[QModel] = None,
     step: float = 1e-4,
-):
+) -> FreysoldtSummary:
     """Gets the Freysoldt correction for a defect entry.
 
     Get the Freysoldt correction for a defect. The result is given
@@ -83,17 +96,39 @@ def get_correction(
     # dielectric has to be a float
     if isinstance(dielectric, (int, float)):
         dielectric = float(dielectric)
+    elif np.ndim(dielectric) == 1:
+        dielectric = float(np.mean(dielectric))
+    elif np.ndim(dielectric) == 2:
+        dielectric = float(np.mean(dielectric.diagonal()))
     else:
-        dielectric = float(np.mean(np.diag(dielectric)))
+        raise ValueError(
+            f"Dielectric constant is cannot be converted into a scalar. Currently of type {type(dielectric)}"
+        )
 
     q_model = QModel() if q_model is None else q_model
 
-    list_axis_grid = [*map(defect_locpot.get_axis_grid, [0, 1, 2])]
-    list_defect_plnr_avg_esp = [*map(defect_locpot.get_average_along_axis, [0, 1, 2])]
-    list_bulk_plnr_avg_esp = [*map(bulk_locpot.get_average_along_axis, [0, 1, 2])]
-    list_axes = range(len(list_axis_grid))
+    if isinstance(defect_locpot, Locpot):
+        list_axis_grid = [*map(defect_locpot.get_axis_grid, [0, 1, 2])]
+        list_defect_plnr_avg_esp = [
+            *map(defect_locpot.get_average_along_axis, [0, 1, 2])
+        ]
+        lattice_ = defect_locpot.structure.lattice.copy()
+        if lattice is not None and lattice != lattice_:
+            raise ValueError(
+                "Lattice of defect_locpot and user provided lattice do not match."
+            )
+        lattice = lattice_
+    else:
+        list_defect_plnr_avg_esp = defect_locpot
+        list_axis_grid = [
+            *map(np.linspace, [0, 0, 0], lattice.abc, [len(i) for i in defect_locpot])
+        ]
 
-    lattice = defect_locpot.structure.lattice.copy()
+    # TODO this can be done with regridding later
+    if isinstance(bulk_locpot, Locpot):
+        list_bulk_plnr_avg_esp = [*map(bulk_locpot.get_average_along_axis, [0, 1, 2])]
+    else:
+        list_bulk_plnr_avg_esp = bulk_locpot
 
     es_corr = perform_es_corr(
         lattice=lattice,
@@ -109,7 +144,7 @@ def get_correction(
     plot_data = dict()
 
     for x, pureavg, defavg, axis in zip(
-        list_axis_grid, list_bulk_plnr_avg_esp, list_defect_plnr_avg_esp, list_axes
+        list_axis_grid, list_bulk_plnr_avg_esp, list_defect_plnr_avg_esp, [0, 1, 2]
     ):
         tmp_pot_corr, md = perform_pot_corr(
             axis_grid=x,
@@ -127,14 +162,13 @@ def get_correction(
         pot_corrs[axis] = tmp_pot_corr
         plot_data[axis] = md
 
-    # defect_entry.parameters["freysoldt_meta"] = dict(self.metadata)
-    # defect_entry.parameters["potalign"] = pot_corr / (-q) if q else 0.0
     pot_corr = np.mean(list(pot_corrs.values()))
-    frey_corr = {
-        "freysoldt_electrostatic": es_corr,
-        "freysoldt_potential_alignment": pot_corr,
-    }
-    return frey_corr, plot_data
+
+    return FreysoldtSummary(
+        electrostatic=es_corr,
+        potential_alignment=pot_corr / (-q) if q else 0,
+        metadata=plot_data,
+    )
 
 
 def perform_es_corr(
