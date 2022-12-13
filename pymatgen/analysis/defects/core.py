@@ -522,11 +522,7 @@ class DefectComplex(Defect):
 
     def get_multiplicity(self) -> int:
         """Determine the multiplicity of the defect site within the structure."""
-        symm_struct = self.defects[0].symmetrized_structure
-        for defect in self.defects:
-            defect_site = self.structure[defect.defect_site_index]
-            update_structure(symm_struct, defect_site, defect_type=defect.defect_type)
-        return len(symm_struct.find_equivalent_sites(defect_site))
+        raise NotImplementedError("Not implemented for defect complexes")
 
     @property
     def element_changes(self) -> Dict[Element, int]:
