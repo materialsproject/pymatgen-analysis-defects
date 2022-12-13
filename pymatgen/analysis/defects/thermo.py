@@ -7,10 +7,7 @@ from itertools import groupby
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import matplotlib.cm as cm
 import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib.lines import Line2D
 from monty.json import MSONable
 from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
