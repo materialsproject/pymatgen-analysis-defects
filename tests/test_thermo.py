@@ -173,7 +173,7 @@ def test_multi(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
     ef = mfed.solve_for_fermi_level(
         chempots=mfed.chempot_limits[0], temperature=300, dos=bulk_dos
     )
-    assert ef == pytest.approx(0.6986374710290937, 1e-3)
+    assert ef == pytest.approx(0.6986374710290937)
 
 
 def test_formation_from_directory(test_dir, stable_entries_Mg_Ga_N, defect_Mg_Ga):
