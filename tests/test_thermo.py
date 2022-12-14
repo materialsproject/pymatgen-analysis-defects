@@ -120,17 +120,21 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
     for p in pd.stable_entries:
         p._energy = 0
     fed = FormationEnergyDiagram(
-            bulk_entry=bulk_entry, defect_entries=[fake_defect_entry], vbm=vbm,
-            pd_entries=pd.stable_entries, inc_inf_values=False,
-            )
+        bulk_entry=bulk_entry,
+        defect_entries=[fake_defect_entry],
+        vbm=vbm,
+        pd_entries=pd.stable_entries,
+        inc_inf_values=False,
+    )
     assert fed.get_formation_energy(
-        fermi_level=vbm, chempot_dict={e: 0 for e in def_ent_list[0].defect.element_changes}
-        ) == pytest.approx(1)
+        fermi_level=vbm,
+        chempot_dict={e: 0 for e in def_ent_list[0].defect.element_changes},
+    ) == pytest.approx(1)
     assert fed.get_concentration(
         fermi_level=vbm,
         chempots={e: 0 for e in def_ent_list[0].defect.element_changes},
-        temperature=300
-        ) == pytest.approx(2 * 1.5875937551666035e-17)
+        temperature=300,
+    ) == pytest.approx(2 * 1.5875937551666035e-17)
 
 
 def test_multi(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
