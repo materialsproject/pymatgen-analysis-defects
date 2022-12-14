@@ -578,9 +578,9 @@ class MultiFormationEnergyDiagram(MSONable):
             Equilibrium fermi level with respect to the valence band edge.
         """
         fdos = FermiDos(dos, bandgap=self.band_gap)
-        bulk_factor = (
-            self.formation_energy_diagrams[0].defect.structure.composition.get_reduced_formula_and_factor()[1]
-        )
+        bulk_factor = self.formation_energy_diagrams[
+            0
+        ].defect.structure.composition.get_reduced_formula_and_factor()[1]
         fdos_factor = fdos.structure.composition.get_reduced_formula_and_factor()[1]
         fdos_multiplicity = fdos_factor / bulk_factor
         fdos_cbm, fdos_vbm = fdos.get_cbm_vbm()
