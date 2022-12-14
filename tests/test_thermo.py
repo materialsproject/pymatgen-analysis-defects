@@ -185,10 +185,14 @@ def test_multi(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
     )
     pd = PhaseDiagram(stable_entries_Mg_Ga_N)
     mfed = MultiFormationEnergyDiagram.with_atomic_entries(
-        bulk_entry=bulk_entry, defect_entries=def_ent_list,
-        atomic_entries=atomic_entries, phase_diagram=pd, vbm=vbm
-        )
+        bulk_entry=bulk_entry,
+        defect_entries=def_ent_list,
+        atomic_entries=atomic_entries,
+        phase_diagram=pd,
+        vbm=vbm,
+    )
     assert len(mfed.formation_energy_diagrams) == 1
+
 
 def test_formation_from_directory(test_dir, stable_entries_Mg_Ga_N, defect_Mg_Ga):
     sc_dir = test_dir / "Mg_Ga"
