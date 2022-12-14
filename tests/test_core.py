@@ -67,7 +67,7 @@ def test_interstitial(gan_struct):
     sc = inter.get_supercell_structure()
     assert sc.formula == "Ga64 N65"
     assert inter.name == "N_i"
-    assert str(inter) == "N intersitial site at at site [0.00,0.00,0.75]"
+    assert str(inter) == "N intersitial site [0.00,0.00,0.75]"
     assert inter.element_changes == {Element("N"): 1}
 
 
@@ -77,6 +77,7 @@ def test_adsorbate(gan_struct):
     n_site = PeriodicSite(Specie("N"), ads_fpos, s.lattice)
     ads = Adsorbate(s, n_site)
     assert ads.name == "N_{ads}"
+    assert str(ads) == "N adsorbate site at [0.00,0.00,0.75]"
 
 
 def test_complex(gan_struct):

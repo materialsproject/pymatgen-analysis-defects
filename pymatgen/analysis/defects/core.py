@@ -494,7 +494,7 @@ class Interstitial(Defect):
         """Representation of a interstitial defect."""
         sub_species = get_element(self.site.specie)
         fpos_str = ",".join(f"{x:.2f}" for x in self.site.frac_coords)
-        return f"{sub_species} intersitial site at " f"at site [{fpos_str}]"
+        return f"{sub_species} intersitial site at [{fpos_str}]"
 
 
 class DefectComplex(Defect):
@@ -670,7 +670,7 @@ class Adsorbate(Interstitial):
         """Representation of a adsorbate defect."""
         sub_species = get_element(self.site.specie)
         fpos_str = ",".join(f"{x:.2f}" for x in self.site.frac_coords)
-        return f"{sub_species} adsorbate site at " f"at site [{fpos_str}]"
+        return f"{sub_species} adsorbate site at [{fpos_str}]"
 
 
 def get_element(sp_el: Species | Element) -> Element:
