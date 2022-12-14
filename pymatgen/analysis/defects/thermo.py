@@ -571,23 +571,24 @@ class MultiFormationEnergyDiagram(MSONable):
         Args:
             chempots: dictionary of chemical potentials to use
             temperature: temperature at which to evaluate.
-            dos: Density of states object. Must contain a structure attribute.
+            dos: Density of states object. Must contain a structure attribute. If band_gap attribute
+                is set, then dos band edges be shifted to match it.
 
         Returns:
             Equilibrium fermi level with respect to the valence band edge.
         """
         fdos = FermiDos(dos, bandgap=self.band_gap)
         bulk_factor = (
-            self.defect.structure.composition.get_reduced_formula_and_factor()[1]
+            self.formation_energy_diagrams[0].defect.structure.composition.get_reduced_formula_and_factor()[1]
         )
         fdos_factor = fdos.structure.composition.get_reduced_formula_and_factor()[1]
         fdos_multiplicity = fdos_factor / bulk_factor
-        _, fdos_vbm = fdos.get_cbm_vbm()
+        fdos_cbm, fdos_vbm = fdos.get_cbm_vbm()
 
         def _get_chg(fd: FormationEnergyDiagram, ef):
             lines = fd._get_lines(chempots=chempots)
             return sum(
-                self.defect.multiplicity
+                fd.defect.multiplicity
                 * charge
                 * fermi_dirac(vbm_fe + charge * ef, temperature)
                 for charge, vbm_fe in lines
@@ -602,7 +603,7 @@ class MultiFormationEnergyDiagram(MSONable):
             )
             return qd_tot
 
-        return bisect(_get_total_q, -1.0, self.band_gap + 1.0)
+        return bisect(_get_total_q, -1.0, fdos_cbm - fdos_vbm + 1.0)
 
 
 def group_defects(defect_entries: list[DefectEntry]):
