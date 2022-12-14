@@ -67,7 +67,7 @@ def test_interstitial(gan_struct):
     sc = inter.get_supercell_structure()
     assert sc.formula == "Ga64 N65"
     assert inter.name == "N_i"
-    assert str(inter) == "N intersitial site [0.00,0.00,0.75]"
+    assert str(inter) == "N intersitial site at [0.00,0.00,0.75]"
     assert inter.element_changes == {Element("N"): 1}
 
 
