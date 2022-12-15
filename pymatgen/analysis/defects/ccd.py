@@ -236,7 +236,6 @@ class HarmonicDefect(MSONable):
     def from_directories(
         cls,
         directories: list[Path],
-        kpt_index: int,
         charge_state: int | None = None,
         spin_index: int | None = None,
         relaxed_index: int | None = None,
@@ -249,14 +248,11 @@ class HarmonicDefect(MSONable):
 
         Args:
             directories: A list of directories.
-            kpt_index: The index of the kpoint that corresponds to the band edge.
-            charge_state: The charge state for the defect. If None, we will try to parse the POTCAR.
-            spin_index: The index of the spin that corresponds to the band edge.
-                If None, we will assume that the band edge is spin-independent and we will use the
-                spin channel with the most localized state.
+            charge_state: The charge state for the defect. If None, the charge state
+                will be determined using the data in the vasprun.xml and POTCAR files.
             relaxed_index: The index of the relaxed structure in the list of structures.
-            defect_band_index: The index of the defect band (0-indexed).  This is found by looking
-                at the inverse participation ratio of the different states.
+            defect_band: The the index of the defect band since the defect for different
+                kpoints and spins presented as `[(band, kpt, spin), ...]`.
             store_bandstructure: Whether to store the bandstructure of the relaxed defect calculation.
                 Defaults to False to save space.
             get_band_structure_kwargs: Keyword arguments to pass to the ``get_band_structure`` method.
