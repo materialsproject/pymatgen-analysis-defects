@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 from ctypes import Structure
 from dataclasses import dataclass
+from itertools import groupby
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -14,9 +15,9 @@ from pymatgen.electronic_structure.core import Spin
 from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun, Waveder
 from scipy.optimize import curve_fit
 
-from .constants import AMU2KG, ANGS2M, EDEPS, EV2J, HBAR_EV, KB
+from .constants import AMU2KG, ANGS2M, EV2J, HBAR_EV, KB
 from .recombination import get_Rad_coef, get_SRH_coef
-from .utils import get_localized_state, get_zfile, sort_positive_definite
+from .utils import get_localized_states, get_zfile, sort_positive_definite
 
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
@@ -30,44 +31,34 @@ __date__ = "Mar 15, 2022"
 _logger = logging.getLogger(__name__)
 
 
-def optical_prefactor(struct):
-    """Prefactor for optical transition rate calculations."""
-    return EDEPS * np.pi / struct.volume
-
-
-# __all__ = ["ConfigurationCoordinateDiagram", "HarmonicDefect", "get_dQ"]
-
-
 @dataclass
 class HarmonicDefect(MSONable):
     """A class representing the a harmonic defect vibronic state.
 
-    The vibronic part of a defect is often catured by a simple harmonic oscillator.
+    The vibronic part of a defect is often captured by a simple harmonic oscillator.
     This class store a representation of the SHO as well as some additional information for book-keeping purposes.
 
     Attributes:
         omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.
-        charge: The charge state. This should be the charge of the defect
-            simulation that gave rise to the minimum of the parabola.
-        kpt_index: The kpoint index in the simulation that correspond to the band edge.
-        spin_index: The spin index in the simulation that correspond to the band edge.
+        charge_state: The charge of the defect.
+        ispin: The number of spin channels in the calculation (ISPIN from VASP).
         distortions: The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
-            This object's internal reference for the distoration should always be relaxed structure.
+            This object's internal reference for the distortion should always be relaxed structure.
         structures: The list of structures that were used to compute the distortions.
         energies: The potential energy surface obtained by distorting the structure.A
-        defect_band_index: The index of the defect band.
+        defect_band: The the index of the defect band since the defect for different
+            kpoints and spins presented as `[(band, kpt, spin), ...]`.
         relaxed_indices: The indices of the relaxed defect structure.
         relaxed_bandstructure: The band structure of the relaxed defect calculation.
     """
 
     omega: float
     charge_state: int
-    kpt_index: int
-    spin_index: int
+    ispin: int
     distortions: Optional[list[float]] = None
     structures: Optional[list[Structure]] = None
     energies: Optional[list[float]] = None
-    defect_band_index: Optional[int] = None
+    defect_band: Optional[list[tuple]] = None
     relaxed_index: Optional[int] = None
     relaxed_bandstructure: Optional[BandStructure] = None
 
@@ -80,13 +71,33 @@ class HarmonicDefect(MSONable):
             f"relaxed_index={self.relaxed_index}, "
             f"kpt={self.kpt_index}, "
             f"spin={self.spin_index}, "
-            f"defect_band_index={self.defect_band_index}"
+            f"defect_band={self.defect_band}"
             ")"
         )
 
     @property
+    def defect_band_index(self) -> int:
+        """The index of the defect band."""
+        bands = {band for band, _, _ in self.defect_band}
+        if len(bands) != 1:
+            raise ValueError("Defect band index is not unique.")
+        return bands.pop()
+
+    @property
+    def spin_index(self) -> int:
+        """The spin index of the defect.
+
+        The integer spin index the defect state belongs to.
+        0 for spin up and 1 for spin down. If ISPIN=1, this is always 0.
+        """
+        spins = {spin for _, _, spin in self.defect_band}
+        if len(spins) != 1:
+            raise ValueError("Spin index is not unique.")
+        return spins.pop()
+
+    @property
     def spin(self) -> Spin:
-        """The spin of the defect."""
+        """The spin of the defect returned as an Spin Enum."""
         if self.spin_index == 0:
             return Spin.up
         elif self.spin_index == 1:
@@ -103,14 +114,14 @@ class HarmonicDefect(MSONable):
     def from_vaspruns(
         cls,
         vaspruns: list[Vasprun],
-        kpt_index: int,
         charge_state: int,
         spin_index: int | None = None,
         relaxed_index: int | None = None,
-        defect_band_index: int | None = None,
+        defect_band: list[tuple] | None = None,
         procar: Procar | None = None,
         store_bandstructure: bool = False,
         get_band_structure_kwargs: dict | None = None,
+        band_window: int = 7,
         **kwargs,
     ) -> HarmonicDefect:
         """Create a HarmonicDefect from a list of vasprun.
@@ -118,18 +129,15 @@ class HarmonicDefect(MSONable):
         .. note::
             The constructor check that you have the vaspruns sorted by the distortions
             but does not perform the sorting for you.  This serves as a safety check to
-            ensure that the vaspruns are properly ordered.
+            ensure that the provided vaspruns are properly ordered.  This check might
+            become optional in the future.
 
         Args:
             vaspruns: A list of Vasprun objects.
             charge_state: The charge state for the defect.
-            kpt_index: The index of the kpoint that corresponds to the band edge.
-            spin_index: The index of the spin that corresponds to the band edge.
-                If None, we will assume that the band edge is spin-independent and we will use the
-                spin channel with the most localized state.
             relaxed_index: The index of the relaxed structure in the list of structures.
-            defect_band_index: The index of the defect band (0-indexed).  This is found by looking
-                at the inverse participation ratio of the different states.
+            defect_band: The the index of the defect band since the defect for different
+                kpoints and spins presented as `[(band, kpt, spin), ...]`.
             procar: A Procar object.  Used to identify the defect band if the defect_band_index is not provided.
             store_bandstructure: Whether to store the bandstructure of the relaxed defect calculation.
                 Defaults to False to save space.
@@ -174,42 +182,51 @@ class HarmonicDefect(MSONable):
         bandstructure = vaspruns[relaxed_index].get_band_structure(
             **get_band_structure_kwargs
         )
+        ispin = vaspruns[relaxed_index].parameters["ISPIN"]
+
         if store_bandstructure:
             bs = bandstructure
         else:
             bs = None
 
-        if defect_band_index is None:
+        if defect_band is None:
             if procar is None:  # pragma: no cover
                 raise ValueError(
                     "If defect_band_index is not provided, you must provide a Procar object."
                 )
-            loc_res = get_localized_state(
-                bandstructure=bandstructure, procar=procar, k_index=kpt_index
+            # Get the defect bands
+            defect_band_2s = list(
+                get_localized_states(
+                    bandstructure=bandstructure, procar=procar, band_window=band_window
+                )
             )
-            spin_e, (defect_band_index, _) = min(loc_res.items(), key=lambda x: x[1])
-        else:
+            defect_band_2s.sort(key=lambda x: (x[2], x[1]))
+            # group by the spin index
+            defect_band_grouped = {
+                spin: list(bands)
+                for spin, bands in groupby(defect_band_2s, lambda x: x[2])
+            }
+            avg_localization = {
+                spin: np.average([val for _, _, _, val in bands])
+                for spin, bands in defect_band_grouped.items()
+            }
             if spin_index is None:
-                raise ValueError(
-                    "If ``defect_band_index`` is provided, you must provide also ``spin_index``."
+                # get the most localized spin
+                spin_index = min(avg_localization, key=avg_localization.get)
+                print(
+                    f"Using spin index {spin_index} with average localization {avg_localization[spin_index]}"
                 )
-            if kpt_index is None:  # pragma: no cover
-                raise ValueError(
-                    "If ``defect_band_index`` is provided, you must provide also ``kpt_index``."
-                )
-
-        if spin_index is None:
-            spin_index = 0 if spin_e == Spin.up else 1
+            # drop the val
+            defect_band = [r_[:3] for r_ in defect_band_grouped[spin_index]]
 
         return cls(
             omega=omega,
             charge_state=charge_state,
-            kpt_index=kpt_index,
-            spin_index=spin_index,
+            ispin=ispin,
             structures=structures,
             distortions=distortions,
             energies=energies,
-            defect_band_index=defect_band_index,
+            defect_band=defect_band,
             relaxed_index=relaxed_index,
             relaxed_bandstructure=bs,
             **kwargs,
@@ -266,7 +283,6 @@ class HarmonicDefect(MSONable):
 
         return cls.from_vaspruns(
             vaspruns=vaspruns,
-            kpt_index=kpt_index,
             charge_state=charge_state,
             spin_index=spin_index,
             relaxed_index=relaxed_index,
@@ -473,7 +489,6 @@ class RadiativeCatpture(MSONable):
         """
         initial_defect = HarmonicDefect.from_directories(
             directories=initial_dirs,
-            kpt_index=kpt_index,
             charge_state=initial_charge_state,
             spin_index=spin_index,
             relaxed_index=None,

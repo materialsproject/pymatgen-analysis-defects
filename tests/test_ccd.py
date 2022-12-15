@@ -12,38 +12,39 @@ def test_HarmonicDefect(v_ga):
     vaspruns = v_ga[(0, -1)]["vaspruns"]
     procar = v_ga[(0, -1)]["procar"]
     hd0 = HarmonicDefect.from_vaspruns(
-        vaspruns, charge_state=0, procar=procar, kpt_index=1
+        vaspruns,
+        charge_state=0,
+        procar=procar,
     )
     assert hd0.spin_index == 1
     pytest.approx(hd0.distortions[1], 0.0)
     pytest.approx(hd0.omega_eV, 0.032680)
     wswqs = v_ga[(0, -1)]["wswqs"]
+
     # check for ValueError
     with pytest.raises(ValueError):
         elph_me = hd0.get_elph_me(wswqs=wswqs)
 
     hd0 = HarmonicDefect.from_vaspruns(
-        vaspruns, charge_state=0, procar=procar, store_bandstructure=True, kpt_index=1
+        vaspruns,
+        charge_state=0,
+        procar=procar,
+        store_bandstructure=True,
     )
     elph_me = hd0.get_elph_me(wswqs=wswqs)
     assert np.allclose(elph_me[..., 138], 0.0)  # ediff should be zero for defect band
     assert np.linalg.norm(elph_me[..., 139]) > 0
 
     hd2 = HarmonicDefect.from_vaspruns(
-        vaspruns,
-        charge_state=0,
-        procar=procar,
-        kpt_index=1,
-        defect_band_index=139,
-        spin_index=1,
+        vaspruns, charge_state=0, procar=procar, defect_band=((139, 0, 1), (139, 0, 1))
     )
-    hd2.spin_index == 1
+    assert hd2.spin_index == 1
 
     # check for ValueError
-    with pytest.raises(ValueError):
-        HarmonicDefect.from_vaspruns(
-            vaspruns, charge_state=0, procar=procar, kpt_index=1, defect_band_index=139
-        )
+    # with pytest.raises(ValueError):
+    #     HarmonicDefect.from_vaspruns(
+    #         vaspruns, charge_state=0, procar=procar, kpt_index=1, defect_band_index=139
+    #     )
 
 
 # def test_OpticalHarmonicDefect(v_ga):

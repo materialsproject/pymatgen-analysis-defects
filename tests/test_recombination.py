@@ -22,7 +22,6 @@ def test_boltzmann():
         3.901200631921917e-09,
     ]
     results = boltzmann_filling(0.1, 300, n_states=6)
-    print(results.flatten())
     assert np.allclose(results.flatten(), ref_results, rtol=1e-3)
     results2 = boltzmann_filling(0.1, [100, 300], n_states=6)
     assert np.allclose(results2[:, 1], ref_results, rtol=1e-3)

@@ -7,7 +7,7 @@ from pymatgen.analysis.defects.utils import (
     cluster_nodes,
     get_avg_chg,
     get_local_extrema,
-    get_localized_state,
+    get_localized_states,
 )
 
 
@@ -76,22 +76,22 @@ def test_get_localized_states(v_ga):
     procar = v_ga[(0, -1)]["procar"]
     vr = vaspruns[1]
     bs = vr.get_band_structure()
-    res = get_localized_state(bs, procar=procar)
-    _, (min_indx, _) = min(res.items(), key=lambda x: x[1])
-    assert min_indx == 138
+    res = get_localized_states(bs, procar=procar)
+    loc_bands = set()
+    for (iband, ikpt, ispin, val) in get_localized_states(bs, procar=procar):
+        loc_bands.add(iband)
+    assert loc_bands == {
+        138,
+    }
 
     vaspruns = v_ga[(-1, 0)]["vaspruns"]
     procar = v_ga[(-1, 0)]["procar"]
     vr = vaspruns[1]
     bs = vr.get_band_structure()
-    res = get_localized_state(bs, procar=procar)
-    _, (min_indx, _) = min(res.items(), key=lambda x: x[1])
-    assert min_indx == 138
 
-    res = get_localized_state(bs, procar=procar, k_index=0)
-    _, (min_indx, _) = min(res.items(), key=lambda x: x[1])
-    assert min_indx == 138
-
-    res = get_localized_state(bs, procar=procar, k_index=0, band_window=100)
-    _, (min_indx, _) = min(res.items(), key=lambda x: x[1])
-    assert min_indx < 138  # some core states should be more localized
+    loc_bands = set()
+    for (iband, ikpt, ispin, val) in get_localized_states(
+        bs, procar=procar, band_window=100
+    ):
+        loc_bands.add(iband)
+    assert loc_bands == {75, 77}  # 75 and 77 are more localized core states
