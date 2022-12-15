@@ -89,7 +89,7 @@ def test_complex(gan_struct):
         s, PeriodicSite(Specie("H"), [0, 0, 0.75], s.lattice)
     )  # H interstitial
     dc = DefectComplex([sub, vac])
-    assert dc.name == "O_N_v_Ga"
+    assert dc.name == "O_N+v_Ga"
     sc_struct = dc.get_supercell_structure()
     assert sc_struct.formula == "Ga63 N63 O1"
     dc.oxi_state == sub.oxi_state + vac.oxi_state
