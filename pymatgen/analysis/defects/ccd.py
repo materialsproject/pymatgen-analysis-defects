@@ -6,17 +6,17 @@ from ctypes import Structure
 from dataclasses import dataclass
 from itertools import groupby
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Sequence, Tuple
 
 import numpy as np
 import numpy.typing as npt
 from monty.json import MSONable
 from pymatgen.electronic_structure.core import Spin
-from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun, Waveder
+from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun
 from scipy.optimize import curve_fit
 
 from .constants import AMU2KG, ANGS2M, EV2J, HBAR_EV, KB
-from .recombination import get_Rad_coef, get_SRH_coef
+from .recombination import get_SRH_coef
 from .utils import get_localized_states, get_zfile, sort_positive_definite
 
 # Copyright (c) Pymatgen Development Team.
@@ -58,7 +58,7 @@ class HarmonicDefect(MSONable):
     distortions: Optional[list[float]] = None
     structures: Optional[list[Structure]] = None
     energies: Optional[list[float]] = None
-    defect_band: Optional[list[tuple]] = None
+    defect_band: Optional[Sequence[tuple]] = None
     relaxed_index: Optional[int] = None
     relaxed_bandstructure: Optional[BandStructure] = None
 
@@ -117,7 +117,7 @@ class HarmonicDefect(MSONable):
         charge_state: int,
         spin_index: int | None = None,
         relaxed_index: int | None = None,
-        defect_band: list[tuple] | None = None,
+        defect_band: Sequence[tuple] | None = None,
         procar: Procar | None = None,
         store_bandstructure: bool = False,
         get_band_structure_kwargs: dict | None = None,
@@ -238,7 +238,7 @@ class HarmonicDefect(MSONable):
         directories: list[Path],
         charge_state: int | None = None,
         relaxed_index: int | None = None,
-        defect_band: list[tuple] | None = None,
+        defect_band: Sequence[tuple] | None = None,
         store_bandstructure: bool = False,
         get_band_structure_kwargs: dict | None = None,
         **kwargs,
@@ -381,156 +381,156 @@ class HarmonicDefect(MSONable):
             )  # pragma: no cover
 
 
-@dataclass
-class RadiativeCatpture(MSONable):
-    """Representation of a radiative capture event.
+# @dataclass
+# class RadiativeCatpture(MSONable):
+#     """Representation of a radiative capture event.
 
-    Attributes:
-        initial_state: The initial state of the radiative capture event.
-        final_state: The final state of the radiative capture event.
-        dQ: The configuration coordinate change between the relaxed initial state and the final state.
-        waveder: The data from the WAVEDER file obtained with ``LOPTICS=.True.``.
+#     Attributes:
+#         initial_state: The initial state of the radiative capture event.
+#         final_state: The final state of the radiative capture event.
+#         dQ: The configuration coordinate change between the relaxed initial state and the final state.
+#         waveder: The data from the WAVEDER file obtained with ``LOPTICS=.True.``.
 
-    """
+#     """
 
-    initial_state: HarmonicDefect
-    final_state: HarmonicDefect
-    dQ: float
-    waveder: Waveder
+#     initial_state: HarmonicDefect
+#     final_state: HarmonicDefect
+#     dQ: float
+#     waveder: Waveder
 
-    def get_coeff(
-        self,
-        T: float | npt.ArrayLike,
-        dE: float,
-        omega_photon: float,
-        volume: float | None = None,
-        g: int = 1,
-        occ_tol: float = 1e-3,
-        n_band_edge: int = 1,
-    ):
-        """Calculate the SRH recombination coefficient."""
-        if volume is None:
-            volume = self.initial_state.relaxed_structure.volume
+#     def get_coeff(
+#         self,
+#         T: float | npt.ArrayLike,
+#         dE: float,
+#         omega_photon: float,
+#         volume: float | None = None,
+#         g: int = 1,
+#         occ_tol: float = 1e-3,
+#         n_band_edge: int = 1,
+#     ):
+#         """Calculate the SRH recombination coefficient."""
+#         if volume is None:
+#             volume = self.initial_state.relaxed_structure.volume
 
-        me_all = self.get_dipoles()  # indices: [band, kpoint, spin, coord]
+#         me_all = self.get_dipoles()  # indices: [band, kpoint, spin, coord]
 
-        istate = self.initial_state
+#         istate = self.initial_state
 
-        if self.initial_state.charge_state == self.final_state.charge_state + 1:
-            band_slice = slice(
-                istate.defect_band_index + 1, istate.defect_band_index + 1 + n_band_edge
-            )
-        elif self.initial_state.charge_state == self.final_state.charge_state - 1:
-            band_slice = slice(
-                istate.defect_band_index - n_band_edge, istate.defect_band_index
-            )
-        else:
-            raise ValueError(
-                "SRH capture event must involve a charge state change of 1."
-            )
+#         if self.initial_state.charge_state == self.final_state.charge_state + 1:
+#             band_slice = slice(
+#                 istate.defect_band_index + 1, istate.defect_band_index + 1 + n_band_edge
+#             )
+#         elif self.initial_state.charge_state == self.final_state.charge_state - 1:
+#             band_slice = slice(
+#                 istate.defect_band_index - n_band_edge, istate.defect_band_index
+#             )
+#         else:
+#             raise ValueError(
+#                 "SRH capture event must involve a charge state change of 1."
+#             )
 
-        me_band_edge = me_all[band_slice, istate.kpt_index, istate.spin_index]
+#         me_band_edge = me_all[band_slice, istate.kpt_index, istate.spin_index]
 
-        return get_Rad_coef(
-            T,
-            dQ=self.dQ,
-            dE=dE,
-            omega_i=self.initial_state.omega_eV,
-            omega_f=self.final_state.omega_eV,
-            omega_photon=omega_photon,
-            dipole_me=np.average(me_band_edge),
-            volume=volume,
-            g=g,
-            occ_tol=occ_tol,
-        )
+#         return get_Rad_coef(
+#             T,
+#             dQ=self.dQ,
+#             dE=dE,
+#             omega_i=self.initial_state.omega_eV,
+#             omega_f=self.final_state.omega_eV,
+#             omega_photon=omega_photon,
+#             dipole_me=np.average(me_band_edge),
+#             volume=volume,
+#             g=g,
+#             occ_tol=occ_tol,
+#         )
 
-    @classmethod
-    def from_directories(
-        cls,
-        initial_dirs: list[Path],
-        final_dirs: list[Path],
-        waveder_dir: Path,
-        kpt_index: int,
-        initial_charge_state: int | None = None,
-        final_charge_state: int | None = None,
-        spin_index: int | None = None,
-        defect_band_index: int | None = None,
-        store_bandstructure: bool = False,
-        get_band_structure_kwargs: dict | None = None,
-        **kwargs,
-    ) -> RadiativeCatpture:
-        """Create a RadiativeCapture object from a list of directories.
+#     @classmethod
+#     def from_directories(
+#         cls,
+#         initial_dirs: list[Path],
+#         final_dirs: list[Path],
+#         waveder_dir: Path,
+#         kpt_index: int,
+#         initial_charge_state: int | None = None,
+#         final_charge_state: int | None = None,
+#         spin_index: int | None = None,
+#         defect_band_index: int | None = None,
+#         store_bandstructure: bool = False,
+#         get_band_structure_kwargs: dict | None = None,
+#         **kwargs,
+#     ) -> RadiativeCatpture:
+#         """Create a RadiativeCapture object from a list of directories.
 
-        Args:
-            initial_dirs: A list of directories for the initial state.
-            final_dirs: A list of directories for the final state.
-            waveder_dir: The directory containing the WAVEDER file.
-            kpt_index: The index of the k-point to use.
-            initial_charge_state: The charge state of the initial state.
-                If None, the charge state is determined from the vasprun.xml and POTCAR files.
-            final_charge_state: The charge state of the final state.
-                If None, the charge state is determined from the vasprun.xml and POTCAR files.
-            spin_index: The index of the spin channel to use.
-                If None, the spin channel is determined by the channel with the most localized state.
-            defect_band_index: The index of the defect band (0-indexed).
-                If None, the defect band is determined by the band with the most localized state.
-            store_bandstructure: Whether to store the band structure.
-            get_band_structure_kwargs: Keyword arguments to pass to get_band_structure.
-            **kwargs: Keyword arguments to pass to the HarmonicDefect constructor.
+#         Args:
+#             initial_dirs: A list of directories for the initial state.
+#             final_dirs: A list of directories for the final state.
+#             waveder_dir: The directory containing the WAVEDER file.
+#             kpt_index: The index of the k-point to use.
+#             initial_charge_state: The charge state of the initial state.
+#                 If None, the charge state is determined from the vasprun.xml and POTCAR files.
+#             final_charge_state: The charge state of the final state.
+#                 If None, the charge state is determined from the vasprun.xml and POTCAR files.
+#             spin_index: The index of the spin channel to use.
+#                 If None, the spin channel is determined by the channel with the most localized state.
+#             defect_band_index: The index of the defect band (0-indexed).
+#                 If None, the defect band is determined by the band with the most localized state.
+#             store_bandstructure: Whether to store the band structure.
+#             get_band_structure_kwargs: Keyword arguments to pass to get_band_structure.
+#             **kwargs: Keyword arguments to pass to the HarmonicDefect constructor.
 
-        Returns:
-            A SRHCapture object.
-        """
-        initial_defect = HarmonicDefect.from_directories(
-            directories=initial_dirs,
-            charge_state=initial_charge_state,
-            spin_index=spin_index,
-            relaxed_index=None,
-            defect_band_index=defect_band_index,
-            store_bandstructure=store_bandstructure,
-            get_band_structure_kwargs=get_band_structure_kwargs,
-            **kwargs,
-        )
+#         Returns:
+#             A SRHCapture object.
+#         """
+#         initial_defect = HarmonicDefect.from_directories(
+#             directories=initial_dirs,
+#             charge_state=initial_charge_state,
+#             spin_index=spin_index,
+#             relaxed_index=None,
+#             defect_band_index=defect_band_index,
+#             store_bandstructure=store_bandstructure,
+#             get_band_structure_kwargs=get_band_structure_kwargs,
+#             **kwargs,
+#         )
 
-        # the final state does not need the additional
-        # information about the electronic states
-        final_defect = HarmonicDefect.from_directories(
-            directories=final_dirs,
-            kpt_index=kpt_index,
-            charge_state=final_charge_state,
-            spin_index=spin_index,
-            relaxed_index=None,
-            defect_band_index=None,
-            store_bandstructure=None,
-            get_band_structure_kwargs=None,
-            **kwargs,
-        )
+#         # the final state does not need the additional
+#         # information about the electronic states
+#         final_defect = HarmonicDefect.from_directories(
+#             directories=final_dirs,
+#             kpt_index=kpt_index,
+#             charge_state=final_charge_state,
+#             spin_index=spin_index,
+#             relaxed_index=None,
+#             defect_band_index=None,
+#             store_bandstructure=None,
+#             get_band_structure_kwargs=None,
+#             **kwargs,
+#         )
 
-        waveder_file = get_zfile(waveder_dir, "WAVEDER")
-        waveder = Waveder(waveder_file)
-        dQ = get_dQ(initial_defect.relaxed_structure, final_defect.relaxed_structure)
-        return cls(initial_defect, final_defect, dQ=dQ, waveder=waveder)
+#         waveder_file = get_zfile(waveder_dir, "WAVEDER")
+#         waveder = Waveder(waveder_file)
+#         dQ = get_dQ(initial_defect.relaxed_structure, final_defect.relaxed_structure)
+#         return cls(initial_defect, final_defect, dQ=dQ, waveder=waveder)
 
-    def get_dipoles(self) -> npt.NDArray:
-        """Get the dipole matrix elements associated with the defect.
+#     def get_dipoles(self) -> npt.NDArray:
+#         """Get the dipole matrix elements associated with the defect.
 
-        Return
+#         Return
 
-        Returns:
-            The dipole matrix elements for the defect. The indices are:
-                ``[band, k-point, spin, cart. direction]``.
-        """
-        return self.waveder.cder_data[self.initial_state.defect_band_index, ...]
+#         Returns:
+#             The dipole matrix elements for the defect. The indices are:
+#                 ``[band, k-point, spin, cart. direction]``.
+#         """
+#         return self.waveder.cder_data[self.initial_state.defect_band_index, ...]
 
-    def get_spectra(self) -> npt.NDArray:
-        """Get the spectra for the defect.
+#     def get_spectra(self) -> npt.NDArray:
+#         """Get the spectra for the defect.
 
-        Compute the energy differences between all the bands and he defect band.
+#         Compute the energy differences between all the bands and he defect band.
 
-        Returns:
-            Array of size ``[n_bands, n_kpoints, n_spins]``.
-        """
-        return self.initial_state._get_ediff(output_order="bks")
+#         Returns:
+#             Array of size ``[n_bands, n_kpoints, n_spins]``.
+#         """
+#         return self.initial_state._get_ediff(output_order="bks")
 
 
 @dataclass
@@ -557,6 +557,7 @@ class SRHCapture(MSONable):
         self,
         T: float | npt.ArrayLike,
         dE: float,
+        kpt_index: int,
         volume: float | None = None,
         g: int = 1,
         occ_tol: float = 1e-3,
@@ -583,7 +584,7 @@ class SRHCapture(MSONable):
                 "SRH capture event must involve a charge state change of 1."
             )
 
-        elph_me_band_edge = elph_me_all[istate.spin_index, istate.kpt_index, band_slice]
+        elph_me_band_edge = elph_me_all[istate.spin_index, kpt_index, band_slice]
 
         return get_SRH_coef(
             T,
@@ -603,11 +604,9 @@ class SRHCapture(MSONable):
         initial_dirs: list[Path],
         final_dirs: list[Path],
         wswq_dir: Path,
-        kpt_index: int,
         initial_charge_state: int | None = None,
         final_charge_state: int | None = None,
-        spin_index: int | None = None,
-        defect_band_index: int | None = None,
+        defect_band: list[tuple] | None = None,
         store_bandstructure: bool = False,
         get_band_structure_kwargs: dict | None = None,
         **kwargs,
@@ -618,15 +617,12 @@ class SRHCapture(MSONable):
             initial_dirs: A list of directories for the initial state.
             final_dirs: A list of directories for the final state.
             wswq_dir: The directory containing the WSWQ files.
-            kpt_index: The index of the k-point to use.
             initial_charge_state: The charge state of the initial state.
                 If None, the charge state is determined from the vasprun.xml and POTCAR files.
             final_charge_state: The charge state of the final state.
                 If None, the charge state is determined from the vasprun.xml and POTCAR files.
-            spin_index: The index of the spin channel to use.
-                If None, the spin channel is determined by the channel with the most localized state.
-            defect_band_index: The index of the defect band (0-indexed).
-                If None, the defect band is determined by the band with the most localized state.
+            defect_band: The the index of the defect band since the defect for different
+                kpoints and spins presented as `[(band, kpt, spin), ...]`.
             store_bandstructure: Whether to store the band structure.
             get_band_structure_kwargs: Keyword arguments to pass to get_band_structure.
             **kwargs: Keyword arguments to pass to the HarmonicDefect constructor.
@@ -636,11 +632,9 @@ class SRHCapture(MSONable):
         """
         initial_defect = HarmonicDefect.from_directories(
             directories=initial_dirs,
-            kpt_index=kpt_index,
             charge_state=initial_charge_state,
-            spin_index=spin_index,
             relaxed_index=None,
-            defect_band_index=defect_band_index,
+            defect_band=defect_band,
             store_bandstructure=store_bandstructure,
             get_band_structure_kwargs=get_band_structure_kwargs,
             **kwargs,
@@ -651,9 +645,8 @@ class SRHCapture(MSONable):
         final_defect = HarmonicDefect.from_directories(
             directories=final_dirs,
             charge_state=final_charge_state,
-            spin_index=spin_index,
             relaxed_index=None,
-            defect_band_index=None,
+            defect_band=((),),  # Skip the procar check since we only need the energies.
             store_bandstructure=None,
             get_band_structure_kwargs=None,
             **kwargs,
