@@ -7,6 +7,7 @@ from pymatgen.analysis.defects.recombination import (
     analytic_overlap_NM,
     boltzmann_filling,
     get_mQn,
+    get_Rad_coef,
     get_SRH_coef,
     pchip_eval,
 )
@@ -22,7 +23,6 @@ def test_boltzmann():
         3.901200631921917e-09,
     ]
     results = boltzmann_filling(0.1, 300, n_states=6)
-    print(results.flatten())
     assert np.allclose(results.flatten(), ref_results, rtol=1e-3)
     results2 = boltzmann_filling(0.1, [100, 300], n_states=6)
     assert np.allclose(results2[:, 1], ref_results, rtol=1e-3)
@@ -66,3 +66,17 @@ def test_get_SRH_coef():
         g=1,
     )
     assert np.allclose(res, ref_res)
+
+
+def test_get_Rad_coef():
+    res = get_Rad_coef(
+        T=[100, 200, 300],
+        dQ=1.0,
+        dE=1.0,
+        omega_i=0.2,
+        omega_f=0.2,
+        omega_photon=0.6,
+        dipole_me=1,
+        volume=1,
+        g=1,
+    )

@@ -40,7 +40,7 @@ __email__ = "jmmshn@gmail.com"
 __status__ = "Development"
 __date__ = "Aug 15, 2022"
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 hart_to_ev = 27.2114
 ang_to_bohr = 1.8897
 invang_to_ev = 3.80986
@@ -306,7 +306,7 @@ def remove_collisions(
         fcoord (numpy.ndarray): The filtered coordinates.
     """
     s_fcoord = structure.frac_coords
-    logger.info(s_fcoord)
+    _logger.info(s_fcoord)
     dist_matrix = structure.lattice.get_all_distances(fcoords, s_fcoord)
     all_dist = np.min(dist_matrix, axis=1)
     return np.array(
@@ -543,66 +543,50 @@ def get_ipr_in_window(
         band_range: The number of bands above and blow the fermi level to include in the search window.
 
     Returns:
-        dict[Spin, npt.NDArray]: The IPR of the states in the band window.
+        dict[(int, int), npt.NDArray]: The IPR of the states in the band window keyed for each k-point and spin.
     """
     res = dict()
     for spin in bandstructure.bands.keys():
+        s_index = 0 if spin == Spin.up else 1
         # last band that is fully below the fermi level
         last_occ_idx = bisect.bisect_left(
             bandstructure.bands[spin].max(1), bandstructure.efermi
         )
         lbound = max(last_occ_idx - band_window, 0)
         ubound = min(last_occ_idx + band_window, bandstructure.nb_bands)
-        ib_ipr = np.array([])
         for k_idx, _ in enumerate(bandstructure.kpoints):
             ipr = _get_ipr(spin, k_idx, procar)
-            ib_ipr_ = np.stack((np.arange(lbound, ubound), ipr[lbound:ubound])).T
-            ib_ipr = np.stack((ib_ipr, ib_ipr_), axis=0) if ib_ipr.size else ib_ipr_
-        res[spin] = ib_ipr
+            res[(k_idx, s_index)] = np.stack(
+                (np.arange(lbound, ubound), ipr[lbound:ubound])
+            ).T
     return res
 
 
-def get_localized_state(
+def get_localized_states(
     bandstructure: BandStructure,
     procar: Procar,
-    k_index: int | None = None,
-    band_window: int = 5,
-) -> dict[Spin, tuple[int, float]]:
-    """Find the index of the localized state.
+    band_window: int = 7,
+) -> Generator[tuple[int, int, int, float], None, None]:
+    """Find the (band, kpt, spin) index of the most localized state.
 
     Find the band index with the lowest inverse participation ratio (IPR) in a small window
     around the fermi level.  Since some of the core states can be very localized,
-    we should only search near the valence.
+    we should only search near the band edges.  Report the result for each k-point and spin channel.
 
     Args:
         bandstructure: The bandstructure object.
             The band just below the fermi level is used as the center of band window.
         procar: The procar object.
-        k_index: The index of the k-point to use. If None, the IPR is averaged over all k-points.
-        band_range: The number of bands above and blow the fermi level to include in the search window.
+        band_window: The number of bands above and blow the fermi level to include in the search window.
 
     Returns:
-        dict[Spin, tuple(int, float)]:
-            The band index and inverse participation ratio (IPR) of the most localized state for each spin channel.
+        tuple(int, int, int): Returns the (band, kpt, spin) index of the most localized state.
     """
     d_ib_ipr = get_ipr_in_window(bandstructure, procar, band_window)
-    res = dict()
-    for spin, ib_ipr in d_ib_ipr.items():
-        # collape the first dimension by averaging over k-points
-        # This whole thing is not accurate enough to worry about k-weighting
-        if k_index is None:
-            ib_ipr = np.mean(ib_ipr, axis=0)
-            ib_ipr = np.expand_dims(ib_ipr, axis=0)
-            k_index = 0
+    for (k_index, ispin), ib_ipr in d_ib_ipr.items():
         # find the index of the minimum IPR
-        min_idx = np.argmin(ib_ipr[k_index, :, 1])
-        if not ib_ipr[k_index, min_idx, 0].is_integer():  # pragma: no cover
-            raise ValueError(
-                "Since the band indices are synced across "
-                "different k points this should always be an integer."
-            )
-        res[spin] = (int(ib_ipr[k_index, min_idx, 0]), ib_ipr[k_index, min_idx, 1])
-    return res
+        min_idx, val = min(ib_ipr, key=lambda x: x[1])
+        yield (int(min_idx), k_index, ispin, val)
 
 
 def sort_positive_definite(
