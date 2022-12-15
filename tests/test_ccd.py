@@ -124,25 +124,26 @@ def test_SRHCapture(v_ga):
         T=[100, 200, 300],
         dE=1.0,
         volume=hd0.structures[hd0.relaxed_index].volume,
+        kpt_index=1,
     )
     ref_results = [1.89187260e-34, 6.21019152e-33, 3.51501688e-31]
     assert np.allclose(c_n, ref_results)
 
 
-# def test_SRHCapture(test_dir):
-#     from pymatgen.analysis.defects.ccd import SRHCapture
+def test_SRHCapture_from_dir(test_dir):
+    from pymatgen.analysis.defects.ccd import SRHCapture
 
-#     DEF_DIR = test_dir / "v_Ga"
-#     srh = SRHCapture.from_directories(
-#         initial_dirs=[DEF_DIR / "ccd_0_-1" / str(i) for i in [0, 1, 2]],
-#         final_dirs=[DEF_DIR / "ccd_-1_0" / str(i) for i in [0, 1, 2]],
-#         wswq_dir=DEF_DIR / "ccd_0_-1" / "wswqs",
-#         kpt_index=1,
-#         store_bandstructure=True,
-#     )
-#     c_n = srh.get_coeff(
-#         T=[100, 200, 300],
-#         dE=1.0,
-#     )
-#     ref_results = [1.89187260e-34, 6.21019152e-33, 3.51501688e-31]
-#     assert np.allclose(c_n, ref_results)
+    DEF_DIR = test_dir / "v_Ga"
+    srh = SRHCapture.from_directories(
+        initial_dirs=[DEF_DIR / "ccd_0_-1" / str(i) for i in [0, 1, 2]],
+        final_dirs=[DEF_DIR / "ccd_-1_0" / str(i) for i in [0, 1, 2]],
+        wswq_dir=DEF_DIR / "ccd_0_-1" / "wswqs",
+        store_bandstructure=True,
+    )
+    c_n = srh.get_coeff(
+        T=[100, 200, 300],
+        dE=1.0,
+        kpt_index=1,
+    )
+    ref_results = [1.89187260e-34, 6.21019152e-33, 3.51501688e-31]
+    assert np.allclose(c_n, ref_results)

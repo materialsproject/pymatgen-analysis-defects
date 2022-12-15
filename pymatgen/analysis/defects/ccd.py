@@ -213,9 +213,6 @@ class HarmonicDefect(MSONable):
             if spin_index is None:
                 # get the most localized spin
                 spin_index = min(avg_localization, key=avg_localization.get)
-                print(
-                    f"Using spin index {spin_index} with average localization {avg_localization[spin_index]}"
-                )
             # drop the val
             defect_band = [r_[:3] for r_ in defect_band_grouped[spin_index]]
 
