@@ -186,7 +186,8 @@ def get_mn(
         omega_i: The initial phonon frequency in eV.
         omega_f: The final phonon frequency in eV.
         m_init: The initial phonon quantum number.
-        en_final: The final energy in eV.
+        en_final: The final energy in eV, reference to the bottom of the
+            final state parabola.
         en_pad: The energy window to consider in eV.
 
     Returns:
@@ -345,7 +346,7 @@ def get_Rad_coef(
             en_final=final_energy,
         )
         if len(E) <= 1:
-            # The phonto took you to a energy range with no final states
+            # The photon took you to a energy range with no final states
             continue
         interp_me = pchip_eval(final_energy, E, me * me, pad_frac=0.2, n_points=5000)
         rate += weights[m, :] * interp_me
