@@ -60,7 +60,7 @@ def test_interstitial_generator(gan_struct):
     )
     l_gen = list(gen)
     assert len(l_gen) == 1
-    assert str(l_gen[0]) == "Mg intersitial site at at site [0.00,0.00,0.00]"
+    assert str(l_gen[0]) == "Mg intersitial site at [0.00,0.00,0.00]"
 
     bad_site = [0.667, 0.333, 0.875]
     gen = InterstitialGenerator().get_defects(

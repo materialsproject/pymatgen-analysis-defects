@@ -1,10 +1,14 @@
 import numpy as np
 import pytest
 from pymatgen.analysis.phase_diagram import PhaseDiagram
+from pymatgen.core import PeriodicSite
 
+from pymatgen.analysis.defects.core import Interstitial
 from pymatgen.analysis.defects.corrections.freysoldt import plot_plnr_avg
 from pymatgen.analysis.defects.thermo import (
+    DefectEntry,
     FormationEnergyDiagram,
+    MultiFormationEnergyDiagram,
     get_lower_envelope,
     get_transitions,
 )
@@ -108,6 +112,86 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
     )
 
     assert len(fed.chempot_limits) == 2
+
+    # Create a fake defect entry independent of the test data
+    fake_defect_entry = defect_entries[0]
+    fake_defect_entry.sc_entry._energy = bulk_entry.energy + 1
+    fake_defect_entry.charge_state = 0
+    for p in pd.stable_entries:
+        p._energy = 0
+    fed = FormationEnergyDiagram(
+        bulk_entry=bulk_entry,
+        defect_entries=[fake_defect_entry],
+        vbm=vbm,
+        pd_entries=pd.stable_entries,
+        inc_inf_values=False,
+    )
+    assert fed.get_formation_energy(
+        fermi_level=vbm,
+        chempot_dict={e: 0 for e in def_ent_list[0].defect.element_changes},
+    ) == pytest.approx(1)
+    assert fed.get_concentration(
+        fermi_level=vbm,
+        chempots={e: 0 for e in def_ent_list[0].defect.element_changes},
+        temperature=300,
+    ) == pytest.approx(2 * 1.5875937551666035e-17)
+
+
+def test_multi(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
+    bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
+    bulk_dos = bulk_vasprun.complete_dos
+    _, vbm = bulk_dos.get_cbm_vbm()
+    bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
+    defect_entries, plot_data = defect_entries_Mg_Ga
+    def_ent_list = list(defect_entries.values())
+
+    with pytest.raises(
+        ValueError,
+        match="Defects are not of same type! Use MultiFormationEnergyDiagram for multiple defect types",
+    ):
+        inter = Interstitial(
+            structure=defect_entries[0].defect.structure,
+            site=PeriodicSite(
+                "H", [0, 0, 0], defect_entries[0].defect.structure.lattice
+            ),
+        )
+        fake_defect_entry = DefectEntry(
+            defect=inter, sc_entry=defect_entries[0].sc_entry, charge_state=0
+        )
+        FormationEnergyDiagram(
+            bulk_entry=bulk_entry,
+            defect_entries=def_ent_list + [fake_defect_entry],
+            vbm=vbm,
+            pd_entries=stable_entries_Mg_Ga_N,
+            inc_inf_values=False,
+        )
+
+    fed = FormationEnergyDiagram(
+        bulk_entry=bulk_entry,
+        defect_entries=def_ent_list,
+        vbm=vbm,
+        pd_entries=stable_entries_Mg_Ga_N,
+        inc_inf_values=False,
+    )
+    mfed = MultiFormationEnergyDiagram(formation_energy_diagrams=[fed])
+    ef = mfed.solve_for_fermi_level(
+        chempots=mfed.chempot_limits[0], temperature=300, dos=bulk_dos
+    )
+    assert ef == pytest.approx(0.6986374710290937)
+
+    # test the constructor with materials project phase diagram
+    atomic_entries = list(
+        filter(lambda x: len(x.composition.elements) == 1, stable_entries_Mg_Ga_N)
+    )
+    pd = PhaseDiagram(stable_entries_Mg_Ga_N)
+    mfed = MultiFormationEnergyDiagram.with_atomic_entries(
+        bulk_entry=bulk_entry,
+        defect_entries=def_ent_list,
+        atomic_entries=atomic_entries,
+        phase_diagram=pd,
+        vbm=vbm,
+    )
+    assert len(mfed.formation_energy_diagrams) == 1
 
 
 def test_formation_from_directory(test_dir, stable_entries_Mg_Ga_N, defect_Mg_Ga):

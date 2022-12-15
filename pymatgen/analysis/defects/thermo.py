@@ -3,8 +3,9 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from itertools import groupby
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 from monty.json import MSONable
@@ -12,8 +13,11 @@ from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.core import Composition, Structure
+from pymatgen.electronic_structure.dos import Dos, FermiDos
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
 from pymatgen.io.vasp import Locpot, Vasprun
+from scipy.constants import value as _cd
+from scipy.optimize import bisect
 from scipy.spatial import ConvexHull
 
 from pymatgen.analysis.defects.core import Defect
@@ -30,6 +34,7 @@ __maintainer__ = "Jimmy-Xuan Shen"
 __email__ = "jmmshn@gmail.com"
 
 _logger = logging.getLogger(__name__)
+boltzman_eV_K = _cd("Boltzmann constant in eV/K")
 
 
 @dataclass
@@ -198,6 +203,13 @@ class FormationEnergyDiagram(MSONable):
         - Make sure that the bulk entry is stable
         - create the chemical potential diagram using only the formation energies
         """
+        g = group_defects(self.defect_entries)
+        if next(g, True) and next(g, False):
+            raise ValueError(
+                "Defects are not of same type! "
+                "Use MultiFormationEnergyDiagram for multiple defect types"
+            )
+
         pd_ = PhaseDiagram(self.pd_entries)
         entries = pd_.stable_entries | {self.bulk_entry}
         pd_ = PhaseDiagram(entries)
@@ -205,14 +217,20 @@ class FormationEnergyDiagram(MSONable):
 
         entries = []
         for entry in self.phase_diagram.stable_entries:
-            d_ = entry.as_dict()
-            d_["energy"] = self.phase_diagram.get_form_energy(entry)
+            d_ = dict(
+                energy=self.phase_diagram.get_form_energy(entry),
+                composition=entry.composition,
+                entry_id=entry.entry_id,
+                correction=0.0,
+            )
+            entries.append(ComputedEntry.from_dict(d_))
             entries.append(ComputedEntry.from_dict(d_))
 
         self.chempot_diagram = ChemicalPotentialDiagram(entries)
         chempot_limits = self.chempot_diagram.domains[
             self.bulk_entry.composition.reduced_formula
         ]
+
         if self.inc_inf_values:
             self._chempot_limits_arr = chempot_limits
         else:
@@ -220,6 +238,9 @@ class FormationEnergyDiagram(MSONable):
             self._chempot_limits_arr = chempot_limits[
                 ~np.any(chempot_limits == boundary_value, axis=1)
             ]
+        self._chempot_limits_arr = self._chempot_limits_arr.dot(
+            1 / self.bulk_entry.composition.reduced_composition.num_atoms
+        )
 
         self.dft_energies = {
             el: self.phase_diagram.get_hull_energy_per_atom(Composition(str(el)))
@@ -350,7 +371,7 @@ class FormationEnergyDiagram(MSONable):
             **kwargs,
         )
 
-    def _parse_chempots(self, chempots: dict | ArrayLike) -> dict:
+    def _parse_chempots(self, chempots: dict) -> dict:
         """Parse the chemical potentials.
 
         Make sure that the chemical potential is represented as a dictionary.
@@ -371,9 +392,7 @@ class FormationEnergyDiagram(MSONable):
             }
         return chempots
 
-    def _vbm_formation_energy(
-        self, defect_entry: DefectEntry, chempots: dict | Iterable
-    ) -> float:
+    def _vbm_formation_energy(self, defect_entry: DefectEntry, chempots: dict) -> float:
         """Compute the formation energy at the VBM.
 
         Compute the formation energy at the VBM (essentially the y-intercept)
@@ -411,7 +430,12 @@ class FormationEnergyDiagram(MSONable):
             res.append(dict(zip(self.chempot_diagram.elements, vertex)))
         return res
 
-    def _get_lines(self, chempots: dict) -> list[tuple[float, float]]:
+    @property
+    def defect(self):
+        """Get the defect that this FormationEnergyDiagram represents."""
+        return self.defect_entries[0].defect
+
+    def _get_lines(self, chempots: Dict) -> list[tuple[float, float]]:
         """Get the lines for the formation energy diagram.
 
         Args:
@@ -449,19 +473,20 @@ class FormationEnergyDiagram(MSONable):
                 potential diagram.
 
         Returns:
-            list[tuple[float, float]]:
-                Transition levels and the formation energy at each transition level.
-                The first and last points are the intercepts with the
-                VBM and CBM respectively.
+            Transition levels and the formation energy at each transition level.
+            Organized as a dictionary keyed by defect __repr__
+            The first and last points are the intercepts with the
+            VBM and CBM respectively.
         """
         chempots = self._parse_chempots(chempots)
         if x_max is None:
             x_max = self.band_gap
+
         lines = self._get_lines(chempots)
         lines = get_lower_envelope(lines)
         return get_transitions(lines, x_min, x_max)
 
-    def _get_formation_energy(self, fermi_level: float, chempot_dict: dict):
+    def get_formation_energy(self, fermi_level: float, chempot_dict: dict):
         """Get the formation energy at a given Fermi level.
 
         Linearly interpolate between the transition levels.
@@ -478,6 +503,114 @@ class FormationEnergyDiagram(MSONable):
         )
         # linearly interpolate between the set of points
         return np.interp(fermi_level, transitions[:, 0], transitions[:, 1])
+
+    def get_concentration(
+        self, fermi_level: float, chempots: dict, temperature: int | float
+    ) -> float:
+        """Get equilibrium defect concentration assuming the dilute limit.
+
+        Args:
+            fermi_level: fermi level with respect to the VBM
+            chempots: Chemical potentials
+            temperature: in Kelvin
+        """
+        chempots = self._parse_chempots(chempots=chempots)
+        fe = self.get_formation_energy(fermi_level, chempots)
+        return self.defect_entries[0].defect.multiplicity * fermi_dirac(
+            energy=fe, temperature=temperature
+        )
+
+
+@dataclass
+class MultiFormationEnergyDiagram(MSONable):
+    """Container for multiple formation energy diagrams."""
+
+    formation_energy_diagrams: List[FormationEnergyDiagram]
+
+    def __post_init__(self):
+        """Set some attributes after initialization."""
+        self.band_gap = self.formation_energy_diagrams[0].band_gap
+        self.vbm = self.formation_energy_diagrams[0].vbm
+        self.chempot_limits = self.formation_energy_diagrams[0].chempot_limits
+        self.chempot_diagram = self.formation_energy_diagrams[0].chempot_diagram
+
+    @classmethod
+    def with_atomic_entries(
+        cls,
+        bulk_entry: ComputedEntry,
+        defect_entries: list[DefectEntry],
+        atomic_entries: list[ComputedEntry],
+        phase_diagram: PhaseDiagram,
+        vbm: float,
+        **kwargs,
+    ) -> MultiFormationEnergyDiagram:
+        """Initialize using atomic entries.
+
+        Initializes by grouping defect types, and creating a list of single
+        FormationEnergyDiagram using the with_atomic_entries method (see above)
+        """
+        single_form_en_diagrams = []
+        for _, defect_group in group_defects(defect_entries=defect_entries):
+            _fd = FormationEnergyDiagram.with_atomic_entries(
+                bulk_entry=bulk_entry,
+                defect_entries=defect_group,
+                atomic_entries=atomic_entries,
+                phase_diagram=phase_diagram,
+                vbm=vbm,
+                **kwargs,
+            )
+            single_form_en_diagrams.append(_fd)
+
+        return cls(formation_energy_diagrams=single_form_en_diagrams)
+
+    def solve_for_fermi_level(
+        self, chempots: dict, temperature: int | float, dos: Dos
+    ) -> float:
+        """Solves for the equilibrium fermi level at a given chempot, temperature, density of states.
+
+        Args:
+            chempots: dictionary of chemical potentials to use
+            temperature: temperature at which to evaluate.
+            dos: Density of states object. Must contain a structure attribute. If band_gap attribute
+                is set, then dos band edges be shifted to match it.
+
+        Returns:
+            Equilibrium fermi level with respect to the valence band edge.
+        """
+        fdos = FermiDos(dos, bandgap=self.band_gap)
+        bulk_factor = self.formation_energy_diagrams[
+            0
+        ].defect.structure.composition.get_reduced_formula_and_factor()[1]
+        fdos_factor = fdos.structure.composition.get_reduced_formula_and_factor()[1]
+        fdos_multiplicity = fdos_factor / bulk_factor
+        fdos_cbm, fdos_vbm = fdos.get_cbm_vbm()
+
+        def _get_chg(fd: FormationEnergyDiagram, ef):
+            lines = fd._get_lines(chempots=chempots)
+            return sum(
+                fd.defect.multiplicity
+                * charge
+                * fermi_dirac(vbm_fe + charge * ef, temperature)
+                for charge, vbm_fe in lines
+            )
+
+        def _get_total_q(ef):
+            qd_tot = sum(
+                _get_chg(fd=fd, ef=ef) for fd in self.formation_energy_diagrams
+            )
+            qd_tot += fdos_multiplicity * fdos.get_doping(
+                fermi_level=ef + fdos_vbm, temperature=temperature
+            )
+            return qd_tot
+
+        return bisect(_get_total_q, -1.0, fdos_cbm - fdos_vbm + 1.0)
+
+
+def group_defects(defect_entries: list[DefectEntry]):
+    """Group defects by their representation."""
+    sents = sorted(defect_entries, key=lambda x: x.defect.__repr__())
+    for k, group in groupby(sents, key=lambda x: x.defect.__repr__()):
+        yield k, list(group)
 
 
 def ensure_stable_bulk(
@@ -650,8 +783,18 @@ def _get_adjusted_pd_entries(phase_diagram, atomic_entries) -> list[ComputedEntr
             energy=get_interp_en(entry) + phase_diagram.get_form_energy(entry),
             composition=entry.composition,
             entry_id=entry.entry_id,
-            correction=entry.correction,
+            correction=0,
         )
         adjusted_entries.append(ComputedEntry.from_dict(d_))
 
     return adjusted_entries
+
+
+def fermi_dirac(energy: float, temperature: int | float) -> float:
+    """Get value of fermi dirac distribution.
+
+    Gets the defects equilibrium concentration (up to the multiplicity factor)
+    at a particular fermi level, chemical potential, and temperature (in Kelvin),
+    assuming dilue limit thermodynamics (non-interacting defects) using FD statistics.
+    """
+    return 1.0 / (1.0 + np.exp((energy) / (boltzman_eV_K * temperature)))
