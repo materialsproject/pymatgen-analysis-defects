@@ -69,7 +69,6 @@ class HarmonicDefect(MSONable):
             f"omega={self.omega:.3f} eV, "
             f"charge={self.charge_state}, "
             f"relaxed_index={self.relaxed_index}, "
-            f"kpt={self.kpt_index}, "
             f"spin={self.spin_index}, "
             f"defect_band={self.defect_band}"
             ")"
