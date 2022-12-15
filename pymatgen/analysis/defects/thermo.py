@@ -474,7 +474,6 @@ class FormationEnergyDiagram(MSONable):
 
         Returns:
             Transition levels and the formation energy at each transition level.
-            Organized as a dictionary keyed by defect __repr__
             The first and last points are the intercepts with the
             VBM and CBM respectively.
         """
