@@ -559,7 +559,7 @@ class SRHCapture(MSONable):
         g: int = 1,
         occ_tol: float = 1e-3,
         n_band_edge: int = 1,
-    ):
+    ) -> npt.NDArray:
         """Calculate the SRH recombination coefficient.
 
         Args:
@@ -572,6 +572,9 @@ class SRHCapture(MSONable):
             g: The degeneracy of the defect state.
             occ_tol: The tolerance for determining if a state is occupied.
             n_band_edge: The number of bands to average over at the band edge.
+
+        Returns:
+            The SRH recombination coefficient in units of cm^3 s^-1.
         """
         if volume is None:
             volume = self.initial_state.relaxed_structure.volume
