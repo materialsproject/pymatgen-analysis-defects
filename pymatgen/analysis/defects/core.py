@@ -536,7 +536,7 @@ class DefectComplex(Defect):
     @property
     def name(self) -> str:
         """Name of the defect."""
-        return "_".join([d.name for d in self.defects])
+        return "+".join([d.name for d in self.defects])
 
     def _guess_oxi_state(self) -> float:
         oxi_state = 0.0
@@ -678,3 +678,10 @@ def get_element(sp_el: Species | Element) -> Element:
     if isinstance(sp_el, Species):
         return sp_el.element
     return sp_el
+
+
+# TODO: matching defect complexes might be done with some kind of CoM site to fix the periodicity
+# Get this by taking the periodic average of all the provided sites.
+# class DefectComplex(DummySpecies):
+#     def __init__(self, oxidation_state: float = 0, properties: dict | None = None):
+#         super().__init__("Vac", oxidation_state, properties)
