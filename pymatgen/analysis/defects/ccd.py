@@ -560,7 +560,19 @@ class SRHCapture(MSONable):
         occ_tol: float = 1e-3,
         n_band_edge: int = 1,
     ):
-        """Calculate the SRH recombination coefficient."""
+        """Calculate the SRH recombination coefficient.
+
+        Args:
+            T: The temperature in Kelvin.
+            dE: The energy difference between the defect and the conduction band.
+            kpt_index: The index of the k-point to use, this should be
+                determined by the band edge so most likely this will be Gamma.
+            volume: The volume of the structure in Angstrom^3.
+                If None, the volume of the initial state is used.
+            g: The degeneracy of the defect state.
+            occ_tol: The tolerance for determining if a state is occupied.
+            n_band_edge: The number of bands to average over at the band edge.
+        """
         if volume is None:
             volume = self.initial_state.relaxed_structure.volume
         elph_me_all = self.initial_state.get_elph_me(
