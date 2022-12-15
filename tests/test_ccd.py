@@ -41,10 +41,10 @@ def test_HarmonicDefect(v_ga):
     assert hd2.spin_index == 1
 
     # check for ValueError
-    # with pytest.raises(ValueError):
-    #     HarmonicDefect.from_vaspruns(
-    #         vaspruns, charge_state=0, procar=procar, kpt_index=1, defect_band_index=139
-    #     )
+    with pytest.raises(ValueError):
+        HarmonicDefect.from_vaspruns(
+            vaspruns, charge_state=0, procar=procar, kpt_index=1, defect_band_index=139
+        )
 
 
 # def test_OpticalHarmonicDefect(v_ga):

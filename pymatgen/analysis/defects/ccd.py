@@ -237,9 +237,8 @@ class HarmonicDefect(MSONable):
         cls,
         directories: list[Path],
         charge_state: int | None = None,
-        spin_index: int | None = None,
         relaxed_index: int | None = None,
-        defect_band_index: int | None = None,
+        defect_band: list[tuple] | None = None,
         store_bandstructure: bool = False,
         get_band_structure_kwargs: dict | None = None,
         **kwargs,
@@ -280,9 +279,8 @@ class HarmonicDefect(MSONable):
         return cls.from_vaspruns(
             vaspruns=vaspruns,
             charge_state=charge_state,
-            spin_index=spin_index,
             relaxed_index=relaxed_index,
-            defect_band_index=defect_band_index,
+            defect_band=defect_band,
             procar=procar,
             store_bandstructure=store_bandstructure,
             get_band_structure_kwargs=get_band_structure_kwargs,
@@ -652,7 +650,6 @@ class SRHCapture(MSONable):
         # information about the electronic states
         final_defect = HarmonicDefect.from_directories(
             directories=final_dirs,
-            kpt_index=kpt_index,
             charge_state=final_charge_state,
             spin_index=spin_index,
             relaxed_index=None,
