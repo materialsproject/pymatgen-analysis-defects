@@ -31,9 +31,9 @@ def get_sc_fromstruct(
 
     The CubicSupercellTransformation from PMG is much faster but don't iterate over as
     many supercell configurations so it's less able to find the best configuration in a
-    given cell size. We try the PMG's cubic supercell transformation with a cap on the
-    number of atoms (max_atoms). The min_length is decreased by 10% (geometrically)
-    until a supercell can be constructed.
+    given cell size. We try the PMG's cubic supercell transformation first and if it fails
+    we will use the `find_optimal_cell_shape` function from ASE which is much slower but
+    exhaustive.
 
     Args:
         base_struct: structure of the unit cell
@@ -126,7 +126,7 @@ def _ase_cubic(base_struture, min_atoms: int = 80, max_atoms: int = 240):
     from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape
     from pymatgen.io.ase import AseAtomsAdaptor
 
-    _logger.info("ASE cubic supercell generation.")
+    _logger.warn("ASE cubic supercell generation.")
 
     aaa = AseAtomsAdaptor()
     ase_atoms = aaa.get_atoms(base_struture)
@@ -134,7 +134,7 @@ def _ase_cubic(base_struture, min_atoms: int = 80, max_atoms: int = 240):
     upper = math.floor(max_atoms / base_struture.num_sites)
     min_dev = (float("inf"), None)
     for size in range(lower, upper + 1):
-        _logger.info(f"Trying size {size} out of {upper}.")
+        _logger.warn(f"Trying size {size} out of {upper}.")
         sc = find_optimal_cell_shape(
             ase_atoms.cell, target_size=size, target_shape="sc"
         )
