@@ -12,6 +12,7 @@ from monty.json import MSONable
 from numpy.typing import ArrayLike, NDArray
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
+from matplotlib import cm
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.core import Composition, Structure
