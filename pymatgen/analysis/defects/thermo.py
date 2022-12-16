@@ -8,10 +8,10 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
-from monty.json import MSONable
-from numpy.typing import ArrayLike, NDArray
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
+from monty.json import MSONable
+from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.core import Composition, Structure
@@ -799,6 +799,7 @@ def fermi_dirac(energy: float, temperature: int | float) -> float:
     assuming dilue limit thermodynamics (non-interacting defects) using FD statistics.
     """
     return 1.0 / (1.0 + np.exp((energy) / (boltzman_eV_K * temperature)))
+
 
 def plot_formation_energy_diagrams(
     formation_energy_diagrams: FormationEnergyDiagram
