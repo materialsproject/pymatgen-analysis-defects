@@ -79,4 +79,8 @@ repos:
   rev: 0.6.1
   hooks:
     - id: nbstripout
-      args: [--extra-keys="metadata.kernelspec"]
+      args: [
+        --drop-empty-cells,
+        --strip-init-cells,
+        --extra-keys=metadata.kernelspec,
+        ]
