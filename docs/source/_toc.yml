@@ -6,3 +6,4 @@ root: intro
 chapters:
 - file: content/quickstart
 - file: content/defining-defects
+- file: content/nonradiative
