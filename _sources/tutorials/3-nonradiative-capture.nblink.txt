@@ -1,3 +1,0 @@
-{
-    "path": "../../../tutorials/3-nonradiative-capture.ipynb"
-}
