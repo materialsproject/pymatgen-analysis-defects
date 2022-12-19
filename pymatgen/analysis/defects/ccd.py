@@ -305,9 +305,9 @@ class HarmonicDefect(MSONable):
         Combine the data from the WSWQs to calculate the electron phonon matrix elements.
         The matrix elements are calculated by combining the finite difference from the matrix overlaps.
 
-        d(<W|S|W(Q)>) / dQ
+        (e_i - e_f) d(<W|S|W(Q)>) / dQ
 
-        And the eignvalue difference.
+        And the eigenvalue difference.
 
         Args:
             wswqs: A list of WSWQ objects, assuming that they match the order of the distortions.
@@ -323,7 +323,6 @@ class HarmonicDefect(MSONable):
         # It's either [..., defect_band_index, :] or [..., defect_band_index]
         # Which band index is the "correct" one might not be super important since
         # the matrix is symmetric in the first-order theory we are working in.
-        # TODO: I should really read my thesis.
         slopes = _get_wswq_slope(self.distortions, wswqs)[
             ..., self.defect_band_index, :
         ]
