@@ -6,7 +6,7 @@ import pytest
 from pymatgen.analysis.defects.ccd import _get_wswq_slope, get_dQ
 
 
-def test_HarmonicDefect(v_ga):
+def test_HarmonicDefect(v_ga, test_dir):
     from pymatgen.analysis.defects.ccd import HarmonicDefect
 
     vaspruns = v_ga[(0, -1)]["vaspruns"]
@@ -50,6 +50,21 @@ def test_HarmonicDefect(v_ga):
         )
         hd3.spin
     assert "Spin index" in str(e.value)
+
+
+def test_wswq(v_ga, test_dir):
+    from pymatgen.analysis.defects.ccd import HarmonicDefect
+
+    vaspruns = v_ga[(0, -1)]["vaspruns"]
+    procar = v_ga[(0, -1)]["procar"]
+    hd = HarmonicDefect.from_vaspruns(
+        vaspruns,
+        charge_state=0,
+        procar=procar,
+        store_bandstructure=True,
+    )
+    wswq_dir = test_dir / "v_Ga" / "ccd_0_-1" / "wswqs"
+    hd.get_elph_me_from_dir(wswq_dir)
 
 
 # def test_OpticalHarmonicDefect(v_ga):

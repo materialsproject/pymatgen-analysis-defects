@@ -101,7 +101,13 @@ def v_ga(test_dir):
     for q1, q2 in [(0, -1), (-1, 0)]:
         ccd_dir = test_dir / f"v_Ga/ccd_{q1}_{q2}"
         vaspruns = [Vasprun(ccd_dir / f"{i}/vasprun.xml") for i in [0, 1, 2]]
-        wswqs = [WSWQ.from_file(ccd_dir / "wswqs" / f"WSWQ.{i}.gz") for i in [0, 1, 2]]
+        wswq_dir = ccd_dir / "wswqs"
+        wswq_files = [f for f in wswq_dir.glob("WSWQ*")]
+        wswq_files.sort(
+            key=lambda x: int(x.name.split(".")[1])
+        )  # does stem work for non-zipped files?
+        wswqs = [WSWQ.from_file(f) for f in wswq_files]
+        # wswqs = [WSWQ.from_file(ccd_dir / "wswqs" / f"WSWQ.{i}.gz") for i in [0, 1, 2]]
         res[(q1, q2)] = {
             "vaspruns": vaspruns,
             "procar": Procar(ccd_dir / "1/PROCAR"),

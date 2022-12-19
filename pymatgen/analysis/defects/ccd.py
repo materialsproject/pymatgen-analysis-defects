@@ -296,9 +296,31 @@ class HarmonicDefect(MSONable):
         """
         return 1.0 / (1 - np.exp(-self.omega_eV / KB * t))
 
+    def get_elph_me_from_dir(
+        self, directory: Path, distortions: npt.ArrayLike | None = None
+    ) -> npt.NDArray:
+        """Calculate the electron phonon matrix elements from a directory.
+
+        Compute the matrix element using `get_elph_me` after reading the
+        WSWQ files from a directory.
+        Assuming that we have a directory containing the WSWQ files ordered in
+        the same way as the `self.distortions`.
+
+        Args:
+            directory: The directory containing the WSWQ files.
+            distortions: The distortions used if different from self.distortions
+        """
+        wswq_files = [f for f in directory.glob("WSWQ*")]
+        wswq_files.sort(
+            key=lambda x: int(x.name.split(".")[1])
+        )  # should work for zipped and unzipped files
+        wswqs = [WSWQ.from_file(f) for f in wswq_files]
+        return self.get_elph_me(wswqs, distortions=distortions)
+
     def get_elph_me(
         self,
         wswqs: list[WSWQ],
+        distortions: npt.ArrayLike | None = None,
     ) -> npt.NDArray:
         """Calculate the electron phonon matrix elements.
 
@@ -311,7 +333,7 @@ class HarmonicDefect(MSONable):
 
         Args:
             wswqs: A list of WSWQ objects, assuming that they match the order of the distortions.
-            bandstructure: The bandstructure of the relaxed defect calculation.
+            distortions: The distortions used if different from self.distortions
 
         Returns:
             npt.NDArray: The electron phonon matrix elements from the defect band to all other bands.
@@ -319,13 +341,12 @@ class HarmonicDefect(MSONable):
         """
         if self.defect_band_index is None:
             raise ValueError("The ``defect_band_index`` must be already be set.")
-
+        if distortions is None:
+            distortions = self.distortions
         # It's either [..., defect_band_index, :] or [..., defect_band_index]
         # Which band index is the "correct" one might not be super important since
         # the matrix is symmetric in the first-order theory we are working in.
-        slopes = _get_wswq_slope(self.distortions, wswqs)[
-            ..., self.defect_band_index, :
-        ]
+        slopes = _get_wswq_slope(distortions, wswqs)[..., self.defect_band_index, :]
         ediffs = self._get_ediff(output_order="skb")
         return np.multiply(slopes, ediffs)
 
@@ -352,7 +373,8 @@ class HarmonicDefect(MSONable):
             )
         if self.relaxed_bandstructure is None:
             raise ValueError(  # pragma: no cover
-                "The ``relaxed_bandstructure`` must be set before ``ediff`` can be computed."
+                "The ``relaxed_bandstructure`` must be set before ``ediff`` can be computed. "
+                "Try setting ``store_bandstructure=True`` when initializing."
             )
 
         ediffs_ = _get_ks_ediff(
