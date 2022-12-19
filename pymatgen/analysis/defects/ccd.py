@@ -333,8 +333,8 @@ class HarmonicDefect(MSONable):
 
         Args:
             defect_state: The defect state as a tuple of (band, kpoint, spin).
-                Note that even though the defect state is localized and does not have a well defined kpoint, the band-edge
-                states are usually dispersive and the k-point provided here should match the
+                Note that even though the defect state is localized and does not have a well defined kpoint,
+                the band-edge states are usually dispersive and the k-point provided here should match the
                 k-point associated with the band-edge states.
 
         Returns:
