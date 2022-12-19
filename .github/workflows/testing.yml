@@ -1,12 +1,10 @@
 name: testing
-
 on:
   push:
     branches:
       - main
     tags:
       - "v*"
-
   pull_request:
     branches:
       - main
@@ -14,7 +12,6 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -45,7 +42,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -91,3 +87,10 @@ jobs:
           pip install -e .[docs]
       - name: Build
         run: jupyter-book build --path-output docs docs/source
+        # Develop branch only
+      - name: Deploy
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          publish_dir: ./docs_build
