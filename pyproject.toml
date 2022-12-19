@@ -61,6 +61,9 @@ profile = "black"
 [tool.black]
 line-length = 88
 
+[tool.blacken-docs]
+line-length = 88
+
 [tool.flake8]
 extend-ignore = "E203, W503, E501, F401, RST21"
 max-line-length = 120
