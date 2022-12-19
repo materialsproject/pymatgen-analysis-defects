@@ -5,3 +5,4 @@ format: jb-book
 root: intro
 chapters:
 - file: content/quickstart
+- file: content/defining-defects
