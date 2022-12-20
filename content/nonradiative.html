@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Simulation of non-radiative capture &#8212; pymatgen-analysis-defects</title>
+    <title>Shockley-Read-Hall Recombination &#8212; pymatgen-analysis-defects</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -55,6 +55,7 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="canonical" href="https://materialsproject.github.io/pymatgen-analysis-defects/content/nonradiative.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="References" href="references.html" />
     <link rel="prev" title="Defining Defects" href="defining-defects.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="None">
@@ -115,7 +116,12 @@ const thebe_selector_output = ".output, .cell_output"
  </li>
  <li class="toctree-l1 current active">
   <a class="current reference internal" href="#">
-   Simulation of non-radiative capture
+   Shockley-Read-Hall Recombination
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="references.html">
+   References
   </a>
  </li>
 </ul>
@@ -325,13 +331,13 @@ title="Print to PDF"
   </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#evaluating-the-electron-phonon-matrix-element-with-pawsk">
-   Evaluating the Electron-Phonon Matrix Element with PAWsk
+  <a class="reference internal nav-link" href="#evaluating-the-electron-phonon-matrix-element-with-paws">
+   Evaluating the Electron-Phonon Matrix Element with PAWs
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#combined-two-harmonicdefects-and-a-series-of-wswq">
-   Combined two HarmonicDefects and a series of WSWQ
+  <a class="reference internal nav-link" href="#calculating-the-srh-capture-coefficient">
+   Calculating the SRH Capture Coefficient
   </a>
  </li>
 </ul>
@@ -343,7 +349,7 @@ title="Print to PDF"
         <div class="col pl-md-3 pl-lg-5 content-container">
             <!-- Table of contents that is only displayed when printing the page -->
             <div id="jb-print-docs-body" class="onlyprint">
-                <h1>Simulation of non-radiative capture</h1>
+                <h1>Shockley-Read-Hall Recombination</h1>
                 <!-- Table of contents -->
                 <div id="print-main-content">
                     <div id="jb-print-toc">
@@ -366,13 +372,13 @@ title="Print to PDF"
   </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#evaluating-the-electron-phonon-matrix-element-with-pawsk">
-   Evaluating the Electron-Phonon Matrix Element with PAWsk
+  <a class="reference internal nav-link" href="#evaluating-the-electron-phonon-matrix-element-with-paws">
+   Evaluating the Electron-Phonon Matrix Element with PAWs
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#combined-two-harmonicdefects-and-a-series-of-wswq">
-   Combined two HarmonicDefects and a series of WSWQ
+  <a class="reference internal nav-link" href="#calculating-the-srh-capture-coefficient">
+   Calculating the SRH Capture Coefficient
   </a>
  </li>
 </ul>
@@ -385,15 +391,28 @@ title="Print to PDF"
                 
               <div>
                 
-  <section class="tex2jax_ignore mathjax_ignore" id="simulation-of-non-radiative-capture">
-<h1>Simulation of non-radiative capture<a class="headerlink" href="#simulation-of-non-radiative-capture" title="Permalink to this headline">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="shockley-read-hall-recombination">
+<h1>Shockley-Read-Hall Recombination<a class="headerlink" href="#shockley-read-hall-recombination" title="Permalink to this headline">#</a></h1>
+<p>Shockley-Read-Hall (SRH) recombination is the dominant recombination mechanism at lower carrier concentrations.
+First-principles calculations of the SRH recombination rate were pioneered in the Van de Walle group at the University of California, Santa Barbara by Prof. Audrius Alisauskas <span id="id1">[<a class="reference internal" href="references.html#id3" title="Audrius Alkauskas, Qimin Yan, and Chris G. Van de Walle. First-principles theory of nonradiative carrier capture via multiphonon emission. Phys. Rev. B, 90(7):075202, August 2014. doi:10.1103/PhysRevB.90.075202.">Alkauskas <em>et al.</em>, 2014</a>]</span>.
+Additional development have been made to better integrate the methodology with existing projector-augmented wave methods in <code class="docutils literal notranslate"><span class="pre">VASP</span></code> to enable much faster calculations of the SRH recombination rate. For a more detailed account of the methodology, please see the following reference: <span id="id2">[<a class="reference internal" href="references.html#id2" title="Jimmy-Xuan Shen. Nonradiative Recombination in Semiconductor Alloys. 2018. [Online; accessed 19. Dec. 2022]. URL: https://escholarship.org/uc/item/1c126345.">Shen, 2018</a>]</span>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.ccd</span> <span class="kn">import</span> <span class="n">HarmonicDefect</span><span class="p">,</span> <span class="n">SRHCapture</span>
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.ccd</span> <span class="kn">import</span> <span class="n">HarmonicDefect</span><span class="p">,</span> <span class="n">get_SRH_coefficient</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># disable warnings</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -422,21 +441,15 @@ The relaxed structure will be taken from the <code class="docutils literal notra
 <span class="nb">print</span><span class="p">(</span><span class="n">hd0</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span>
     <span class="sa">f</span><span class="s2">&quot;The spin channel (</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">spin</span><span class="si">}</span><span class="s2">) is also automaticalliy determined by the &quot;</span>
-    <span class="s2">&quot;IPR, by taking the spin channel with the lowest average IPR.&quot;</span>
+    <span class="s2">&quot;IPR, by taking the spin channel who&#39;s defect states have the lowest average IPR across the different k-points.&quot;</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.10.9/x64/lib/python3.10/site-packages/pymatgen/io/vasp/inputs.py:1820: UnknownPotcarWarning: POTCAR with symbol Ga_d has metadata that does not match                          any VASP POTCAR known to pymatgen. The data in this                          POTCAR is known to match the following functionals:                          [&#39;PBE_54&#39;, &#39;PBE_52&#39;, &#39;unvie_PBE_52&#39;]
-  warnings.warn(
-/opt/hostedtoolcache/Python/3.10.9/x64/lib/python3.10/site-packages/pymatgen/io/vasp/inputs.py:1820: UnknownPotcarWarning: POTCAR with symbol N has metadata that does not match                          any VASP POTCAR known to pymatgen. The data in this                          POTCAR is known to match the following functionals:                          [&#39;PBE_54&#39;, &#39;PBE_52&#39;, &#39;unvie_PBE_52&#39;]
-  warnings.warn(
-</pre></div>
-</div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The relaxed structure is in dirs01[1]
-HarmonicDefect(omega=0.505 eV, charge=0.0, relaxed_index=1, spin=1, defect_band=[(138, 0, 1), (138, 1, 1)])
-The spin channel (-1) is also automaticalliy determined by the IPR, by taking the spin channel with the lowest average IPR.
+HarmonicDefect(omega=0.033 eV, charge=0.0, relaxed_index=1, spin=1, defect_band=[(138, 0, 1), (138, 1, 1)])
+The spin channel (-1) is also automaticalliy determined by the IPR, by taking the spin channel who&#39;s defect states have the lowest average IPR across the different k-points.
 </pre></div>
 </div>
 </div>
@@ -469,9 +482,10 @@ Please report any issues you encounter to the github issue tracker.
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/nonradiative_7_0.png" src="../_images/nonradiative_7_0.png" />
+<img alt="../_images/nonradiative_8_0.png" src="../_images/nonradiative_8_0.png" />
 </div>
 </div>
+<p>The band structure of the relaxed structure has a state that can be identified as the defect state using the inverse participation ratio.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bs</span> <span class="o">=</span> <span class="n">hd0</span><span class="o">.</span><span class="n">relaxed_bandstructure</span>
@@ -486,7 +500,7 @@ Please report any issues you encounter to the github issue tracker.
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/nonradiative_8_0.png" src="../_images/nonradiative_8_0.png" />
+<img alt="../_images/nonradiative_10_0.png" src="../_images/nonradiative_10_0.png" />
 </div>
 </div>
 <p>From the eigenvalue file:</p>
@@ -499,8 +513,8 @@ Please report any issues you encounter to the github issue tracker.
 </div>
 </section>
 </section>
-<section id="evaluating-the-electron-phonon-matrix-element-with-pawsk">
-<h2>Evaluating the Electron-Phonon Matrix Element with PAWsk<a class="headerlink" href="#evaluating-the-electron-phonon-matrix-element-with-pawsk" title="Permalink to this headline">#</a></h2>
+<section id="evaluating-the-electron-phonon-matrix-element-with-paws">
+<h2>Evaluating the Electron-Phonon Matrix Element with PAWs<a class="headerlink" href="#evaluating-the-electron-phonon-matrix-element-with-paws" title="Permalink to this headline">#</a></h2>
 <p>Methods for evaluating electron-phonon interactions in solids from ab initio calculations are well established.
 We use the frozen-phonon method, whereby all the atoms in a supercell are displaced according to the eigenmode of the special phonon.
 The coupling between of the atomic displacements and the electronic properties of the system is represented by the electron-phonon matrix element (epME).
@@ -516,45 +530,74 @@ The overlap above is for the all-electron wavefunction, under the PAW formalism 
 <p>This expression above can be calculated VASP version 6 and above by copying the <code class="docutils literal notranslate"><span class="pre">WAVECAR</span></code> file from the displaced (δQ) structure into the directory that already contains the relaxed calculations directory as <code class="docutils literal notranslate"><span class="pre">WAVECAR.QQQ</span></code> and then running VASP with <code class="docutils literal notranslate"><span class="pre">LWSWQ</span> <span class="pre">=</span> <span class="pre">.TRUE.</span></code>.
 This will calculate the overlap part in the expression above and write it into the <code class="docutils literal notranslate"><span class="pre">WSWQ</span></code> file.
 Automatic parsing of the <code class="docutils literal notranslate"><span class="pre">WSWQ</span></code> file has been implmented in <code class="docutils literal notranslate"><span class="pre">pymatgen.io.vasp.outputs</span></code>.
-To compute the epME via finite difference we need to calculate the overlap for a series of displacements.
-The <code class="docutils literal notranslate"><span class="pre">HarmonicDefect.get_get_elph_me</span></code> method will read a list of <code class="docutils literal notranslate"><span class="pre">WSWQ</span></code> objects and track how the overlap between the initial and final state changes with the displacement of the special phonon.</p>
-</section>
-<section id="combined-two-harmonicdefects-and-a-series-of-wswq">
-<h2>Combined two HarmonicDefects and a series of WSWQ<a class="headerlink" href="#combined-two-harmonicdefects-and-a-series-of-wswq" title="Permalink to this headline">#</a></h2>
-<p>Read the information required for SRH recombination from directories.</p>
-<div class="alert alert-block alert-info"><b>Note:</b> I'm seriously considering changing this to be functional since this feels really over-engineered at this point.
-</div>
+The <code class="docutils literal notranslate"><span class="pre">HarmonicDefect.get_elph_me</span></code> method will read a list of <code class="docutils literal notranslate"><span class="pre">WSWQ</span></code> objects and compute the epME via finite difference by calculating the overlap for a series of displacements.</p>
+<p>To compute the electron phonon matrix element, we must first populate the <code class="docutils literal notranslate"><span class="pre">wswq</span></code> attribute of the <code class="docutils literal notranslate"><span class="pre">HarmonicDefect</span></code> object by reading the <code class="docutils literal notranslate"><span class="pre">WSWQ</span></code> files from a directory where they have been labeled in <code class="docutils literal notranslate"><span class="pre">WSWQ.i</span></code> where the index <code class="docutils literal notranslate"><span class="pre">i</span></code> is used to sort the <code class="docutils literal notranslate"><span class="pre">WSWQ</span></code> files to help compute the epME via finite difference.
+As an example, we will use the three <code class="docutils literal notranslate"><span class="pre">WSWQ</span></code> files in the generated by the three displaces in <code class="docutils literal notranslate"><span class="pre">hd0</span></code></p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">srh</span> <span class="o">=</span> <span class="n">SRHCapture</span><span class="o">.</span><span class="n">from_directories</span><span class="p">(</span>
-    <span class="n">initial_dirs</span><span class="o">=</span><span class="p">[</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]],</span>
-    <span class="n">final_dirs</span><span class="o">=</span><span class="p">[</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_-1_0&quot;</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]],</span>
-    <span class="n">wswq_dir</span><span class="o">=</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="s2">&quot;wswqs&quot;</span><span class="p">,</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wswq_dir</span> <span class="o">=</span> <span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="s2">&quot;wswqs&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The parsed WSWQ files are: </span><span class="si">{</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">wswq_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;WSWQ*&#39;</span><span class="p">)]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">hd0</span><span class="o">.</span><span class="n">read_wswqs</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="s2">&quot;wswqs&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parsed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hd0</span><span class="o">.</span><span class="n">wswqs</span><span class="p">)</span><span class="si">}</span><span class="s2"> WSWQ files.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The parsed WSWQ files are: [&#39;WSWQ.2&#39;, &#39;WSWQ.1&#39;, &#39;WSWQ.0&#39;]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Parsed 3 WSWQ files.
+</pre></div>
+</div>
+</div>
+</div>
+<p>The epME is computed by the <code class="docutils literal notranslate"><span class="pre">HarmonicDefect.get_elph_me</span></code> method, which requires the defect band index.
+Since we know the band edge state is at the Gamma point from analyzing the bulk cell and that the second kpoint index is Gamma in our supercell calculations, can pass the <code class="docutils literal notranslate"><span class="pre">ikpt</span> <span class="pre">=</span> <span class="pre">1</span></code> defect electronic state into the <code class="docutils literal notranslate"><span class="pre">get_elph_me</span></code> method.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The automatically determined defect electronic states are: </span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band</span><span class="si">}</span><span class="s2"> &quot;</span>
+    <span class="s2">&quot;(with [band, k-point, spin] indexing).&quot;</span><span class="p">)</span>
+<span class="n">epME</span> <span class="o">=</span> <span class="n">hd0</span><span class="o">.</span><span class="n">get_elph_me</span><span class="p">(</span><span class="n">defect_state</span><span class="o">=</span><span class="p">(</span><span class="mi">138</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The resulting array of shape </span><span class="si">{</span><span class="n">epME</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> contains the matrix elements from the &quot;</span>
+    <span class="s2">&quot;defect state to all other states at the same k-point.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The automatically determined defect electronic states are: [(138, 0, 1), (138, 1, 1)] (with [band, k-point, spin] indexing).
+The resulting array of shape (216,) contains the matrix elements from the defect state to all other states at the same k-point.
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="calculating-the-srh-capture-coefficient">
+<h2>Calculating the SRH Capture Coefficient<a class="headerlink" href="#calculating-the-srh-capture-coefficient" title="Permalink to this headline">#</a></h2>
+<p>To calculate the Shockley-Read-Hall (SRH) capture coefficient, we also need the potential energy surface of the final state.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dirs10</span> <span class="o">=</span> <span class="p">[</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_-1_0&quot;</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+<span class="n">hd1</span> <span class="o">=</span> <span class="n">HarmonicDefect</span><span class="o">.</span><span class="n">from_directories</span><span class="p">(</span>
+    <span class="n">directories</span><span class="o">=</span><span class="n">dirs10</span><span class="p">,</span>
     <span class="n">store_bandstructure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
+<p>With the initial and final potential energy surfaces, and the <code class="docutils literal notranslate"><span class="pre">WSWQ</span></code> data for the initial state, we can calculate the SRH capture coefficient using the <code class="docutils literal notranslate"><span class="pre">get_SRH_coefficient</span></code> function to compute the capture coefficient as a function of temperature.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
-<span class="n">cc</span> <span class="o">=</span> <span class="n">srh</span><span class="o">.</span><span class="n">get_coeff</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">kpt_index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">cc</span><span class="p">)</span>
+<span class="n">srh_c</span> <span class="o">=</span> <span class="n">get_SRH_coefficient</span><span class="p">(</span><span class="n">initial_state</span><span class="o">=</span><span class="n">hd0</span><span class="p">,</span> <span class="n">final_state</span><span class="o">=</span><span class="n">hd1</span><span class="p">,</span> <span class="n">defect_state</span><span class="o">=</span><span class="p">(</span><span class="mi">138</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">dE</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">srh_c</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Temperature [K]&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;SRH coefficient [cm$^{-3}$s$^{-1}$]&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.lines.Line2D at 0x7fceb4eb9630&gt;]
-</pre></div>
-</div>
-<img alt="../_images/nonradiative_14_1.png" src="../_images/nonradiative_14_1.png" />
+<img alt="../_images/nonradiative_19_0.png" src="../_images/nonradiative_19_0.png" />
 </div>
 </div>
 </section>
@@ -593,6 +636,13 @@ The <code class="docutils literal notranslate"><span class="pre">HarmonicDefect.
             <p class="prev-next-subtitle">previous</p>
             <p class="prev-next-title">Defining Defects</p>
         </div>
+    </a>
+    <a class='right-next' id="next-link" href="references.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">References</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
     </a>
 </div>
             </footer>
