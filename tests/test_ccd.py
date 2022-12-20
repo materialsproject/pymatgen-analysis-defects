@@ -37,7 +37,7 @@ def hd1(v_ga):
     return hd1
 
 
-def test_HarmonicDefect(hd0, v_ga):
+def test_HarmonicDefect(hd0, v_ga, test_dir):
     # test other basic reading functions for HarmonicDefect
     vaspruns = v_ga[(0, -1)]["vaspruns"]
     procar = v_ga[(0, -1)]["procar"]
@@ -48,6 +48,12 @@ def test_HarmonicDefect(hd0, v_ga):
         store_bandstructure=True,
     )
     assert hd0.defect_band == [(138, 0, 1), (138, 1, 1)]
+
+    hd0p = HarmonicDefect.from_directories(
+        directories=[test_dir / "v_Ga" / "ccd_0_-1" / str(i) for i in range(3)],
+        charge_state=0,
+    )
+    assert hd0p.defect_band == [(138, 0, 1), (138, 1, 1)]
 
     hd2 = HarmonicDefect.from_vaspruns(
         vaspruns, charge_state=0, procar=procar, defect_band=((139, 0, 1), (139, 1, 1))
