@@ -12,10 +12,12 @@ import numpy as np
 import numpy.typing as npt
 from monty.json import MSONable
 from pymatgen.electronic_structure.core import Spin
-from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun
+from pymatgen.io.vasp.optics import DielectricFunctionCalculator
+from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun, Waveder
 from scipy.optimize import curve_fit
 
 from .constants import AMU2KG, ANGS2M, EV2J, HBAR_EV, KB
+from .recombination import get_SRH_coef
 from .utils import get_localized_states, get_zfile, sort_positive_definite
 
 # Copyright (c) Pymatgen Development Team.
@@ -41,6 +43,7 @@ class HarmonicDefect(MSONable):
         omega: The vibronic frequency of the phonon state in in the same units as the energy vs. Q plot.
         charge_state: The charge of the defect.
         ispin: The number of spin channels in the calculation (ISPIN from VASP).
+        vrun: The Vasprun object for the relaxed defect structure.
         distortions: The distortion of the structure in units of amu^{-1/2} Angstrom^{-1}.
             This object's internal reference for the distortion should always be relaxed structure.
         structures: The list of structures that were used to compute the distortions.
@@ -49,12 +52,14 @@ class HarmonicDefect(MSONable):
             kpoints and spins presented as `[(band, kpt, spin), ...]`.
         relaxed_indices: The indices of the relaxed defect structure.
         relaxed_bandstructure: The band structure of the relaxed defect calculation.
-        wswqs: The list of `WSWQ` objects for each distortion used to compute the eletron-phonon matrix elements.
+        wswqs: Dict of WSWQ objects for each distortion. The key is the distortion.
+        waveder: The Waveder object for the relaxed defect structure.
     """
 
     omega: float
     charge_state: int
     ispin: int
+    vrun: Optional[Vasprun] = None
     distortions: Optional[list[float]] = None
     structures: Optional[list[Structure]] = None
     energies: Optional[list[float]] = None
@@ -62,12 +67,13 @@ class HarmonicDefect(MSONable):
     relaxed_index: Optional[int] = None
     relaxed_bandstructure: Optional[BandStructure] = None
     wswqs: Optional[dict[float, WSWQ]] = None
+    waveder: Optional[Waveder] = None
 
     def __repr__(self) -> str:
         """String representation of the harmonic defect."""
         return (
             f"HarmonicDefect("
-            f"omega={self.omega:.3f} eV, "
+            f"omega={self.omega_eV:.3f} eV, "
             f"charge={self.charge_state}, "
             f"relaxed_index={self.relaxed_index}, "
             f"spin={self.spin_index}, "
@@ -226,6 +232,7 @@ class HarmonicDefect(MSONable):
             defect_band=defect_band,
             relaxed_index=relaxed_index,
             relaxed_bandstructure=bs,
+            vrun=vaspruns[relaxed_index],
             **kwargs,
         )
 
@@ -341,10 +348,13 @@ class HarmonicDefect(MSONable):
             npt.NDArray: The electron phonon matrix elements from the defect band to all other bands.
                 The indices are [spin, kpoint, band_j]
         """
+        if self.wswqs is None:
+            raise RuntimeError("WSWQs have not been read. Use `read_wswqs` first.")
         distortions = list(self.wswqs.keys())
         wswqs = list(self.wswqs.values())
-        spin_index, kpoint_index, band_index = defect_state
-        # The second band index is associated with the \delta Q state
+        band_index, kpoint_index, spin_index = defect_state
+        # The second band index is associated with the defect state
+        # since we are usually interested in capture
         slopes = _get_wswq_slope(distortions, wswqs)[
             spin_index, kpoint_index, :, band_index
         ]
@@ -397,6 +407,122 @@ class HarmonicDefect(MSONable):
             raise ValueError(
                 "Invalid output_order, choose from 'skb' or 'bks'."
             )  # pragma: no cover
+
+    def get_dielectric_function(
+        self, idir: int, jdir: int
+    ) -> tuple[npt.ArrayLike, npt.ArrayLike, npt.ArrayLike]:
+        """Calculate the dielectric function.
+
+        Args:
+            idir: The first direction of the dielectric tensor.
+            jdir: The second direction of the dielectric tensor.
+
+        Returns:
+            energy: The energy grid representing the dielectric function.
+            eps_vbm: The dielectric function from the VBM to the defect state.
+            eps_cbm: The dielectric function from the defect state to the CBM.
+        """
+        dfc = DielectricFunctionCalculator.from_vasp_objects(
+            vrun=self.vrun, waveder=self.waveder
+        )
+
+        # two masks to select for VBM -> Defect and Defect -> CBM
+        mask_vbm = np.zeros_like(dfc.cder_real)
+        mask_cbm = np.zeros_like(dfc.cder_real)
+        min_def_eig, max_def_eig = np.inf, -np.inf
+        for ib, ik, ispin in self.defect_band:
+            mask_vbm[:ib, ib, ik, ispin] = 1.0
+            mask_cbm[ib, ib:, ik, ispin] = 1.0
+            min_def_eig = min(dfc.eigs[ib, ik, ispin], min_def_eig)
+            max_def_eig = max(dfc.eigs[ib, ik, ispin], max_def_eig)
+
+        # VBM must be lower than defect and CBM must be higher than defect
+        # For situations where there are multiple defect states, hopefully
+        # the Fermi smearing will reduce the trantision between defect states
+        # and we will only measure transitions to the band edges.
+        e_vbm = np.max(dfc.eigs[dfc.eigs < min_def_eig])
+        e_cbm = np.min(dfc.eigs[dfc.eigs > max_def_eig])
+
+        fermi_vbm = (e_vbm + min_def_eig) / 2
+        fermi_cbm = (e_cbm + max_def_eig) / 2
+
+        energy, eps_vbm = dfc.get_epsilon(idir, jdir, fermi_vbm, mask=mask_vbm)
+        _, eps_cbm = dfc.get_epsilon(idir, jdir, fermi_cbm, mask=mask_cbm)
+
+        return energy, eps_vbm, eps_cbm
+
+    # def get_dipoles(self, defect_state: tuple[int, int, int]) -> npt.NDArray:
+    #     """Get the dipole matrix elements associated with the defect.
+
+    #     Return
+
+    #     Returns:
+    #         The dipole matrix elements for the defect. The indices are:
+    #             ``[band, k-point, spin, cart. direction]``.
+    #     """
+    #     defect_band, defect_kpt, defect_spin = defect_state
+    #     all_me = self.waveder.cder_data[:, defect_kpt, defect_spin, :]
+
+    # def get_spectra(self) -> npt.NDArray:
+    #     """Get the spectra for the defect.
+
+    #     Compute the energy differences between all the bands and he defect band.
+
+    #     Returns:
+    #         Array of size ``[n_bands, n_kpoints, n_spins]``.
+    #     """
+    #     return self.initial_state._get_ediff(output_order="bks")
+
+
+def get_SRH_coefficient(
+    initial_state: HarmonicDefect,
+    final_state: HarmonicDefect,
+    defect_state: tuple[int, int, int],
+    T: float | npt.ArrayLike,
+    dE: float,
+    g: int = 1,
+    occ_tol: float = 1e-3,
+    n_band_edge: int = 1,
+) -> npt.ArrayLike:
+    """Get the SRH coefficient for a defect.
+
+    Args:
+        initial_state: The initial charge state of the defect.
+        final_state: The final charge state of the defect.
+        defect_state: The band, k-point, and spin of the defect.
+        T: The temperature in Kelvin.
+        dE: The energy difference between the defect and the band edge.
+        g: The degeneracy of the defect state.
+        occ_tol: The tolerance for determining if a state is occupied.
+        n_band_edge: The number of bands to average over at the band edge.
+
+    Returns:
+        The SRH recombination coefficient in units of cm^3 s^-1.
+    """
+    me_all = initial_state.get_elph_me(defect_state=defect_state)
+    defect_band, defect_kpt, defect_spin = defect_state
+
+    if initial_state.charge_state == final_state.charge_state + 1:
+        band_slice = slice(defect_band + 1, defect_band + 1 + n_band_edge)
+    elif initial_state.charge_state == final_state.charge_state - 1:
+        band_slice = slice(defect_band - n_band_edge, defect_band)
+    else:
+        raise ValueError("SRH capture event must involve a charge state change of 1.")
+
+    me_band_edge = me_all[defect_spin, defect_kpt, band_slice]
+    dQ = get_dQ(initial_state.relaxed_structure, final_state.relaxed_structure)
+    volume = initial_state.relaxed_structure.volume
+    return get_SRH_coef(
+        T,
+        dQ=dQ,
+        dE=dE,
+        omega_i=initial_state.omega_eV,
+        omega_f=final_state.omega_eV,
+        elph_me=np.average(me_band_edge),
+        volume=volume,
+        g=g,
+        occ_tol=occ_tol,
+    )
 
 
 # @dataclass
@@ -528,59 +654,6 @@ class HarmonicDefect(MSONable):
 #         waveder = Waveder(waveder_file)
 #         dQ = get_dQ(initial_defect.relaxed_structure, final_defect.relaxed_structure)
 #         return cls(initial_defect, final_defect, dQ=dQ, waveder=waveder)
-
-#     def get_dipoles(self) -> npt.NDArray:
-#         """Get the dipole matrix elements associated with the defect.
-
-#         Return
-
-#         Returns:
-#             The dipole matrix elements for the defect. The indices are:
-#                 ``[band, k-point, spin, cart. direction]``.
-#         """
-#         return self.waveder.cder_data[self.initial_state.defect_band_index, ...]
-
-#     def get_spectra(self) -> npt.NDArray:
-#         """Get the spectra for the defect.
-
-#         Compute the energy differences between all the bands and he defect band.
-
-#         Returns:
-#             Array of size ``[n_bands, n_kpoints, n_spins]``.
-#         """
-#         return self.initial_state._get_ediff(output_order="bks")
-
-
-# def get_SRH_coefficient(
-#     initial_state: HarmonicDefect,
-#     final_state: HarmonicDefect,
-#     dQ: float,
-#     T: float | npt.ArrayLike,
-#     dE: float,
-#     kpt_index: int,
-#     volume: float | None = None,
-#     g: int = 1,
-#     occ_tol: float = 1e-3,
-#     n_band_edge: int = 1,
-# ):
-#     if volume is None:
-#         volume = initial_state.relaxed_structure.volume
-
-#     elph_me_all = initial_state.get_elph_me(
-#         self.wswqs
-#     )  # indices: [spin, kpoint, band_i, band_j]
-#     istate = self.initial_state
-
-#     if self.initial_state.charge_state == self.final_state.charge_state + 1:
-#         band_slice = slice(
-#             istate.defect_band_index + 1, istate.defect_band_index + 1 + n_band_edge
-#         )
-#     elif self.initial_state.charge_state == self.final_state.charge_state - 1:
-#         band_slice = slice(
-#             istate.defect_band_index - n_band_edge, istate.defect_band_index
-#         )
-#     else:
-#         raise ValueError("SRH capture event must involve a charge state change of 1.")
 
 
 # @dataclass
