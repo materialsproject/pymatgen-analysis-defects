@@ -328,7 +328,7 @@ class HarmonicDefect(MSONable):
             )
         self.wswqs = {d: WSWQ.from_file(f) for d, f in zip(distortions, wswq_files)}
 
-    def get_elph_me(self, defect_state: tuple[int, int, int]) -> npt.NDArray:
+    def get_elph_me(self, defect_state: tuple[int, int, int]) -> npt.ArrayLike:
         """Calculate the electron phonon matrix elements.
 
         Combine the data from the WSWQs to calculate the electron phonon matrix elements.
@@ -345,8 +345,8 @@ class HarmonicDefect(MSONable):
                 k-point associated with the band-edge states.
 
         Returns:
-            npt.NDArray: The electron phonon matrix elements from the defect band to all other bands.
-                The indices are [spin, kpoint, band_j]
+            npt.ArrayLike: The electron phonon matrix elements from the defect band to all other bands.
+                The indices are [band_j,]
         """
         if self.wswqs is None:
             raise RuntimeError("WSWQs have not been read. Use `read_wswqs` first.")
@@ -358,7 +358,7 @@ class HarmonicDefect(MSONable):
         slopes = _get_wswq_slope(distortions, wswqs)[
             spin_index, kpoint_index, :, band_index
         ]
-        ediffs = self._get_ediff(output_order="skb")
+        ediffs = self._get_ediff(output_order="skb")[spin_index, kpoint_index, :]
         return np.multiply(slopes, ediffs)
 
     def _get_ediff(self, output_order="skb") -> npt.NDArray:
@@ -509,7 +509,7 @@ def get_SRH_coefficient(
     else:
         raise ValueError("SRH capture event must involve a charge state change of 1.")
 
-    me_band_edge = me_all[defect_spin, defect_kpt, band_slice]
+    me_band_edge = me_all[band_slice]
     dQ = get_dQ(initial_state.relaxed_structure, final_state.relaxed_structure)
     volume = initial_state.relaxed_structure.volume
     return get_SRH_coef(
@@ -654,148 +654,6 @@ def get_SRH_coefficient(
 #         waveder = Waveder(waveder_file)
 #         dQ = get_dQ(initial_defect.relaxed_structure, final_defect.relaxed_structure)
 #         return cls(initial_defect, final_defect, dQ=dQ, waveder=waveder)
-
-
-# @dataclass
-# class SRHCapture(MSONable):
-#     """Representation of a SRH capture event.
-
-#     Performs book keeping of initial and final states.
-
-#     Attributes:
-#         initial_state: The initial state of the SRH capture event.
-#         final_state: The final state of the SRH capture event.
-#         dQ: The distortion between the structures in units of amu^{-1/2} Angstrom^{-1}.
-#             By convention, the final state should be on the +dQ side of the initial state.
-#             This should only matter once we start considering anharmonic defects.
-#         wswqs: The PAW overlap matrix element <W(0)|S|W(Q)> stored as a list of WSWQ objects.
-#     """
-
-#     initial_state: HarmonicDefect
-#     final_state: HarmonicDefect
-#     dQ: float
-#     wswqs: list[WSWQ]
-
-#     def get_coeff(
-#         self,
-#         T: float | npt.ArrayLike,
-#         dE: float,
-#         kpt_index: int,
-#         volume: float | None = None,
-#         g: int = 1,
-#         occ_tol: float = 1e-3,
-#         n_band_edge: int = 1,
-#     ) -> npt.NDArray:
-#         """Calculate the SRH recombination coefficient.
-
-#         Args:
-#             T: The temperature in Kelvin.
-#             dE: The energy difference between the defect and the conduction band.
-#             kpt_index: The index of the k-point to use, this should be
-#                 determined by the band edge so most likely this will be Gamma.
-#             volume: The volume of the structure in Angstrom^3.
-#                 If None, the volume of the initial state is used.
-#             g: The degeneracy of the defect state.
-#             occ_tol: The tolerance for determining if a state is occupied.
-#             n_band_edge: The number of bands to average over at the band edge.
-
-#         Returns:
-#             The SRH recombination coefficient in units of cm^3 s^-1.
-#         """
-#         if volume is None:
-#             volume = self.initial_state.relaxed_structure.volume
-#         elph_me_all = self.initial_state.get_elph_me(
-#             self.wswqs
-#         )  # indices: [spin, kpoint, band_i, band_j]
-#         istate = self.initial_state
-
-#         if self.initial_state.charge_state == self.final_state.charge_state + 1:
-#             band_slice = slice(
-#                 istate.defect_band_index + 1, istate.defect_band_index + 1 + n_band_edge
-#             )
-#         elif self.initial_state.charge_state == self.final_state.charge_state - 1:
-#             band_slice = slice(
-#                 istate.defect_band_index - n_band_edge, istate.defect_band_index
-#             )
-#         else:
-#             raise ValueError(
-#                 "SRH capture event must involve a charge state change of 1."
-#             )
-
-#         elph_me_band_edge = elph_me_all[istate.spin_index, kpt_index, band_slice]
-
-#         return get_SRH_coef(
-#             T,
-#             dQ=self.dQ,
-#             dE=dE,
-#             omega_i=self.initial_state.omega_eV,
-#             omega_f=self.final_state.omega_eV,
-#             elph_me=np.average(elph_me_band_edge),
-#             volume=volume,
-#             g=g,
-#             occ_tol=occ_tol,
-#         )
-
-#     @classmethod
-#     def from_directories(
-#         cls,
-#         initial_dirs: list[Path],
-#         final_dirs: list[Path],
-#         wswq_dir: Path,
-#         initial_charge_state: int | None = None,
-#         final_charge_state: int | None = None,
-#         defect_band: list[tuple] | None = None,
-#         store_bandstructure: bool = False,
-#         get_band_structure_kwargs: dict | None = None,
-#         **kwargs,
-#     ) -> SRHCapture:
-#         """Create a SRHCapture from a list of directories.
-
-#         Args:
-#             initial_dirs: A list of directories for the initial state.
-#             final_dirs: A list of directories for the final state.
-#             wswq_dir: The directory containing the WSWQ files.
-#             initial_charge_state: The charge state of the initial state.
-#                 If None, the charge state is determined from the vasprun.xml and POTCAR files.
-#             final_charge_state: The charge state of the final state.
-#                 If None, the charge state is determined from the vasprun.xml and POTCAR files.
-#             defect_band: The the index of the defect band since the defect for different
-#                 kpoints and spins presented as `[(band, kpt, spin), ...]`.
-#             store_bandstructure: Whether to store the band structure.
-#             get_band_structure_kwargs: Keyword arguments to pass to get_band_structure.
-#             **kwargs: Keyword arguments to pass to the HarmonicDefect constructor.
-
-#         Returns:
-#             A SRHCapture object.
-#         """
-#         initial_defect = HarmonicDefect.from_directories(
-#             directories=initial_dirs,
-#             charge_state=initial_charge_state,
-#             relaxed_index=None,
-#             defect_band=defect_band,
-#             store_bandstructure=store_bandstructure,
-#             get_band_structure_kwargs=get_band_structure_kwargs,
-#             **kwargs,
-#         )
-
-#         # the final state does not need the additional
-#         # information about the electronic states
-#         final_defect = HarmonicDefect.from_directories(
-#             directories=final_dirs,
-#             charge_state=final_charge_state,
-#             relaxed_index=None,
-#             defect_band=((),),  # Skip the procar check since we only need the energies.
-#             store_bandstructure=None,
-#             get_band_structure_kwargs=None,
-#             **kwargs,
-#         )
-#         wswq_files = [f for f in wswq_dir.glob("WSWQ*")]
-#         wswq_files.sort(
-#             key=lambda x: int(x.stem.split(".")[1])
-#         )  # does stem work for non-zipped files?
-#         wswqs = [WSWQ.from_file(f) for f in wswq_files]
-#         dQ = get_dQ(initial_defect.relaxed_structure, final_defect.relaxed_structure)
-#         return cls(initial_defect, final_defect, dQ=dQ, wswqs=wswqs)
 
 
 def get_dQ(ground: Structure, excited: Structure) -> float:
