@@ -5,7 +5,7 @@ import pytest
 from monty.serialization import loadfn
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Specie
-from pymatgen.io.vasp.outputs import WSWQ, Chgcar, Locpot, Procar, Vasprun, Waveder
+from pymatgen.io.vasp.outputs import WSWQ, Chgcar, Locpot, Procar, Vasprun
 
 from pymatgen.analysis.defects.core import PeriodicSite, Substitution
 from pymatgen.analysis.defects.thermo import DefectEntry
@@ -111,7 +111,6 @@ def v_ga(test_dir):
         res[(q1, q2)] = {
             "vaspruns": vaspruns,
             "procar": Procar(ccd_dir / "1/PROCAR"),
-            "waveder": Waveder.from_binary(ccd_dir / "1/WAVEDER"),
             "wswqs": wswqs,
         }
     return res

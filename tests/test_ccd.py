@@ -3,7 +3,7 @@ from collections import namedtuple
 import numpy as np
 import pytest
 
-from pymatgen.analysis.defects.ccd import HarmonicDefect, _get_wswq_slope
+from pymatgen.analysis.defects.ccd import HarmonicDefect, Waveder, _get_wswq_slope
 
 
 @pytest.fixture(scope="session")
@@ -17,23 +17,23 @@ def hd0(v_ga):
         store_bandstructure=True,
     )
     assert hd0.spin_index == 1
-    pytest.approx(hd0.distortions[1], 0.0)
-    pytest.approx(hd0.omega_eV, 0.032680)
+    assert pytest.approx(hd0.distortions[1]) == 0.0
+    assert pytest.approx(hd0.omega_eV) == 0.03268045792725
     assert hd0.defect_band == [(138, 0, 1), (138, 1, 1)]
     return hd0
 
 
 @pytest.fixture(scope="session")
 def hd1(v_ga):
-    vaspruns = v_ga[(0, -1)]["vaspruns"]
-    procar = v_ga[(0, -1)]["procar"]
+    vaspruns = v_ga[(-1, 0)]["vaspruns"]
+    procar = v_ga[(-1, 0)]["procar"]
     hd1 = HarmonicDefect.from_vaspruns(
         vaspruns,
         charge_state=1,
         procar=procar,
         store_bandstructure=True,
     )
-    pytest.approx(hd1.omega_eV, 0.03268045792725)
+    assert pytest.approx(hd1.omega_eV) == 0.03341323356861477
     return hd1
 
 
@@ -75,8 +75,6 @@ def test_HarmonicDefect(hd0, v_ga, test_dir):
 
 
 def test_wswq(hd0, test_dir):
-    pass
-
     wswq_dir = test_dir / "v_Ga" / "ccd_0_-1" / "wswqs"
 
     # check for ValueError when you have mis-matched distortions and wswqs
@@ -123,8 +121,18 @@ def test_SRHCapture(hd0, hd1, test_dir):
     assert np.allclose(c_n, ref_results)
 
 
-def test_dielectric_func(v_ga):
-    pass
+def test_dielectric_func(test_dir):
+    dir0_opt = test_dir / "v_Ga" / "ccd_0_-1" / "optics"
+    hd0 = HarmonicDefect.from_directories(
+        directories=[dir0_opt],
+        store_bandstructure=True,
+    )
+    hd0.waveder = Waveder.from_binary(dir0_opt / "WAVEDER")
+    energy, eps_vbm, eps_cbm = hd0.get_dielectric_function(idir=0, jdir=0)
+    inter_vbm = np.trapz(np.imag(eps_vbm[:100]), energy[:100])
+    inter_cbm = np.trapz(np.imag(eps_cbm[:100]), energy[:100])
+    assert pytest.approx(inter_vbm, abs=0.01) == 6.31
+    assert pytest.approx(inter_cbm, abs=0.01) == 0.27
 
 
 # def test_OpticalHarmonicDefect(v_ga):

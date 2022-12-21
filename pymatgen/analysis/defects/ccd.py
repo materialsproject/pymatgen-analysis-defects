@@ -12,6 +12,7 @@ import numpy as np
 import numpy.typing as npt
 from monty.json import MSONable
 from pymatgen.electronic_structure.core import Spin
+from pymatgen.io.vasp.optics import DielectricFunctionCalculator
 from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun, Waveder
 from scipy.optimize import curve_fit
 
@@ -407,48 +408,48 @@ class HarmonicDefect(MSONable):
                 "Invalid output_order, choose from 'skb' or 'bks'."
             )  # pragma: no cover
 
-    # def get_dielectric_function(
-    #     self, idir: int, jdir: int
-    # ) -> tuple[npt.ArrayLike, npt.ArrayLike, npt.ArrayLike]:
-    #     """Calculate the dielectric function.
+    def get_dielectric_function(
+        self, idir: int, jdir: int
+    ) -> tuple[npt.ArrayLike, npt.ArrayLike, npt.ArrayLike]:
+        """Calculate the dielectric function.
 
-    #     Args:
-    #         idir: The first direction of the dielectric tensor.
-    #         jdir: The second direction of the dielectric tensor.
+        Args:
+            idir: The first direction of the dielectric tensor.
+            jdir: The second direction of the dielectric tensor.
 
-    #     Returns:
-    #         energy: The energy grid representing the dielectric function.
-    #         eps_vbm: The dielectric function from the VBM to the defect state.
-    #         eps_cbm: The dielectric function from the defect state to the CBM.
-    #     """
-    #     dfc = DielectricFunctionCalculator.from_vasp_objects(
-    #         vrun=self.vrun, waveder=self.waveder
-    #     )
+        Returns:
+            energy: The energy grid representing the dielectric function.
+            eps_vbm: The dielectric function from the VBM to the defect state.
+            eps_cbm: The dielectric function from the defect state to the CBM.
+        """
+        dfc = DielectricFunctionCalculator.from_vasp_objects(
+            vrun=self.vrun, waveder=self.waveder
+        )
 
-    #     # two masks to select for VBM -> Defect and Defect -> CBM
-    #     mask_vbm = np.zeros_like(dfc.cder_real)
-    #     mask_cbm = np.zeros_like(dfc.cder_real)
-    #     min_def_eig, max_def_eig = np.inf, -np.inf
-    #     for ib, ik, ispin in self.defect_band:
-    #         mask_vbm[:ib, ib, ik, ispin] = 1.0
-    #         mask_cbm[ib, ib:, ik, ispin] = 1.0
-    #         min_def_eig = min(dfc.eigs[ib, ik, ispin], min_def_eig)
-    #         max_def_eig = max(dfc.eigs[ib, ik, ispin], max_def_eig)
+        # two masks to select for VBM -> Defect and Defect -> CBM
+        mask_vbm = np.zeros_like(dfc.cder_real)
+        mask_cbm = np.zeros_like(dfc.cder_real)
+        min_def_eig, max_def_eig = np.inf, -np.inf
+        for ib, ik, ispin in self.defect_band:
+            mask_vbm[:ib, ib, ik, ispin] = 1.0
+            mask_cbm[ib, ib:, ik, ispin] = 1.0
+            min_def_eig = min(dfc.eigs[ib, ik, ispin], min_def_eig)
+            max_def_eig = max(dfc.eigs[ib, ik, ispin], max_def_eig)
 
-    #     # VBM must be lower than defect and CBM must be higher than defect
-    #     # For situations where there are multiple defect states, hopefully
-    #     # the Fermi smearing will reduce the trantision between defect states
-    #     # and we will only measure transitions to the band edges.
-    #     e_vbm = np.max(dfc.eigs[dfc.eigs < min_def_eig])
-    #     e_cbm = np.min(dfc.eigs[dfc.eigs > max_def_eig])
+        # VBM must be lower than defect and CBM must be higher than defect
+        # For situations where there are multiple defect states, hopefully
+        # the Fermi smearing will reduce the transition between defect states
+        # and we will only measure transitions to the band edges.
+        e_vbm = np.max(dfc.eigs[dfc.eigs < min_def_eig])
+        e_cbm = np.min(dfc.eigs[dfc.eigs > max_def_eig])
 
-    #     fermi_vbm = (e_vbm + min_def_eig) / 2
-    #     fermi_cbm = (e_cbm + max_def_eig) / 2
+        fermi_vbm = (e_vbm + min_def_eig) / 2
+        fermi_cbm = (e_cbm + max_def_eig) / 2
 
-    #     energy, eps_vbm = dfc.get_epsilon(idir, jdir, fermi_vbm, mask=mask_vbm)
-    #     _, eps_cbm = dfc.get_epsilon(idir, jdir, fermi_cbm, mask=mask_cbm)
+        energy, eps_vbm = dfc.get_epsilon(idir, jdir, fermi_vbm, mask=mask_vbm)
+        _, eps_cbm = dfc.get_epsilon(idir, jdir, fermi_cbm, mask=mask_cbm)
 
-    #     return energy, eps_vbm, eps_cbm
+        return energy, eps_vbm, eps_cbm
 
     # def get_dipoles(self, defect_state: tuple[int, int, int]) -> npt.NDArray:
     #     """Get the dipole matrix elements associated with the defect.
