@@ -431,6 +431,7 @@ class FormationEnergyDiagram(MSONable):
         res = []
         for vertex in self._chempot_limits_arr:
             res.append(dict(zip(self.chempot_diagram.elements, vertex)))
+        print(res)
         return res
 
     @property
@@ -872,6 +873,8 @@ def plot_formation_energy_diagrams(
         xmin, xmax = np.subtract(-0.2, alignment), np.subtract(
             band_gap + 0.2, alignment
         )
+    elif xlim:
+        xmin, xmax = xlim
     ymin, ymax = 0.0, 1.0
     legends_txt = []
     artists = []
@@ -887,12 +890,13 @@ def plot_formation_energy_diagrams(
         else cm.gist_rainbow(np.linspace(0, 1, len(formation_energy_diagrams)))
     )
 
-    for i, single_fed in enumerate(formation_energy_diagrams):
+    for fid, single_fed in enumerate(formation_energy_diagrams):
         lines = single_fed._get_lines(chempots=chempots)
         lowerlines = get_lower_envelope(lines)
         trans = get_transitions(
             lowerlines, np.add(xmin, alignment), np.add(xmax, alignment)
         )
+
 
         # plot lines
         if not only_lower_envelope:
@@ -900,7 +904,7 @@ def plot_formation_energy_diagrams(
                 x = np.linspace(xmin, xmax)
                 y = ln[0] * x + ln[1]
                 axis.plot(
-                    np.subtract(x, alignment), y, color=colors[i], alpha=line_alpha
+                    np.subtract(x, alignment), y, color=colors[fid], alpha=line_alpha
                 )
 
         # plot connecting envelop lines
@@ -910,7 +914,7 @@ def plot_formation_energy_diagrams(
             axis.plot(
                 np.subtract(x, alignment),
                 y,
-                color=colors[i],
+                color=colors[fid],
                 ls=linestyle,
                 lw=linewidth,
                 alpha=envelope_alpha,
@@ -919,12 +923,12 @@ def plot_formation_energy_diagrams(
         # Plot transitions
         for _x, _y in trans:
             ymax = max((ymax, _y))
-            ymin = max((ymin, _y))
+            ymin = min((ymin, _y))
             axis.plot(
                 np.subtract(_x, alignment),
                 _y,
                 marker=transition_marker,
-                color=colors[i],
+                color=colors[fid],
                 markersize=transition_markersize,
             )
 
@@ -935,7 +939,7 @@ def plot_formation_energy_diagrams(
         if legend_prefix:
             latexname = f"{legend_prefix} {latexname}"
         legends_txt.append(latexname)
-        artists.append(Line2D([0], [0], color=colors[i], lw=4))
+        artists.append(Line2D([0], [0], color=colors[fid], lw=4))
 
     axis.set_xlim(xmin, xmax)
     axis.set_ylim(ylim[0] if ylim else ymin - 0.1, ylim[1] if ylim else ymax + 0.1)
