@@ -379,9 +379,20 @@ This essentially allows us to calculate the optical response for (defect)→(con
 <p>For more details on how the python code works, please see the documentation for the <code class="docutils literal notranslate"><span class="pre">pymatgen.io.vasp.optics</span></code> module.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># disable tqdm progress bar</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partialmethod</span>
+<span class="n">tqdm</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="n">partialmethod</span><span class="p">(</span><span class="n">tqdm</span><span class="o">.</span><span class="fm">__init__</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># disable warnings</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.ccd</span> <span class="kn">import</span> <span class="n">HarmonicDefect</span><span class="p">,</span> <span class="n">get_SRH_coefficient</span>
 <span class="kn">from</span> <span class="nn">pymatgen.io.vasp.optics</span> <span class="kn">import</span> <span class="n">DielectricFunctionCalculator</span><span class="p">,</span> <span class="n">Spin</span><span class="p">,</span> <span class="n">Vasprun</span><span class="p">,</span> <span class="n">Waveder</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -489,26 +500,6 @@ Which requires the <code class="docutils literal notranslate"><span class="pre">
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0it [00:00, ?it/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>552it [00:00, 6877.15it/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0it [00:00, ?it/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>312it [00:00, 6745.48it/s]
-</pre></div>
-</div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -522,10 +513,10 @@ Which requires the <code class="docutils literal notranslate"><span class="pre">
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend at 0x7f6eae4635b0&gt;
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend at 0x7f2251f93610&gt;
 </pre></div>
 </div>
-<img alt="../_images/photo-conduct_11_1.png" src="../_images/photo-conduct_11_1.png" />
+<img alt="../_images/photo-conduct_12_1.png" src="../_images/photo-conduct_12_1.png" />
 </div>
 </div>
 <p>From the dielectric function above we see that this particular defect (the Ga vacancy in the neutral <code class="docutils literal notranslate"><span class="pre">q=0</span></code> state) is much better at capturing electrons from the valence band via dipole transitions than it is at emitting electrons to the conduction band via dipole transitions.</p>
