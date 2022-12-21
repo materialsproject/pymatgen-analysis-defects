@@ -497,13 +497,8 @@ Which requires the <code class="docutils literal notranslate"><span class="pre">
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">energy</span><span class="p">,</span> <span class="n">eps_vbm</span><span class="p">,</span> <span class="n">eps_cbm</span> <span class="o">=</span> <span class="n">hd0</span><span class="o">.</span><span class="n">get_dielectric_function</span><span class="p">(</span><span class="n">idir</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">jdir</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">eps_vbm</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;VBM&quot;</span><span class="p">)</span>
+<span class="c1"># plotting</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">eps_vbm</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;VBM&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">eps_cbm</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;CBM&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Photon Energy (eV)&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\varepsilon_{\rm imag}$&quot;</span><span class="p">)</span>
@@ -513,10 +508,10 @@ Which requires the <code class="docutils literal notranslate"><span class="pre">
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend at 0x7f2251f93610&gt;
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend at 0x7fd9240539d0&gt;
 </pre></div>
 </div>
-<img alt="../_images/photo-conduct_12_1.png" src="../_images/photo-conduct_12_1.png" />
+<img alt="../_images/photo-conduct_11_1.png" src="../_images/photo-conduct_11_1.png" />
 </div>
 </div>
 <p>From the dielectric function above we see that this particular defect (the Ga vacancy in the neutral <code class="docutils literal notranslate"><span class="pre">q=0</span></code> state) is much better at capturing electrons from the valence band via dipole transitions than it is at emitting electrons to the conduction band via dipole transitions.</p>
