@@ -441,7 +441,7 @@ The user can refine the definition of the defect band by passing in a list of <c
                 <span class="n">e</span><span class="p">,</span> <span class="n">o</span> <span class="o">=</span> <span class="n">spin_eigs</span><span class="p">[</span><span class="n">kpt</span><span class="p">,</span> <span class="n">ib</span><span class="p">,</span> <span class="p">:]</span>
                 <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">ib</span><span class="p">,</span> <span class="n">kpt</span><span class="p">,</span> <span class="n">spin_idx</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">defect_bands</span><span class="p">:</span>
-                    <span class="n">e_out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;*</span><span class="si">{</span><span class="n">e</span><span class="si">:</span><span class="s2">8.5f</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="n">e_out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e</span><span class="si">:</span><span class="s2">7.4f</span><span class="si">}</span><span class="s2">*&quot;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">e_out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e</span><span class="si">:</span><span class="s2">8.5f</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">output</span><span class="p">[(</span><span class="n">ib</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e_out</span><span class="p">)</span>
@@ -459,7 +459,7 @@ The user can refine the definition of the defect band by passing in a list of <c
 135  3.58800  4.06530  4.04520  4.26400
 136  3.70270  4.25190  4.62880  4.79700
 137  3.89660  4.28290  4.94740  4.98330
-138  4.11920  4.34290 * 5.53380 * 5.75310
+138  4.11920  4.34290  5.5338*  5.7531*
 139  7.98830  6.26990  8.08180  6.35690
 140  8.71050  8.44200  8.81040  8.53660
 141  8.80880  8.55270  8.86150  8.60610
@@ -469,7 +469,7 @@ The user can refine the definition of the defect band by passing in a list of <c
 </div>
 </div>
 </div>
-<p>From the eigenvalues above, we can see that isolated defect band is <code class="docutils literal notranslate"><span class="pre">[(138,</span> <span class="pre">0,</span> <span class="pre">1),</span> <span class="pre">(138,</span> <span class="pre">1,</span> <span class="pre">1)]</span></code> which matches with underlined values determined by the data from inverse participation ratio (IPR) analysis.</p>
+<p>From the eigenvalues above, we can see that isolated defect band is <code class="docutils literal notranslate"><span class="pre">[(138,</span> <span class="pre">0,</span> <span class="pre">1),</span> <span class="pre">(138,</span> <span class="pre">1,</span> <span class="pre">1)]</span></code> which matches with starred values determined by the data from inverse participation ratio (IPR) analysis.</p>
 </section>
 <section id="frequency-dependent-dielectric-function">
 <h2>Frequency-Dependent Dielectric Function<a class="headerlink" href="#frequency-dependent-dielectric-function" title="Permalink to this headline">#</a></h2>
@@ -493,7 +493,7 @@ Which requires the <code class="docutils literal notranslate"><span class="pre">
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0it [00:00, ?it/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>552it [00:00, 7458.94it/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>552it [00:00, 6877.15it/s]
 </pre></div>
 </div>
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
@@ -502,7 +502,7 @@ Which requires the <code class="docutils literal notranslate"><span class="pre">
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0it [00:00, ?it/s]
 </pre></div>
 </div>
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>312it [00:00, 7412.82it/s]
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>312it [00:00, 6745.48it/s]
 </pre></div>
 </div>
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
@@ -522,7 +522,7 @@ Which requires the <code class="docutils literal notranslate"><span class="pre">
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend at 0x7fefa0f43790&gt;
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend at 0x7f6eae4635b0&gt;
 </pre></div>
 </div>
 <img alt="../_images/photo-conduct_11_1.png" src="../_images/photo-conduct_11_1.png" />
