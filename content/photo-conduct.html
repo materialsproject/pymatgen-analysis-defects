@@ -398,10 +398,16 @@ Although this time, since we don’t need to consider the vibrational modes of t
 Since the <code class="docutils literal notranslate"><span class="pre">PROCAR</span></code> file is also present in the directory, the <code class="docutils literal notranslate"><span class="pre">(band,</span> <span class="pre">kpoint,</span> <span class="pre">spin)</span></code> indices representing the singular, most localized, state will be automatically determined.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dir0</span> <span class="o">=</span> <span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dir0</span> <span class="o">=</span> <span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="s2">&quot;optics&quot;</span>
 <span class="n">hd0</span> <span class="o">=</span> <span class="n">HarmonicDefect</span><span class="o">.</span><span class="n">from_directories</span><span class="p">(</span><span class="n">directories</span><span class="o">=</span><span class="p">[</span><span class="n">dir0</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The defect band is </span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The vibrational frequency is omega=</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">omega</span><span class="si">}</span><span class="s2"> in this case is gibberish.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The defect band is [(138, 0, 1), (138, 1, 1)]
+The vibrational frequency is omega=1.0 in this case is gibberish.
 </pre></div>
 </div>
 </div>
@@ -435,7 +441,7 @@ The user can refine the definition of the defect band by passing in a list of <c
                 <span class="n">e</span><span class="p">,</span> <span class="n">o</span> <span class="o">=</span> <span class="n">spin_eigs</span><span class="p">[</span><span class="n">kpt</span><span class="p">,</span> <span class="n">ib</span><span class="p">,</span> <span class="p">:]</span>
                 <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">ib</span><span class="p">,</span> <span class="n">kpt</span><span class="p">,</span> <span class="n">spin_idx</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">defect_bands</span><span class="p">:</span>
-                    <span class="n">e_out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[4m</span><span class="si">{</span><span class="n">e</span><span class="si">:</span><span class="s2">8.5f</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&quot;</span>
+                    <span class="n">e_out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;*</span><span class="si">{</span><span class="n">e</span><span class="si">:</span><span class="s2">8.5f</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">e_out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e</span><span class="si">:</span><span class="s2">8.5f</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">output</span><span class="p">[(</span><span class="n">ib</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e_out</span><span class="p">)</span>
@@ -444,6 +450,21 @@ The user can refine the definition of the defect band by passing in a list of <c
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ib</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">eigs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 <span class="n">print_eigs</span><span class="p">(</span><span class="n">vr</span><span class="o">=</span><span class="n">hd0</span><span class="o">.</span><span class="n">vrun</span><span class="p">,</span> <span class="n">defect_bands</span><span class="o">=</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>band s=0,k=0  s=0,k=1  s=1,k=0  s=1,k=1
+134  3.46880  3.77960  3.86670  4.22680
+135  3.58800  4.06530  4.04520  4.26400
+136  3.70270  4.25190  4.62880  4.79700
+137  3.89660  4.28290  4.94740  4.98330
+138  4.11920  4.34290 * 5.53380 * 5.75310
+139  7.98830  6.26990  8.08180  6.35690
+140  8.71050  8.44200  8.81040  8.53660
+141  8.80880  8.55270  8.86150  8.60610
+142  9.12240  8.76330  9.16820  8.86680
+143  9.12980  9.35840  9.17690  9.36620
 </pre></div>
 </div>
 </div>
@@ -468,6 +489,26 @@ Which requires the <code class="docutils literal notranslate"><span class="pre">
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0it [00:00, ?it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>552it [00:00, 7458.94it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0it [00:00, ?it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>312it [00:00, 7412.82it/s]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -479,6 +520,12 @@ Which requires the <code class="docutils literal notranslate"><span class="pre">
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend at 0x7fefa0f43790&gt;
+</pre></div>
+</div>
+<img alt="../_images/photo-conduct_11_1.png" src="../_images/photo-conduct_11_1.png" />
 </div>
 </div>
 <p>From the dielectric function above we see that this particular defect (the Ga vacancy in the neutral <code class="docutils literal notranslate"><span class="pre">q=0</span></code> state) is much better at capturing electrons from the valence band via dipole transitions than it is at emitting electrons to the conduction band via dipole transitions.</p>
