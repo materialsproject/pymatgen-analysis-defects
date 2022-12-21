@@ -139,3 +139,7 @@ examples/wip*
 .vscode/
 
 pymatgen/analysis/defects/corrections/kumagai_old.py
+
+docs.old/_build/
+
+docs.old/

@@ -241,9 +241,6 @@ class FormationEnergyDiagram(MSONable):
             self._chempot_limits_arr = chempot_limits[
                 ~np.any(chempot_limits == boundary_value, axis=1)
             ]
-        self._chempot_limits_arr = self._chempot_limits_arr.dot(
-            1 / self.bulk_entry.composition.reduced_composition.num_atoms
-        )
 
         self.dft_energies = {
             el: self.phase_diagram.get_hull_energy_per_atom(Composition(str(el)))

@@ -1,0 +1,11 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+root: intro
+chapters:
+- file: content/quickstart
+- file: content/defining-defects
+- file: content/nonradiative
+- file: content/photo-conduct
+- file: content/references

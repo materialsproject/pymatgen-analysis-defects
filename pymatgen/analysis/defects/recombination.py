@@ -153,7 +153,7 @@ def get_mQn(
             This can be off-set by a constant value depending on the physical process you are studying.
         np.array: The matrix elements for those pairs of states.
     """
-    E = np.arange(0, Nf * omega_f, omega_f) - m_init * omega_i
+    E = np.linspace(0, Nf * omega_f, Nf, endpoint=False) - m_init * omega_i
     if m_init == 0:
         matels = (
             np.sqrt(Factor2 / 2 / omega_i) * ovl[m_init + 1, :]
