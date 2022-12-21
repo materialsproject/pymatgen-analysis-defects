@@ -1,0 +1,555 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Photo Conductivity &#8212; pymatgen-analysis-defects</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <link rel="canonical" href="https://materialsproject.github.io/pymatgen-analysis-defects/content/photo-conduct.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="References" href="references.html" />
+    <link rel="prev" title="Shockley-Read-Hall Recombination" href="nonradiative.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../index.html">
+      
+      
+      
+      <h1 class="site-logo" id="site-title">pymatgen-analysis-defects</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        <ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="quickstart.html">
+   Quick Start
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="defining-defects.html">
+   Defining Defects
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="nonradiative.html">
+   Shockley-Read-Hall Recombination
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Photo Conductivity
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="references.html">
+   References
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/materialsproject/pymatgen-analysis-defects"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/materialsproject/pymatgen-analysis-defects/issues/new?title=Issue%20on%20page%20%2Fcontent/photo-conduct.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/materialsproject/pymatgen-analysis-defects/edit/main/docs/content/photo-conduct.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Edit this page"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="headerbtn__text-container">suggest edit</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="../_sources/content/photo-conduct.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.ipynb</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#identification-of-the-defect-band">
+   Identification of the Defect Band
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#frequency-dependent-dielectric-function">
+   Frequency-Dependent Dielectric Function
+  </a>
+ </li>
+</ul>
+
+    </nav>
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>Photo Conductivity</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#identification-of-the-defect-band">
+   Identification of the Defect Band
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#frequency-dependent-dielectric-function">
+   Frequency-Dependent Dielectric Function
+  </a>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="photo-conductivity">
+<h1>Photo Conductivity<a class="headerlink" href="#photo-conductivity" title="Permalink to this headline">#</a></h1>
+<p>When the electronic state of the defect interacts with radiation, carriers can be excited to the conduction band. This is called photoconductivity. To help elucidate how likely a defect is to cause photoconductivity, we can look at the band-decomposed contribution to the frequency-dependent dielectric function.
+Here we have replicated <code class="docutils literal notranslate"><span class="pre">VASP</span></code>’s density-density optical response calculated in the independent-particle picture in the <code class="docutils literal notranslate"><span class="pre">pymatgen.io.vasp.optics</span></code> module, and a allowed users to control which dipole matrix elements are accounted for by masking the dipole matrix elements stored in the <code class="docutils literal notranslate"><span class="pre">WAVEDER</span></code> file and manipulate the Fermi level to populate or depopulate the defect state.
+This essentially allows us to calculate the optical response for (defect)→(conduction band) and (valence band)→(defect) transitions in isolation.</p>
+<p>For more information on how <code class="docutils literal notranslate"><span class="pre">VASP</span></code> handles optical response, see the <a class="reference external" href="https://www.vasp.at/wiki/index.php/LOPTICS">VASP documentation</a>.</p>
+<p>For more details on how the python code works, please see the documentation for the <code class="docutils literal notranslate"><span class="pre">pymatgen.io.vasp.optics</span></code> module.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.ccd</span> <span class="kn">import</span> <span class="n">HarmonicDefect</span><span class="p">,</span> <span class="n">get_SRH_coefficient</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp.optics</span> <span class="kn">import</span> <span class="n">DielectricFunctionCalculator</span><span class="p">,</span> <span class="n">Spin</span><span class="p">,</span> <span class="n">Vasprun</span><span class="p">,</span> <span class="n">Waveder</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">import</span> <span class="nn">bisect</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../../../tests/test_files/v_Ga/&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>To compute the optical response of a defect we can use the <code class="docutils literal notranslate"><span class="pre">HarmonicDefect</span></code> object again.
+Although this time, since we don’t need to consider the vibrational modes of the defect, we only need to pass in the directory containing the relaxed structure and the <code class="docutils literal notranslate"><span class="pre">WAVEDER</span></code> file.
+Since the <code class="docutils literal notranslate"><span class="pre">PROCAR</span></code> file is also present in the directory, the <code class="docutils literal notranslate"><span class="pre">(band,</span> <span class="pre">kpoint,</span> <span class="pre">spin)</span></code> indices representing the singular, most localized, state will be automatically determined.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dir0</span> <span class="o">=</span> <span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">hd0</span> <span class="o">=</span> <span class="n">HarmonicDefect</span><span class="o">.</span><span class="n">from_directories</span><span class="p">(</span><span class="n">directories</span><span class="o">=</span><span class="p">[</span><span class="n">dir0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The defect band is </span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The vibrational frequency is omega=</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">omega</span><span class="si">}</span><span class="s2"> in this case is gibberish.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="identification-of-the-defect-band">
+<h2>Identification of the Defect Band<a class="headerlink" href="#identification-of-the-defect-band" title="Permalink to this headline">#</a></h2>
+<p>We can first check that the <code class="docutils literal notranslate"><span class="pre">defect_band</span></code>, identified using the <code class="docutils literal notranslate"><span class="pre">PROCAR</span></code> file, is indeed an isolated flat band in the middle of the band gap.
+While this is not always the case since we are looking at Kohn-Sham states, this is usually a good starting point.
+The user can refine the definition of the defect band by passing in a list of <code class="docutils literal notranslate"><span class="pre">(band,</span> <span class="pre">kpoint,</span> <span class="pre">spin)</span></code> indices to the <code class="docutils literal notranslate"><span class="pre">defect_band</span></code> argument of the <code class="docutils literal notranslate"><span class="pre">HarmonicDefect</span></code> object.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">print_eigs</span><span class="p">(</span><span class="n">vr</span><span class="p">,</span> <span class="n">bwind</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">defect_bands</span> <span class="o">=</span> <span class="p">()):</span>
+    <span class="sd">&quot;&quot;&quot;Print the eigenvalues in a small band window around the Fermi level.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        vr (Vasprun): The Vasprun object.</span>
+<span class="sd">        bwind (int): The number of bands above and below the Fermi level to print.</span>
+<span class="sd">        defect_bands (list): A list of tuples of the form (band index, kpt index, spin index)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_get_spin_idx</span><span class="p">(</span><span class="n">spin</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">spin</span> <span class="o">==</span> <span class="n">Spin</span><span class="o">.</span><span class="n">up</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="n">occ</span> <span class="o">=</span> <span class="n">vr</span><span class="o">.</span><span class="n">eigenvalues</span><span class="p">[</span><span class="n">Spin</span><span class="o">.</span><span class="n">up</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">fermi_idx</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect_left</span><span class="p">(</span><span class="n">occ</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">)</span> 
+    <span class="n">output</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">spin_eigs</span> <span class="ow">in</span> <span class="n">vr</span><span class="o">.</span><span class="n">eigenvalues</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">spin_idx</span> <span class="o">=</span> <span class="n">_get_spin_idx</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">kpt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spin_eigs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">fermi_idx</span> <span class="o">-</span> <span class="n">bwind</span><span class="p">,</span> <span class="n">fermi_idx</span> <span class="o">+</span> <span class="n">bwind</span><span class="p">):</span>
+                <span class="n">e</span><span class="p">,</span> <span class="n">o</span> <span class="o">=</span> <span class="n">spin_eigs</span><span class="p">[</span><span class="n">kpt</span><span class="p">,</span> <span class="n">ib</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">ib</span><span class="p">,</span> <span class="n">kpt</span><span class="p">,</span> <span class="n">spin_idx</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">defect_bands</span><span class="p">:</span>
+                    <span class="n">e_out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\033</span><span class="s2">[4m</span><span class="si">{</span><span class="n">e</span><span class="si">:</span><span class="s2">8.5f</span><span class="si">}</span><span class="se">\033</span><span class="s2">[0m&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">e_out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e</span><span class="si">:</span><span class="s2">8.5f</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">output</span><span class="p">[(</span><span class="n">ib</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e_out</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;band s=0,k=0  s=0,k=1  s=1,k=0  s=1,k=1&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ib</span><span class="p">,</span> <span class="n">eigs</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ib</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">eigs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">print_eigs</span><span class="p">(</span><span class="n">vr</span><span class="o">=</span><span class="n">hd0</span><span class="o">.</span><span class="n">vrun</span><span class="p">,</span> <span class="n">defect_bands</span><span class="o">=</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>From the eigenvalues above, we can see that isolated defect band is <code class="docutils literal notranslate"><span class="pre">[(138,</span> <span class="pre">0,</span> <span class="pre">1),</span> <span class="pre">(138,</span> <span class="pre">1,</span> <span class="pre">1)]</span></code> which matches with underlined values determined by the data from inverse participation ratio (IPR) analysis.</p>
+</section>
+<section id="frequency-dependent-dielectric-function">
+<h2>Frequency-Dependent Dielectric Function<a class="headerlink" href="#frequency-dependent-dielectric-function" title="Permalink to this headline">#</a></h2>
+<p>The frequency-dependent dielectric function is calculated using the <code class="docutils literal notranslate"><span class="pre">get_dielectric_function</span></code> method of the <code class="docutils literal notranslate"><span class="pre">HarmonicDefect</span></code> object.
+Which requires the <code class="docutils literal notranslate"><span class="pre">waveder</span></code> attribute of the <code class="docutils literal notranslate"><span class="pre">HarmonicDefect</span></code> object to be set.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hd0</span><span class="o">.</span><span class="n">waveder</span> <span class="o">=</span> <span class="n">Waveder</span><span class="o">.</span><span class="n">from_binary</span><span class="p">(</span><span class="n">dir0</span> <span class="o">/</span> <span class="s2">&quot;WAVEDER&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The (x,x) component of the complex dielectric function tensor for the (VBM)→(defect) and (defect)→(CBM) transitions can be obtained by calling the <code class="docutils literal notranslate"><span class="pre">get_dielectric_function</span></code> method with <code class="docutils literal notranslate"><span class="pre">idir=0,</span> <span class="pre">jdir=0</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">energy</span><span class="p">,</span> <span class="n">eps_vbm</span><span class="p">,</span> <span class="n">eps_cbm</span> <span class="o">=</span> <span class="n">hd0</span><span class="o">.</span><span class="n">get_dielectric_function</span><span class="p">(</span><span class="n">idir</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">jdir</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">eps_vbm</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;VBM&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">eps_cbm</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;CBM&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Photon Energy (eV)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\varepsilon_{\rm imag}$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>From the dielectric function above we see that this particular defect (the Ga vacancy in the neutral <code class="docutils literal notranslate"><span class="pre">q=0</span></code> state) is much better at capturing electrons from the valence band via dipole transitions than it is at emitting electrons to the conduction band via dipole transitions.</p>
+<p>Of course for a complete picture of photoconductivity, the Frank-Condon type ofr vibrational state transition should also be considered, but we are already pushing the limits of what is acceptable in the independent-particle picture so we will leave that for another time.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./content"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="nonradiative.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Shockley-Read-Hall Recombination</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="references.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">References</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Jimmy-Xuan Shen<br/>
+  
+      &copy; Copyright 2022.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>
