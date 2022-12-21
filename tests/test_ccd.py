@@ -3,7 +3,7 @@ from collections import namedtuple
 import numpy as np
 import pytest
 
-from pymatgen.analysis.defects.ccd import HarmonicDefect, _get_wswq_slope
+from pymatgen.analysis.defects.ccd import HarmonicDefect, Waveder, _get_wswq_slope
 
 
 @pytest.fixture(scope="session")
@@ -17,8 +17,8 @@ def hd0(v_ga):
         store_bandstructure=True,
     )
     assert hd0.spin_index == 1
-    pytest.approx(hd0.distortions[1], 0.0)
-    pytest.approx(hd0.omega_eV, 0.032680)
+    assert pytest.approx(hd0.distortions[1]) == 0.0
+    assert pytest.approx(hd0.omega_eV) == 0.032680
     assert hd0.defect_band == [(138, 0, 1), (138, 1, 1)]
     return hd0
 
@@ -123,8 +123,14 @@ def test_SRHCapture(hd0, hd1, test_dir):
     assert np.allclose(c_n, ref_results)
 
 
-def test_dielectric_func(v_ga):
-    pass
+def test_dielectric_func(hd0, test_dir):
+    dir0_r = test_dir / "v_Ga" / "ccd_0_-1" / "1"
+    hd0.waveder = Waveder.from_binary(dir0_r / "WAVEDER")
+    energy, eps_vbm, eps_cbm = hd0.get_dielectric_function(idir=0, jdir=0)
+    inter_vbm = np.trapz(np.imag(eps_vbm[:100]), energy[:100])
+    inter_cbm = np.trapz(np.imag(eps_cbm[:100]), energy[:100])
+    assert pytest.approx(inter_vbm, abs=0.01) == 6.31
+    assert pytest.approx(inter_cbm, abs=0.01) == 0.27
 
 
 # def test_OpticalHarmonicDefect(v_ga):
