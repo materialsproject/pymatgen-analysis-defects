@@ -328,12 +328,12 @@ title="Print to PDF"
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#defining-defect-complexes">
-   Defining defect complexes
+   Defining Defect Complexes
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#obtaining-the-simulation-supercell">
-   Obtaining the simulation supercell
+   Obtaining the Simulation Supercell
   </a>
  </li>
 </ul>
@@ -362,12 +362,12 @@ title="Print to PDF"
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#defining-defect-complexes">
-   Defining defect complexes
+   Defining Defect Complexes
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#obtaining-the-simulation-supercell">
-   Obtaining the simulation supercell
+   Obtaining the Simulation Supercell
   </a>
  </li>
 </ul>
@@ -490,7 +490,7 @@ The two vacancies v_N and v_N are equivalent.
 </div>
 </section>
 <section id="defining-defect-complexes">
-<h2>Defining defect complexes<a class="headerlink" href="#defining-defect-complexes" title="Permalink to this headline">#</a></h2>
+<h2>Defining Defect Complexes<a class="headerlink" href="#defining-defect-complexes" title="Permalink to this headline">#</a></h2>
 <p>Defining defect complexes can be done by providing a list of defect objects generated using the same pristine structure.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -517,7 +517,7 @@ The two vacancies v_N and v_N are equivalent.
 </div>
 </section>
 <section id="obtaining-the-simulation-supercell">
-<h2>Obtaining the simulation supercell<a class="headerlink" href="#obtaining-the-simulation-supercell" title="Permalink to this headline">#</a></h2>
+<h2>Obtaining the Simulation Supercell<a class="headerlink" href="#obtaining-the-simulation-supercell" title="Permalink to this headline">#</a></h2>
 <p>The simplest way to generate a supercell for simulating the defect is to just call the <code class="docutils literal notranslate"><span class="pre">get_supercell_structure</span></code> method for the defect.</p>
 <p>Note that, under the hood, the <code class="docutils literal notranslate"><span class="pre">get_supercell_structure</span></code> method first attempts a “quick and dirty” inversion of a large cube in the bases of the lattice parameters.
 If a valid supercell is not discovered this way, ASE’s <code class="docutils literal notranslate"><span class="pre">find_optimal_cell_shape</span></code> will be called to exhaustively search for the best supercell structure.</p>
@@ -537,7 +537,7 @@ If a valid supercell is not discovered this way, ASE’s <code class="docutils l
 <p>The supercell generated with default settings looks like this:</p>
 <img src="https://raw.githubusercontent.com/materialsproject/pymatgen-analysis-defects/main/docs/source/_static/img/defect_mg_ga_sc.png" width="300"/>
 <p>You can also reduce the <code class="docutils literal notranslate"><span class="pre">max_atoms</span></code> field to obtain a smaller simulation cell.
-Note that in this case, the conditions for the for cubic cell cannot be satisfied by the lattice vector inversion approach and the more expensive algorithm from ASE will be used.  Uncomment the following cell to see this in action.</p>
+Note that in this case, the conditions for the for cubic cell cannot be satisfied by the lattice vector inversion approach and the more expensive algorithm from ASE will be used. Uncomment the following cell to see this in action.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#sc_struct_smaller = mg_ga_defect0.get_supercell_structure(max_atoms=100)</span>
