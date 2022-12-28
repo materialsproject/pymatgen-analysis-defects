@@ -214,7 +214,6 @@ class FormationEnergyDiagram(MSONable):
         entries = pd_.stable_entries | {self.bulk_entry}
         pd_ = PhaseDiagram(entries)
         self.phase_diagram = ensure_stable_bulk(pd_, self.bulk_entry)
-
         entries = []
         for entry in self.phase_diagram.stable_entries:
             d_ = dict(
@@ -610,7 +609,8 @@ def group_defects(defect_entries: list[DefectEntry]):
 
 
 def ensure_stable_bulk(
-    pd: PhaseDiagram, entry: ComputedEntry, use_pd_energy: bool = True
+    pd: PhaseDiagram,
+    entry: ComputedEntry,
 ) -> PhaseDiagram:
     """Added entry to phase diagram and ensure that it is stable.
 
@@ -632,11 +632,10 @@ def ensure_stable_bulk(
             Modified Phase diagram.
     """
     SMALL_NUM = 1e-8
-    e_above_hull = pd.get_e_above_hull(entry)
     stable_entry = ComputedEntry(
-        entry.composition, entry.energy - e_above_hull - SMALL_NUM
+        entry.composition, pd.get_hull_energy(entry.composition) - SMALL_NUM
     )
-    pd = PhaseDiagram([stable_entry] + pd.all_entries)
+    pd = PhaseDiagram(pd.all_entries + [stable_entry])
     return pd
 
 
