@@ -6,9 +6,12 @@ from pymatgen.core import PeriodicSite
 from pymatgen.analysis.defects.core import Interstitial
 from pymatgen.analysis.defects.corrections.freysoldt import plot_plnr_avg
 from pymatgen.analysis.defects.thermo import (
+    Composition,
+    ComputedEntry,
     DefectEntry,
     FormationEnergyDiagram,
     MultiFormationEnergyDiagram,
+    ensure_stable_bulk,
     get_lower_envelope,
     get_transitions,
 )
@@ -210,3 +213,13 @@ def test_formation_from_directory(test_dir, stable_entries_Mg_Ga_N, defect_Mg_Ga
         )
         trans = fed.get_transitions(fed.chempot_limits[1], x_min=-100, x_max=100)
         assert len(trans) == 1 + len(qq)
+
+
+def test_ensure_stable_bulk(stable_entries_Mg_Ga_N):
+    pd = PhaseDiagram(stable_entries_Mg_Ga_N)
+    bulk_comp = Composition("GaN")
+    fake_bulk_ent = ComputedEntry(bulk_comp, energy=pd.get_hull_energy(bulk_comp) + 2)
+    pd1 = PhaseDiagram(stable_entries_Mg_Ga_N + [fake_bulk_ent])
+    print("----1----\n", pd1.get_e_above_hull(fake_bulk_ent))
+    pd2 = ensure_stable_bulk(pd, fake_bulk_ent)
+    print("----2----\n", pd2.get_e_above_hull(fake_bulk_ent))

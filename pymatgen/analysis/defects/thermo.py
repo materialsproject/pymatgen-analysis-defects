@@ -632,9 +632,8 @@ def ensure_stable_bulk(
             Modified Phase diagram.
     """
     SMALL_NUM = 1e-8
-    e_above_hull = pd.get_e_above_hull(entry) * entry.composition.num_atoms
     stable_entry = ComputedEntry(
-        entry.composition, entry.energy - e_above_hull - SMALL_NUM
+        entry.composition, pd.get_hull_energy(entry.composition) - SMALL_NUM
     )
     pd = PhaseDiagram([stable_entry] + pd.all_entries)
     return pd
