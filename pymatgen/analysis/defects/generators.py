@@ -238,6 +238,65 @@ class InterstitialGenerator(DefectGenerator):
             yield fc
 
 
+# class VoronoiInterstitialGenerator(DefectGenerator):
+#     """
+#     Generator for interstitials based on a simple Voronoi analysis
+#     """
+
+#     def __init__(self, structure, element):
+#         """
+#         Initializes an Interstitial generator using Voronoi sites
+#         Args:
+#             structure (Structure): pymatgen structure object
+#             element (str or Element or Species): element for the interstitial
+#         """
+#         self.structure = structure
+#         self.element = element
+
+#         framework = list(self.structure.symbol_set)
+#         get_voronoi = TopographyAnalyzer(self.structure, framework, [], check_volume=False)
+#         get_voronoi.cluster_nodes()
+#         get_voronoi.remove_collisions()
+
+#         # trim equivalent nodes with symmetry analysis
+#         struct_to_trim = self.structure.copy()
+#         for poss_inter in get_voronoi.vnodes:
+#             struct_to_trim.append(self.element, poss_inter.frac_coords, coords_are_cartesian=False)
+
+#         symmetry_finder = SpacegroupAnalyzer(struct_to_trim, symprec=1e-1)
+#         equiv_sites_list = symmetry_finder.get_symmetrized_structure().equivalent_sites
+
+#         # do additional screening for sublattice equivalent
+#         # defects which may have slipped through
+#         pdc = PointDefectComparator()
+#         self.unique_defect_seq = []
+#         for poss_site_list in equiv_sites_list:
+#             poss_site = poss_site_list[0]
+#             if poss_site not in self.structure:
+#                 now_defect = Interstitial(self.structure, poss_site)
+#                 append_defect = True
+#                 for unique_defect in self.unique_defect_seq:
+#                     if pdc.are_equal(now_defect, unique_defect):
+#                         append_defect = False
+#                 if append_defect:
+#                     self.unique_defect_seq.append(now_defect)
+
+#         self.count_def = 0  # for counting the index of the generated defect
+
+#     def __next__(self):
+#         """
+#         Returns the next interstitial or
+#         raises StopIteration
+#         """
+#         if len(self.unique_defect_seq) > 0:
+#             inter_defect = self.unique_defect_seq.pop(0)
+#             inter_site = inter_defect.site
+#             self.count_def += 1
+#             site_name = "Voronoi" + str(self.count_def)
+#             return Interstitial(self.structure, inter_site, site_name=site_name)
+#         raise StopIteration
+
+
 class ChargeInterstitialGenerator(InterstitialGenerator):
     """Generator of interstitiald defects.
 

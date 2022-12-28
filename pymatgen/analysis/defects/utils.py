@@ -424,11 +424,16 @@ class TopographyAnalyzer:
         structure,
         framework_ions,
         cations,
-        tol=0.0001,
+        image_tol=0.0001,
         max_cell_range=1,
         check_volume=True,
         constrained_c_frac=0.5,
         thickness=0.5,
+        clustering_tol: float = 0.5,
+        min_dist: float = 0.9,
+        ltol: float = 0.2,
+        stol: float = 0.3,
+        angle_tol: float = 5,
     ):
         """Initialize the TopographyAnalyzer.
 
@@ -442,7 +447,7 @@ class TopographyAnalyzer:
                 conductor, Li is a mobile species. Your cations should be [
                 "P"]. The cations are used to exclude polyhedra from
                 diffusion analysis since those polyhedra are already occupied.
-            tol (float): A tolerance distance for the analysis, used to
+            image_tol (float): A tolerance distance for the analysis, used to
                 determine if something are actually periodic boundary images of
                 each other. Default is usually fine.
             max_cell_range (int): This is the range of periodic images to
@@ -462,11 +467,23 @@ class TopographyAnalyzer:
             thickness (float): Along with constrained_c_frac, limit the
                 thickness of the regions where we want to explore. Default is
                 0.5, which is mapping all the site of the unit cell.
+            clustering_tol (float): Tolerance for clustering nodes. Default is
+                0.5.
+            min_dist (float): Minimum distance between nodes. Default is 0.9.
+            ltol (float): Lattice parameter tolerance for structure matching.
+                Default is 0.2.
+            stol (float): Site tolerance for structure matching. Default is
+                0.3.
+            angle_tol (float): Angle tolerance for structure matching. Default
+                is 5.
 
         """
         self.structure = structure
         self.framework_ions = {get_el_sp(sp) for sp in framework_ions}
         self.cations = {get_el_sp(sp) for sp in cations}
+        self.clustering_tol = clustering_tol
+        self.min_dist = min_dist
+        self.sm = StructureMatcher(ltol=ltol, stol=stol, angle_tol=angle_tol)
 
         # Let us first map all sites to the standard unit cell, i.e.,
         # 0 ≤ coordinates < 1.
@@ -519,7 +536,7 @@ class TopographyAnalyzer:
 
         # Vnodes store all the valid voronoi polyhedra. Cation vnodes store
         # the voronoi polyhedra that are already occupied by existing cations.
-        vnodes = []
+        vnodes: list[VoronoiPolyhedron] = []
         cation_vnodes = []
 
         def get_mapping(poly):
@@ -529,7 +546,7 @@ class TopographyAnalyzer:
             one of the existing voronoi polys.
             """
             for v in vnodes:
-                if v.is_image(poly, tol):
+                if v.is_image(poly, image_tol):
                     return v
             return None
 
@@ -540,7 +557,7 @@ class TopographyAnalyzer:
                 continue
             fcoord = lattice.get_fractional_coords(vertex)
             poly = VoronoiPolyhedron(lattice, fcoord, node_points_map[i], coords, i)
-            if np.all([-tol <= c < 1 + tol for c in fcoord]):
+            if np.all([-image_tol <= c < 1 + image_tol for c in fcoord]):
                 if len(vnodes) == 0:
                     vnodes.append(poly)
                 else:
@@ -573,6 +590,26 @@ class TopographyAnalyzer:
         if check_volume:
             self.check_volume()
 
+    @cached_property
+    def labeled_sites(
+        self,
+    ) -> list[tuple[list[float], int]]:
+        """Get a list of inserted structures and a list of structure matching labels.
+
+        Returns:
+            list[tuple[list[float], int]]: A list of tuples of the form (fcoords, label)
+        """
+        # Get a reasonablly reduced set of candidate sites first
+        local_minima = get_local_extrema(self.vnodes, find_min=True)
+        return get_symmetry_labeled_structures(
+            local_minima,
+            host_structure=self.structure,
+            working_ion="X",
+            min_dist=self.min_dist,
+            clustering_tol=self.clustering_tol,
+            sm=self.sm,
+        )
+
     def check_volume(self):
         """Basic check for volume of all voronoi poly sum to unit cell volume.
 
@@ -588,63 +625,6 @@ class TopographyAnalyzer:
                 "tweak the tolerance and max_cell_range until you get a "
                 "correct mapping."
             )
-
-    def cluster_nodes(self, tol=0.2):
-        """Cluster nodes that are too close together using a tol.
-
-        Args:
-            tol (float): A distance tolerance. PBC is taken into account.
-        """
-        lattice = self.structure.lattice
-
-        vfcoords = [v.frac_coords for v in self.vnodes]
-
-        # Manually generate the distance matrix (which needs to take into
-        # account PBC.
-        dist_matrix = np.array(lattice.get_all_distances(vfcoords, vfcoords))
-        dist_matrix = (dist_matrix + dist_matrix.T) / 2
-        for i in range(len(dist_matrix)):
-            dist_matrix[i, i] = 0
-        condensed_m = squareform(dist_matrix)
-        z = linkage(condensed_m)
-        cn = fcluster(z, tol, criterion="distance")
-        merged_vnodes = []
-        for n in set(cn):
-            poly_indices = set()
-            frac_coords = []
-            for i, j in enumerate(np.where(cn == n)[0]):
-                poly_indices.update(self.vnodes[j].polyhedron_indices)
-                if i == 0:
-                    frac_coords.append(self.vnodes[j].frac_coords)
-                else:
-                    fcoords = self.vnodes[j].frac_coords
-                    # We need the image to combine the frac_coords properly.
-                    d, image = lattice.get_distance_and_image(frac_coords[0], fcoords)
-                    frac_coords.append(fcoords + image)
-            merged_vnodes.append(
-                VoronoiPolyhedron(
-                    lattice, np.average(frac_coords, axis=0), poly_indices, self.coords
-                )
-            )
-        self.vnodes = merged_vnodes
-        _logger.debug(f"{len(self.vnodes)} vertices after combination.")
-
-    def remove_collisions(self, min_dist=0.5):
-        """Remove vnodes that are too close to existing atoms in the structure.
-
-        Args:
-            min_dist(float): The minimum distance that a vertex needs to be
-                from existing atoms.
-        """
-        vfcoords = [v.frac_coords for v in self.vnodes]
-        sfcoords = self.structure.frac_coords
-        dist_matrix = self.structure.lattice.get_all_distances(vfcoords, sfcoords)
-        all_dist = np.min(dist_matrix, axis=1)
-        new_vnodes = []
-        for i, v in enumerate(self.vnodes):
-            if all_dist[i] > min_dist:
-                new_vnodes.append(v)
-        self.vnodes = new_vnodes
 
     def get_structure_with_nodes(self):
         """Get the modified structure with the voronoi nodes inserted.
@@ -802,41 +782,19 @@ class ChargeInsertionAnalyzer(MSONable):
     ) -> list[tuple[list[float], int]]:
         """Get a list of inserted structures and a list of structure matching labels.
 
-        The process is as follows:
-        1. Get a list of candidate sites by finiding the local minima
-        2. Group the candidate sites by symmetry
-        3. Label the groups by structure matching
-        4. Since the average charge density is the most expensive part,
-        we will leave this until the end.
-
         Returns:
             list[tuple[list[float], int]]: A list of tuples of the form (fcoords, label)
         """
         # Get a reasonablly reduced set of candidate sites first
         local_minima = get_local_extrema(self.chgcar, find_min=True)
-        local_minima = remove_collisions(
-            local_minima, structure=self.chgcar.structure, min_dist=self.min_dist
+        return get_symmetry_labeled_structures(
+            sites=local_minima,
+            host_structure=self.chgcar.structure,
+            working_ion=self.working_ion,
+            min_dist=self.min_dist,
+            clustering_tol=self.clustering_tol,
+            sm=self.sm,
         )
-        local_minima = cluster_nodes(
-            local_minima, lattice=self.chgcar.structure.lattice, tol=self.clustering_tol
-        )
-
-        # Group the candidate sites by symmetry
-        inserted_structs = []
-        for fpos in local_minima:
-            tmp_struct = self.chgcar.structure.copy()
-            get_valid_magmom_struct(tmp_struct, inplace=True, spin_mode="none")
-            tmp_struct.insert(
-                0,
-                self.working_ion,
-                fpos,
-            )
-            tmp_struct.sort()
-            inserted_structs.append(tmp_struct)
-
-        # Label the groups by structure matching
-        site_labels = generic_groupby(inserted_structs, comp=self.sm.fit)
-        return [*zip(local_minima.tolist(), site_labels)]
 
     @cached_property
     def local_minima(self) -> list[npt.ArrayLike]:
@@ -991,3 +949,50 @@ def calculate_vol(coords: npt.NDArray):
         The volume of the convex hull of the points.
     """
     return ConvexHull(coords).volume
+
+
+def get_symmetry_labeled_structures(
+    sites: npt.NDArray,
+    host_structure: Structure,
+    working_ion: str,
+    min_dist: float,
+    clustering_tol: float,
+    sm: StructureMatcher,
+) -> list[tuple[list[float], int]]:
+    """Get a list of inserted structures and a list of structure matching labels.
+
+    The process is as follows:
+    1. Read in the list of candidate sites.
+    2. Remove any sites that collide with the host and cluster the remaining sites.
+    2. Group the candidate sites by symmetry by inserting the working ion and structure matching.
+    3. Label the groups by structure matching.
+
+    Args:
+        sites: The candidate sites to insert.
+        host_structure: The host structure.
+        working_ion: The working ion.
+        min_dist: The minimum distance between the working ion and atoms in the host structure.
+        clustering_tol: The tolerance for clustering the candidate sites.
+
+    Returns:
+        list[tuple[list[float], int]]: A list of tuples of the form (fcoords, label)
+    """
+    sites = remove_collisions(sites, structure=host_structure, min_dist=min_dist)
+    sites = cluster_nodes(sites, lattice=host_structure.lattice, tol=clustering_tol)
+
+    # Group the candidate sites by symmetry
+    inserted_structs = []
+    for fpos in sites:
+        tmp_struct = host_structure.copy()
+        get_valid_magmom_struct(tmp_struct, inplace=True, spin_mode="none")
+        tmp_struct.insert(
+            0,
+            working_ion,
+            fpos,
+        )
+        tmp_struct.sort()
+        inserted_structs.append(tmp_struct)
+
+    # Label the groups by structure matching
+    site_labels = generic_groupby(inserted_structs, comp=sm.fit)
+    return [*zip(sites.tolist(), site_labels)]
