@@ -1,0 +1,600 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Formation Energy Diagrams &#8212; pymatgen-analysis-defects</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="canonical" href="https://materialsproject.github.io/pymatgen-analysis-defects/content/formation-energy.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../index.html">
+      
+      
+      
+      <h1 class="site-logo" id="site-title">pymatgen-analysis-defects</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        <ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="quickstart.html">
+   Quick Start
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="defining-defects.html">
+   Defining Defects
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="nonradiative.html">
+   Shockley-Read-Hall Recombination
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="photo-conduct.html">
+   Photo Conductivity
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="references.html">
+   References
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/materialsproject/pymatgen-analysis-defects"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/materialsproject/pymatgen-analysis-defects/issues/new?title=Issue%20on%20page%20%2Fcontent/formation-energy.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/materialsproject/pymatgen-analysis-defects/edit/main/docs/content/formation-energy.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Edit this page"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="headerbtn__text-container">suggest edit</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="../_sources/content/formation-energy.ipynb"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.ipynb</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   Formation Energy Diagrams
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#defining-a-formation-energy-diagram">
+   Defining a Formation Energy Diagram
+  </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#getting-the-elemental-chemical-potentials">
+     Getting the Elemental Chemical Potentials
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#finite-size-corrections">
+     Finite-size corrections
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    </nav>
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>Formation Energy Diagrams</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   Formation Energy Diagrams
+  </a>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#defining-a-formation-energy-diagram">
+   Defining a Formation Energy Diagram
+  </a>
+  <ul class="visible nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#getting-the-elemental-chemical-potentials">
+     Getting the Elemental Chemical Potentials
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#finite-size-corrections">
+     Finite-size corrections
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section class="tex2jax_ignore mathjax_ignore" id="formation-energy-diagrams">
+<h1>Formation Energy Diagrams<a class="headerlink" href="#formation-energy-diagrams" title="Permalink to this headline">#</a></h1>
+<p>The formation energy diagram is perhaps the most important tool in analyzing the defect properties.
+It informs both the likelihood of a defect to form and transition level where the charge state of the defect changes.</p>
+<p>The formation energy of a defect is determined by the chemical potential of everything that goes into forming the defect.
+While all of the different chemical potentials are interconnected, it is conceptually easier to separate them into two groups: the chemical potential of the elements and the chemical potential of the electron.
+The chemical potential of the electron, often called the <em>Fermi level</em>, accounts for how all of the external conditions, including the presence of other defects, affect the thermodynamics of adding or removing an electron from the defect.
+Since the electrons in the system can be manipulated after the defect is formed, the <em>Fermi level</em> is often considered a free variable and is shown as the x-axis in the formation energy diagram.
+The chemical potentials of the different atoms added or removed to form the defect determine are less dynamic and assumed to be fixed after the defect is formed.</p>
+<p>The expression for the formation energy of a defect is given by:</p>
+<div class="math notranslate nohighlight">
+\[E^f[X^q] = E_{\rm tot}[X^q] - E_{\rm tot}[{\rm bulk}] + \sum_i n_i \mu_i + qE_{\rm F} + \Delta^q \, ,\]</div>
+<p>where <span class="math notranslate nohighlight">\(E^f[X^q]\)</span> is the formation energy of the defect, <span class="math notranslate nohighlight">\(E_{\rm tot}[X^q]\)</span> is the total energy of the defect, <span class="math notranslate nohighlight">\(E_{\rm tot}[{\rm bulk}]\)</span> is the total energy of the bulk, <span class="math notranslate nohighlight">\(n_i\)</span> is the number of atoms of type <span class="math notranslate nohighlight">\(i\)</span> in the defect, <span class="math notranslate nohighlight">\(\mu_i\)</span> is the chemical potential of atom type <span class="math notranslate nohighlight">\(i\)</span>, <span class="math notranslate nohighlight">\(q\)</span> is the charge of the defect, <span class="math notranslate nohighlight">\(E_{\rm F}\)</span> is the Fermi level, and <span class="math notranslate nohighlight">\(\Delta^q\)</span> is finite-size correction which we have to add to account for image effects of simulating the defect in a periodic simulation cell.</p>
+<p>A schematic of the formation energy diagram for the <span class="math notranslate nohighlight">\(q=0\)</span> and <span class="math notranslate nohighlight">\(q=-1\)</span> charge states of a hypothetical defect is shown below.</p>
+<img src="https://raw.githubusercontent.com/materialsproject/pymatgen-analysis-defects/main/docs/source/_static/img/formation_schematic.png" width="300"/>
+</section>
+<section class="tex2jax_ignore mathjax_ignore" id="defining-a-formation-energy-diagram">
+<h1>Defining a Formation Energy Diagram<a class="headerlink" href="#defining-a-formation-energy-diagram" title="Permalink to this headline">#</a></h1>
+<p>The class responsible for analyzing the formation energy is described by the following fields.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">FormationEnergyDiagram</span><span class="p">(</span>
+    <span class="n">bulk_entry</span><span class="p">:</span> <span class="s1">&#39;ComputedStructureEntry&#39;</span><span class="p">,</span>
+    <span class="n">defect_entries</span><span class="p">:</span> <span class="s1">&#39;List[DefectEntry]&#39;</span><span class="p">,</span>
+    <span class="n">pd_entries</span><span class="p">:</span> <span class="s1">&#39;list[ComputedEntry]&#39;</span><span class="p">,</span>
+    <span class="n">vbm</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">,</span>
+    <span class="n">band_gap</span><span class="p">:</span> <span class="s1">&#39;Optional[float]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">inc_inf_values</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="alert alert-block alert-info"><b>Note:</b> For now, the bulk entry and all the defect entries need to have the exact same supercell shape.
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="kn">import</span> <span class="n">loadfn</span>
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.thermo</span> <span class="kn">import</span> <span class="n">FormationEnergyDiagram</span>
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">Vasprun</span>
+
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.core</span> <span class="kn">import</span> <span class="n">Substitution</span>
+<span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">PeriodicSite</span><span class="p">,</span> <span class="n">Species</span><span class="p">,</span> <span class="n">Structure</span>
+
+<span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../../../tests/test_files&quot;</span><span class="p">)</span>
+
+<span class="n">gan_struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;GaN.vasp&quot;</span><span class="p">)</span>
+<span class="c1"># make a substitution site</span>
+<span class="n">ga_site</span> <span class="o">=</span> <span class="n">gan_struct</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">mg_site</span> <span class="o">=</span> <span class="n">PeriodicSite</span><span class="p">(</span>
+    <span class="n">species</span><span class="o">=</span><span class="n">Species</span><span class="p">(</span><span class="s2">&quot;Mg&quot;</span><span class="p">),</span> <span class="n">coords</span><span class="o">=</span><span class="n">ga_site</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">,</span> <span class="n">lattice</span><span class="o">=</span><span class="n">gan_struct</span><span class="o">.</span><span class="n">lattice</span>
+<span class="p">)</span>
+<span class="c1"># instantiate the defect object</span>
+<span class="n">mg_ga</span> <span class="o">=</span> <span class="n">Substitution</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">gan_struct</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">mg_site</span><span class="p">)</span>
+
+<span class="n">sc_dir</span> <span class="o">=</span> <span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;Mg_Ga&quot;</span>
+<span class="c1"># ents = MPRester().get_entries_in_chemsys(&quot;Mg-Ga-N&quot;) # Query from MPRester</span>
+<span class="n">ents</span> <span class="o">=</span> <span class="n">loadfn</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;Ga_Mg_N.json&quot;</span><span class="p">)</span>  <span class="c1"># Load from local</span>
+<span class="n">fed</span> <span class="o">=</span> <span class="n">FormationEnergyDiagram</span><span class="o">.</span><span class="n">with_directories</span><span class="p">(</span>
+    <span class="n">directory_map</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;bulk&quot;</span><span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;bulk_sc&quot;</span><span class="p">,</span>
+        <span class="mi">0</span><span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;q=0&quot;</span><span class="p">,</span>
+        <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;q=-1&quot;</span><span class="p">,</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;q=1&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">defect</span><span class="o">=</span><span class="n">mg_ga</span><span class="p">,</span>
+    <span class="n">pd_entries</span><span class="o">=</span><span class="n">ents</span><span class="p">,</span>
+    <span class="n">dielectric</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="getting-the-elemental-chemical-potentials">
+<h2>Getting the Elemental Chemical Potentials<a class="headerlink" href="#getting-the-elemental-chemical-potentials" title="Permalink to this headline">#</a></h2>
+<p>All of the chemical potentials are, in principle, free variables that indicates the conditions of the surrounding environment while the defect is formed.
+These free variables are bound by the enthalpies of formation of the various compounds that share the same elements as the defect and bulk material.
+These competing compounds essentially establish the boundaries of the allowed chemical potentials, while the VBM and CBM of the bulk material determine the allowed range of the Fermi level.
+As such, first-principles calculations can be used to determine the limits of the various chemical potentials.
+As an example, the elemental chemical potentials for the Mg<span class="math notranslate nohighlight">\(_{\rm Ga}\)</span> defect in GaN are shown below:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}
+\begin{aligned}
+\mu_{\rm Ga} + \mu_{\rm N} &amp;= \Delta H_{\rm GaN} \\
+5\mu_{\rm Mg} + 2\mu_{\rm Ga} + \mu_{\rm N} &amp;\leq \Delta H_{\rm Mg_5Ga_2} \\
+3\mu_{\rm Mg} + 2\mu_{\rm N} &amp;\leq \Delta H_{\rm Mg_3N_2} \\
+\end{aligned}
+\end{split}\]</div>
+<p>Here since the defect must for in GaN the chemical potentials are pinned by the plane defined by the enthalpy of formation of GaN.
+The limits imposed by the competing compounds are shown by the additional inequalities.
+The points of interest are usually vertex points in the constrained chemical potential space so we report the full set of vertex points in <code class="docutils literal notranslate"><span class="pre">FormationEnergyDiagram.chempot_limits</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fed</span><span class="o">.</span><span class="n">chempot_limits</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Chemical potential limits for point </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;μ_</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> eV&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Chemical potential limits for point 0
+μ_Mg = -1.49 eV
+μ_Ga = -1.31 eV
+μ_N = 0.00 eV
+Chemical potential limits for point 1
+μ_Mg = -0.62 eV
+μ_Ga = 0.00 eV
+μ_N = -1.31 eV
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="finite-size-corrections">
+<h2>Finite-size corrections<a class="headerlink" href="#finite-size-corrections" title="Permalink to this headline">#</a></h2>
+<p>Finite-size corrections are necessary to account for the fact that we are simulating a charged defect in a periodic simulation cell.
+The standard approach was developed by Freysoldt and co-workers and is described in the following paper:</p>
+<p><span id="id1">[<a class="reference internal" href="references.html#id4" title="Christoph Freysoldt, J\ifmmode \ddot o\else ö\fi rg Neugebauer, and Chris G. Van de Walle. Fully Ab Initio Finite-Size Corrections for Charged-Defect Supercell Calculations. Phys. Rev. Lett., 102(1):016402, January 2009. doi:10.1103/PhysRevLett.102.016402.">Freysoldt <em>et al.</em>, 2009</a>]</span>.</p>
+<blockquote>
+<div><p>Freysoldt, C., Neugebauer, J., &amp; Van de Walle, C. G. (2009). Fully Ab Initio Finite-Size Corrections for Charged-Defect Supercell Calculations. Phys Rev Lett, 102(1), 016402. doi: 10.1103/PhysRevLett.102.016402</p>
+</div></blockquote>
+<p>This method requires calculating the the long range term from the Coulomb interaction and a short range term from the electrostatic potential in the <code class="docutils literal notranslate"><span class="pre">LOCPOT</span></code> file.
+While the final result of the finite-size correction is just a single number <span class="math notranslate nohighlight">\(\Delta^q\)</span> for each charge state, the intermediate results can still be analyzed.
+This is still useful, since the defect position is automatically determined from the <code class="docutils literal notranslate"><span class="pre">LOCPOT</span></code> files alone, to check the planar-averaged potential plots to make sure that the defect is indeed in the correct position.
+This will be evident if the planar-averaged potential difference is peaked at the two ends of the plot since the automatically determined defect position is chosen as the origin of the plot.
+The short range contribution is set to zero far away from the defect, which is accomplished by average the planar electrostatic potential far away from the defect in the <code class="docutils literal notranslate"><span class="pre">sampling</span> <span class="pre">region</span></code> shown below.
+The intermediate analysis (planar-averaged potentials) for calculating the Freysoldt correction for each of the the three lattice directions is shown below.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.corrections.freysoldt</span> <span class="kn">import</span> <span class="n">plot_plnr_avg</span>
+<span class="n">plot_data</span> <span class="o">=</span> <span class="n">fed</span><span class="o">.</span><span class="n">defect_entries</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">correction_metadata</span>
+<span class="n">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lattice Direction 1&quot;</span><span class="p">)</span>
+<span class="n">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lattice Direction 2&quot;</span><span class="p">)</span>
+<span class="n">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lattice Direction 3&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;module &#39;matplotlib.pyplot&#39; from &#39;/opt/hostedtoolcache/Python/3.10.9/x64/lib/python3.10/site-packages/matplotlib/pyplot.py&#39;&gt;
+</pre></div>
+</div>
+<img alt="../_images/formation-energy_6_1.png" src="../_images/formation-energy_6_1.png" />
+<img alt="../_images/formation-energy_6_2.png" src="../_images/formation-energy_6_2.png" />
+<img alt="../_images/formation-energy_6_3.png" src="../_images/formation-energy_6_3.png" />
+</div>
+</div>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./content"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Jimmy-Xuan Shen<br/>
+  
+      &copy; Copyright 2022.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>
