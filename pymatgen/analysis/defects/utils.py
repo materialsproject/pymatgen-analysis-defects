@@ -414,7 +414,7 @@ class TopographyAnalyzer:
     methods are available to perform aggregation and elimination of nodes. A
     typical use is something like::
 
-        a = TopographyAnalyzer(structure, ["O"], ["P"])
+        a = TopographyAnalyzer(structure, ["O", "P"])
         a.cluster_nodes()
         a.remove_collisions()
     """
