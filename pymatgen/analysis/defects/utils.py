@@ -600,9 +600,9 @@ class TopographyAnalyzer:
             list[tuple[list[float], int]]: A list of tuples of the form (fcoords, label)
         """
         # Get a reasonablly reduced set of candidate sites first
-        local_minima = get_local_extrema(self.vnodes, find_min=True)
+        candidate_sites = [v.frac_coords for v in self.vnodes]
         return get_symmetry_labeled_structures(
-            local_minima,
+            candidate_sites,
             host_structure=self.structure,
             working_ion="X",
             min_dist=self.min_dist,
