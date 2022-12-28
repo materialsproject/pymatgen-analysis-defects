@@ -216,10 +216,15 @@ def test_formation_from_directory(test_dir, stable_entries_Mg_Ga_N, defect_Mg_Ga
 
 
 def test_ensure_stable_bulk(stable_entries_Mg_Ga_N):
+    entries = stable_entries_Mg_Ga_N
     pd = PhaseDiagram(stable_entries_Mg_Ga_N)
     bulk_comp = Composition("GaN")
     fake_bulk_ent = ComputedEntry(bulk_comp, energy=pd.get_hull_energy(bulk_comp) + 2)
-    pd1 = PhaseDiagram(stable_entries_Mg_Ga_N + [fake_bulk_ent])
-    print("----1----\n", pd1.get_e_above_hull(fake_bulk_ent))
+    # removed GaN from the stable entries
+    entries = list(
+        filter(lambda x: x.composition.reduced_formula != "GaN", stable_entries_Mg_Ga_N)
+    )
+    pd1 = PhaseDiagram(entries + [fake_bulk_ent])
+    assert "GaN" not in [e.composition.reduced_formula for e in pd1.stable_entries]
     pd2 = ensure_stable_bulk(pd, fake_bulk_ent)
-    print("----2----\n", pd2.get_e_above_hull(fake_bulk_ent))
+    assert "GaN" in [e.composition.reduced_formula for e in pd2.stable_entries]

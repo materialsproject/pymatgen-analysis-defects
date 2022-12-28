@@ -635,7 +635,7 @@ def ensure_stable_bulk(
     stable_entry = ComputedEntry(
         entry.composition, pd.get_hull_energy(entry.composition) - SMALL_NUM
     )
-    pd = PhaseDiagram([stable_entry] + pd.all_entries)
+    pd = PhaseDiagram(pd.all_entries + [stable_entry])
     return pd
 
 
