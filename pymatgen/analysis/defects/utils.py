@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import bisect
 import collections
+import itertools
 import logging
 import math
 import operator
+from collections import defaultdict
 from copy import deepcopy
 from functools import cached_property
 from pathlib import Path
@@ -18,10 +20,13 @@ from numpy.linalg import norm
 from pymatgen.analysis.local_env import cn_opt_params
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.core import Lattice, Structure
+from pymatgen.core.periodic_table import get_el_sp
 from pymatgen.electronic_structure.core import Spin
 from pymatgen.io.vasp.outputs import BandStructure, Procar, VolumetricData
 from pymatgen.io.vasp.sets import get_valid_magmom_struct
+from pymatgen.util.coord import pbc_diff
 from scipy.cluster.hierarchy import fcluster, linkage
+from scipy.spatial import ConvexHull, Voronoi
 from scipy.spatial.distance import squareform
 
 try:
@@ -395,6 +400,357 @@ def get_avg_chg(
     return avg_chg
 
 
+class TopographyAnalyzer:
+    """Topography Analyzer.
+
+    This is a generalized module to perform topological analyses of a crystal
+    structure using Voronoi tessellations. It can be used for finding potential
+    interstitial sites. Applications including using these sites for
+    inserting additional atoms or for analyzing diffusion pathways.
+
+    Note that you typically want to do some preliminary postprocessing after
+    the initial construction. The initial construction will create a lot of
+    points, especially for determining potential insertion sites. Some helper
+    methods are available to perform aggregation and elimination of nodes. A
+    typical use is something like::
+
+        a = TopographyAnalyzer(structure, ["O"], ["P"])
+        a.cluster_nodes()
+        a.remove_collisions()
+    """
+
+    def __init__(
+        self,
+        structure,
+        framework_ions,
+        cations,
+        tol=0.0001,
+        max_cell_range=1,
+        check_volume=True,
+        constrained_c_frac=0.5,
+        thickness=0.5,
+    ):
+        """Initialize the TopographyAnalyzer.
+
+        Args:
+            structure (Structure): An initial structure.
+            framework_ions ([str]): A list of ions to be considered as a
+                framework. Typically, this would be all anion species. E.g.,
+                ["O", "S"].
+            cations ([str]): A list of ions to be considered as non-migrating
+                cations. E.g., if you are looking at Li3PS4 as a Li
+                conductor, Li is a mobile species. Your cations should be [
+                "P"]. The cations are used to exclude polyhedra from
+                diffusion analysis since those polyhedra are already occupied.
+            tol (float): A tolerance distance for the analysis, used to
+                determine if something are actually periodic boundary images of
+                each other. Default is usually fine.
+            max_cell_range (int): This is the range of periodic images to
+                construct the Voronoi tessellation. A value of 1 means that we
+                include all points from (x +- 1, y +- 1, z+- 1) in the
+                voronoi construction. This is because the Voronoi poly
+                extends beyond the standard unit cell because of PBC.
+                Typically, the default value of 1 works fine for most
+                structures and is fast. But for really small unit
+                cells with high symmetry, you may need to increase this to 2
+                or higher.
+            check_volume (bool): Set False when ValueError always happen after
+                tuning tolerance.
+            constrained_c_frac (float): Constraint the region where users want
+                to do Topology analysis the default value is 0.5, which is the
+                fractional coordinate of the cell
+            thickness (float): Along with constrained_c_frac, limit the
+                thickness of the regions where we want to explore. Default is
+                0.5, which is mapping all the site of the unit cell.
+
+        """
+        self.structure = structure
+        self.framework_ions = {get_el_sp(sp) for sp in framework_ions}
+        self.cations = {get_el_sp(sp) for sp in cations}
+
+        # Let us first map all sites to the standard unit cell, i.e.,
+        # 0 ≤ coordinates < 1.
+        # structure = Structure.from_sites(structure, to_unit_cell=True)
+        # lattice = structure.lattice
+
+        # We could constrain the region where we want to dope/explore by setting
+        # the value of constrained_c_frac and thickness. The default mode is
+        # mapping all sites to the standard unit cell
+        s = structure.copy()
+        constrained_sites = []
+        for i, site in enumerate(s):
+            if (
+                site.frac_coords[2] >= constrained_c_frac - thickness
+                and site.frac_coords[2] <= constrained_c_frac + thickness
+            ):
+                constrained_sites.append(site)
+        structure = Structure.from_sites(sites=constrained_sites)
+        lattice = structure.lattice
+
+        # Divide the sites into framework and non-framework sites.
+        framework = []
+        non_framework = []
+        for site in structure:
+            if self.framework_ions.intersection(site.species.keys()):
+                framework.append(site)
+            else:
+                non_framework.append(site)
+
+        # We construct a supercell series of coords. This is because the
+        # Voronoi polyhedra can extend beyond the standard unit cell. Using a
+        # range of -2, -1, 0, 1 should be fine.
+        coords = []
+        cell_range = list(range(-max_cell_range, max_cell_range + 1))
+        for shift in itertools.product(cell_range, cell_range, cell_range):
+            for site in framework:
+                shifted = site.frac_coords + shift
+                coords.append(lattice.get_cartesian_coords(shifted))
+
+        # Perform the voronoi tessellation.
+        voro = Voronoi(coords)
+
+        # Store a mapping of each voronoi node to a set of points.
+        node_points_map = defaultdict(set)
+        for pts, vs in voro.ridge_dict.items():
+            for v in vs:
+                node_points_map[v].update(pts)
+
+        _logger.debug(f"{len(voro.vertices)} total Voronoi vertices")
+
+        # Vnodes store all the valid voronoi polyhedra. Cation vnodes store
+        # the voronoi polyhedra that are already occupied by existing cations.
+        vnodes = []
+        cation_vnodes = []
+
+        def get_mapping(poly):
+            """Helper function.
+
+            Checks if a vornoi poly is a periodic image of
+            one of the existing voronoi polys.
+            """
+            for v in vnodes:
+                if v.is_image(poly, tol):
+                    return v
+            return None
+
+        # Filter all the voronoi polyhedra so that we only consider those
+        # which are within the unit cell.
+        for i, vertex in enumerate(voro.vertices):
+            if i == 0:
+                continue
+            fcoord = lattice.get_fractional_coords(vertex)
+            poly = VoronoiPolyhedron(lattice, fcoord, node_points_map[i], coords, i)
+            if np.all([-tol <= c < 1 + tol for c in fcoord]):
+                if len(vnodes) == 0:
+                    vnodes.append(poly)
+                else:
+                    ref = get_mapping(poly)
+                    if ref is None:
+                        vnodes.append(poly)
+
+        _logger.debug(f"{len(vnodes)} voronoi vertices in cell.")
+
+        # Eliminate all voronoi nodes which are closest to existing cations.
+        if len(cations) > 0:
+            cation_coords = [
+                site.frac_coords
+                for site in non_framework
+                if self.cations.intersection(site.species.keys())
+            ]
+
+            vertex_fcoords = [v.frac_coords for v in vnodes]
+            dist_matrix = lattice.get_all_distances(cation_coords, vertex_fcoords)
+            indices = np.where(dist_matrix == np.min(dist_matrix, axis=1)[:, None])[1]
+            cation_vnodes = [v for i, v in enumerate(vnodes) if i in indices]
+            vnodes = [v for i, v in enumerate(vnodes) if i not in indices]
+
+        _logger.debug(f"{len(vnodes)} vertices in cell not with cation.")
+        self.coords = coords
+        self.vnodes = vnodes
+        self.cation_vnodes = cation_vnodes
+        self.framework = framework
+        self.non_framework = non_framework
+        if check_volume:
+            self.check_volume()
+
+    def check_volume(self):
+        """Basic check for volume of all voronoi poly sum to unit cell volume.
+
+        Note that this does not apply after poly combination.
+        """
+        vol = sum(v.volume for v in self.vnodes) + sum(
+            v.volume for v in self.cation_vnodes
+        )
+        if abs(vol - self.structure.volume) > 1e-8:
+            raise ValueError(
+                "Sum of voronoi volumes is not equal to original volume of "
+                "structure! This may lead to inaccurate results. You need to "
+                "tweak the tolerance and max_cell_range until you get a "
+                "correct mapping."
+            )
+
+    def cluster_nodes(self, tol=0.2):
+        """Cluster nodes that are too close together using a tol.
+
+        Args:
+            tol (float): A distance tolerance. PBC is taken into account.
+        """
+        lattice = self.structure.lattice
+
+        vfcoords = [v.frac_coords for v in self.vnodes]
+
+        # Manually generate the distance matrix (which needs to take into
+        # account PBC.
+        dist_matrix = np.array(lattice.get_all_distances(vfcoords, vfcoords))
+        dist_matrix = (dist_matrix + dist_matrix.T) / 2
+        for i in range(len(dist_matrix)):
+            dist_matrix[i, i] = 0
+        condensed_m = squareform(dist_matrix)
+        z = linkage(condensed_m)
+        cn = fcluster(z, tol, criterion="distance")
+        merged_vnodes = []
+        for n in set(cn):
+            poly_indices = set()
+            frac_coords = []
+            for i, j in enumerate(np.where(cn == n)[0]):
+                poly_indices.update(self.vnodes[j].polyhedron_indices)
+                if i == 0:
+                    frac_coords.append(self.vnodes[j].frac_coords)
+                else:
+                    fcoords = self.vnodes[j].frac_coords
+                    # We need the image to combine the frac_coords properly.
+                    d, image = lattice.get_distance_and_image(frac_coords[0], fcoords)
+                    frac_coords.append(fcoords + image)
+            merged_vnodes.append(
+                VoronoiPolyhedron(
+                    lattice, np.average(frac_coords, axis=0), poly_indices, self.coords
+                )
+            )
+        self.vnodes = merged_vnodes
+        _logger.debug(f"{len(self.vnodes)} vertices after combination.")
+
+    def remove_collisions(self, min_dist=0.5):
+        """Remove vnodes that are too close to existing atoms in the structure.
+
+        Args:
+            min_dist(float): The minimum distance that a vertex needs to be
+                from existing atoms.
+        """
+        vfcoords = [v.frac_coords for v in self.vnodes]
+        sfcoords = self.structure.frac_coords
+        dist_matrix = self.structure.lattice.get_all_distances(vfcoords, sfcoords)
+        all_dist = np.min(dist_matrix, axis=1)
+        new_vnodes = []
+        for i, v in enumerate(self.vnodes):
+            if all_dist[i] > min_dist:
+                new_vnodes.append(v)
+        self.vnodes = new_vnodes
+
+    def get_structure_with_nodes(self):
+        """Get the modified structure with the voronoi nodes inserted.
+
+        The species is set as a DummySpecies X.
+        """
+        new_s = Structure.from_sites(self.structure)
+        for v in self.vnodes:
+            new_s.append("X", v.frac_coords)
+        return new_s
+
+    def print_stats(self):
+        """Print stats such as the MSE dist."""
+        latt = self.structure.lattice
+
+        def get_min_dist(fcoords):
+            n = len(fcoords)
+            dist = latt.get_all_distances(fcoords, fcoords)
+            all_dist = [dist[i, j] for i in range(n) for j in range(i + 1, n)]
+            return min(all_dist)
+
+        voro = [s.frac_coords for s in self.vnodes]
+        print(f"Min dist between voronoi vertices centers = {get_min_dist(voro):.4f}")
+
+        def get_non_framework_dist(fcoords):
+            cations = [site.frac_coords for site in self.non_framework]
+            dist_matrix = latt.get_all_distances(cations, fcoords)
+            min_dist = np.min(dist_matrix, axis=1)
+            if len(cations) != len(min_dist):
+                raise Exception("Could not calculate distance to all cations")
+            return np.linalg.norm(min_dist), min(min_dist), max(min_dist)
+
+        print(len(self.non_framework))
+        print(f"MSE dist voro = {str(get_non_framework_dist(voro))}")
+
+    def write_topology(self, fname="Topo.cif"):
+        """Write topology to a file.
+
+        Args:
+            fname (str): Filename to write to.
+        """
+        new_s = Structure.from_sites(self.structure)
+        for v in self.vnodes:
+            new_s.append("Mg", v.frac_coords)
+        new_s.to(filename=fname)
+
+
+class VoronoiPolyhedron:
+    """Convenience container for a voronoi point in PBC and its associated polyhedron."""
+
+    def __init__(self, lattice, frac_coords, polyhedron_indices, all_coords, name=None):
+        """Initialize a VoronoiPolyhedron.
+
+        Args:
+            lattice (Lattice): Lattice of the structure.
+            frac_coords (np.array): Fractional coordinates of the voronoi point.
+            polyhedron_indices (list): Indices of the polyhedron vertices.
+            all_coords (list): List of all polyhedron vertices.
+            name (str): Name of the polyhedron.
+        """
+        self.lattice = lattice
+        self.frac_coords = frac_coords
+        self.polyhedron_indices = polyhedron_indices
+        self.polyhedron_coords = np.array(all_coords)[list(polyhedron_indices), :]
+        self.name = name
+
+    def is_image(self, poly: VoronoiPolyhedron, tol: float) -> bool:
+        """Check if poly is an image of the current polyhedron.
+
+        Args:
+            poly (VoronoiPolyhedron): Polyhedron to check.
+            tol (float): Tolerance for image check.
+
+        Returns:
+            bool: True if poly is an image of the current polyhedron.
+        """
+        frac_diff = pbc_diff(poly.frac_coords, self.frac_coords)
+        if not np.allclose(frac_diff, [0, 0, 0], atol=tol):
+            return False
+        to_frac = self.lattice.get_fractional_coords
+        for c1 in self.polyhedron_coords:
+            found = False
+            for c2 in poly.polyhedron_coords:
+                d = pbc_diff(to_frac(c1), to_frac(c2))
+                if not np.allclose(d, [0, 0, 0], atol=tol):
+                    found = True
+                    break
+            if not found:
+                return False
+        return True
+
+    @property
+    def coordination(self):
+        """Coordination number."""
+        return len(self.polyhedron_indices)
+
+    @property
+    def volume(self):
+        """Volume of the polyhedron."""
+        return calculate_vol(self.polyhedron_coords)
+
+    def __str__(self):
+        """String representation."""
+        return f"Voronoi polyhedron {self.name}"
+
+
 class ChargeInsertionAnalyzer(MSONable):
     """Object for insertions sites from charge density.
 
@@ -623,3 +979,15 @@ def sort_positive_definite(
     d_vs_s.sort()
     distances, sorted_list = list(zip(*d_vs_s))
     return sorted_list, distances
+
+
+def calculate_vol(coords: npt.NDArray):
+    """Calculate volume given a set of points in 3D space.
+
+    Args:
+        coords: The coordinates of the points in 3D space.
+
+    Returns:
+        The volume of the convex hull of the points.
+    """
+    return ConvexHull(coords).volume
