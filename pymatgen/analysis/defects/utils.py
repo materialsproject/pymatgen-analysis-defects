@@ -20,7 +20,7 @@ from numpy.linalg import norm
 from pymatgen.analysis.local_env import cn_opt_params
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.core import Lattice, Structure
-from pymatgen.core.periodic_table import get_el_sp
+from pymatgen.core.periodic_table import Element, get_el_sp
 from pymatgen.electronic_structure.core import Spin
 from pymatgen.io.vasp.outputs import BandStructure, Procar, VolumetricData
 from pymatgen.io.vasp.sets import get_valid_magmom_struct
@@ -490,8 +490,12 @@ class TopographyAnalyzer:
         # We could constrain the region where we want to dope/explore by setting
         # the value of constrained_c_frac and thickness. The default mode is
         # mapping all sites to the standard unit cell
+
         self.structure = structure.copy()
         # TODO: Structure is still being mutated something weird is going on but the code works.
+        # remove oxidation state
+        self.structure.remove_oxidation_states()
+
         constrained_sites = []
         for i, site in enumerate(self.structure):
             if (
@@ -509,7 +513,7 @@ class TopographyAnalyzer:
             # site.species can be Composition SpecieLike
             if hasattr(site.species, "elements"):
                 # Handle the case where site.species is a Composition
-                els = [*map(lambda x: x.element, site.species.elements)]
+                els = [*map(Element, site.species.elements)]
             else:
                 els = [*map(get_el_sp, site.species.keys())]
             if self.framework_ions.intersection(els):
