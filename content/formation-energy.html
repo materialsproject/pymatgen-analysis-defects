@@ -55,6 +55,8 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="canonical" href="https://materialsproject.github.io/pymatgen-analysis-defects/content/formation-energy.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Overview of the API." href="../api_ref/index.html" />
+    <link rel="prev" title="References" href="references.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="None">
     
@@ -101,7 +103,12 @@ const thebe_selector_output = ".output, .cell_output"
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
 </form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item active">
-        <ul class="nav bd-sidenav">
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Documentation
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="quickstart.html">
    Quick Start
@@ -126,6 +133,70 @@ const thebe_selector_output = ".output, .cell_output"
   <a class="reference internal" href="references.html">
    References
   </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Formation Energy Diagrams
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  API References
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../api_ref/index.html">
+   Overview of the API.
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../api_ref/pymatgen.analysis.defects.core.html">
+     pymatgen.analysis.defects.core
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../api_ref/pymatgen.analysis.defects.generators.html">
+     pymatgen.analysis.defects.generators
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../api_ref/pymatgen.analysis.defects.thermo.html">
+     pymatgen.analysis.defects.thermo
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../api_ref/pymatgen.analysis.defects.ccd.html">
+     pymatgen.analysis.defects.ccd
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../api_ref/pymatgen.analysis.defects.finder.html">
+     pymatgen.analysis.defects.finder
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../api_ref/pymatgen.analysis.defects.recombination.html">
+     pymatgen.analysis.defects.recombination
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../api_ref/pymatgen.analysis.defects.supercells.html">
+     pymatgen.analysis.defects.supercells
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../api_ref/pymatgen.analysis.defects.utils.html">
+     pymatgen.analysis.defects.utils
+    </a>
+   </li>
+  </ul>
  </li>
 </ul>
 
@@ -513,7 +584,7 @@ Chemical potential limits for point 1
 <h2>Finite-size corrections<a class="headerlink" href="#finite-size-corrections" title="Permalink to this headline">#</a></h2>
 <p>Finite-size corrections are necessary to account for the fact that we are simulating a charged defect in a periodic simulation cell.
 The standard approach was developed by Freysoldt and co-workers and is described in the following paper:</p>
-<p><span id="id1">[<a class="reference internal" href="references.html#id4" title="Christoph Freysoldt, J\ifmmode \ddot o\else ö\fi rg Neugebauer, and Chris G. Van de Walle. Fully Ab Initio Finite-Size Corrections for Charged-Defect Supercell Calculations. Phys. Rev. Lett., 102(1):016402, January 2009. doi:10.1103/PhysRevLett.102.016402.">Freysoldt <em>et al.</em>, 2009</a>]</span>.</p>
+<p><span id="id1">[<a class="reference internal" href="references.html#id4" title="Christoph Freysoldt, Jörg Neugebauer, and Chris G. Van de Walle. Fully Ab Initio Finite-Size Corrections for Charged-Defect Supercell Calculations. Phys. Rev. Lett., 102(1):016402, January 2009. doi:10.1103/PhysRevLett.102.016402.">Freysoldt <em>et al.</em>, 2009</a>]</span>.</p>
 <blockquote>
 <div><p>Freysoldt, C., Neugebauer, J., &amp; Van de Walle, C. G. (2009). Fully Ab Initio Finite-Size Corrections for Charged-Defect Supercell Calculations. Phys Rev Lett, 102(1), 016402. doi: 10.1103/PhysRevLett.102.016402</p>
 </div></blockquote>
@@ -572,6 +643,20 @@ The intermediate analysis (planar-averaged potentials) for calculating the Freys
                 
     <!-- Previous / next buttons -->
 <div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="references.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">References</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="../api_ref/index.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Overview of the API.</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
 </div>
             </footer>
         </div>
