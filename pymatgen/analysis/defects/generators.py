@@ -322,6 +322,7 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
         for fpos, lab in top.labeled_sites:
             if lab in insert_sites:
                 multiplicity[lab] += 1
+                continue
             insert_sites[lab] = fpos
             multiplicity[lab] = 1
 
@@ -424,9 +425,16 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         """
         if len(set(insert_species)) != len(insert_species):
             raise ValueError("Insert species must be unique.")
-        cand_sites = [*self._get_candidate_sites(chgcar)]
+        cand_sites_and_mul = [*self._get_candidate_sites(chgcar)]
         for species in insert_species:
-            yield from super().generate(chgcar.structure, {species: cand_sites})
+            cand_sites = [cand_site for cand_site, mul in cand_sites_and_mul]
+            multiplicity = [mul for cand_site, mul in cand_sites_and_mul]
+            yield from super().generate(
+                chgcar.structure,
+                insertions={species: cand_sites},
+                multiplicies={species: multiplicity},
+                **kwargs,
+            )
 
     def _get_candidate_sites(self, chgcar: Chgcar):
         cia = ChargeInsertionAnalyzer(
@@ -441,7 +449,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
             avg_radius=self.avg_radius, max_avg_charge=self.max_avg_charge
         )
         for _, g in avg_chg_groups:
-            yield min(g)
+            yield min(g), len(g)
 
 
 def _element_str(sp_or_el: Species | Element) -> str:
