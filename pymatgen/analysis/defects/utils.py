@@ -626,7 +626,7 @@ class TopographyAnalyzer:
         vol = sum(v.volume for v in self.vnodes) + sum(
             v.volume for v in self.cation_vnodes
         )
-        if abs(vol - self.structure.volume) > 1e-8:
+        if abs(vol - self.structure.volume) > 1e-8:  # pragma: no cover
             raise ValueError(
                 "Sum of voronoi volumes is not equal to original volume of "
                 "structure! This may lead to inaccurate results. You need to "
@@ -643,30 +643,6 @@ class TopographyAnalyzer:
         for v in self.vnodes:
             new_s.append("X", v.frac_coords)
         return new_s
-
-    def print_stats(self):
-        """Print stats such as the MSE dist."""
-        latt = self.structure.lattice
-
-        def get_min_dist(fcoords):
-            n = len(fcoords)
-            dist = latt.get_all_distances(fcoords, fcoords)
-            all_dist = [dist[i, j] for i in range(n) for j in range(i + 1, n)]
-            return min(all_dist)
-
-        voro = np.array([s.frac_coords for s in self.vnodes])
-        print(f"Min dist between voronoi vertices centers = {get_min_dist(voro):.4f}")
-
-        def get_non_framework_dist(fcoords):
-            cations = [site.frac_coords for site in self.non_framework]
-            dist_matrix = latt.get_all_distances(cations, fcoords)
-            min_dist = np.min(dist_matrix, axis=1)
-            if len(cations) != len(min_dist):
-                raise Exception("Could not calculate distance to all cations")
-            return np.linalg.norm(min_dist), min(min_dist), max(min_dist)
-
-        print(len(self.non_framework))
-        print(f"MSE dist voro = {str(get_non_framework_dist(voro))}")
 
 
 class VoronoiPolyhedron:
