@@ -654,7 +654,7 @@ class TopographyAnalyzer:
             all_dist = [dist[i, j] for i in range(n) for j in range(i + 1, n)]
             return min(all_dist)
 
-        voro = [s.frac_coords for s in self.vnodes]
+        voro = np.array([s.frac_coords for s in self.vnodes])
         print(f"Min dist between voronoi vertices centers = {get_min_dist(voro):.4f}")
 
         def get_non_framework_dist(fcoords):
@@ -667,17 +667,6 @@ class TopographyAnalyzer:
 
         print(len(self.non_framework))
         print(f"MSE dist voro = {str(get_non_framework_dist(voro))}")
-
-    def write_topology(self, fname="Topo.cif"):
-        """Write topology to a file.
-
-        Args:
-            fname (str): Filename to write to.
-        """
-        new_s = Structure.from_sites(self.structure)
-        for v in self.vnodes:
-            new_s.append("Mg", v.frac_coords)
-        new_s.to(filename=fname)
 
 
 class VoronoiPolyhedron:
