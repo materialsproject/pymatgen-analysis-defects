@@ -3,9 +3,15 @@
 
 format: jb-book
 root: intro
-chapters:
-- file: content/quickstart
-- file: content/defining-defects
-- file: content/nonradiative
-- file: content/photo-conduct
-- file: content/references
+parts:
+- caption: Documentation
+  chapters:
+  - file: content/quickstart
+  - file: content/defining-defects
+  - file: content/nonradiative
+  - file: content/photo-conduct
+  - file: content/references
+  - file: content/formation-energy
+- caption: API References
+  chapters:
+  - file: api_ref/index
