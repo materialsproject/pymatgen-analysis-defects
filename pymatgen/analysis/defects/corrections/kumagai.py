@@ -6,9 +6,11 @@ https://github.com/kumagai-group/pydefect
 
 from __future__ import annotations
 
+import logging
 import math
+from pathlib import Path
 
-from pymatgen.analysis.defects.utils import CorrectionResult
+from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile
 
 # check that pydefect is installed
 try:
@@ -16,14 +18,13 @@ try:
 except ImportError:
     raise ImportError("pydefect is not installed. Please install it first.")
 
-import logging
+# Disable messages from pydefect import
+from vise import user_settings
+
+user_settings.logger.setLevel(logging.CRITICAL)
 
 from pydefect.analyzer.calc_results import CalcResults
 from pydefect.cli.vasp.make_efnv_correction import make_efnv_correction
-
-# suppress pydefect INFO messages
-logging.getLogger("pydefect").setLevel(logging.WARNING)
-
 from pymatgen.core import Structure
 from pymatgen.io.vasp import Outcar, Vasprun
 
@@ -33,10 +34,18 @@ __maintainer__ = "Jimmy-Xuan Shen"
 __email__ = "jmmshn@gmail.com"
 
 _logger = logging.getLogger(__name__)
+# suppress pydefect INFO messages
+logging.getLogger("pydefect").setLevel(logging.WARNING)
 
 
-def read_vasp_output(vasprun: Vasprun, outcar: Outcar) -> CalcResults:
+def read_vasp_output(directory: Path) -> CalcResults:
     """Reads vasprun.xml and OUTCAR files and returns a CalcResults object."""
+    d_ = Path(directory)
+    f_vasprun = get_zfile(d_, "vasprun.xml")
+    f_outcar = get_zfile(d_, "OUTCAR")
+    vasprun = Vasprun(f_vasprun)
+    outcar = Outcar(f_outcar)
+
     return CalcResults(
         structure=vasprun.final_structure,
         energy=outcar.final_energy,
@@ -49,7 +58,8 @@ def read_vasp_output(vasprun: Vasprun, outcar: Outcar) -> CalcResults:
     # Once it is we can create a new constructor
 
 
-def get_kumagai_correction(
+def get_efnv_correction(
+    charge: int,
     defect_structure: Structure,
     bulk_structure: Structure,
     dielectric_tensor: list[list[float]],
@@ -82,8 +92,9 @@ def get_kumagai_correction(
     )
 
     efnv_corr = make_efnv_correction(
+        charge=charge,
         calc_results=defect_calc_results,
-        bulk_calc_results=bulk_calc_results,
+        perfect_calc_results=bulk_calc_results,
         dielectric_tensor=dielectric_tensor,
         **kwargs,
     )
