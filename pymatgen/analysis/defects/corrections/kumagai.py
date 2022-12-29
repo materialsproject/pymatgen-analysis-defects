@@ -38,15 +38,22 @@ _logger = logging.getLogger(__name__)
 logging.getLogger("pydefect").setLevel(logging.WARNING)
 
 
-def read_vasp_output(directory: Path) -> CalcResults:
-    """Reads vasprun.xml and OUTCAR files and returns a CalcResults object."""
+def get_structure_with_pot(directory: Path) -> Structure:
+    """Reads vasprun.xml and OUTCAR files in a directory.
+
+    Args:
+        directory: Directory containing vasprun.xml and OUTCAR files.
+
+    Returns:
+        Structure with "potential" site property.
+    """
     d_ = Path(directory)
     f_vasprun = get_zfile(d_, "vasprun.xml")
     f_outcar = get_zfile(d_, "OUTCAR")
     vasprun = Vasprun(f_vasprun)
     outcar = Outcar(f_outcar)
 
-    return CalcResults(
+    calc = CalcResults(
         structure=vasprun.final_structure,
         energy=outcar.final_energy,
         magnetization=outcar.total_mag or 0.0,
@@ -54,8 +61,9 @@ def read_vasp_output(directory: Path) -> CalcResults:
         electronic_conv=vasprun.converged_electronic,
         ionic_conv=vasprun.converged_ionic,
     )
-    # TODO: for now electronstatic_potential is not stored in atomate2
-    # Once it is we can create a new constructor
+
+    struct = calc.structure.copy(site_properties={"potential": calc.potentials})
+    return struct
 
 
 def get_efnv_correction(
