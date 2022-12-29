@@ -21,12 +21,9 @@ from scipy.optimize import bisect
 from scipy.spatial import ConvexHull
 
 from pymatgen.analysis.defects.core import Defect
-from pymatgen.analysis.defects.corrections.freysoldt import (
-    FreysoldtSummary,
-    get_freysoldt_correction,
-)
+from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
 from pymatgen.analysis.defects.finder import DefectSiteFinder
-from pymatgen.analysis.defects.utils import get_zfile
+from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile
 
 __author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -72,7 +69,7 @@ class DefectEntry(MSONable):
         """Post-initialization."""
         self.charge_state = int(self.charge_state)
         self.corrections: dict = {} if self.corrections is None else self.corrections
-        self.correction_type: str = "Freysoldt"
+        self.correction_type: str = "freysoldt"
         self.correction_metadata: dict = (
             {} if self.correction_metadata is None else self.correction_metadata
         )
@@ -85,7 +82,7 @@ class DefectEntry(MSONable):
         defect_struct: Optional[Structure] = None,
         bulk_struct: Optional[Structure] = None,
         **kwargs,
-    ) -> FreysoldtSummary:
+    ) -> CorrectionResult:
         """Calculate the Freysoldt correction.
 
         Updates the corrections dictionary with the Freysoldt correction
@@ -144,18 +141,16 @@ class DefectEntry(MSONable):
         )
         self.corrections.update(
             {
-                "electrostatic": frey_corr.electrostatic,
-                "potential_alignment": frey_corr.potential_alignment,
+                "freysoldt": frey_corr.correction_energy,
             }
         )
-        self.correction_metadata.update(frey_corr.metadata.copy())
-        self.correction_type = "Freysoldt"
+        self.correction_metadata.update({"freysoldt": frey_corr.metadata.copy()})
         return frey_corr
 
     @property
     def corrected_energy(self) -> float:
         """The energy of the defect entry with all corrections applied."""
-        return self.sc_entry.energy + sum(self.corrections.values())
+        return self.sc_entry.energy + self.corrections["freysoldt"]
 
 
 @dataclass

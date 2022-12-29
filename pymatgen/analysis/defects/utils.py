@@ -9,6 +9,7 @@ import math
 import operator
 from collections import defaultdict
 from copy import deepcopy
+from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
 from typing import Any, Callable, Generator
@@ -969,3 +970,17 @@ def get_symmetry_labeled_structures(
     # Label the groups by structure matching
     site_labels = generic_groupby(inserted_structs, comp=sm.fit)
     return [*zip(sites.tolist(), site_labels)]
+
+
+@dataclass
+class CorrectionResult(MSONable):
+    """A summary of the corrections applied to a structure.
+
+    Attributes:
+        electrostatic: The electrostatic correction.
+        potential_alignment: The potential alignment correction.
+        metadata: A dictionary of metadata for plotting and intermediate analysis.
+    """
+
+    correction_energy: float
+    metadata: dict[Any, Any]

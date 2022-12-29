@@ -17,8 +17,7 @@ def test_freysoldt(data_Mg_Ga):
         bulk_locpot=bulk_locpot,
         defect_frac_coords=[0.5, 0.5, 0.5],
     )
-    assert freysoldt_summary.electrostatic == pytest.approx(0, abs=1e-4)
-    assert freysoldt_summary.potential_alignment == pytest.approx(0, abs=1e-4)
+    assert freysoldt_summary.correction_energy == pytest.approx(0, abs=1e-4)
 
     # simple check that the plotter works
     plot_plnr_avg(freysoldt_summary.metadata[0])
