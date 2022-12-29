@@ -723,6 +723,8 @@ def _get_wswq_slope(distortions: list[float], wswqs: list[WSWQ]) -> npt.NDArray:
 
     Returns:
         npt.NDArray: slope matrix with the same shape as the ``WSWQ.data``.
+            Since there is always ambiguity in the phase, we require that the output
+            is always positive.
     """
     yy = np.stack([np.abs(ww.data) * np.sign(qq) for qq, ww in zip(distortions, wswqs)])
     _, *oldshape = yy.shape
