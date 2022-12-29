@@ -80,6 +80,10 @@ def test_topography_analyzer(chgcar_fe3o4):
     dummy_sites = [site for site in node_struct if site.specie.symbol == "X"]
     assert len(dummy_sites) == 100
 
+    # Check value error
+    with pytest.raises(ValueError):
+        ta = TopographyAnalyzer(struct, ["O"], ["Fe"], check_volume=True)
+
 
 def test_get_localized_states(v_ga):
     vaspruns = v_ga[(0, -1)]["vaspruns"]
