@@ -38,7 +38,6 @@ strict = [
   "scikit-image==0.19.3",
   "pytest==7.2.0",
   "pytest-cov==4.0.0",
-  "jupyter-book==0.13.1",
   "pre-commit==2.21.0",
   "pydefect==0.6.2",
 ]
