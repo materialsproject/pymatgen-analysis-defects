@@ -415,8 +415,6 @@ class TopographyAnalyzer:
     typical use is something like::
 
         a = TopographyAnalyzer(structure, ["O", "P"])
-        a.cluster_nodes()
-        a.remove_collisions()
     """
 
     def __init__(
@@ -478,7 +476,6 @@ class TopographyAnalyzer:
                 is 5.
 
         """
-        self.structure = structure
         self.framework_ions = {get_el_sp(sp) for sp in framework_ions}
         self.cations = {get_el_sp(sp) for sp in cations}
         self.clustering_tol = clustering_tol
@@ -493,22 +490,29 @@ class TopographyAnalyzer:
         # We could constrain the region where we want to dope/explore by setting
         # the value of constrained_c_frac and thickness. The default mode is
         # mapping all sites to the standard unit cell
-        s = structure.copy()
+        self.structure = structure.copy()
+        # TODO: Structure is still being mutated something weird is going on but the code works.
         constrained_sites = []
-        for i, site in enumerate(s):
+        for i, site in enumerate(self.structure):
             if (
                 site.frac_coords[2] >= constrained_c_frac - thickness
                 and site.frac_coords[2] <= constrained_c_frac + thickness
             ):
                 constrained_sites.append(site)
-        structure = Structure.from_sites(sites=constrained_sites)
-        lattice = structure.lattice
+        constrained_struct = Structure.from_sites(sites=constrained_sites)
+        lattice = constrained_struct.lattice
 
         # Divide the sites into framework and non-framework sites.
         framework = []
         non_framework = []
-        for site in structure:
-            if self.framework_ions.intersection(site.species.keys()):
+        for site in constrained_struct:
+            # site.species can be Composition SpecieLike
+            if hasattr(site.species, "elements"):
+                # Handle the case where site.species is a Composition
+                els = [*map(lambda x: x.element, site.species.elements)]
+            else:
+                els = [*map(get_el_sp, site.species.keys())]
+            if self.framework_ions.intersection(els):
                 framework.append(site)
             else:
                 non_framework.append(site)
@@ -590,7 +594,7 @@ class TopographyAnalyzer:
         if check_volume:
             self.check_volume()
 
-    @cached_property
+    @property
     def labeled_sites(
         self,
     ) -> list[tuple[list[float], int]]:
