@@ -38,6 +38,7 @@
    .. autosummary::
    
       ChargeInsertionAnalyzer
+      CorrectionResult
       QModel
       TopographyAnalyzer
       VoronoiPolyhedron
