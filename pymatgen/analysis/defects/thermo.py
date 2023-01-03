@@ -5,7 +5,7 @@ import logging
 from dataclasses import dataclass
 from itertools import groupby
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Callable
 
 import numpy as np
 from matplotlib import cm
@@ -814,7 +814,7 @@ def plot_formation_energy_diagrams(
     envelope_alpha: float = 0.8,
     line_alpha: float = 0.5,
     band_edge_color="k",
-    filterfunction: callable | None = None,
+    filterfunction: Callable | None = None,
     axis=None,
 ):
     """Plot the formation energy diagram.
