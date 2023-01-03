@@ -8,21 +8,21 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from matplotlib import cm
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
-from matplotlib import cm
-from scipy.constants import value as _cd
-from scipy.optimize import bisect
-from scipy.spatial import ConvexHull
-
 from monty.json import MSONable
+from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.core import Composition, Structure
 from pymatgen.electronic_structure.dos import Dos, FermiDos
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
 from pymatgen.io.vasp import Locpot, Vasprun
+from scipy.constants import value as _cd
+from scipy.optimize import bisect
+from scipy.spatial import ConvexHull
+
 from pymatgen.analysis.defects.core import Defect
 from pymatgen.analysis.defects.corrections.freysoldt import (
     FreysoldtSummary,
@@ -899,7 +899,6 @@ def plot_formation_energy_diagrams(
         trans = get_transitions(
             lowerlines, np.add(xmin, alignment), np.add(xmax, alignment)
         )
-
 
         # plot lines
         if not only_lower_envelope:
