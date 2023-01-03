@@ -7,6 +7,7 @@ from pymatgen.analysis.defects.generators import (
     InterstitialGenerator,
     SubstitutionGenerator,
     VacancyGenerator,
+    VoronoiInterstitialGenerator,
 )
 
 
@@ -78,3 +79,13 @@ def test_charge_interstitial_generator(chgcar_fe3o4):
         assert defect.site.specie.symbol == "Ga"
         cnt += 1
     assert cnt == 2
+
+
+def test_voronoi_interstitial_generator(chgcar_fe3o4):
+    gen = VoronoiInterstitialGenerator().get_defects(chgcar_fe3o4.structure, {"Li"})
+    cnt = 0
+    for defect in gen:
+        assert isinstance(defect, Interstitial)
+        assert defect.site.specie.symbol == "Li"
+        cnt += 1
+    assert cnt == 4

@@ -23,7 +23,7 @@ repos:
     additional_dependencies: [black]
     exclude: README.md
 - repo: https://github.com/pycqa/isort
-  rev: v5.11.3
+  rev: 5.11.4
   hooks:
   - id: isort
 - repo: https://github.com/pycqa/flake8
@@ -72,7 +72,7 @@ repos:
     language: python
     types: [text]
     args: [
-      --ignore-words-list, 'titel,statics,ba,nd,te,mater,commun',
+      --ignore-words-list, 'titel,statics,ba,nd,te,mater,commun,vise',
       --skip, "*.ipynb"
       ]
 - repo: https://github.com/kynan/nbstripout

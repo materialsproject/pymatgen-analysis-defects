@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from collections import namedtuple
 from typing import Optional
 
 import matplotlib.pyplot as plt
@@ -15,6 +14,7 @@ from pymatgen.io.vasp.outputs import Locpot
 from scipy import stats
 
 from pymatgen.analysis.defects.utils import (
+    CorrectionResult,
     QModel,
     ang_to_bohr,
     converge,
@@ -36,16 +36,6 @@ Adapted from the original code by Danny and Shyam.
 Rewritten to be functional instead of object oriented.
 """
 
-"""
-Named tuple for storing result of correction result.
-
-Metadata contains plotting data for the planar average electrostatic potential.
-key 0, 1, 2 correspond to the x, y, z axes respectively.
-"""
-FreysoldtSummary = namedtuple(
-    "FreysoldtSummary", ["electrostatic", "potential_alignment", "metadata"]
-)
-
 
 def get_freysoldt_correction(
     q: int,
@@ -58,16 +48,8 @@ def get_freysoldt_correction(
     mad_tol: float = 1e-4,
     q_model: Optional[QModel] = None,
     step: float = 1e-4,
-) -> FreysoldtSummary:
+) -> CorrectionResult:
     """Gets the Freysoldt correction for a defect entry.
-
-    Get the Freysoldt correction for a defect. The result is given
-    as a dictionary with the following keys:
-    - "freysoldt_electrostatic": the electrostatic portion of the correction
-    - "freysoldt_potential_alignment": the potential alignment portion of the correction
-
-    The second return value is a dictionary used to plot the planar average
-    electrostatic potential (used for debugging).
 
     Args:
         q:
@@ -90,8 +72,11 @@ def get_freysoldt_correction(
             Step size for numerical integration.
 
     Returns:
-        dict: Freysoldt correction values as a dictionary
-        dict: Plot data for planar average electrostatic potential.
+        CorrectionResult: Correction summary object. The metadata contains
+            plotting data for the planar average electrostatic potential.
+            ```
+            plot_plnr_avg(result.metadata[0], title="Lattice Direction 1")
+            ```
     """
     # dielectric has to be a float
     if isinstance(dielectric, (int, float)):
@@ -163,10 +148,9 @@ def get_freysoldt_correction(
         plot_data[axis] = md
 
     pot_corr = np.mean(list(pot_corrs.values()))
-
-    return FreysoldtSummary(
-        electrostatic=es_corr,
-        potential_alignment=pot_corr / (-q) if q else 0,
+    pot_align = pot_corr / (-q) if q else 0
+    return CorrectionResult(
+        correction_energy=es_corr + pot_align,
         metadata=plot_data,
     )
 

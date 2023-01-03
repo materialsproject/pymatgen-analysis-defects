@@ -14,7 +14,11 @@ from pymatgen.io.vasp import Chgcar
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 from pymatgen.analysis.defects.core import Defect, Interstitial, Substitution, Vacancy
-from pymatgen.analysis.defects.utils import ChargeInsertionAnalyzer, remove_collisions
+from pymatgen.analysis.defects.utils import (
+    ChargeInsertionAnalyzer,
+    TopographyAnalyzer,
+    remove_collisions,
+)
 
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -198,25 +202,38 @@ class InterstitialGenerator(DefectGenerator):
         self.min_dist = min_dist
 
     def generate(
-        self, structure: Structure, insertions: dict[str, list[list[float]]], **kwargs
+        self,
+        structure: Structure,
+        insertions: dict[str, list[list[float]]],
+        multiplicies: dict[str, list[int]] | None = None,
+        **kwargs,
     ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
 
         Args:
             structure: The bulk structure the interstitials are generated from.
             insertions: The insertions to be made given as a dictionary {"Mg": [[0.0, 0.0, 0.0], [0.5, 0.5, 0.5]]}.
+            multiplicies: The multiplicities of the insertions to be made given as a dictionary {"Mg": [1, 2]}.
             **kwargs: Additional keyword arguments for the ``Interstitial`` constructor.
 
         Returns:
             Generator[Interstitial, None, None]: Generator that yields a list of ``Interstitial`` objects
         """
+        if multiplicies is None:
+            multiplicies = {
+                el_str: [1] * len(coords) for el_str, coords in insertions.items()
+            }
+
         for el_str, coords in insertions.items():
 
-            for coord in self._filter_colliding(coords, structure=structure):
+            for i, coord in enumerate(
+                self._filter_colliding(coords, structure=structure)
+            ):
+                mul = multiplicies[el_str][i]
                 isite = PeriodicSite(
                     species=Species(el_str), coords=coord, lattice=structure.lattice
                 )
-                yield Interstitial(structure, isite, **kwargs)
+                yield Interstitial(structure, isite, multiplicity=mul, **kwargs)
 
     def _filter_colliding(
         self, fcoords: list[list[float]], structure: Structure
@@ -236,6 +253,81 @@ class InterstitialGenerator(DefectGenerator):
             if tuple(fc) not in cleaned_fcoords:
                 continue
             yield fc
+
+
+class VoronoiInterstitialGenerator(InterstitialGenerator):
+    """Generator for interstitials based on a simple Voronoi.
+
+    Attributes:
+        clustering_tol: Tolerance for clustering the Voronoi nodes.
+        min_dist: Minimum distance between an interstitial and the nearest atom.
+        ltol: Tolerance for lattice matching.
+        stol: Tolerance for structure matching.
+        angle_tol: Angle tolerance for structure matching.
+        kwargs: Additional keyword arguments for the ``TopographyAnalyzer`` constructor.
+    """
+
+    def __init__(
+        self,
+        clustering_tol: float = 0.5,
+        min_dist: float = 0.9,
+        ltol: float = 0.2,
+        stol: float = 0.3,
+        angle_tol: float = 5,
+        **kwargs,
+    ) -> None:
+        self.clustering_tol = clustering_tol
+        self.min_dist = min_dist
+        self.ltol = ltol
+        self.stol = stol
+        self.angle_tol = angle_tol
+        self.top_kwargs = kwargs
+        super().__init__()
+
+    def generate(self, structure: Structure, insert_species: set[str] | list[str], **kwargs) -> Generator[Interstitial, None, None]:  # type: ignore[override]
+        """Generate interstitials.
+
+        Args:
+            structure: The bulk structure the interstitials inserted in.
+            insert_species: The species to be inserted.
+            **kwargs: Additional keyword arguments for the ``Interstitial`` constructor.
+        """
+        if len(set(insert_species)) != len(insert_species):
+            raise ValueError("Insert species must be unique.")
+        cand_sites_and_mul = [*self._get_candidate_sites(structure)]
+        for species in insert_species:
+            cand_sites = [cand_site for cand_site, mul in cand_sites_and_mul]
+            multiplicity = [mul for cand_site, mul in cand_sites_and_mul]
+            yield from super().generate(
+                structure,
+                insertions={species: cand_sites},
+                multiplicies={species: multiplicity},
+                **kwargs,
+            )
+
+    def _get_candidate_sites(
+        self, structure: Structure
+    ) -> Generator[tuple[list[float], int], None, None]:
+        """Get the candidate sites for interstitials.
+
+        Args:
+            structure: The bulk structure the interstitials inserted in.
+        """
+        framework = list(structure.symbol_set)
+        top = TopographyAnalyzer(
+            structure, framework, [], check_volume=False, **self.top_kwargs
+        )
+        insert_sites = dict()
+        multiplicity: dict[int, int] = dict()
+        for fpos, lab in top.labeled_sites:
+            if lab in insert_sites:
+                multiplicity[lab] += 1
+                continue
+            insert_sites[lab] = fpos
+            multiplicity[lab] = 1
+
+        for key in insert_sites.keys():
+            yield insert_sites[key], multiplicity[key]
 
 
 class ChargeInterstitialGenerator(InterstitialGenerator):
@@ -279,9 +371,16 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         """
         if len(set(insert_species)) != len(insert_species):
             raise ValueError("Insert species must be unique.")
-        cand_sites = [*self._get_candidate_sites(chgcar)]
+        cand_sites_and_mul = [*self._get_candidate_sites(chgcar)]
         for species in insert_species:
-            yield from super().generate(chgcar.structure, {species: cand_sites})
+            cand_sites = [cand_site for cand_site, mul in cand_sites_and_mul]
+            multiplicity = [mul for cand_site, mul in cand_sites_and_mul]
+            yield from super().generate(
+                chgcar.structure,
+                insertions={species: cand_sites},
+                multiplicies={species: multiplicity},
+                **kwargs,
+            )
 
     def _get_candidate_sites(self, chgcar: Chgcar):
         cia = ChargeInsertionAnalyzer(
@@ -296,7 +395,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
             avg_radius=self.avg_radius, max_avg_charge=self.max_avg_charge
         )
         for _, g in avg_chg_groups:
-            yield min(g)
+            yield min(g), len(g)
 
 
 def _element_str(sp_or_el: Species | Element) -> str:

@@ -4,6 +4,7 @@ from pymatgen.io.vasp.outputs import Chgcar
 
 from pymatgen.analysis.defects.utils import (
     ChargeInsertionAnalyzer,
+    TopographyAnalyzer,
     cluster_nodes,
     get_avg_chg,
     get_local_extrema,
@@ -69,6 +70,19 @@ def test_chgcar_insertion(chgcar_fe3o4):
         fpos = sorted(group)
         pytest.approx(avg_chg, ref_chg)
         assert np.allclose(fpos, ref_fpos)
+
+
+def test_topography_analyzer(chgcar_fe3o4):
+    struct = chgcar_fe3o4.structure
+    ta = TopographyAnalyzer(struct, ["Fe", "O"], [], check_volume=True)
+    node_struct = ta.get_structure_with_nodes()
+    # All sites with species X
+    dummy_sites = [site for site in node_struct if site.specie.symbol == "X"]
+    assert len(dummy_sites) == 100
+
+    # Check value error
+    with pytest.raises(ValueError):
+        ta = TopographyAnalyzer(struct, ["O"], ["Fe"], check_volume=True)
 
 
 def test_get_localized_states(v_ga):

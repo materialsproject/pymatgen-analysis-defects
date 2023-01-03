@@ -100,10 +100,10 @@ def test_wswq_slope():
     fake_wswqs = [FakeWSWQ(data=m) for m in mats]
 
     res = _get_wswq_slope([-0.5, 0, 0.5], fake_wswqs)
-    np.allclose(res, np.ones((3, 5)) * 2)
+    assert np.allclose(res, np.ones((3, 5)) * 2)
 
     res = _get_wswq_slope([1.0, 0, -1.0], fake_wswqs)
-    np.allclose(res, np.ones((3, 5)) * -1)
+    assert np.allclose(res, np.ones((3, 5)) * 1)
 
 
 def test_SRHCapture(hd0, hd1, test_dir):

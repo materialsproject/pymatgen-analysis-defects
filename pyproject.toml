@@ -30,6 +30,7 @@ dev = ["pre-commit>=2.12.1"]
 docs = [
   "jupyter-book>=0.13.1",
 ]
+pydefect = ["pydefect>=0.6.2"]
 
 strict = [
   "pymatgen==2022.11.7",
@@ -37,8 +38,8 @@ strict = [
   "scikit-image==0.19.3",
   "pytest==7.2.0",
   "pytest-cov==4.0.0",
-  "jupyter-book==0.13.1",
-  "pre-commit==2.20.0",
+  "pre-commit==2.21.0",
+  "pydefect==0.6.2",
 ]
 
 tests = ["pytest==7.2.0", "pytest-cov==4.0.0"]
