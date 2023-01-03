@@ -820,6 +820,7 @@ def plot_formation_energy_diagrams(
     envelope_alpha: float = 0.8,
     line_alpha: float = 0.5,
     band_edge_color="k",
+    filterfunction: callable | None = None,
     axis=None,
 ):
     """Plot the formation energy diagram.
@@ -851,6 +852,7 @@ def plot_formation_energy_diagrams(
         envelope_alpha: Alpha for the envelope
         line_alpha: Alpha for the lines (if the are shown)
         band_edge_color: Color for VBM/CBM vertical lines
+        filterfunction: A callable that filters formation energy diagram objects to clean up the plot
         axis: Previous axis to amend
 
     Returns:
@@ -860,6 +862,9 @@ def plot_formation_energy_diagrams(
         formation_energy_diagrams = formation_energy_diagrams.formation_energy_diagrams
     elif isinstance(formation_energy_diagrams, FormationEnergyDiagram):
         formation_energy_diagrams = [formation_energy_diagrams]
+
+    filterfunction = filterfunction if filterfunction else lambda x: True
+    formation_energy_diagrams = list(filter(filterfunction, formation_energy_diagrams))
 
     band_gap = formation_energy_diagrams[0].band_gap
     if not xlim and not band_gap:
@@ -871,7 +876,7 @@ def plot_formation_energy_diagrams(
         xmin, xmax = np.subtract(-0.2, alignment), np.subtract(
             band_gap + 0.2, alignment
         )
-    elif xlim:
+    else:
         xmin, xmax = xlim
     ymin, ymax = 0.0, 1.0
     legends_txt = []
