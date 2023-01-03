@@ -225,3 +225,26 @@ def test_ensure_stable_bulk(stable_entries_Mg_Ga_N):
     assert "GaN" not in [e.composition.reduced_formula for e in pd1.stable_entries]
     pd2 = ensure_stable_bulk(pd, fake_bulk_ent)
     assert "GaN" in [e.composition.reduced_formula for e in pd2.stable_entries]
+
+
+def test_plotter(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
+    bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
+    bulk_dos = bulk_vasprun.complete_dos
+    _, vbm = bulk_dos.get_cbm_vbm()
+    bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
+    defect_entries, _ = defect_entries_Mg_Ga
+    def_ent_list = list(defect_entries.values())
+
+    fed = FormationEnergyDiagram(
+        bulk_entry=bulk_entry,
+        defect_entries=def_ent_list,
+        vbm=vbm,
+        pd_entries=stable_entries_Mg_Ga_N,
+        inc_inf_values=False,
+    )
+    axis = plot_formation_energy_diagrams(fed, chempots=fed.chempot_limits[0], show=False, xlim=[0, 2], ylim=[0,4])
+    mfed = MultiFormationEnergyDiagram(formation_energy_diagrams=[fed])
+    plot_formation_energy_diagrams(
+        mfed, chempots=fed.chempot_limits[0], show=True, xlim=[0, 2], ylim=[0,4],
+        axis=axis, legend_prefix="test", linestyle='--', line_alpha=1, linewidth=1
+        )
