@@ -422,7 +422,6 @@ class FormationEnergyDiagram(MSONable):
         res = []
         for vertex in self._chempot_limits_arr:
             res.append(dict(zip(self.chempot_diagram.elements, vertex)))
-        print(res)
         return res
 
     @property
