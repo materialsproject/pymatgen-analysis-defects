@@ -1,4 +1,5 @@
 import os
+
 import numpy as np
 import pytest
 from matplotlib import pyplot as plt
@@ -248,10 +249,17 @@ def test_plotter(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N, plot_
         ValueError,
         match="Must specify xlim or set band_gap attribute",
     ):
-        plot_formation_energy_diagrams(fed, chempots=fed.chempot_limits[0], show=False, save=False)
+        plot_formation_energy_diagrams(
+            fed, chempots=fed.chempot_limits[0], show=False, save=False
+        )
     fed.band_gap = 1
     axis = plot_formation_energy_diagrams(
-        fed, chempots=fed.chempot_limits[0], show=False, xlim=[0, 2], ylim=[0, 4], save=False
+        fed,
+        chempots=fed.chempot_limits[0],
+        show=False,
+        xlim=[0, 2],
+        ylim=[0, 4],
+        save=False,
     )
     mfed = MultiFormationEnergyDiagram(formation_energy_diagrams=[fed])
     plot_formation_energy_diagrams(
@@ -265,14 +273,22 @@ def test_plotter(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N, plot_
         line_alpha=1,
         linewidth=1,
     )
-    plot_fn(fed, chempots=fed.chempot_limits[0], show=False, only_lower_envelope=False, save=True)
+    plot_fn(
+        fed,
+        chempots=fed.chempot_limits[0],
+        show=False,
+        only_lower_envelope=False,
+        save=True,
+    )
     assert os.path.isfile("formation_energy_diagram.png")
     os.remove("formation_energy_diagram.png")
 
-@pytest.fixture(scope='function')
+
+@pytest.fixture(scope="function")
 def plot_fn(*args, **kwargs):
     def _plot(*args, **kwargs):
         plot_formation_energy_diagrams(*args, **kwargs)
         yield plt.show()
-        plt.close('all')
+        plt.close("all")
+
     return _plot
