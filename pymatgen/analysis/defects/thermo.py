@@ -150,7 +150,7 @@ class DefectEntry(MSONable):
     @property
     def corrected_energy(self) -> float:
         """The energy of the defect entry with all corrections applied."""
-        return self.sc_entry.energy + self.corrections["freysoldt"]
+        return self.sc_entry.energy + sum(self.corrections.values())
 
 
 @dataclass
