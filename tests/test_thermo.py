@@ -1,5 +1,7 @@
+import os
 import numpy as np
 import pytest
+from matplotlib import pyplot as plt
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.core import PeriodicSite
 
@@ -227,7 +229,7 @@ def test_ensure_stable_bulk(stable_entries_Mg_Ga_N):
     assert "GaN" in [e.composition.reduced_formula for e in pd2.stable_entries]
 
 
-def test_plotter(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
+def test_plotter(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N, plot_fn):
     bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
     bulk_dos = bulk_vasprun.complete_dos
     _, vbm = bulk_dos.get_cbm_vbm()
@@ -246,22 +248,31 @@ def test_plotter(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
         ValueError,
         match="Must specify xlim or set band_gap attribute",
     ):
-        plot_formation_energy_diagrams(fed, chempots=fed.chempot_limits[0], show=False)
+        plot_formation_energy_diagrams(fed, chempots=fed.chempot_limits[0], show=False, save=False)
     fed.band_gap = 1
     axis = plot_formation_energy_diagrams(
-        fed, chempots=fed.chempot_limits[0], show=False, xlim=[0, 2], ylim=[0, 4]
+        fed, chempots=fed.chempot_limits[0], show=False, xlim=[0, 2], ylim=[0, 4], save=False
     )
     mfed = MultiFormationEnergyDiagram(formation_energy_diagrams=[fed])
     plot_formation_energy_diagrams(
         mfed,
         chempots=fed.chempot_limits[0],
         show=False,
+        save=False,
         axis=axis,
         legend_prefix="test",
         linestyle="--",
         line_alpha=1,
         linewidth=1,
     )
-    plot_formation_energy_diagrams(
-        fed, chempots=fed.chempot_limits[0], show=False, only_lower_envelope=False
-    )
+    plot_fn(fed, chempots=fed.chempot_limits[0], show=False, only_lower_envelope=False, save=True)
+    assert os.path.isfile("formation_energy_diagram.png")
+    os.remove("formation_energy_diagram.png")
+
+@pytest.fixture(scope='function')
+def plot_fn(*args, **kwargs):
+    def _plot(*args, **kwargs):
+        plot_formation_energy_diagrams(*args, **kwargs)
+        yield plt.show()
+        plt.close('all')
+    return _plot
