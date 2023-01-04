@@ -246,9 +246,7 @@ def test_plotter(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
         ValueError,
         match="Must specify xlim or set band_gap attribute",
     ):
-        plot_formation_energy_diagrams(
-            fed, chempots=fed.chempot_limits[0], show=False
-        )
+        plot_formation_energy_diagrams(fed, chempots=fed.chempot_limits[0], show=False)
     fed.band_gap = 1
     axis = plot_formation_energy_diagrams(
         fed, chempots=fed.chempot_limits[0], show=False, xlim=[0, 2], ylim=[0, 4]
