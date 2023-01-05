@@ -282,6 +282,7 @@ def plot_fn():
     def _plot(*args):
         plot_formation_energy_diagrams(*args, save=True, show=True)
         yield plt.show()
-        plt.close('all')
+        plt.close("all")
         os.remove("formation_energy_diagram.png")
+
     return _plot
