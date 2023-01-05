@@ -267,20 +267,20 @@ def test_plotter(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N, plot_
         chempots=fed.chempot_limits[0],
         show=False,
         save=False,
+        only_lower_envelope=False,
         axis=axis,
         legend_prefix="test",
         linestyle="--",
         line_alpha=1,
         linewidth=1,
     )
-    plot_fn(fed, chempots=fed.chempot_limits[0], show=False, only_lower_envelope=False, save=True)
+    plot_fn(fed, fed.chempot_limits[0])
 
 @pytest.fixture(scope='function')
 def plot_fn():
-    def _plot(*args, **kwargs):
-        plot_formation_energy_diagrams(*args, **kwargs)
+    def _plot(*args):
+        plot_formation_energy_diagrams(*args, save=True, show=True)
         yield plt.show()
         plt.close('all')
-        if os.path.exists(kwargs.get("save")):
-            os.remove(kwargs.get("save"))
+        os.remove("formation_energy_diagram.png")
     return _plot
