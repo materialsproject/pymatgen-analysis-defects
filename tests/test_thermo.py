@@ -276,7 +276,8 @@ def test_plotter(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N, plot_
     )
     plot_fn(fed, fed.chempot_limits[0])
 
-@pytest.fixture(scope='function')
+
+@pytest.fixture(scope="function")
 def plot_fn():
     def _plot(*args):
         plot_formation_energy_diagrams(*args, save=True, show=True)
