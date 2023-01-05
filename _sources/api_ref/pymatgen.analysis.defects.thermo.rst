@@ -19,6 +19,7 @@
       get_transitions
       get_upper_hull
       group_defects
+      plot_formation_energy_diagrams
    
    
 
