@@ -100,6 +100,7 @@ def get_efnv_correction(
         potentials=bulk_potentials,
     )
 
+    # TODO Should probably be done natively instead of with pydefect
     efnv_corr = make_efnv_correction(
         charge=charge,
         calc_results=defect_calc_results,
@@ -108,10 +109,15 @@ def get_efnv_correction(
         **kwargs,
     )
 
-    # TODO Using pydefect
-    efnv_corr = Correction(
-        correction_energy=efnv_corr.correction_energy,
+    es_corr = Correction(
+        correction_energy=efnv_corr.point_charge_correction,
         correction_type=CorrectionType.electrostatic,
-        metadata={"efnv_corr": efnv_corr}
         )
-    return CorrectionsSummary.from_corrections([efnv_corr])
+
+    # TODO Need to get potalign plot data
+    pot_corr = Correction(
+        correction_energy=efnv_corr.alignment_correction,
+        correction_type=CorrectionType.potential_alignment,
+    )
+
+    return CorrectionsSummary.from_corrections([es_corr, pot_corr])
