@@ -10,7 +10,11 @@ import logging
 import math
 from pathlib import Path
 
-from pymatgen.analysis.defects.corrections.base import CorrectionType, Correction, CorrectionsSummary
+from pymatgen.analysis.defects.corrections.base import (
+    Correction,
+    CorrectionsSummary,
+    CorrectionType,
+)
 from pymatgen.analysis.defects.utils import get_zfile
 
 # check that pydefect is installed
@@ -112,7 +116,7 @@ def get_efnv_correction(
     es_corr = Correction(
         correction_energy=efnv_corr.point_charge_correction,
         correction_type=CorrectionType.electrostatic,
-        )
+    )
 
     # TODO Need to get potalign plot data
     pot_corr = Correction(

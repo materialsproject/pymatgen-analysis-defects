@@ -1,13 +1,16 @@
-from typing import Any, Optional
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Optional
+
 from monty.json import MSONable
 
 
 class CorrectionType(Enum):
     """Correction type"""
+
     electrostatic = "electrostatic"
     potential_alignment = "potential_alignment"
+
 
 @dataclass
 class Correction(MSONable):
@@ -21,13 +24,14 @@ class Correction(MSONable):
 
     correction_energy: float
     correction_type: CorrectionType
-    uncertainty: float = None,
-    name: str = "Defect correction",
-    description: str = "",
+    uncertainty: float = (None,)
+    name: str = ("Defect correction",)
+    description: str = ("",)
     metadata: Optional[dict[Any, Any]] = None
 
     def __post_init__(self):
         self.metadata: dict = {} if self.metadata is None else self.metadata
+
 
 @dataclass
 class CorrectionsSummary(MSONable):
@@ -37,6 +41,7 @@ class CorrectionsSummary(MSONable):
         corrections: A dictionary mapping CorrectionType to its correction energy
         metadata: A dictionary of metadata for plotting and intermediate analysis.
     """
+
     corrections: dict[CorrectionType, float]
     metadata: dict[Any, Any]
 
