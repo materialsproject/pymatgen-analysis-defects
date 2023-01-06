@@ -10,7 +10,11 @@ import logging
 import math
 from pathlib import Path
 
-from pymatgen.analysis.defects.corrections.base import CorrectionType, Correction, CorrectionsSummary
+from pymatgen.analysis.defects.corrections.base import (
+    Correction,
+    CorrectionsSummary,
+    CorrectionType,
+)
 from pymatgen.analysis.defects.utils import get_zfile
 
 # check that pydefect is installed

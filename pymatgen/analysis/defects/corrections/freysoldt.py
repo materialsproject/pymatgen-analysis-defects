@@ -10,11 +10,14 @@ import numpy as np
 import scipy
 from numpy.typing import ArrayLike
 from pymatgen.core import Lattice
-from pymatgen.io.vasp.outputs import Locpot
 from pymatgen.io.common import VolumetricData
 from scipy import stats
 
-from pymatgen.analysis.defects.corrections.base import CorrectionType, Correction, CorrectionsSummary
+from pymatgen.analysis.defects.corrections.base import (
+    Correction,
+    CorrectionsSummary,
+    CorrectionType,
+)
 from pymatgen.analysis.defects.utils import (
     QModel,
     ang_to_bohr,
@@ -41,7 +44,7 @@ Rewritten to be functional instead of object oriented.
 def get_freysoldt_correction(
     q: int,
     dielectric: float,
-    defect_locpot: VolumetricData, #TODO Change to VolumetricData eventually
+    defect_locpot: VolumetricData,  # TODO Change to VolumetricData eventually
     bulk_locpot: VolumetricData,
     defect_frac_coords: Optional[ArrayLike] = None,
     lattice: Optional[Lattice] = None,
@@ -112,9 +115,9 @@ def get_freysoldt_correction(
 
     # TODO this can be done with regridding later
     if isinstance(bulk_locpot, VolumetricData):
-        list_bulk_plnr_avg_esp = [*map(bulk_locpot.get_average_along_axis, [0, 1, 2])]
+        [*map(bulk_locpot.get_average_along_axis, [0, 1, 2])]
     else:
-        list_bulk_plnr_avg_esp = bulk_locpot
+        pass
 
     es_corr = perform_es_corr(
         lattice=lattice,
@@ -135,7 +138,7 @@ def get_freysoldt_correction(
         defect_frac_coords=defect_frac_coords,
         dielectric=dielectric,
         q_model=q_model,
-        mad_tol=mad_tol
+        mad_tol=mad_tol,
     )
 
     return CorrectionsSummary.from_corrections([es_corr, pot_corr])
@@ -200,13 +203,20 @@ def perform_es_corr(
     return Correction(
         correction_energy=es_corr, correction_type=CorrectionType.ELECTROSTATIC,
         name="Freysoldt electrostatic",
-        description="https://doi.org/10.1103/PhysRevLett.102.016402"
-        )
+        description="https://doi.org/10.1103/PhysRevLett.102.016402",
+    )
 
 
 def perform_pot_corr(
-    q, list_axis_grid, list_bulk_plnr_avg_esp, list_defect_plnr_avg_esp,
-    lattice, defect_frac_coords, dielectric, q_model, mad_tol,
+    q,
+    list_axis_grid,
+    list_bulk_plnr_avg_esp,
+    list_defect_plnr_avg_esp,
+    lattice,
+    defect_frac_coords,
+    dielectric,
+    q_model,
+    mad_tol,
 ):
     pot_corrs = dict()
     plot_data = dict()
@@ -237,7 +247,7 @@ def perform_pot_corr(
         description="https://doi.org/10.1103/PhysRevLett.102.016402",
         correction_type=CorrectionType.POTENTIAL_ALIGNMENT,
         metadata=plot_data,
-        )
+    )
 
 
 def perform_pot_corr_single(

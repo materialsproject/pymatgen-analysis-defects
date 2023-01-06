@@ -14,6 +14,7 @@ class CorrectionType(Enum):
     POTENTIAL_ALIGNMENT = "potential_alignment"
 
 
+
 @dataclass
 class Correction(MSONable):
     """Summary of a single energy correction.

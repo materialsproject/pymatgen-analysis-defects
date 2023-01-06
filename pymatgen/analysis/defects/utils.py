@@ -9,7 +9,6 @@ import math
 import operator
 from collections import defaultdict
 from copy import deepcopy
-from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
 from typing import Any, Callable, Generator
