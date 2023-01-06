@@ -116,7 +116,7 @@ def get_efnv_correction(
     es_corr = Correction(
         correction_energy=efnv_corr.point_charge_correction,
         correction_type=CorrectionType.ELECTROSTATIC,
-        )
+    )
 
     # TODO Need to get potalign plot data
     pot_corr = Correction(

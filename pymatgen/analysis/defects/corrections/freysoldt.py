@@ -201,7 +201,8 @@ def perform_es_corr(
     es_corr = round((eiso - eper) / dielectric * hart_to_ev, 6)
     _logger.info("Defect Correction without alignment %f (eV): ", es_corr)
     return Correction(
-        correction_energy=es_corr, correction_type=CorrectionType.ELECTROSTATIC,
+        correction_energy=es_corr,
+        correction_type=CorrectionType.ELECTROSTATIC,
         name="Freysoldt electrostatic",
         description="https://doi.org/10.1103/PhysRevLett.102.016402",
     )

@@ -1,8 +1,9 @@
 """Objects for representing corrections to defect calculations."""
 
-from typing import Any, Optional
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Optional
+
 import numpy as np
 from monty.json import MSONable
 
@@ -12,7 +13,6 @@ class CorrectionType(Enum):
 
     ELECTROSTATIC = "electrostatic"
     POTENTIAL_ALIGNMENT = "potential_alignment"
-
 
 
 @dataclass
