@@ -24,9 +24,10 @@ from scipy.optimize import bisect
 from scipy.spatial import ConvexHull
 
 from pymatgen.analysis.defects.core import Defect
+from pymatgen.analysis.defects.corrections.base import CorrectionsSummary
 from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
 from pymatgen.analysis.defects.finder import DefectSiteFinder
-from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile
+from pymatgen.analysis.defects.utils import get_zfile
 
 __author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -65,17 +66,11 @@ class DefectEntry(MSONable):
     charge_state: int
     sc_entry: ComputedStructureEntry
     sc_defect_frac_coords: Optional[ArrayLike] = None
-    corrections: Optional[Dict[str, float]] = None
-    correction_metadata: Optional[Dict[str, Dict]] = None
+    corrections: Optional[CorrectionsSummary] = None
 
     def __post_init__(self) -> None:
         """Post-initialization."""
         self.charge_state = int(self.charge_state)
-        self.corrections: dict = {} if self.corrections is None else self.corrections
-        self.correction_type: str = "freysoldt"
-        self.correction_metadata: dict = (
-            {} if self.correction_metadata is None else self.correction_metadata
-        )
 
     def get_freysoldt_correction(
         self,
@@ -85,7 +80,7 @@ class DefectEntry(MSONable):
         defect_struct: Optional[Structure] = None,
         bulk_struct: Optional[Structure] = None,
         **kwargs,
-    ) -> CorrectionResult:
+    ) -> CorrectionsSummary:
         """Calculate the Freysoldt correction.
 
         Updates the corrections dictionary with the Freysoldt correction
@@ -142,18 +137,13 @@ class DefectEntry(MSONable):
             lattice=defect_struct.lattice,
             **kwargs,
         )
-        self.corrections.update(
-            {
-                "freysoldt": frey_corr.correction_energy,
-            }
-        )
-        self.correction_metadata.update({"freysoldt": frey_corr.metadata.copy()})
+        self.corrections = frey_corr
         return frey_corr
 
     @property
     def corrected_energy(self) -> float:
         """The energy of the defect entry with all corrections applied."""
-        return self.sc_entry.energy + self.corrections["freysoldt"]
+        return self.sc_entry.energy + self.corrections.correction_energy
 
 
 @dataclass

@@ -11,10 +11,11 @@ import scipy
 from numpy.typing import ArrayLike
 from pymatgen.core import Lattice
 from pymatgen.io.vasp.outputs import Locpot
+from pymatgen.io.common import VolumetricData
 from scipy import stats
 
+from pymatgen.analysis.defects.corrections.base import CorrectionType, Correction, CorrectionsSummary
 from pymatgen.analysis.defects.utils import (
-    CorrectionResult,
     QModel,
     ang_to_bohr,
     converge,
@@ -40,15 +41,15 @@ Rewritten to be functional instead of object oriented.
 def get_freysoldt_correction(
     q: int,
     dielectric: float,
-    defect_locpot: Locpot,
-    bulk_locpot: Locpot,
+    defect_locpot: VolumetricData, #TODO Change to VolumetricData eventually
+    bulk_locpot: VolumetricData,
     defect_frac_coords: Optional[ArrayLike] = None,
     lattice: Optional[Lattice] = None,
     energy_cutoff: float = 520,
     mad_tol: float = 1e-4,
     q_model: Optional[QModel] = None,
     step: float = 1e-4,
-) -> CorrectionResult:
+) -> CorrectionsSummary:
     """Gets the Freysoldt correction for a defect entry.
 
     Args:
@@ -92,7 +93,7 @@ def get_freysoldt_correction(
 
     q_model = QModel() if q_model is None else q_model
 
-    if isinstance(defect_locpot, Locpot):
+    if isinstance(defect_locpot, VolumetricData):
         list_axis_grid = [*map(defect_locpot.get_axis_grid, [0, 1, 2])]
         list_defect_plnr_avg_esp = [
             *map(defect_locpot.get_average_along_axis, [0, 1, 2])
@@ -110,7 +111,7 @@ def get_freysoldt_correction(
         ]
 
     # TODO this can be done with regridding later
-    if isinstance(bulk_locpot, Locpot):
+    if isinstance(bulk_locpot, VolumetricData):
         list_bulk_plnr_avg_esp = [*map(bulk_locpot.get_average_along_axis, [0, 1, 2])]
     else:
         list_bulk_plnr_avg_esp = bulk_locpot
@@ -125,39 +126,24 @@ def get_freysoldt_correction(
         step=step,
     )
 
-    pot_corrs = dict()
-    plot_data = dict()
-
-    for x, pureavg, defavg, axis in zip(
-        list_axis_grid, list_bulk_plnr_avg_esp, list_defect_plnr_avg_esp, [0, 1, 2]
-    ):
-        tmp_pot_corr, md = perform_pot_corr(
-            axis_grid=x,
-            pureavg=pureavg,
-            defavg=defavg,
-            lattice=lattice,
-            q=q,
-            defect_frac_coords=defect_frac_coords,
-            axis=axis,
-            dielectric=dielectric,
-            q_model=q_model,
-            mad_tol=mad_tol,
-            widthsample=1.0,
-        )
-        pot_corrs[axis] = tmp_pot_corr
-        plot_data[axis] = md
-
-    pot_corr = np.mean(list(pot_corrs.values()))
-    pot_align = pot_corr / (-q) if q else 0
-    return CorrectionResult(
-        correction_energy=es_corr + pot_align,
-        metadata=plot_data,
+    pot_corr = perform_pot_corr(
+        q,
+        list_axis_grid=list_axis_grid,
+        list_bulk_plnr_avg_esp=list_defect_plnr_avg_esp,
+        list_defect_plnr_avg_esp=list_defect_plnr_avg_esp,
+        lattice=lattice,
+        defect_frac_coords=defect_frac_coords,
+        dielectric=dielectric,
+        q_model=q_model,
+        mad_tol=mad_tol
     )
+
+    return CorrectionsSummary.from_corrections([es_corr, pot_corr])
 
 
 def perform_es_corr(
     lattice, q, dielectric, q_model, energy_cutoff=520, mad_tol=1e-4, step=1e-4
-) -> float:
+) -> Correction:
     """Perform Electrostatic Freysoldt Correction.
 
     Perform the electrostatic Freysoldt correction for a defect.
@@ -211,10 +197,50 @@ def perform_es_corr(
 
     es_corr = round((eiso - eper) / dielectric * hart_to_ev, 6)
     _logger.info("Defect Correction without alignment %f (eV): ", es_corr)
-    return es_corr
+    return Correction(
+        correction_energy=es_corr, correction_type=CorrectionType.electrostatic,
+        name="Freysoldt electrostatic",
+        description="https://doi.org/10.1103/PhysRevLett.102.016402"
+        )
 
 
 def perform_pot_corr(
+    q, list_axis_grid, list_bulk_plnr_avg_esp, list_defect_plnr_avg_esp,
+    lattice, defect_frac_coords, dielectric, q_model, mad_tol,
+):
+    pot_corrs = dict()
+    plot_data = dict()
+
+    for x, pureavg, defavg, axis in zip(
+        list_axis_grid, list_bulk_plnr_avg_esp, list_defect_plnr_avg_esp, [0, 1, 2]
+    ):
+        tmp_pot_corr, md = perform_pot_corr_single(
+            axis_grid=x,
+            pureavg=pureavg,
+            defavg=defavg,
+            lattice=lattice,
+            q=q,
+            defect_frac_coords=defect_frac_coords,
+            axis=axis,
+            dielectric=dielectric,
+            q_model=q_model,
+            mad_tol=mad_tol,
+            widthsample=1.0,
+        )
+        pot_corrs[axis] = tmp_pot_corr
+        plot_data[axis] = md
+
+    pot_corr = np.mean(list(pot_corrs.values()))
+    return Correction(
+        correction_energy=pot_corr if q else 0,
+        name="Freysoldt potential alignment",
+        description="https://doi.org/10.1103/PhysRevLett.102.016402",
+        correction_type=CorrectionType.potential_alignment,
+        metadata=plot_data,
+        )
+
+
+def perform_pot_corr_single(
     axis_grid,
     pureavg,
     defavg,
