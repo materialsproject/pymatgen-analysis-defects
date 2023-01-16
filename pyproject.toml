@@ -36,13 +36,13 @@ strict = [
   "pymatgen==2022.11.7",
   "dscribe==1.2.2",
   "scikit-image==0.19.3",
-  "pytest==7.2.0",
+  "pytest==7.2.1",
   "pytest-cov==4.0.0",
   "pre-commit==2.21.0",
   "pydefect==0.7.0",
 ]
 
-tests = ["pytest==7.2.0", "pytest-cov==4.0.0"]
+tests = ["pytest==7.2.1", "pytest-cov==4.0.0"]
 
 [tool.setuptools.dynamic]
 readme = { file = ["README.rst"] }
