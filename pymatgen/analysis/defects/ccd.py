@@ -66,7 +66,7 @@ class HarmonicDefect(MSONable):
     defect_band: Optional[Sequence[tuple]] = None
     relaxed_index: Optional[int] = None
     relaxed_bandstructure: Optional[BandStructure] = None
-    wswqs: Optional[dict[float, WSWQ]] = None
+    wswqs: Optional[list[dict]] = None
     waveder: Optional[Waveder] = None
 
     def __repr__(self) -> str:
@@ -326,9 +326,11 @@ class HarmonicDefect(MSONable):
             raise ValueError(
                 f"Number of WSWQ files ({len(wswq_files)}) does not match number of distortions ({len(distortions)})."
             )
-        self.wswqs = {d: WSWQ.from_file(f) for d, f in zip(distortions, wswq_files)}
+        self.wswqs = [
+            {"Q": d, "wswq": WSWQ.from_file(f)} for d, f in zip(distortions, wswq_files)
+        ]
 
-    def get_elph_me(self, defect_state: tuple[int, int, int]) -> npt.ArrayLike:
+    def get_elph_me(self, defect_state: tuple) -> npt.ArrayLike:
         """Calculate the electron phonon matrix elements.
 
         Combine the data from the WSWQs to calculate the electron phonon matrix elements.
@@ -350,8 +352,8 @@ class HarmonicDefect(MSONable):
         """
         if self.wswqs is None:
             raise RuntimeError("WSWQs have not been read. Use `read_wswqs` first.")
-        distortions = list(self.wswqs.keys())
-        wswqs = list(self.wswqs.values())
+        distortions = [wswq["Q"] for wswq in self.wswqs]
+        wswqs = [wswq["wswq"] for wswq in self.wswqs]
         band_index, kpoint_index, spin_index = defect_state
         # The second band index is associated with the defect state
         # since we are usually interested in capture
@@ -378,10 +380,6 @@ class HarmonicDefect(MSONable):
             The eigenvalue difference to the defect band in the order specified by output_order.
 
         """
-        if self.defect_band_index is None:
-            raise ValueError(  # pragma: no cover
-                "The ``defect_band_index`` must be set before ``ediff`` can be computed."
-            )
         if self.relaxed_bandstructure is None:
             raise ValueError(  # pragma: no cover
                 "The ``relaxed_bandstructure`` must be set before ``ediff`` can be computed. "
@@ -390,7 +388,7 @@ class HarmonicDefect(MSONable):
 
         ediffs_ = _get_ks_ediff(
             bandstructure=self.relaxed_bandstructure,
-            defect_band_index=self.defect_band_index,
+            defect_band=self.defect_band,
         )
         ediffs_stack = [
             ediffs_[Spin.up].T,
@@ -735,7 +733,7 @@ def _get_wswq_slope(distortions: list[float], wswqs: list[WSWQ]) -> npt.NDArray:
 
 def _get_ks_ediff(
     bandstructure: BandStructure,
-    defect_band_index: int,
+    defect_band: Sequence[tuple],
 ) -> dict[Spin, npt.NDArray]:
     """Calculate the Kohn-Sham energy between the defect state.
 
@@ -744,15 +742,23 @@ def _get_ks_ediff(
 
     Args:
         bandstructure: A BandStructure object.
-        defect_band_index: The index of the defect band.
+        defect_band: The defect band given as a list of tuples (band_index, kpoint_index, spin_index).
 
     Returns:
         npt.NDArray: The Kohn-Sham energy difference between the defect state and other states.
         Indexed the same way as ``bandstructure.bands``.
     """
     res = dict()
-    for k, kpt_bands in bandstructure.bands.items():
-        e_at_def_band = kpt_bands[defect_band_index, :]
-        e_diff = kpt_bands - e_at_def_band
-        res[k] = e_diff
+    b_at_kpt_and_spin = {(k, s): b for b, k, s in defect_band}
+    for ispin, eigs in bandstructure.bands.items():
+        spin_index = 0 if ispin == Spin.up else 1
+        res[ispin] = np.zeros_like(eigs)
+        for ikpt, kpt in enumerate(bandstructure.kpoints):
+            iband = b_at_kpt_and_spin.get((ikpt, spin_index), None)
+            # import ipdb; ipdb.set_trace()
+            if iband is None:
+                continue
+            e_at_def_band = eigs[iband, ikpt]
+            e_diff = eigs[:, ikpt] - e_at_def_band
+            res[ispin][:, ikpt] = e_diff
     return res

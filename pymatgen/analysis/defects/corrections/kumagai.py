@@ -14,13 +14,13 @@ from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile
 
 # check that pydefect is installed
 try:
-    pass
+    from vise import user_settings
 except ImportError:
-    raise ImportError("pydefect is not installed. Please install it first.")
+    raise ModuleNotFoundError(
+        "vise/pydefect is not installed. Please install it first."
+    )
 
 # Disable messages from pydefect import
-from vise import user_settings
-
 user_settings.logger.setLevel(logging.CRITICAL)
 
 from pydefect.analyzer.calc_results import CalcResults
