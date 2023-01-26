@@ -566,6 +566,22 @@ The points of interest are usually vertex points in the constrained chemical pot
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Chemical potential limits for point 0
+μ_Mg = -1.49 eV
+μ_Ga = -1.75 eV
+μ_N = 0.00 eV
+Chemical potential limits for point 1
+μ_Mg = -0.35 eV
+μ_Ga = -0.03 eV
+μ_N = -1.71 eV
+Chemical potential limits for point 2
+μ_Mg = -0.44 eV
+μ_Ga = -0.00 eV
+μ_N = -1.75 eV
+</pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="finite-size-corrections">
@@ -585,12 +601,20 @@ The intermediate analysis (planar-averaged potentials) for calculating the Freys
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.corrections.freysoldt</span> <span class="kn">import</span> <span class="n">plot_plnr_avg</span>
-<span class="n">plot_data</span> <span class="o">=</span> <span class="n">fed</span><span class="o">.</span><span class="n">defect_entries</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">correction_metadata</span>
+<span class="n">plot_data</span> <span class="o">=</span> <span class="n">fed</span><span class="o">.</span><span class="n">defect_entries</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">correction_metadata</span><span class="p">[</span><span class="s2">&quot;freysoldt&quot;</span><span class="p">]</span>
 <span class="n">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lattice Direction 1&quot;</span><span class="p">)</span>
 <span class="n">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lattice Direction 2&quot;</span><span class="p">)</span>
 <span class="n">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lattice Direction 3&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;module &#39;matplotlib.pyplot&#39; from &#39;/opt/hostedtoolcache/Python/3.10.9/x64/lib/python3.10/site-packages/matplotlib/pyplot.py&#39;&gt;
+</pre></div>
+</div>
+<img alt="../_images/formation-energy_6_1.png" src="../_images/formation-energy_6_1.png" />
+<img alt="../_images/formation-energy_6_2.png" src="../_images/formation-energy_6_2.png" />
+<img alt="../_images/formation-energy_6_3.png" src="../_images/formation-energy_6_3.png" />
 </div>
 </div>
 </section>
