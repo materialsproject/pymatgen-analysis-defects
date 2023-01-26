@@ -10,7 +10,12 @@ import logging
 import math
 from pathlib import Path
 
-from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile
+from pymatgen.analysis.defects.corrections.base import (
+    Correction,
+    CorrectionsSummary,
+    CorrectionType,
+)
+from pymatgen.analysis.defects.utils import get_zfile
 
 # check that pydefect is installed
 try:
@@ -72,7 +77,7 @@ def get_efnv_correction(
     bulk_structure: Structure,
     dielectric_tensor: list[list[float]],
     **kwargs,
-) -> CorrectionResult:
+) -> CorrectionsSummary:
     """Returns the Kumagai/Oba EFNV correction for a given defect.
 
     Args:
@@ -99,6 +104,7 @@ def get_efnv_correction(
         potentials=bulk_potentials,
     )
 
+    # TODO Should probably be done natively instead of with pydefect
     efnv_corr = make_efnv_correction(
         charge=charge,
         calc_results=defect_calc_results,
@@ -107,6 +113,15 @@ def get_efnv_correction(
         **kwargs,
     )
 
-    return CorrectionResult(
-        correction_energy=efnv_corr.correction_energy, metadata={"efnv_corr": efnv_corr}
+    es_corr = Correction(
+        correction_energy=efnv_corr.point_charge_correction,
+        correction_type=CorrectionType.ELECTROSTATIC,
     )
+
+    # TODO Need to get potalign plot data
+    pot_corr = Correction(
+        correction_energy=efnv_corr.alignment_correction,
+        correction_type=CorrectionType.POTENTIAL_ALIGNMENT,
+    )
+
+    return CorrectionsSummary.from_corrections([es_corr, pot_corr])
