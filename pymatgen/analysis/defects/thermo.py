@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from itertools import groupby
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 from matplotlib import cm
@@ -54,28 +54,23 @@ class DefectEntry(MSONable):
             automatically determine the defect location.
         corrections:
             A dictionary of corrections to the energy.
-        correction_summaries:
+        corrections_metadata:
             A dictionary that acts as a generic container for storing information
             about how the corrections were calculated.  These should are only used
             for debugging and plotting purposes.
-            PLEASE DO NOT USE THIS FOR REAL DATA.
+            PLEASE DO NOT USE THIS AS A CONTAINER FOR IMPORTANT DATA.
     """
 
     defect: Defect
     charge_state: int
     sc_entry: ComputedStructureEntry
-    sc_defect_frac_coords: Optional[ArrayLike] = None
-    corrections: Optional[Dict[str, float]] = None
-    correction_metadata: Optional[Dict[str, Dict]] = None
+    corrections: dict[str, float] = field(default_factory=dict)
+    corrections_metadata: dict[str, Any] = field(default_factory=dict)
+    sc_defect_frac_coords: tuple[float, float, float] | None = None
 
     def __post_init__(self) -> None:
         """Post-initialization."""
         self.charge_state = int(self.charge_state)
-        self.corrections: dict = {} if self.corrections is None else self.corrections
-        self.correction_type: str = "freysoldt"
-        self.correction_metadata: dict = (
-            {} if self.correction_metadata is None else self.correction_metadata
-        )
 
     def get_freysoldt_correction(
         self,
@@ -147,7 +142,7 @@ class DefectEntry(MSONable):
                 "freysoldt": frey_corr.correction_energy,
             }
         )
-        self.correction_metadata.update({"freysoldt": frey_corr.metadata.copy()})
+        self.corrections_metadata.update({"freysoldt": frey_corr.metadata.copy()})
         return frey_corr
 
     @property
