@@ -609,12 +609,17 @@ The intermediate analysis (planar-averaged potentials) for calculating the Freys
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;module &#39;matplotlib.pyplot&#39; from &#39;/opt/hostedtoolcache/Python/3.10.9/x64/lib/python3.10/site-packages/matplotlib/pyplot.py&#39;&gt;
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">2</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.corrections.freysoldt</span> <span class="kn">import</span> <span class="n">plot_plnr_avg</span>
+<span class="ne">----&gt; </span><span class="mi">2</span> <span class="n">plot_data</span> <span class="o">=</span> <span class="n">fed</span><span class="o">.</span><span class="n">defect_entries</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">correction_metadata</span><span class="p">[</span><span class="s2">&quot;freysoldt&quot;</span><span class="p">]</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lattice Direction 1&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lattice Direction 2&quot;</span><span class="p">)</span>
+
+<span class="ne">AttributeError</span>: &#39;DefectEntry&#39; object has no attribute &#39;correction_metadata&#39;
 </pre></div>
 </div>
-<img alt="../_images/formation-energy_6_1.png" src="../_images/formation-energy_6_1.png" />
-<img alt="../_images/formation-energy_6_2.png" src="../_images/formation-energy_6_2.png" />
-<img alt="../_images/formation-energy_6_3.png" src="../_images/formation-energy_6_3.png" />
 </div>
 </div>
 </section>
