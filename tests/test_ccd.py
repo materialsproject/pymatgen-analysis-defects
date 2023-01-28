@@ -125,6 +125,18 @@ def test_SRHCapture(hd0, hd1, test_dir):
     ref_results = [1.89187260e-34, 6.21019152e-33, 3.51501688e-31]
     assert np.allclose(c_n, ref_results)
 
+    # expect RuntimeError
+    with pytest.raises(RuntimeError) as e:
+        get_SRH_coefficient(
+            initial_state=hd0,
+            final_state=hd1,
+            defect_state=hd1.defect_band[-1],
+            T=[100, 200, 300],
+            dE=1.0,
+            use_final_state_elph=True,
+        )
+    assert "WSWQ" in str(e.value)
+
 
 def test_dielectric_func(test_dir):
     dir0_opt = test_dir / "v_Ga" / "ccd_0_-1" / "optics"
