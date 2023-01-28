@@ -10,6 +10,7 @@ from typing import Optional, Sequence, Tuple
 
 import numpy as np
 import numpy.typing as npt
+from matplotlib.axes import Axes
 from monty.json import MSONable
 from pymatgen.electronic_structure.core import Spin
 from pymatgen.io.vasp.optics import DielectricFunctionCalculator
@@ -481,6 +482,7 @@ def get_SRH_coefficient(
     g: int = 1,
     occ_tol: float = 1e-3,
     n_band_edge: int = 1,
+    use_final_state_elph: bool = False,
 ) -> npt.ArrayLike:
     """Get the SRH coefficient for a defect.
 
@@ -493,12 +495,18 @@ def get_SRH_coefficient(
         g: The degeneracy of the defect state.
         occ_tol: The tolerance for determining if a state is occupied.
         n_band_edge: The number of bands to average over at the band edge.
+        use_final_state_elph: Whether to use the final state's ELPH data.
+            This is useful if the initial state does not have a well-defined
+            defect state.
 
     Returns:
         The SRH recombination coefficient in units of cm^3 s^-1.
     """
-    me_all = initial_state.get_elph_me(defect_state=defect_state)
-    defect_band, defect_kpt, defect_spin = defect_state
+    if use_final_state_elph:
+        me_all = final_state.get_elph_me(defect_state=defect_state)
+    else:
+        me_all = initial_state.get_elph_me(defect_state=defect_state)
+    defect_band, _, _ = defect_state
 
     if initial_state.charge_state == final_state.charge_state + 1:
         band_slice = slice(defect_band + 1, defect_band + 1 + n_band_edge)
@@ -762,3 +770,33 @@ def _get_ks_ediff(
             e_diff = eigs[:, ikpt] - e_at_def_band
             res[ispin][:, ikpt] = e_diff
     return res
+
+
+def plot_pes(
+    hd: HarmonicDefect, x_shift=0, y_shift=0, width: float = 1.0, ax: Axes = None
+) -> None:
+    """Plot the Potential Energy Surface of a HarmonicDefect.
+
+    Args:
+        hd: HarmonicDefect object
+        x_shift: shift the PES by this amount in the x-direction
+        y_shift: shift the PES by this amount in the y-direction
+
+    Returns:
+        None
+    """
+    if ax is None:
+        from matplotlib import pyplot as plt
+
+        fig, ax = plt.subplots()
+    ax.plot(
+        np.array(hd.distortions) + x_shift,
+        (np.array(hd.energies) - hd.energies[hd.relaxed_index]) + y_shift,
+        "o",
+        ms=10,
+    )
+    xx = np.linspace(-width / 2, width / 2, 20)
+    yy = 0.5 * hd.omega**2 * xx**2
+    ax.plot(xx + x_shift, (yy + y_shift))
+    ax.set_xlabel("Q [amu$^{1/2}$Å]")
+    ax.set_ylabel("Energy [eV]")

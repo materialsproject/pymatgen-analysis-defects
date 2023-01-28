@@ -52,10 +52,10 @@ def test_defect_entry(defect_entries_Mg_Ga):
 
     # test that the plotting code runs
     plot_plnr_avg(plot_data[0][1])
-    plot_plnr_avg(defect_entries[1].correction_metadata["freysoldt"][1])
+    plot_plnr_avg(defect_entries[1].corrections_metadata["freysoldt"][1])
 
     vr1 = plot_data[0][1]["pot_plot_data"]["Vr"]
-    vr2 = defect_entries[0].correction_metadata["freysoldt"][1]["pot_plot_data"]["Vr"]
+    vr2 = defect_entries[0].corrections_metadata["freysoldt"][1]["pot_plot_data"]["Vr"]
     assert np.allclose(vr1, vr2)
 
 
