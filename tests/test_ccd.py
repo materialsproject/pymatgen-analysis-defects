@@ -3,7 +3,12 @@ from collections import namedtuple
 import numpy as np
 import pytest
 
-from pymatgen.analysis.defects.ccd import HarmonicDefect, Waveder, _get_wswq_slope
+from pymatgen.analysis.defects.ccd import (
+    HarmonicDefect,
+    Waveder,
+    _get_wswq_slope,
+    plot_pes,
+)
 
 
 @pytest.fixture(scope="session")
@@ -135,67 +140,5 @@ def test_dielectric_func(test_dir):
     assert pytest.approx(inter_cbm, abs=0.01) == 0.27
 
 
-# def test_OpticalHarmonicDefect(v_ga):
-#     from pymatgen.analysis.defects.ccd import OpticalHarmonicDefect
-
-#     vaspruns = v_ga[(0, -1)]["vaspruns"]
-#     procar = v_ga[(0, -1)]["procar"]
-#     wavder = v_ga[(0, -1)]["waveder"]
-#     hd0 = OpticalHarmonicDefect.from_vaspruns_and_waveder(
-#         vaspruns,
-#         waveder=wavder,
-#         charge_state=0,
-#         procar=procar,
-#     )
-
-#     # the non-optical part should behave the same
-#     wswqs = v_ga[(0, -1)]["wswqs"]
-#     elph_me = hd0.get_elph_me(wswqs=wswqs)
-#     assert np.allclose(elph_me[..., 138], 0.0)  # ediff should be zero for defect band
-#     assert np.linalg.norm(elph_me[..., 139]) > 0
-
-#     # # check that waveder is symmetric
-#     def is_symm(waveder, i, j):
-#         assert (
-#             np.max(
-#                 np.abs(
-#                     np.abs(waveder.cder_data[i, j, :, :])
-#                     - np.abs(waveder.cder_data[j, i, :, :])
-#                 )
-#             )
-#             <= 1e-10
-#         )
-
-#     is_symm(hd0.waveder, 123, 42)
-#     is_symm(hd0.waveder, 138, 69)
-
-#     nbands_spectra, *_ = hd0._get_spectra().shape
-#     nbands_dipole, *_ = hd0._get_defect_dipoles().shape
-#     assert nbands_spectra == nbands_dipole
-
-
-# def test_SRHCapture(v_ga):
-#     from pymatgen.analysis.defects.ccd import HarmonicDefect, SRHCapture
-
-#     vaspruns = v_ga[(0, -1)]["vaspruns"]
-#     procar = v_ga[(0, -1)]["procar"]
-#     hd0 = HarmonicDefect.from_vaspruns(
-#         vaspruns, charge_state=0, procar=procar, store_bandstructure=True
-#     )
-
-#     vaspruns = v_ga[(-1, 0)]["vaspruns"]
-#     procar = v_ga[(-1, 0)]["procar"]
-#     hdm1 = HarmonicDefect.from_vaspruns(
-#         vaspruns, charge_state=-1, procar=procar, store_bandstructure=True
-#     )
-#     dQ = get_dQ(hd0.structures[hd0.relaxed_index], hdm1.structures[hdm1.relaxed_index])
-#     srh_cap = SRHCapture(hd0, hdm1, dQ=dQ, wswqs=v_ga[(0, -1)]["wswqs"])
-
-#     c_n = srh_cap.get_coeff(
-#         T=[100, 200, 300],
-#         dE=1.0,
-#         volume=hd0.structures[hd0.relaxed_index].volume,
-#         kpt_index=1,
-#     )
-#     ref_results = [1.89187260e-34, 6.21019152e-33, 3.51501688e-31]
-#     assert np.allclose(c_n, ref_results)
+def test_plot_pes(hd0):
+    plot_pes(hd0)

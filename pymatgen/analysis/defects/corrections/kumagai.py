@@ -14,16 +14,18 @@ from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile
 
 # check that pydefect is installed
 try:
+    from vise import user_settings
+
+    # Disable messages from pydefect import
+    user_settings.logger.setLevel(logging.CRITICAL)
     from pydefect.analyzer.calc_results import CalcResults
     from pydefect.cli.vasp.make_efnv_correction import make_efnv_correction
-    from vise import user_settings
+
 except ImportError:  # pragma: no cover
     raise ModuleNotFoundError(
         "vise/pydefect is not installed. Please install it first."
     )
 
-# Disable messages from pydefect import
-user_settings.logger.setLevel(logging.CRITICAL)
 
 from pymatgen.core import Structure
 from pymatgen.io.vasp import Outcar, Vasprun
