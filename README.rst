@@ -59,12 +59,10 @@ Defect Complexes
 Multiple defects can be composed into defect complexes.
 The complex is can be treated as a normal defect object for subsequent analysis.
 
-Capture coefficients
-++++++++++++++++++++
+Defect Interactions
++++++++++++++++++++
 
-Coming Soon ... Radiative and Non-radiative capture coefficients at defect centers using semi-classical
-approaches.
-
+Simulation of defect-photon and defect-phonon interactions under the independent particle approximation.
 
 Previous versions of the defects code
 -------------------------------------
