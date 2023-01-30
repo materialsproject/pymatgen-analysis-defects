@@ -43,7 +43,7 @@ repos:
   rev: 6.3.0
   hooks:
     - id: pydocstyle
-      additional_dependencies: ["toml"]
+      additional_dependencies: ["tomli==2.0.1"]
 - repo: https://github.com/pre-commit/pygrep-hooks
   rev: v1.10.0
   hooks:
