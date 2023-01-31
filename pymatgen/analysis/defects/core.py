@@ -680,6 +680,20 @@ def get_element(sp_el: Species | Element) -> Element:
     return sp_el
 
 
+def get_vacancy(structure: Structure, isite: int, **kwargs) -> Vacancy:
+    """Get a vacancy defect from a structure and site index.
+
+    Convenience function for creating a Vacancy object quickly.
+
+    Args:
+        structure: The structure to create the vacancy in.
+        isite: The site index of the vacancy.
+        **kwargs: Keyword arguments to pass to Vacancy constructor.
+    """
+    site = structure[isite]
+    return Vacancy(structure=structure, site=site, **kwargs)
+
+
 # TODO: matching defect complexes might be done with some kind of CoM site to fix the periodicity
 # Get this by taking the periodic average of all the provided sites.
 # class DefectComplex(DummySpecies):
