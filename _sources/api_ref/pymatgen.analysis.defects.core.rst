@@ -14,6 +14,7 @@
    .. autosummary::
    
       get_element
+      get_vacancy
       update_structure
    
    
