@@ -47,7 +47,6 @@ def test_freysoldt(data_Mg_Ga):
 
 
 def test_kumagai(test_dir):
-
     sb = get_structure_with_pot(test_dir / "Mg_Ga" / "bulk_sc")
     sd0 = get_structure_with_pot(test_dir / "Mg_Ga" / "q=0")
     sd1 = get_structure_with_pot(test_dir / "Mg_Ga" / "q=1")

@@ -92,7 +92,7 @@ def test_get_localized_states(v_ga):
     bs = vr.get_band_structure()
     res = get_localized_states(bs, procar=procar)
     loc_bands = set()
-    for (iband, ikpt, ispin, val) in get_localized_states(bs, procar=procar):
+    for iband, ikpt, ispin, val in get_localized_states(bs, procar=procar):
         loc_bands.add(iband)
     assert loc_bands == {
         138,
@@ -104,7 +104,7 @@ def test_get_localized_states(v_ga):
     bs = vr.get_band_structure()
 
     loc_bands = set()
-    for (iband, ikpt, ispin, val) in get_localized_states(
+    for iband, ikpt, ispin, val in get_localized_states(
         bs, procar=procar, band_window=100
     ):
         loc_bands.add(iband)
