@@ -225,7 +225,6 @@ class InterstitialGenerator(DefectGenerator):
             }
 
         for el_str, coords in insertions.items():
-
             for i, coord in enumerate(
                 self._filter_colliding(coords, structure=structure)
             ):
