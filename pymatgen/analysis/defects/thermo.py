@@ -367,7 +367,6 @@ class FormationEnergyDiagram(MSONable):
                 defect_locpot=q_locpot, bulk_locpot=bulk_locpot, dielectric=dielectric
             )
             def_entries.append(q_d_entry)
-
         if vbm is None:
             vr = Vasprun(get_zfile(Path(directory_map["bulk"]), "vasprun.xml"))
             vbm = vr.get_band_structure().get_vbm()["energy"]
