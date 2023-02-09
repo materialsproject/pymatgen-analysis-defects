@@ -216,7 +216,7 @@ class FormationEnergyDiagram(MSONable):
                 "Use MultiFormationEnergyDiagram for multiple defect types"
             )
         # if all of the `DefectEntry` objects have the same `bulk_entry` then `self.bulk_entry` is not needed
-        if all(hasattr(d, "bulk_entry") for d in self.defect_entries):
+        if all(d.bulk_entry is not None for d in self.defect_entries):
             if self.bulk_entry is not None:
                 raise ValueError(
                     "All of the `DefectEntry` objects have a `bulk_entry` attribute, it is not needed to provide `bulk_entry` to `FormationEnergyDiagram`"
