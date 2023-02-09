@@ -107,12 +107,12 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
     )
     pd = PhaseDiagram(stable_entries_Mg_Ga_N)
     fed = FormationEnergyDiagram.with_atomic_entries(
-        bulk_entry=bulk_entry,
         defect_entries=def_ent_list,
         atomic_entries=atomic_entries,
         vbm=vbm,
         inc_inf_values=False,
         phase_diagram=pd,
+        bulk_entry=bulk_entry,
     )
     assert len(fed.chempot_limits) == 3
 
