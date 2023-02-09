@@ -52,6 +52,9 @@ class DefectEntry(MSONable):
             The fractional coordinates of the defect in the supercell.
             If None, structures attributes of the locpot file will be used to
             automatically determine the defect location.
+        bulk_entry:
+            The ComputedEntry for the bulk. If this is provided, the energy difference
+            can be calculated from this automatically.
         corrections:
             A dictionary of corrections to the energy.
         corrections_metadata:
@@ -59,6 +62,7 @@ class DefectEntry(MSONable):
             about how the corrections were calculated.  These should are only used
             for debugging and plotting purposes.
             PLEASE DO NOT USE THIS AS A CONTAINER FOR IMPORTANT DATA.
+
     """
 
     defect: Defect
@@ -67,6 +71,7 @@ class DefectEntry(MSONable):
     corrections: dict[str, float] = field(default_factory=dict)
     corrections_metadata: dict[str, Any] = field(default_factory=dict)
     sc_defect_frac_coords: tuple[float, float, float] | None = None
+    bulk_entry: ComputedEntry | None = None
 
     def __post_init__(self) -> None:
         """Post-initialization."""
@@ -125,6 +130,7 @@ class DefectEntry(MSONable):
                 defect_structure=defect_struct,
                 base_structure=bulk_struct,
             )
+            self.sc_defect_frac_coords = defect_fpos
         else:
             defect_fpos = self.sc_defect_frac_coords
 
@@ -149,6 +155,13 @@ class DefectEntry(MSONable):
     def corrected_energy(self) -> float:
         """The energy of the defect entry with all corrections applied."""
         return self.sc_entry.energy + self.corrections["freysoldt"]
+
+    def get_ediff(self) -> float | None:
+        """Get the energy difference between the defect and the bulk (including finite-size correction)."""
+        if self.bulk_entry:
+            return self.corrected_energy - self.bulk_entry.energy
+        else:
+            return None
 
 
 @dataclass
@@ -182,11 +195,11 @@ class FormationEnergyDiagram(MSONable):
 
     """
 
-    bulk_entry: ComputedStructureEntry
     defect_entries: List[DefectEntry]
     pd_entries: list[ComputedEntry]
     vbm: float
     band_gap: Optional[float] = None
+    bulk_entry: Optional[ComputedStructureEntry] = None
     inc_inf_values: bool = False
 
     def __post_init__(self):
@@ -202,11 +215,24 @@ class FormationEnergyDiagram(MSONable):
                 "Defects are not of same type! "
                 "Use MultiFormationEnergyDiagram for multiple defect types"
             )
+        # if all of the `DefectEntry` objects have the same `bulk_entry` then `self.bulk_entry` is not needed
+        if all(d.bulk_entry is not None for d in self.defect_entries):
+            if self.bulk_entry is not None:
+                raise RuntimeError(
+                    "All of the `DefectEntry` objects have a `bulk_entry` attribute, it is not needed to provide `bulk_entry` to `FormationEnergyDiagram`"
+                    "The energy difference E[Defect SuperCell] - E[Bulk SuperCell] can be calculated directly from `DefectEntry.get_ediff`."
+                )
+        else:
+            if self.bulk_entry is None:
+                raise RuntimeError(
+                    "Not all of the `DefectEntry` objects have a `bulk_entry` attribute, you need to provide `bulk_entry` to `FormationEnergyDiagram`"
+                )
 
+        bulk_entry = self.bulk_entry or self.defect_entries[0].bulk_entry
         pd_ = PhaseDiagram(self.pd_entries)
-        entries = pd_.stable_entries | {self.bulk_entry}
+        entries = pd_.stable_entries | {bulk_entry}
         pd_ = PhaseDiagram(entries)
-        self.phase_diagram = ensure_stable_bulk(pd_, self.bulk_entry)
+        self.phase_diagram = ensure_stable_bulk(pd_, bulk_entry)
         entries = []
         for entry in self.phase_diagram.stable_entries:
             d_ = dict(
@@ -220,7 +246,7 @@ class FormationEnergyDiagram(MSONable):
 
         self.chempot_diagram = ChemicalPotentialDiagram(entries)
         chempot_limits = self.chempot_diagram.domains[
-            self.bulk_entry.composition.reduced_formula
+            bulk_entry.composition.reduced_formula
         ]
 
         if self.inc_inf_values:
@@ -239,11 +265,11 @@ class FormationEnergyDiagram(MSONable):
     @classmethod
     def with_atomic_entries(
         cls,
-        bulk_entry: ComputedEntry,
         defect_entries: list[DefectEntry],
         atomic_entries: list[ComputedEntry],
         phase_diagram: PhaseDiagram,
         vbm: float,
+        bulk_entry: ComputedEntry | None = None,
         **kwargs,
     ):
         """Create a FormationEnergyDiagram object using an existing phase diagram.
@@ -257,12 +283,10 @@ class FormationEnergyDiagram(MSONable):
         As long as the atomic phase energies are computed using the same settings as
         the defect supercell calculations, the method used to determine the enthalpy of
         formation of the different competing phases is not important.
-        Then use the an exerimentally corrected ``PhaseDiagram`` object (like the ones you can
+        Then use the an experimentally corrected ``PhaseDiagram`` object (like the ones you can
         obtain from the Materials Project) to calculate the enthalpy of formation.
 
         Args:
-            bulk_entry:
-                The bulk computed entry to get the total energy of the bulk supercell.
             defect_entries:
                 The list of defect entries for the different charge states.
                 The finite-size correction should already be applied to these.
@@ -274,6 +298,8 @@ class FormationEnergyDiagram(MSONable):
                 A separately computed phase diagram.
             vbm:
                 The VBM of the bulk crystal.
+            bulk_entry:
+                The bulk computed entry to get the total energy of the bulk supercell.
             band_gap:
                 The band gap of the bulk crystal.
             inc_inf_values:
@@ -289,7 +315,6 @@ class FormationEnergyDiagram(MSONable):
         adjusted_entries = _get_adjusted_pd_entries(
             phase_diagram=phase_diagram, atomic_entries=atomic_entries
         )
-
         return cls(
             bulk_entry=bulk_entry,
             defect_entries=defect_entries,
@@ -347,7 +372,6 @@ class FormationEnergyDiagram(MSONable):
                 defect_locpot=q_locpot, bulk_locpot=bulk_locpot, dielectric=dielectric
             )
             def_entries.append(q_d_entry)
-
         if vbm is None:
             vr = Vasprun(get_zfile(Path(directory_map["bulk"]), "vasprun.xml"))
             vbm = vr.get_band_structure().get_vbm()["energy"]
@@ -404,11 +428,16 @@ class FormationEnergyDiagram(MSONable):
                 for el, fac in defect_entry.defect.element_changes.items()
             ]
         )
-        formation_en = (
-            defect_entry.corrected_energy
-            - (self.bulk_entry.energy + en_change)
-            + self.vbm * defect_entry.charge_state
-        )
+        ediff = defect_entry.get_ediff()
+        if ediff is not None:
+            formation_en = ediff - en_change + self.vbm * defect_entry.charge_state
+        else:
+            formation_en = (
+                defect_entry.corrected_energy
+                - self.bulk_entry.energy
+                - en_change
+                + self.vbm * defect_entry.charge_state
+            )
         return formation_en
 
     @property
@@ -595,7 +624,10 @@ class MultiFormationEnergyDiagram(MSONable):
 
 
 def group_defects(defect_entries: list[DefectEntry]):
-    """Group defects by their representation."""
+    """Group defects by their representation.
+
+    TODO: Fix this with `defect_structure` grouping with `StructureMatcher`.
+    """
     sents = sorted(defect_entries, key=lambda x: x.defect.__repr__())
     for k, group in groupby(sents, key=lambda x: x.defect.__repr__()):
         yield k, list(group)
