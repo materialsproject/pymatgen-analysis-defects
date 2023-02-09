@@ -218,9 +218,14 @@ class FormationEnergyDiagram(MSONable):
         # if all of the `DefectEntry` objects have the same `bulk_entry` then `self.bulk_entry` is not needed
         if all(d.bulk_entry is not None for d in self.defect_entries):
             if self.bulk_entry is not None:
-                raise ValueError(
+                raise RuntimeError(
                     "All of the `DefectEntry` objects have a `bulk_entry` attribute, it is not needed to provide `bulk_entry` to `FormationEnergyDiagram`"
                     "The energy difference E[Defect SuperCell] - E[Bulk SuperCell] can be calculated directly from `DefectEntry.get_ediff`."
+                )
+        else:
+            if self.bulk_entry is None:
+                raise RuntimeError(
+                    "Not all of the `DefectEntry` objects have a `bulk_entry` attribute, you need to provide `bulk_entry` to `FormationEnergyDiagram`"
                 )
 
         bulk_entry = self.bulk_entry or self.defect_entries[0].bulk_entry
@@ -619,7 +624,10 @@ class MultiFormationEnergyDiagram(MSONable):
 
 
 def group_defects(defect_entries: list[DefectEntry]):
-    """Group defects by their representation."""
+    """Group defects by their representation.
+
+    TODO: Fix this with `defect_structure` grouping with `StructureMatcher`.
+    """
     sents = sorted(defect_entries, key=lambda x: x.defect.__repr__())
     for k, group in groupby(sents, key=lambda x: x.defect.__repr__()):
         yield k, list(group)

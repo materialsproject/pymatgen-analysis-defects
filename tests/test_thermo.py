@@ -1,3 +1,4 @@
+import copy
 import os
 
 import numpy as np
@@ -76,6 +77,36 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
         inc_inf_values=True,
     )
     assert len(fed.chempot_limits) == 5
+
+    # check that the constructor raises an error if `bulk_entry` is is provided for all defect entries
+    def_ents_w_bulk = copy.deepcopy(def_ent_list)
+    for dent in def_ents_w_bulk:
+        dent.bulk_entry = bulk_entry
+
+    fed = FormationEnergyDiagram(
+        defect_entries=def_ents_w_bulk,
+        vbm=vbm,
+        pd_entries=stable_entries_Mg_Ga_N,
+        inc_inf_values=True,
+    )
+    assert len(fed.chempot_limits) == 5
+
+    with pytest.raises(RuntimeError):
+        FormationEnergyDiagram(
+            bulk_entry=bulk_entry,
+            defect_entries=def_ents_w_bulk,
+            vbm=vbm,
+            pd_entries=stable_entries_Mg_Ga_N,
+            inc_inf_values=True,
+        )
+
+    with pytest.raises(RuntimeError):
+        FormationEnergyDiagram(
+            defect_entries=def_ent_list,
+            vbm=vbm,
+            pd_entries=stable_entries_Mg_Ga_N,
+            inc_inf_values=True,
+        )
 
     fed = FormationEnergyDiagram(
         bulk_entry=bulk_entry,
