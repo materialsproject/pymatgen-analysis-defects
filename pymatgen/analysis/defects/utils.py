@@ -330,6 +330,8 @@ def cluster_nodes(
         lattice (Lattice): The lattice of the structure.
         tol (float): A distance tolerance. PBC is taken into account.
     """
+    if len(fcoords) <= 1:
+        return fcoords
     # Manually generate the distance matrix (which needs to take into
     # account PBC.
     dist_matrix = np.array(lattice.get_all_distances(fcoords, fcoords))
