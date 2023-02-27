@@ -82,7 +82,7 @@ class Defect(MSONable, metaclass=ABCMeta):
                 # check oxi_states assigned and not all zero
                 if all([specie.oxi_state == 0 for specie in self.structure.species]):
                     self.structure.add_oxidation_state_by_guess()
-            except: # pragma: no cover
+            except:  # pragma: no cover
                 self.structure.add_oxidation_state_by_guess()
             self.structure.add_oxidation_state_by_guess()
             self.oxi_state = self._guess_oxi_state()
