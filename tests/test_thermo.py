@@ -77,7 +77,6 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
     defect_entries, plot_data = defect_entries_Mg_Ga
 
     def_ent_list = list(defect_entries.values())
-
     fed = FormationEnergyDiagram(
         bulk_entry=bulk_entry,
         defect_entries=def_ent_list,
@@ -100,15 +99,8 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
     )
     assert len(fed.chempot_limits) == 5
 
-    with pytest.raises(RuntimeError):
-        FormationEnergyDiagram(
-            bulk_entry=bulk_entry,
-            defect_entries=def_ents_w_bulk,
-            vbm=vbm,
-            pd_entries=stable_entries_Mg_Ga_N,
-            inc_inf_values=True,
-        )
-
+    # Raise error if bulk_entry is not provided when some
+    # of the defect entries are missing bulk_entry data
     with pytest.raises(RuntimeError):
         FormationEnergyDiagram(
             defect_entries=def_ent_list,
@@ -117,6 +109,8 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
             inc_inf_values=True,
         )
 
+    # if both bulk_entry and defect_entries.bulk_entry are provided (by accident)
+    # the code should still work.
     fed = FormationEnergyDiagram(
         bulk_entry=bulk_entry,
         defect_entries=def_ent_list,
