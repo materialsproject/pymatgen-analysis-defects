@@ -75,7 +75,15 @@ class Defect(MSONable, metaclass=ABCMeta):
         )
         self.user_charges = user_charges if user_charges else []
         if oxi_state is None:
-            # TODO this step might take time so wrap it in a timer
+            # Try to use the reduced cell first since oxidation state assignment
+            # scales poorly with systems size.
+            try:
+                self.structure.add_oxidation_state_by_guess(max_sites=-1)
+                # check oxi_states assigned and not all zero
+                if all([specie.oxi_state == 0 for specie in self.structure.species]):
+                    self.structure.add_oxidation_state_by_guess()
+            except:  # pragma: no cover
+                self.structure.add_oxidation_state_by_guess()
             self.structure.add_oxidation_state_by_guess()
             self.oxi_state = self._guess_oxi_state()
         else:
