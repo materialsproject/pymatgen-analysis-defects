@@ -39,7 +39,7 @@ def test_lower_envelope():
     ]
 
 
-def test_defect_entry(defect_entries_Mg_Ga):
+def test_defect_entry(defect_entries_Mg_Ga, data_Mg_Ga):
     defect_entries, plot_data = defect_entries_Mg_Ga
 
     def_entry = defect_entries[0]
@@ -58,6 +58,15 @@ def test_defect_entry(defect_entries_Mg_Ga):
     vr1 = plot_data[0][1]["pot_plot_data"]["Vr"]
     vr2 = defect_entries[0].corrections_metadata["freysoldt"][1]["pot_plot_data"]["Vr"]
     assert np.allclose(vr1, vr2)
+
+    bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
+    bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
+    def_entry = defect_entries[0]
+    assert def_entry.get_ediff() is None
+
+    def_entry.bulk_entry = bulk_entry
+    ediff = def_entry.sc_entry.energy - bulk_entry.energy
+    assert def_entry.get_ediff() == pytest.approx(ediff, abs=1e-4)
 
 
 def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
