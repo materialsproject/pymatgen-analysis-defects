@@ -39,7 +39,7 @@ def test_lower_envelope():
     ]
 
 
-def test_defect_entry(defect_entries_Mg_Ga):
+def test_defect_entry(defect_entries_Mg_Ga, data_Mg_Ga):
     defect_entries, plot_data = defect_entries_Mg_Ga
 
     def_entry = defect_entries[0]
@@ -59,6 +59,15 @@ def test_defect_entry(defect_entries_Mg_Ga):
     vr2 = defect_entries[0].corrections_metadata["freysoldt"][1]["pot_plot_data"]["Vr"]
     assert np.allclose(vr1, vr2)
 
+    bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
+    bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
+    def_entry = defect_entries[0]
+    assert def_entry.get_ediff() is None
+
+    def_entry.bulk_entry = bulk_entry
+    ediff = def_entry.sc_entry.energy - bulk_entry.energy
+    assert def_entry.get_ediff() == pytest.approx(ediff, abs=1e-4)
+
 
 def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
     bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
@@ -68,7 +77,6 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
     defect_entries, plot_data = defect_entries_Mg_Ga
 
     def_ent_list = list(defect_entries.values())
-
     fed = FormationEnergyDiagram(
         bulk_entry=bulk_entry,
         defect_entries=def_ent_list,
@@ -91,15 +99,8 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
     )
     assert len(fed.chempot_limits) == 5
 
-    with pytest.raises(RuntimeError):
-        FormationEnergyDiagram(
-            bulk_entry=bulk_entry,
-            defect_entries=def_ents_w_bulk,
-            vbm=vbm,
-            pd_entries=stable_entries_Mg_Ga_N,
-            inc_inf_values=True,
-        )
-
+    # Raise error if bulk_entry is not provided when some
+    # of the defect entries are missing bulk_entry data
     with pytest.raises(RuntimeError):
         FormationEnergyDiagram(
             defect_entries=def_ent_list,
@@ -108,6 +109,8 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
             inc_inf_values=True,
         )
 
+    # if both bulk_entry and defect_entries.bulk_entry are provided (by accident)
+    # the code should still work.
     fed = FormationEnergyDiagram(
         bulk_entry=bulk_entry,
         defect_entries=def_ent_list,

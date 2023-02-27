@@ -169,8 +169,6 @@ class FormationEnergyDiagram(MSONable):
     """Formation energy.
 
     Attributes:
-        bulk_entry:
-            The bulk computed entry to get the total energy of the bulk supercell.
         defect_entries:
             The list of defect entries for the different charge states.
             The finite-size correction should already be applied to these.
@@ -183,6 +181,12 @@ class FormationEnergyDiagram(MSONable):
             The VBM of the bulk crystal.
         band_gap:
             The band gap of the bulk crystal.
+        bulk_entry:
+            The bulk computed entry to get the total energy of the bulk supercell.
+            This is only used in case where the bulk entry data is not provided by
+            the individual defect entries themselves. Default is None.
+            The data from the `bulk_entry` attached to each `defect_entry` will be
+            preferrentially used if it is available.
         inc_inf_values:
             If False these boundary points at infinity are ignored when we look at the
             chemical potential limits.
@@ -216,13 +220,7 @@ class FormationEnergyDiagram(MSONable):
                 "Use MultiFormationEnergyDiagram for multiple defect types"
             )
         # if all of the `DefectEntry` objects have the same `bulk_entry` then `self.bulk_entry` is not needed
-        if all(d.bulk_entry is not None for d in self.defect_entries):
-            if self.bulk_entry is not None:
-                raise RuntimeError(
-                    "All of the `DefectEntry` objects have a `bulk_entry` attribute, it is not needed to provide `bulk_entry` to `FormationEnergyDiagram`"
-                    "The energy difference E[Defect SuperCell] - E[Bulk SuperCell] can be calculated directly from `DefectEntry.get_ediff`."
-                )
-        else:
+        if any(d.bulk_entry is None for d in self.defect_entries):
             if self.bulk_entry is None:
                 raise RuntimeError(
                     "Not all of the `DefectEntry` objects have a `bulk_entry` attribute, you need to provide `bulk_entry` to `FormationEnergyDiagram`"
