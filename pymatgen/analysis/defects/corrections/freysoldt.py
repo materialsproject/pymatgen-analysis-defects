@@ -106,7 +106,12 @@ def get_freysoldt_correction(
     else:
         list_defect_plnr_avg_esp = defect_locpot
         list_axis_grid = [
-            *map(np.linspace, [0, 0, 0], lattice.abc, [len(i) for i in defect_locpot.values()])
+            *map(
+                np.linspace,
+                [0, 0, 0],
+                lattice.abc,
+                [len(i) for i in defect_locpot.values()],
+            )
         ]
 
     # TODO this can be done with regridding later
