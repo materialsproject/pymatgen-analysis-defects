@@ -84,7 +84,6 @@ class Defect(MSONable, metaclass=ABCMeta):
                     self.structure.add_oxidation_state_by_guess()
             except:  # pragma: no cover
                 self.structure.add_oxidation_state_by_guess()
-            self.structure.add_oxidation_state_by_guess()
             self.oxi_state = self._guess_oxi_state()
         else:
             self.oxi_state = oxi_state
