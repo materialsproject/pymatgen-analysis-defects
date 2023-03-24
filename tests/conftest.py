@@ -86,7 +86,8 @@ def defect_entries_Mg_Ga(data_Mg_Ga, defect_Mg_Ga):
     for qq in [-2, -1, 0, 1]:
         defect_entry, frey_summary = get_data(qq)
         defect_entries[qq] = defect_entry
-        plot_data[qq] = frey_summary.metadata
+        plot_data[qq] = frey_summary.metadata["plot_data"]
+    import ipdb; ipdb.set_trace()
     return defect_entries, plot_data
 
 

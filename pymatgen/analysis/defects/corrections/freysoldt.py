@@ -12,7 +12,7 @@ from numpy.typing import ArrayLike
 from pymatgen.core import Lattice
 from pymatgen.io.vasp.outputs import Locpot
 from scipy import stats
-
+from pymatgen.analysis.defects.finder import DefectSiteFinder
 from pymatgen.analysis.defects.utils import (
     CorrectionResult,
     QModel,
@@ -78,6 +78,12 @@ def get_freysoldt_correction(
             plot_plnr_avg(result.metadata[0], title="Lattice Direction 1")
             ```
     """
+    if defect_frac_coords is None:
+        finder = DefectSiteFinder()
+        defect_frac_coords = finder.get_defect_fpos(
+            defect_structure=defect_locpot.structure, 
+            base_structure=bulk_locpot.structure)
+
     # dielectric has to be a float
     if isinstance(dielectric, (int, float)):
         dielectric = float(dielectric)
@@ -125,13 +131,13 @@ def get_freysoldt_correction(
         step=step,
     )
 
-    pot_corrs = dict()
+    alignment_corrs = dict()
     plot_data = dict()
 
     for x, pureavg, defavg, axis in zip(
         list_axis_grid, list_bulk_plnr_avg_esp, list_defect_plnr_avg_esp, [0, 1, 2]
     ):
-        tmp_pot_corr, md = perform_pot_corr(
+        alignment_corr, md = perform_pot_corr(
             axis_grid=x,
             pureavg=pureavg,
             defavg=defavg,
@@ -144,14 +150,19 @@ def get_freysoldt_correction(
             mad_tol=mad_tol,
             widthsample=1.0,
         )
-        pot_corrs[axis] = tmp_pot_corr
+        alignment_corrs[axis] = alignment_corr
         plot_data[axis] = md
 
-    pot_corr = np.mean(list(pot_corrs.values()))
-    pot_align = pot_corr / (-q) if q else 0
+    pot_corr = -q * np.mean(list(alignment_corrs.values()))
+
     return CorrectionResult(
-        correction_energy=es_corr + pot_align,
-        metadata=plot_data,
+        correction_energy=es_corr + pot_corr,
+        metadata={
+            "plot_data": plot_data,
+            "electrostatic": es_corr,
+            "alignments": alignment_corrs,
+            "potential": pot_corr,
+        },
     )
 
 
@@ -251,7 +262,8 @@ def perform_pot_corr(
         where the potential alignment correction is averaged. Default is 1 Angstrom.
 
     Returns:
-        Potential Alignment contribution to Freysoldt Correction (float)
+        (float) Potential Alignment shift required to make the short range potential 
+        zero far from the defect.  (-C) in the Freysoldt paper.
     """
     logging.debug("run Freysoldt potential alignment method for axis " + str(axis))
     nx = len(axis_grid)
@@ -316,7 +328,6 @@ def perform_pot_corr(
     _logger.info(
         "Potentital alignment energy correction (-q*delta V):  %f (eV)", -q * C
     )
-    pot_corr = -q * C
 
     # log plotting data:
     metadata = dict()
@@ -327,17 +338,15 @@ def perform_pot_corr(
         "final_shift": final_shift,
         "check": [mid - checkdis, mid + checkdis + 1],
     }
-
     # log uncertainty:
     metadata["pot_corr_uncertainty_md"] = {
         "stats": stats.describe(tmppot)._asdict(),
-        "potcorr": -q * C,
+        "potcorr": C,
     }
+    return C, metadata
 
-    return pot_corr, metadata
 
-
-def plot_plnr_avg(plot_data, title=None, saved=False):
+def plot_plnr_avg(plot_data, title=None, saved=False, ax=None):
     """Plot the planar average electrostatic potential.
 
     Plot the planar average electrostatic potential against the Long range and
@@ -348,7 +357,8 @@ def plot_plnr_avg(plot_data, title=None, saved=False):
         plot_data (dict): Dictionary of FreysoldtCorrection metadata.
         title (str): Title to be given to plot. Default is no title.
         saved (bool): Whether to save file or not. If False then returns plot object.
-        If True then saves plot as   str(title) + "FreyplnravgPlot.pdf"
+            If True then saves plot as   str(title) + "FreyplnravgPlot.pdf"
+        ax (matplotlib.axes.Axes): Axes object to plot on. If None, makes new figure.
     """
     if not plot_data["pot_plot_data"]:
         raise ValueError("Cannot plot potential alignment before running correction!")
@@ -359,28 +369,28 @@ def plot_plnr_avg(plot_data, title=None, saved=False):
     final_shift = plot_data["pot_plot_data"]["final_shift"]
     check = plot_data["pot_plot_data"]["check"]
 
-    plt.figure()
-    plt.clf()
-    plt.plot(x, v_R, c="green", zorder=1, label="long range from model")
-    plt.plot(x, dft_diff, c="red", label="DFT locpot diff")
-    plt.plot(x, final_shift, c="blue", label="short range (aligned)")
+    if ax is None:
+        fig, ax = plt.subplots()
+    ax.plot(x, v_R, c="green", zorder=1, label="long range from model")
+    ax.plot(x, dft_diff, c="red", label="DFT locpot diff")
+    ax.plot(x, final_shift, c="blue", label="short range (aligned)")
 
     tmpx = [x[i] for i in range(check[0], check[1])]
-    plt.fill_between(
+    ax.fill_between(
         tmpx, -100, 100, facecolor="red", alpha=0.15, label="sampling region"
     )
 
-    plt.xlim(round(x[0]), round(x[-1]))
+    ax.set_xlim(round(x[0]), round(x[-1]))
     ymin = min(min(v_R), min(dft_diff), min(final_shift))
     ymax = max(max(v_R), max(dft_diff), max(final_shift))
-    plt.ylim(-0.2 + ymin, 0.2 + ymax)
-    plt.xlabel(r"distance along axis ($\AA$)", fontsize=15)
-    plt.ylabel("Potential (V)", fontsize=15)
-    plt.legend(loc=9)
-    plt.axhline(y=0, linewidth=0.2, color="black")
-    plt.title(str(title) + " defect potential", fontsize=18)
-    plt.xlim(0, max(x))
+    ax.set_ylim(-0.2 + ymin, 0.2 + ymax)
+    ax.set_xlabel(r"distance along axis ($\AA$)", fontsize=15)
+    ax.set_ylabel("Potential (V)", fontsize=15)
+    ax.legend(loc=9)
+    ax.axhline(y=0, linewidth=0.2, color="black")
+    if title is not None:
+        ax.set_title(str(title), fontsize=18)
+    ax.set_xlim(0, max(x))
     if saved:
-        plt.savefig(str(title) + "FreyplnravgPlot.pdf")
-        return None
-    return plt
+        fig.savefig(str(title) + "FreyplnravgPlot.pdf")
+    return ax

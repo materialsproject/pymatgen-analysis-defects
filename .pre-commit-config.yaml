@@ -73,7 +73,7 @@ repos:
     types: [text]
     args: [
       --ignore-words-list, 'titel,statics,ba,nd,te,mater,commun,vise',
-      --skip, "*.ipynb"
+      --skip, "*.ipynb,./tests"
       ]
 - repo: https://github.com/kynan/nbstripout
   rev: 0.6.1

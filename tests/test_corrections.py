@@ -36,12 +36,14 @@ def test_freysoldt(data_Mg_Ga):
         defect_frac_coords=[0.5, 0.5, 0.5],
     )
 
+    defect_locpot_dict = {str(k): defect_locpot.get_axis_grid(k) for k in [0, 1, 2]}
+    bulk_locpot_dict = {str(k): bulk_locpot.get_axis_grid(k) for k in [0, 1, 2]}
     freysoldt_summary = get_freysoldt_correction(
         q=0,
         dielectric=14,
         lattice=defect_locpot.structure.lattice,
-        defect_locpot=[*map(defect_locpot.get_axis_grid, [0, 1, 2])],
-        bulk_locpot=[*map(bulk_locpot.get_axis_grid, [0, 1, 2])],
+        defect_locpot=defect_locpot_dict,
+        bulk_locpot=bulk_locpot_dict,
         defect_frac_coords=[0.5, 0.5, 0.5],
     )
 
