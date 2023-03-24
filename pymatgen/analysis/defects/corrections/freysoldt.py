@@ -281,7 +281,7 @@ def perform_pot_corr(
     # Build background charge potential with defect at origin
     v_G = np.empty(len(axis_grid), np.dtype("c16"))
     v_G[0] = 4 * np.pi * -q / dielectric * q_model.rho_rec_limit0
-    g = np.roll(np.arange(-nx / 2, nx / 2, 1, dtype=int), int(nx / 2)) * dg
+    g = np.roll(np.arange(-nx // 2, nx // 2, 1, dtype=int), int(nx // 2)) * dg
     g2 = np.multiply(g, g)[1:]
     v_G[1:] = 4 * np.pi / (dielectric * g2) * -q * q_model.rho_rec(g2)
     v_G[nx // 2] = 0 if not (nx % 2) else v_G[nx // 2]
