@@ -173,6 +173,9 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
         temperature=300,
     ) == pytest.approx(2 * 1.5875937551666035e-17)
 
+    # dataframe conversion
+    fed.as_dataframe()
+
 
 def test_multi(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
     bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
