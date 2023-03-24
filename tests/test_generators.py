@@ -8,6 +8,7 @@ from pymatgen.analysis.defects.generators import (
     SubstitutionGenerator,
     VacancyGenerator,
     VoronoiInterstitialGenerator,
+    generate_all_native_defects,
 )
 
 
@@ -89,3 +90,8 @@ def test_voronoi_interstitial_generator(chgcar_fe3o4):
         assert defect.site.specie.symbol == "Li"
         cnt += 1
     assert cnt == 4
+
+
+def test_generate_all_native_defects(chgcar_fe3o4):
+    gen = generate_all_native_defects(chgcar_fe3o4)
+    len(list(gen)) == 14
