@@ -12,6 +12,7 @@ from numpy.typing import ArrayLike
 from pymatgen.core import Lattice
 from pymatgen.io.vasp.outputs import Locpot
 from scipy import stats
+
 from pymatgen.analysis.defects.finder import DefectSiteFinder
 from pymatgen.analysis.defects.utils import (
     CorrectionResult,
@@ -81,8 +82,9 @@ def get_freysoldt_correction(
     if defect_frac_coords is None:
         finder = DefectSiteFinder()
         defect_frac_coords = finder.get_defect_fpos(
-            defect_structure=defect_locpot.structure, 
-            base_structure=bulk_locpot.structure)
+            defect_structure=defect_locpot.structure,
+            base_structure=bulk_locpot.structure,
+        )
 
     # dielectric has to be a float
     if isinstance(dielectric, (int, float)):
@@ -153,7 +155,8 @@ def get_freysoldt_correction(
         alignment_corrs[axis] = alignment_corr
         plot_data[axis] = md
 
-    pot_corr = -q * np.mean(list(alignment_corrs.values()))
+    mean_alignment = np.mean(list(alignment_corrs.values()))
+    pot_corr = -mean_alignment * q
 
     return CorrectionResult(
         correction_energy=es_corr + pot_corr,
@@ -161,6 +164,7 @@ def get_freysoldt_correction(
             "plot_data": plot_data,
             "electrostatic": es_corr,
             "alignments": alignment_corrs,
+            "mean_alignments": mean_alignment,
             "potential": pot_corr,
         },
     )
@@ -262,7 +266,7 @@ def perform_pot_corr(
         where the potential alignment correction is averaged. Default is 1 Angstrom.
 
     Returns:
-        (float) Potential Alignment shift required to make the short range potential 
+        (float) Potential Alignment shift required to make the short range potential
         zero far from the defect.  (-C) in the Freysoldt paper.
     """
     logging.debug("run Freysoldt potential alignment method for axis " + str(axis))
@@ -319,7 +323,7 @@ def perform_pot_corr(
         axis_grid[mid + checkdis],
     )
 
-    C = -np.mean(tmppot)
+    C = np.mean(tmppot)
     _logger.debug("C = %f", C)
     final_shift = [short[j] + C for j in range(len(v_R))]
     v_R = [elmnt - C for elmnt in v_R]
