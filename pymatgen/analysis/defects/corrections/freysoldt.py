@@ -111,17 +111,28 @@ def get_freysoldt_correction(
                 "Lattice of defect_locpot and user provided lattice do not match."
             )
         lattice = lattice_
-    else:
-        list_defect_plnr_avg_esp = defect_locpot
+    elif isinstance(defect_locpot, dict):
+        defect_locpot = {int(k): v for k, v in defect_locpot.items()}
+        list_defect_plnr_avg_esp = [defect_locpot[i] for i in range(3)]
         list_axis_grid = [
-            *map(np.linspace, [0, 0, 0], lattice.abc, [len(i) for i in defect_locpot])
+            *map(
+                np.linspace,
+                [0, 0, 0],
+                lattice.abc,
+                [len(i) for i in list_defect_plnr_avg_esp],
+            )
         ]
+    else:
+        raise ValueError("defect_locpot must be of type Locpot or dict")
 
     # TODO this can be done with regridding later
     if isinstance(bulk_locpot, Locpot):
         list_bulk_plnr_avg_esp = [*map(bulk_locpot.get_average_along_axis, [0, 1, 2])]
+    elif isinstance(bulk_locpot, dict):
+        bulk_locpot = {int(k): v for k, v in bulk_locpot.items()}
+        list_bulk_plnr_avg_esp = [bulk_locpot[i] for i in range(3)]
     else:
-        list_bulk_plnr_avg_esp = bulk_locpot
+        raise ValueError("bulk_locpot must be of type Locpot or dict")
 
     es_corr = perform_es_corr(
         lattice=lattice,
@@ -156,7 +167,7 @@ def get_freysoldt_correction(
         plot_data[axis] = md
 
     mean_alignment = np.mean(list(alignment_corrs.values()))
-    pot_corr = -mean_alignment * q
+    pot_corr = mean_alignment * q
 
     return CorrectionResult(
         correction_energy=es_corr + pot_corr,
@@ -311,7 +322,11 @@ def perform_pot_corr(
     v_R = np.real(v_R) * hart_to_ev
 
     # get correction
-    short = np.array(defavg) - np.array(pureavg) - np.array(v_R)
+    short = (
+        np.array(defavg, dtype=float)
+        - np.array(pureavg, dtype=float)
+        - np.array(v_R, dtype=float)
+    )
     checkdis = int((widthsample / 2) / (axis_grid[1] - axis_grid[0]))
     mid = int(len(short) / 2)
 

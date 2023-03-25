@@ -1,23 +1,4 @@
-/g/g20/shen9/compiled/sxdefectalign --charge=0 --ecut 34 --eps 5 --center 0.16666664,0.33333324,0.1657773 --relative --vdef ./LOCPOT --vref ../relax_2/LOCPOT --vasp --align 0.08398513278652599
-VASP mesh: 96 x 96 x 160
-cell defect = [a1={12.0524,0,0},a2={-6.02621,10.4377,0},a3={0,0,19.6243}]
-Can't open file '../relax_2/LOCPOT' for reading: No such file or directory
-
-+-----------------------------------------------------------------------------
-| Program stopped in file /home/c.freysoldt/devel/sphinx/sxaccelerate/src/io/SxFileParser.cpp at line 44
-| Invalid or inconsistent input as described above.
-+-----------------------------------------------------------------------------
-/g/g20/shen9/compiled/sxdefectalign --charge=0 --ecut 34 --eps 5 --center 0.16666664,0.33333324,0.1657773 --relative --vdef ./LOCPOT --vref ../relax_2/LOCPOT --vasp --align 0.08398513278652599
-VASP mesh: 96 x 96 x 160
-cell defect = [a1={12.0524,0,0},a2={-6.02621,10.4377,0},a3={0,0,19.6243}]
-Can't open file '../relax_2/LOCPOT' for reading: No such file or directory
-
-+-----------------------------------------------------------------------------
-| Program stopped in file /home/c.freysoldt/devel/sphinx/sxaccelerate/src/io/SxFileParser.cpp at line 44
-| Invalid or inconsistent input as described above.
-+-----------------------------------------------------------------------------
---charge=0 --ecut 34 --eps 5 --center 0.16666664,0.33333324,0.1657773 --relative --vdef ./LOCPOT --vref ../bulk/LOCPOT --vasp --align 0.08398513278652599
-/g/g20/shen9/compiled/sxdefectalign --charge=0 --ecut 34 --eps 5 --center 0.16666664,0.33333324,0.1657773 --relative --vdef ./LOCPOT --vref ../bulk/LOCPOT --vasp --align 0.08398513278652599
+/g/g20/shen9/compiled/sxdefectalign --charge=0 --ecut 34 --eps 5 --center 0.16666664,0.33333324,0.1657773 --relative --vdef ./LOCPOT --vref ../bulk/LOCPOT --vasp --align -0.08398513278652599
 VASP mesh: 96 x 96 x 160
 cell defect = [a1={12.0524,0,0},a2={-6.02621,10.4377,0},a3={0,0,19.6243}]
 VASP mesh: 96 x 96 x 160
@@ -26,7 +7,7 @@ Excess Electrons = 0 located at {-3.8886e-07,3.47923,3.25326}
 Atomic structure specified.
 ng=8280
 V average: 0 eV
-vAlign=0.0839851 eV
+vAlign=-0.0839851 eV
 +-----------------------------------------------------------------------------
 === Intermediate results (unscreened) ===
 Isolated energy       : 0

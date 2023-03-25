@@ -24,7 +24,7 @@ def test_freysoldt(data_Mg_Ga):
     assert freysoldt_summary.correction_energy == pytest.approx(0, abs=1e-4)
 
     # simple check that the plotter works
-    plot_plnr_avg(freysoldt_summary.metadata[0])
+    plot_plnr_avg(freysoldt_summary.metadata["plot_data"][0])
 
     # different ways to specify the locpot
     freysoldt_summary = get_freysoldt_correction(
