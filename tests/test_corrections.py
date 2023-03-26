@@ -49,9 +49,10 @@ def test_freysoldt(data_Mg_Ga):
     )
 
 
-def test_freysoldt_2(v_N_GaN):
+def test_freysoldt_sxdefect_compare(v_N_GaN):
     """More detailed test for Freysoldt correction.
 
+    Compare against results from the sxdefectalign tool from SPHInX.
     See the `freysoldt_correction.ipynb` notebook for details.
     """
     bulk_locpot = v_N_GaN["bulk_locpot"]
