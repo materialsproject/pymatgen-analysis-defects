@@ -1,0 +1,20 @@
+/g/g20/shen9/compiled/sxdefectalign --charge=-2 --ecut 34 --eps 5 --center -0.01832584,0.39998153,0.22418941 --relative --vdef ./LOCPOT --vref ../bulk/LOCPOT --vasp
+VASP mesh: 96 x 96 x 160
+cell defect = [a1={12.0524,0,0},a2={-6.02621,10.4377,0},a3={0,0,19.6243}]
+VASP mesh: 96 x 96 x 160
+cell bulk = [a1={12.0524,0,0},a2={-6.02621,10.4377,0},a3={0,0,19.6243}]
+Excess Electrons = -2 located at {-2.63124,4.17488,4.39955}
+Atomic structure specified.
+ng=8280
+V average: 0.0692562 eV
+vAlign=0 eV
++-----------------------------------------------------------------------------
+=== Intermediate results (unscreened) ===
+Isolated energy       : 1.59577
+Periodic energy       : 1.22332
+Difference (Hartree)  : -0.37245
+Difference (eV)       : -10.1349
++-----------------------------------------------------------------------------
+Calculation performed with epsilon = 5
++-----------------------------------------------------------------------------
+Defect correction (eV): 2.02698 (incl. screening & alignment)

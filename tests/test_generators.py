@@ -94,4 +94,7 @@ def test_voronoi_interstitial_generator(chgcar_fe3o4):
 
 def test_generate_all_native_defects(chgcar_fe3o4):
     gen = generate_all_native_defects(chgcar_fe3o4)
-    len(list(gen)) == 14
+    assert len(list(gen)) == 14
+
+    gen = generate_all_native_defects(chgcar_fe3o4.structure)
+    assert len(list(gen)) == 10

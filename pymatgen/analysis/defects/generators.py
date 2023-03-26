@@ -41,7 +41,7 @@ class DefectGenerator(MSONable, metaclass=ABCMeta):
                 symprec=self.symprec,
                 angle_tolerance=self.angle_tolerance,
             )
-        else:
+        else:  # pragma: no cover
             raise ValueError("This generator does not have symprec and angle_tolerance")
 
     def get_defects(self, *args, **kwargs) -> list[Defect]:

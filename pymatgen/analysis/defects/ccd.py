@@ -272,7 +272,7 @@ class HarmonicDefect(MSONable):
         procar = Procar(procar_file) if procar_file else None
 
         if charge_state is None:
-            if vaspruns[0].final_structure._charge is None:
+            if vaspruns[min_idx].final_structure._charge is None:
                 raise ValueError(
                     "Charge state is not provided and cannot be parsed from the POTCAR."
                 )
@@ -763,7 +763,6 @@ def _get_ks_ediff(
         res[ispin] = np.zeros_like(eigs)
         for ikpt, kpt in enumerate(bandstructure.kpoints):
             iband = b_at_kpt_and_spin.get((ikpt, spin_index), None)
-            # import ipdb; ipdb.set_trace()
             if iband is None:
                 continue
             e_at_def_band = eigs[iband, ikpt]
