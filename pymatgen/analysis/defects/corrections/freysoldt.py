@@ -155,7 +155,6 @@ def get_freysoldt_correction(
             pureavg=pureavg,
             defavg=defavg,
             lattice=lattice,
-            q=q,
             defect_frac_coords=defect_frac_coords,
             axis=axis,
             dielectric=dielectric,
@@ -168,6 +167,7 @@ def get_freysoldt_correction(
 
     mean_alignment = np.mean(list(alignment_corrs.values()))
     pot_corr = mean_alignment * q
+    _logger.info("Potentital alignment energy correction (-q * C):  %f (eV)", pot_corr)
 
     return CorrectionResult(
         correction_energy=es_corr + pot_corr,
@@ -245,7 +245,6 @@ def perform_pot_corr(
     pureavg,
     defavg,
     lattice,
-    q,
     defect_frac_coords,
     axis,
     dielectric,
@@ -270,7 +269,6 @@ def perform_pot_corr(
             A numpy array for the planar averaged
             electrostatic potential of the defect supercell.
         lattice: Pymatgen Lattice object of the defect supercell
-        q (float or int): charge of the defect
         defect_frac_position: Fracitional Coordinates of the defect in the supercell
         axis (int): axis for performing the freysoldt correction on
         widthsample (float): width (in Angstroms) of the region in between defects
@@ -278,7 +276,7 @@ def perform_pot_corr(
 
     Returns:
         (float) Potential Alignment shift required to make the short range potential
-        zero far from the defect.  (-C) in the Freysoldt paper.
+        zero far from the defect.  (- Delata_{q/b}) in the Freysoldt paper.
     """
     logging.debug("run Freysoldt potential alignment method for axis " + str(axis))
     nx = len(axis_grid)
@@ -344,9 +342,6 @@ def perform_pot_corr(
     v_R = [elmnt - C for elmnt in v_R]
 
     _logger.info("C value is averaged to be %f eV ", C)
-    _logger.info(
-        "Potentital alignment energy correction (-q*delta V):  %f (eV)", -q * C
-    )
 
     # log plotting data:
     metadata = dict()
