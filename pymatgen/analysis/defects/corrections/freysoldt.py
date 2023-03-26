@@ -89,9 +89,9 @@ def get_freysoldt_correction(
     # dielectric has to be a float
     if isinstance(dielectric, (int, float)):
         dielectric = float(dielectric)
-    elif np.ndim(dielectric) == 1:
+    elif np.ndim(dielectric) == 1:  # pragma: no cover
         dielectric = float(np.mean(dielectric))
-    elif np.ndim(dielectric) == 2:
+    elif np.ndim(dielectric) == 2:  # pragma: no cover
         dielectric = float(np.mean(dielectric.diagonal()))
     else:
         raise ValueError(

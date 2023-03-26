@@ -11,6 +11,7 @@ from pymatgen.analysis.defects.corrections.kumagai import (
 
 
 def test_freysoldt(data_Mg_Ga):
+    """Older basic test for Freysoldt correction."""
     bulk_locpot = data_Mg_Ga["bulk_sc"]["locpot"]
     defect_locpot = data_Mg_Ga[f"q=0"]["locpot"]
 
@@ -46,6 +47,32 @@ def test_freysoldt(data_Mg_Ga):
         bulk_locpot=bulk_locpot_dict,
         defect_frac_coords=[0.5, 0.5, 0.5],
     )
+
+
+def test_freysoldt_2(v_N_GaN):
+    """More detailed test for Freysoldt correction.
+
+    See the `freysoldt_correction.ipynb` notebook for details.
+    """
+    bulk_locpot = v_N_GaN["bulk_locpot"]
+    defect_locpots = v_N_GaN["defect_locpots"]
+    references = {
+        -1: 0.366577,
+        0: 0.0,
+        1: 0.179924,
+        2: 0.772761,
+    }
+    results = {
+        q: get_freysoldt_correction(
+            q=q,
+            dielectric=5,
+            bulk_locpot=bulk_locpot,
+            defect_locpot=defect_locpots[q],
+        ).correction_energy
+        for q in range(-1, 3)
+    }
+    for q in range(-1, 3):
+        assert results[q] == pytest.approx(references[q], abs=1e-3)
 
 
 def test_kumagai(test_dir):

@@ -114,3 +114,18 @@ def v_ga(test_dir):
             "wswqs": wswqs,
         }
     return res
+
+
+@pytest.fixture(scope="session")
+def v_N_GaN(test_dir):
+    """More complex."""
+    bulk_locpot = Locpot.from_file(test_dir / "v_N_GaN/bulk/LOCPOT.gz")
+    return {
+        "bulk_locpot": bulk_locpot,
+        "defect_locpots": {
+            -1: Locpot.from_file(test_dir / "v_N_GaN/q=-1/LOCPOT.gz"),
+            0: Locpot.from_file(test_dir / "v_N_GaN/q=0/LOCPOT.gz"),
+            1: Locpot.from_file(test_dir / "v_N_GaN/q=1/LOCPOT.gz"),
+            2: Locpot.from_file(test_dir / "v_N_GaN/q=2/LOCPOT.gz"),
+        },
+    }
