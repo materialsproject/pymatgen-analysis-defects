@@ -1,0 +1,658 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Freysoldt Correction &#8212; pymatgen-analysis-defects</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'content/freysoldt_correction';</script>
+    <link rel="canonical" href="https://materialsproject.github.io/pymatgen-analysis-defects/content/freysoldt_correction.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../intro.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">pymatgen-analysis-defects</p>
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="defining-defects.html">Defining Defects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nonradiative.html">Shockley-Read-Hall Recombination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="photo-conduct.html">Photo Conductivity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="formation-energy.html">Formation Energy Diagrams</a></li>
+
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">API References</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api_ref/index.html">Overview of the API.</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.core.html">pymatgen.analysis.defects.core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.generators.html">pymatgen.analysis.defects.generators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.thermo.html">pymatgen.analysis.defects.thermo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.ccd.html">pymatgen.analysis.defects.ccd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.finder.html">pymatgen.analysis.defects.finder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.recombination.html">pymatgen.analysis.defects.recombination</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.supercells.html">pymatgen.analysis.defects.supercells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.utils.html">pymatgen.analysis.defects.utils</a></li>
+</ul>
+</li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/materialsproject/pymatgen-analysis-defects" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/materialsproject/pymatgen-analysis-defects/edit/main/docs/content/freysoldt_correction.ipynb" target="_blank"
+   class="btn btn-sm btn-source-edit-button dropdown-item"
+   title="Suggest edit"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="btn__text-container">Suggest edit</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/materialsproject/pymatgen-analysis-defects/issues/new?title=Issue%20on%20page%20%2Fcontent/freysoldt_correction.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/content/freysoldt_correction.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Freysoldt Correction</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="freysoldt-correction">
+<h1>Freysoldt Correction<a class="headerlink" href="#freysoldt-correction" title="Permalink to this heading">#</a></h1>
+<p>The canonical tool for performing Freysoldt correction is the <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code> tool shipped as part of the <code class="docutils literal notranslate"><span class="pre">SPHInX</span></code> DFT code.
+The standalone download for the tool can be found <a class="reference external" href="https://sxrepo.mpie.de/projects/sphinx-add-ons/files">here</a> and the source code for the <code class="docutils literal notranslate"><span class="pre">SPHInX</span></code> package can be found <a class="reference external" href="https://sxrepo.mpie.de">here</a>.</p>
+<p>Here, we demonstrate a python implementation that removes the remaining parts of the <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code> that requires user inputs:</p>
+<ol class="arabic simple">
+<li><p>Identification of the position of the defect in the simulation cell.</p></li>
+<li><p>Identification of the plateau for potential alignment.</p></li>
+</ol>
+<p>This document serves as both a validation of the python code against <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code> as well as a tutorials for users of <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code> to migrate their workflow over to the pure python implementation.</p>
+<p>To get the Freysoldt corrections energies we only need to use the LOCPOT files from the DFT calculations and the charge state for the model charge.
+We will use our python code to obtain the defect position in the simulation cell and potential alignment and use those as inputs in the <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code> tool to compare the results against our pure python implementation.</p>
+<p>The raw data from the DFT calculations as well as the script used to generate the correction data can be found in the <code class="docutils literal notranslate"><span class="pre">/tests/test_files/v_N_GaN</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">monty.io</span> <span class="kn">import</span> <span class="n">reverse_readfile</span>
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.corrections.freysoldt</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Locpot</span><span class="p">,</span>
+    <span class="n">get_freysoldt_correction</span><span class="p">,</span>
+    <span class="n">plot_plnr_avg</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.finder</span> <span class="kn">import</span> <span class="n">DefectSiteFinder</span>
+
+<span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../../../tests/test_files&quot;</span><span class="p">)</span>
+<span class="n">DEFECT_DIR</span> <span class="o">=</span> <span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;v_N_GaN&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>First, we perform the analysis in python and print out the defect positions <code class="docutils literal notranslate"><span class="pre">center</span></code> and the potential alignment values <code class="docutils literal notranslate"><span class="pre">align</span></code>.
+These are used as the <code class="docutils literal notranslate"><span class="pre">--center</span></code> and <code class="docutils literal notranslate"><span class="pre">--align</span></code> parameters of the <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code> tool.</p>
+<p>The full result of correction is also computed here and saved for our later comparison with <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code> results.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">finder</span> <span class="o">=</span> <span class="n">DefectSiteFinder</span><span class="p">()</span>
+<span class="n">bulk_locpot</span> <span class="o">=</span> <span class="n">Locpot</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">DEFECT_DIR</span> <span class="o">/</span> <span class="s2">&quot;bulk/LOCPOT.gz&quot;</span><span class="p">)</span>
+<span class="n">freysoldt_results</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">DEFECT_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;q=</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">defect_locpot</span> <span class="o">=</span> <span class="n">Locpot</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">folder</span> <span class="o">/</span> <span class="s2">&quot;LOCPOT.gz&quot;</span><span class="p">)</span>
+    <span class="n">center</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">get_defect_fpos</span><span class="p">(</span>
+        <span class="n">defect_structure</span><span class="o">=</span><span class="n">defect_locpot</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span> <span class="n">base_structure</span><span class="o">=</span><span class="n">bulk_locpot</span><span class="o">.</span><span class="n">structure</span>
+    <span class="p">)</span>
+    <span class="n">center</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Computing Freysoldt Correction for: q=</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;center=</span><span class="si">{</span><span class="n">center</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">freysoldt_results</span><span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_freysoldt_correction</span><span class="p">(</span>
+        <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span>
+        <span class="n">dielectric</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">bulk_locpot</span><span class="o">=</span><span class="n">bulk_locpot</span><span class="p">,</span>
+        <span class="n">defect_locpot</span><span class="o">=</span><span class="n">defect_locpot</span><span class="p">,</span>
+        <span class="n">defect_frac_coords</span><span class="o">=</span><span class="n">center</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">align</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">freysoldt_results</span><span class="p">[</span><span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;alignments&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;alignment correction: </span><span class="si">{</span><span class="n">align</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Computing Freysoldt Correction for: q=-1
+center=[0.16666602 0.33333386 0.16692487]
+alignment correction: 0.14016700517571093
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Computing Freysoldt Correction for: q=0
+center=[0.16666664 0.33333324 0.1657773 ]
+alignment correction: -0.08398513278652599
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Computing Freysoldt Correction for: q=1
+center=[0.16666658 0.33333331 0.16008467]
+alignment correction: -0.3268206458041852
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Computing Freysoldt Correction for: q=2
+center=[-0.01832584  0.39998153  0.22418941]
+alignment correction: -0.6271082552052013
+</pre></div>
+</div>
+</div>
+</div>
+<p>The correction results from <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code> was generated by the <code class="docutils literal notranslate"><span class="pre">get_corr.sh</span></code> script in the <code class="docutils literal notranslate"><span class="pre">/tests/test_files/v_N_GaN</span></code> directory.
+The <code class="docutils literal notranslate"><span class="pre">get_corr.sh</span></code> script will call <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code> with the proper <code class="docutils literal notranslate"><span class="pre">--center</span></code> and <code class="docutils literal notranslate"><span class="pre">--align</span></code> arguments (obtained above) and store the results in the <code class="docutils literal notranslate"><span class="pre">corr.dat</span></code> (not accounting for alignment) and <code class="docutils literal notranslate"><span class="pre">corr_align.dat</span></code> (with potential alignment) files.</p>
+<p>Now we can plot the planar averaged potential values from both methods.
+The documentation for <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code> suggests running <code class="docutils literal notranslate"><span class="pre">xmgrace</span> <span class="pre">-nxy</span> <span class="pre">vline-eV-a#.dat</span></code> for each direction and visually identify the plateaus
+The <code class="docutils literal notranslate"><span class="pre">plot_sxd_output</span></code> below simulates the <code class="docutils literal notranslate"><span class="pre">xmgrace</span> <span class="pre">-nxy</span></code> call and we draw a vertical horizontal line at the automatically determined plateau value to see if they match visually.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plot_sxd_output</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the vline-eV-a#.dat files computed by the `sxdefectalign` program.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        q (int): the charge (electron is negative)</span>
+<span class="sd">        direction (int): the direction of the line (0, 1, or 2)</span>
+<span class="sd">        C (float): the plateau value for the short-range correction.</span>
+<span class="sd">        ax (matplotlib.axes.Axes): the axes to plot on</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">v_line_file</span> <span class="o">=</span> <span class="n">DEFECT_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;q=</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">/vline-eV-a</span><span class="si">{</span><span class="n">direction</span><span class="si">}</span><span class="s2">.dat&quot;</span>
+    <span class="c1"># split the file into blocks based on the location of the string &quot;&amp;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">v_line_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">blocks</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&amp;&quot;</span><span class="p">)</span>
+
+    <span class="c1"># convert each block into a list of lines and convert to a numpy array</span>
+    <span class="n">blocks</span> <span class="o">=</span> <span class="p">[[</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">block</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()]</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">]</span>
+    <span class="n">blocks</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># remove the first line of the second block</span>
+    <span class="n">blocks</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">]</span>
+    <span class="n">colors_gen</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">([</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">])</span>
+    <span class="n">legends</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;long range from model&quot;</span><span class="p">,</span> <span class="s2">&quot;DFT Locpot diff&quot;</span><span class="p">,</span> <span class="s2">&quot;short range (not aligned)&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">b</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">[:,</span> <span class="n">col</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="nb">next</span><span class="p">(</span><span class="n">colors_gen</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="nb">next</span><span class="p">(</span><span class="n">legends</span><span class="p">))</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;C=</span><span class="si">{</span><span class="n">C</span><span class="si">:</span><span class="s2">0.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">comparison_plots</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;&quot;&quot;&quot;</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">direction</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">plot_sxd_output</span><span class="p">(</span>
+            <span class="n">q</span><span class="p">,</span>
+            <span class="n">direction</span><span class="p">,</span>
+            <span class="n">freysoldt_results</span><span class="p">[</span><span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;alignments&quot;</span><span class="p">][</span><span class="n">direction</span><span class="p">],</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">direction</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">plot_plnr_avg</span><span class="p">(</span>
+            <span class="n">freysoldt_results</span><span class="p">[</span><span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;plot_data&quot;</span><span class="p">][</span><span class="n">direction</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="n">direction</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The results from <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code> is show on the right column.
+The peak in the LOCPOT difference correspond to the position of the defect.
+And we find that in region furthest away from that peak, the plateau value computed by python matched the plateau value visually.
+Note the in the case of the python-only plots the defect position is set to the origin and the different alignment terms are set to zero far from the origin.</p>
+<p>It is recommend to check the results of your Freysoldt correction by running something like</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_plnr_avg</span><span class="p">(</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;plot_data&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Since this immediately lets you know that, the defect positions was identified correctly if the LOCPOT diff is peaked at the origin and the curves are relatively flat in the sampling region.</p>
+<p>Note that the example here is an far too small for standard defect calculations but the defect finder is still able to find the defect position automatically.  Expect it to behave better in largers simulation cells.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">comparison_plots</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/416ab6a2bd6bff6c1423d5538f4ff6ffda470708211e313787c114ea71f8f98f.png" src="../_images/416ab6a2bd6bff6c1423d5538f4ff6ffda470708211e313787c114ea71f8f98f.png" />
+</div>
+</div>
+<p>After accounting for the electrostatic and potential alignment corrections we can see how the python correction compares with the results of <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_sxd_result</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the output of sxdefectalign&quot;&quot;&quot;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">DEFECT_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;q=</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">/corr_align.out&quot;</span><span class="p">)</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">reverse_readfile</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+    <span class="n">python_res</span> <span class="o">=</span> <span class="n">freysoldt_results</span><span class="p">[</span><span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">correction_energy</span>
+    <span class="n">sxd_res</span> <span class="o">=</span> <span class="n">get_sxd_result</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;python: </span><span class="si">{</span><span class="n">python_res</span><span class="si">:</span><span class="s2">0.4f</span><span class="si">}</span><span class="s2"> / sxdefectalign: </span><span class="si">{</span><span class="n">sxd_res</span><span class="si">:</span><span class="s2">0.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>python: 0.3664 / sxdefectalign: 0.366577
+python: 0.0000 / sxdefectalign: 0.000000
+python: 0.1798 / sxdefectalign: 0.179924
+python: 0.7721 / sxdefectalign: 0.772761
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./content"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            <div class="bd-footer-content__inner">
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Jimmy-Xuan Shen
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2022.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div></div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
