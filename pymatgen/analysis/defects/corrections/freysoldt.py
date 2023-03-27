@@ -112,8 +112,8 @@ def get_freysoldt_correction(
             )
         lattice = lattice_
     elif isinstance(defect_locpot, dict):
-        defect_locpot = {int(k): v for k, v in defect_locpot.items()}
-        list_defect_plnr_avg_esp = [defect_locpot[i] for i in range(3)]
+        defect_locpot_ = {int(k): v for k, v in defect_locpot.items()}
+        list_defect_plnr_avg_esp = [defect_locpot_[i] for i in range(3)]
         list_axis_grid = [
             *map(
                 np.linspace,
@@ -129,8 +129,8 @@ def get_freysoldt_correction(
     if isinstance(bulk_locpot, Locpot):
         list_bulk_plnr_avg_esp = [*map(bulk_locpot.get_average_along_axis, [0, 1, 2])]
     elif isinstance(bulk_locpot, dict):
-        bulk_locpot = {int(k): v for k, v in bulk_locpot.items()}
-        list_bulk_plnr_avg_esp = [bulk_locpot[i] for i in range(3)]
+        bulk_locpot_ = {int(k): v for k, v in bulk_locpot.items()}
+        list_bulk_plnr_avg_esp = [bulk_locpot_[i] for i in range(3)]
     else:
         raise ValueError("bulk_locpot must be of type Locpot or dict")
 
