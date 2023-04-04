@@ -26,8 +26,8 @@ base_struct = Structure.from_file(
 )
 finder = DefectSiteFinder()
 
-for q in [-1, 0, 1, 2, 3]:
-    fname = f"{str(TEST_FILES)}/v_O_ZrO2/relax_2_v_O_q={q}/CONTCAR"
+for q in range(-1,3):
+    fname = f"{str(TEST_FILES)}/v_N_GaN/q={q}/CONTCAR"
     struct = Structure.from_file(fname)
     fpos = finder.get_defect_fpos(defect_structure=struct, base_structure=base_struct)
     fpos -= np.round(fpos)
@@ -43,7 +43,7 @@ Cell [0;32mIn[2], line 5[0m
 [1;32m      6[0m [43m    [49m[38;5;124;43m"[39;49m[38;5;124;43m/Users/shen9/repos/mp/pymatgen-analysis-defects/tests/test_files/v_O_ZrO2/relax_2/CONTCAR[39;49m[38;5;124;43m"[39;49m
 [1;32m      7[0m [43m)[49m
 [1;32m      8[0m finder [38;5;241m=[39m DefectSiteFinder()
-[1;32m     10[0m [38;5;28;01mfor[39;00m q [38;5;129;01min[39;00m [[38;5;241m-[39m[38;5;241m1[39m, [38;5;241m0[39m, [38;5;241m1[39m, [38;5;241m2[39m, [38;5;241m3[39m]:
+[1;32m     10[0m [38;5;28;01mfor[39;00m q [38;5;129;01min[39;00m [38;5;28mrange[39m([38;5;241m-[39m[38;5;241m1[39m,[38;5;241m3[39m):
 
 File [0;32m/opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/pymatgen/core/structure.py:2682[0m, in [0;36mIStructure.from_file[0;34m(cls, filename, primitive, sort, merge_tol, **kwargs)[0m
 [1;32m   2679[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mio[39;00m[38;5;21;01m.[39;00m[38;5;21;01mvasp[39;00m [38;5;28;01mimport[39;00m Chgcar, Vasprun
