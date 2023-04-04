@@ -403,8 +403,13 @@ This is especially useful during database building since the location of the def
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
+<span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">Locpot</span>
 <span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../../../tests/test_files&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">sub_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">TEST_FILES</span><span class="p">)</span><span class="si">}</span><span class="s2">/v_N_GaN/q=</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">sub_dir</span><span class="p">)</span><span class="si">}</span><span class="s2">/LOCPOT.gz&quot;</span>
+    <span class="n">loc</span> <span class="o">=</span> <span class="n">Locpot</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="n">loc</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sub_dir</span><span class="si">}</span><span class="s2">/POSCAR.gz&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -416,12 +421,12 @@ This is especially useful during database building since the location of the def
 <span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="kn">import</span> <span class="n">Structure</span>
 
 <span class="n">base_struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span>
-    <span class="s2">&quot;/Users/shen9/repos/mp/pymatgen-analysis-defects/tests/test_files/v_O_ZrO2/relax_2/CONTCAR&quot;</span>
+    <span class="s2">&quot;/Users/shen9/repos/mp/pymatgen-analysis-defects/tests/test_files/v_N_GaN/bulk/CONTCAR.gz&quot;</span>
 <span class="p">)</span>
 <span class="n">finder</span> <span class="o">=</span> <span class="n">DefectSiteFinder</span><span class="p">()</span>
 
 <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
-    <span class="n">fname</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">TEST_FILES</span><span class="p">)</span><span class="si">}</span><span class="s2">/v_N_GaN/q=</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">/CONTCAR&quot;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">TEST_FILES</span><span class="p">)</span><span class="si">}</span><span class="s2">/v_N_GaN/q=</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">/CONTCAR.gz&quot;</span>
     <span class="n">struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
     <span class="n">fpos</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">get_defect_fpos</span><span class="p">(</span><span class="n">defect_structure</span><span class="o">=</span><span class="n">struct</span><span class="p">,</span> <span class="n">base_structure</span><span class="o">=</span><span class="n">base_struct</span><span class="p">)</span>
     <span class="n">fpos</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">fpos</span><span class="p">)</span>
@@ -436,7 +441,7 @@ This is especially useful during database building since the location of the def
 <span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.finder</span> <span class="kn">import</span> <span class="n">DefectSiteFinder</span>
 <span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="kn">import</span> <span class="n">Structure</span>
 <span class="ne">----&gt; </span><span class="mi">5</span> <span class="n">base_struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span>
-<span class="g g-Whitespace">      </span><span class="mi">6</span>     <span class="s2">&quot;/Users/shen9/repos/mp/pymatgen-analysis-defects/tests/test_files/v_O_ZrO2/relax_2/CONTCAR&quot;</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span>     <span class="s2">&quot;/Users/shen9/repos/mp/pymatgen-analysis-defects/tests/test_files/v_N_GaN/bulk/CONTCAR.gz&quot;</span>
 <span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="p">)</span>
 <span class="g g-Whitespace">      </span><span class="mi">8</span> <span class="n">finder</span> <span class="o">=</span> <span class="n">DefectSiteFinder</span><span class="p">()</span>
 <span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
@@ -448,16 +453,33 @@ This is especially useful during database building since the location of the def
 <span class="g g-Whitespace">   </span><span class="mi">2683</span>     <span class="n">contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 <span class="g g-Whitespace">   </span><span class="mi">2684</span> <span class="k">if</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="s2">&quot;*.cif*&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="s2">&quot;*.mcif*&quot;</span><span class="p">):</span>
 
-<span class="nn">File /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/monty/io.py:45,</span> in <span class="ni">zopen</span><span class="nt">(filename, *args, **kwargs)</span>
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/monty/io.py:42,</span> in <span class="ni">zopen</span><span class="nt">(filename, *args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">40</span>     <span class="k">return</span> <span class="n">bz2</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">41</span> <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;.GZ&quot;</span><span class="p">,</span> <span class="s2">&quot;.Z&quot;</span><span class="p">):</span>
+<span class="ne">---&gt; </span><span class="mi">42</span>     <span class="k">return</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 <span class="g g-Whitespace">     </span><span class="mi">43</span> <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;.XZ&quot;</span><span class="p">,</span> <span class="s2">&quot;.LZMA&quot;</span><span class="p">):</span>
 <span class="g g-Whitespace">     </span><span class="mi">44</span>     <span class="k">return</span> <span class="n">lzma</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<span class="ne">---&gt; </span><span class="mi">45</span> <span class="k">return</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-<span class="ne">FileNotFoundError</span>: [Errno 2] No such file or directory: &#39;/Users/shen9/repos/mp/pymatgen-analysis-defects/tests/test_files/v_O_ZrO2/relax_2/CONTCAR&#39;
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/gzip.py:58,</span> in <span class="ni">open</span><span class="nt">(filename, mode, compresslevel, encoding, errors, newline)</span>
+<span class="g g-Whitespace">     </span><span class="mi">56</span> <span class="n">gz_mode</span> <span class="o">=</span> <span class="n">mode</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">57</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)):</span>
+<span class="ne">---&gt; </span><span class="mi">58</span>     <span class="n">binary_file</span> <span class="o">=</span> <span class="n">GzipFile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">gz_mode</span><span class="p">,</span> <span class="n">compresslevel</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">59</span> <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;read&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;write&quot;</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">60</span>     <span class="n">binary_file</span> <span class="o">=</span> <span class="n">GzipFile</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">gz_mode</span><span class="p">,</span> <span class="n">compresslevel</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+<span class="nn">File /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/gzip.py:174,</span> in <span class="ni">GzipFile.__init__</span><span class="nt">(self, filename, mode, compresslevel, fileobj, mtime)</span>
+<span class="g g-Whitespace">    </span><span class="mi">172</span>     <span class="n">mode</span> <span class="o">+=</span> <span class="s1">&#39;b&#39;</span>
+<span class="g g-Whitespace">    </span><span class="mi">173</span> <span class="k">if</span> <span class="n">fileobj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">174</span>     <span class="n">fileobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">myfileobj</span> <span class="o">=</span> <span class="n">builtins</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span> <span class="ow">or</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">175</span> <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">176</span>     <span class="n">filename</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fileobj</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+<span class="ne">FileNotFoundError</span>: [Errno 2] No such file or directory: &#39;/Users/shen9/repos/mp/pymatgen-analysis-defects/tests/test_files/v_N_GaN/bulk/CONTCAR.gz&#39;
 </pre></div>
 </div>
 </div>
 </div>
+<p>On a larger ZrO2 cell, the identified vacancy is shown</p>
 <img src="https://raw.githubusercontent.com/materialsproject/pymatgen-analysis-defects/main/docs/source/_static/img/v_O_ZrO2_defect_finder.png" width="800"/><section id="how-does-it-work">
 <h2>How does it work?<a class="headerlink" href="#how-does-it-work" title="Permalink to this heading">#</a></h2>
 <p>Structure matching procedure is as follows:</p>
@@ -469,8 +491,6 @@ This is especially useful during database building since the location of the def
 <li><p>Compute the periodic average of a subset of the most defective sites.</p></li>
 </ol>
 <p>So in a sense we are using SOAP to arrive at a distortion field for the defect structure and calculating the center of that distortion field.  This is a fairly straight-forward approach, but it seems to work well in practice.</p>
-<p>regex for <code class="docutils literal notranslate"><span class="pre">q=?</span></code> in file names and return the number with possible - sign
-expression with grep: <code class="docutils literal notranslate"><span class="pre">grep</span> <span class="pre">-oP</span> <span class="pre">'q=\K-?\d+'</span></code></p>
 </section>
 </section>
 
