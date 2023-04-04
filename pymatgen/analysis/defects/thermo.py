@@ -72,10 +72,12 @@ class DefectEntry(MSONable):
     corrections_metadata: dict[str, Any] = field(default_factory=dict)
     sc_defect_frac_coords: tuple[float, float, float] | None = None
     bulk_entry: ComputedEntry | None = None
+    entry_id: str | None = None
 
     def __post_init__(self) -> None:
         """Post-initialization."""
         self.charge_state = int(self.charge_state)
+        self.entry_id = self.entry_id or self.sc_entry.entry_id
 
     def get_freysoldt_correction(
         self,
@@ -162,6 +164,18 @@ class DefectEntry(MSONable):
             return self.corrected_energy - self.bulk_entry.energy
         else:
             return None
+
+    def get_summary_dict(self) -> dict:
+        """Get a summary dictionary for the defect entry."""
+        corrections_d = {f"correction_{k}": v for k, v in self.corrections.items()}
+        res = {
+            "name": self.defect.name,
+            "charge_state": self.charge_state,
+            "bulk_total_energy": self.bulk_entry.energy if self.bulk_entry else None,
+            "defect_total_energy": self.sc_entry.energy,
+        }
+        res.update(corrections_d)
+        return res
 
 
 @dataclass
@@ -534,6 +548,15 @@ class FormationEnergyDiagram(MSONable):
         return self.defect_entries[0].defect.multiplicity * fermi_dirac(
             energy=fe, temperature=temperature
         )
+
+    def as_dataframe(self):
+        """Return the formation energy diagram as a pandas dataframe."""
+        from pandas import DataFrame
+
+        defect_entries = self.defect_entries
+        l_ = map(lambda x: x.get_summary_dict(), defect_entries)
+        df = DataFrame(l_)
+        return df
 
 
 @dataclass

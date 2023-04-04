@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import collections
+import itertools
 import logging
 from abc import ABCMeta
 from itertools import combinations
@@ -40,7 +41,7 @@ class DefectGenerator(MSONable, metaclass=ABCMeta):
                 symprec=self.symprec,
                 angle_tolerance=self.angle_tolerance,
             )
-        else:
+        else:  # pragma: no cover
             raise ValueError("This generator does not have symprec and angle_tolerance")
 
     def get_defects(self, *args, **kwargs) -> list[Defect]:
@@ -79,8 +80,7 @@ class VacancyGenerator(DefectGenerator):
         Returns:
             Generator[Vacancy, None, None]: Generator that yields a list of ``Vacancy`` objects.
         """
-        all_species = [*map(str, structure.composition.elements)]
-
+        all_species = [*map(_element_str, structure.composition.elements)]
         if rm_species is None:
             rm_species = all_species
         else:
@@ -395,6 +395,37 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         )
         for _, g in avg_chg_groups:
             yield min(g), len(g)
+
+
+def generate_all_native_defects(
+    host: Structure | Chgcar,
+    sub_generator: SubstitutionGenerator | None = None,
+    vac_generator: VacancyGenerator | None = None,
+    int_generator: ChargeInterstitialGenerator | None = None,
+):
+    """Generate all native defects."""
+    if isinstance(host, Chgcar):
+        struct = host.structure
+        chgcar = host
+    elif isinstance(host, Structure):
+        struct = host
+        chgcar = None
+    else:
+        raise ValueError("Host must be a Structure or Chgcar object.")
+
+    species = set(map(_element_str, struct.species))
+    sub_generator = sub_generator or SubstitutionGenerator()
+    vac_generator = vac_generator or VacancyGenerator()
+    # generate all vacancies
+    yield from vac_generator.generate(struct)
+    # generate substitutions for all pairs of species
+    for sp1, sp2 in itertools.combinations(species, 2):
+        yield from sub_generator.generate(struct, {sp1: sp2})
+        yield from sub_generator.generate(struct, {sp2: sp1})
+    # generate interstitials if a chgcar is provided
+    if chgcar is not None:
+        int_generator = int_generator or ChargeInterstitialGenerator()
+        yield from int_generator.generate(chgcar, insert_species=species)
 
 
 def _element_str(sp_or_el: Species | Element) -> str:

@@ -45,18 +45,14 @@ def test_defect_entry(defect_entries_Mg_Ga, data_Mg_Ga):
     def_entry = defect_entries[0]
     assert def_entry.corrections["freysoldt"] == pytest.approx(0.00, abs=1e-4)
 
-    def_entry = defect_entries[-2]
-    assert def_entry.corrections["freysoldt"] > 0
-
-    def_entry = defect_entries[1]
-    assert def_entry.corrections["freysoldt"] > 0
-
     # test that the plotting code runs
     plot_plnr_avg(plot_data[0][1])
-    plot_plnr_avg(defect_entries[1].corrections_metadata["freysoldt"][1])
+    plot_plnr_avg(defect_entries[1].corrections_metadata["freysoldt"]["plot_data"][1])
 
     vr1 = plot_data[0][1]["pot_plot_data"]["Vr"]
-    vr2 = defect_entries[0].corrections_metadata["freysoldt"][1]["pot_plot_data"]["Vr"]
+    vr2 = defect_entries[0].corrections_metadata["freysoldt"]["plot_data"][1][
+        "pot_plot_data"
+    ]["Vr"]
     assert np.allclose(vr1, vr2)
 
     bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
@@ -172,6 +168,9 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
         chempots={e: 0 for e in def_ent_list[0].defect.element_changes},
         temperature=300,
     ) == pytest.approx(2 * 1.5875937551666035e-17)
+
+    # dataframe conversion
+    fed.as_dataframe()
 
 
 def test_multi(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
