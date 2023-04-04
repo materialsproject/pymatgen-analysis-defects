@@ -9,11 +9,11 @@ repos:
   - id: end-of-file-fixer
   - id: trailing-whitespace
 - repo: https://github.com/PyCQA/autoflake
-  rev: v2.0.1
+  rev: v2.0.2
   hooks:
   - id: autoflake
 - repo: https://github.com/psf/black
-  rev: 23.1.0
+  rev: 23.3.0
   hooks:
   - id: black
 - repo: https://github.com/asottile/blacken-docs
@@ -52,7 +52,7 @@ repos:
   - id: rst-directive-colons
   - id: rst-inline-touching-normal
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.0.1
+  rev: v1.1.1
   hooks:
   - id: mypy
     files: ^pymatgen/
@@ -63,7 +63,7 @@ repos:
     - tokenize-rt==4.1.0
     - types-pkg_resources==0.1.2
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.2
+  rev: v2.2.4
   hooks:
   - id: codespell
     name: codespell
