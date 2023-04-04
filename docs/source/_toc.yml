@@ -8,6 +8,7 @@ parts:
   chapters:
   - file: content/quickstart
   - file: content/defining-defects
+  - file: content/defect-finder
   - file: content/nonradiative
   - file: content/photo-conduct
   - file: content/formation-energy
