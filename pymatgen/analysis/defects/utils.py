@@ -986,3 +986,60 @@ class CorrectionResult(MSONable):
 
     correction_energy: float
     metadata: dict[Any, Any]
+
+
+def _group_docs_by_structure(docs: list, sm: StructureMatcher, get_structure: Callable):
+    """Group docs by structure.
+
+    Args:
+        docs (list): list of generic documents/objects
+        sm (StructureMatcher): StructureMatcher object
+        get_hash (function): function to get the hash from the document
+
+    Returns:
+        Generator of lists of grouped documents/objects.
+    """
+    labs = generic_groupby(
+        docs,
+        comp=lambda x, y: sm.fit(get_structure(x), get_structure(y), symmetric=True),
+    )
+    for ilab in set(labs):
+        sub_g = [docs[itr] for itr, jlab in enumerate(labs) if jlab == ilab]
+        yield [el for el in sub_g]
+
+
+def group_docs(
+    docs: list,
+    sm: StructureMatcher,
+    get_structure: Callable,
+    get_hash: Callable | None = None,
+):
+    """Group docs by a simple hash followed by structure.
+
+    Assuming that you have a basic representation of the defect, like `name`.
+    Will first group the documents by name, then group them by the structure
+    of their representation.
+
+    Args:
+        docs (list): list of generic documents/objects
+        sm (StructureMatcher): StructureMatcher object
+        get_hash (function): function to get the hash from the document,
+            this should be some kind of simple string representation.
+        get_structure (function): function to get the structure from the document
+
+    Returns:
+        Generator of lists of grouped documents/objects.
+    """
+    if get_hash is None:
+        for g in _group_docs_by_structure(docs, sm, get_structure):
+            yield None, g
+    else:
+        s_docs = sorted(docs, key=get_hash)
+        for h, g in itertools.groupby(s_docs, key=get_hash):
+            sgroups = _group_docs_by_structure(g, sm, get_structure)
+            if len(sgroups) <= 1:
+                for group in sgroups:
+                    yield h, group
+            else:
+                for itr, group in enumerate(sgroups):
+                    yield f"{h}_{itr}", group

@@ -10,9 +10,11 @@ import logging
 import math
 from pathlib import Path
 
+from pymatgen.core import Structure
+from pymatgen.io.vasp import Outcar, Vasprun
+
 from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile
 
-# check that pydefect is installed
 try:
     from vise import user_settings
 
@@ -21,23 +23,25 @@ try:
     from pydefect.analyzer.calc_results import CalcResults
     from pydefect.cli.vasp.make_efnv_correction import make_efnv_correction
 
+    __has_pydefect__ = True
 except ImportError:  # pragma: no cover
-    raise ModuleNotFoundError(
-        "vise/pydefect is not installed. Please install it first."
-    )
-
-
-from pymatgen.core import Structure
-from pymatgen.io.vasp import Outcar, Vasprun
+    __has_pydefect__ = False
 
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
 __maintainer__ = "Jimmy-Xuan Shen"
 __email__ = "jmmshn@gmail.com"
-
 _logger = logging.getLogger(__name__)
 # suppress pydefect INFO messages
 logging.getLogger("pydefect").setLevel(logging.WARNING)
+
+
+def _check_import_pydefect():
+    """Import pydefect if it is installed."""
+    if __has_pydefect__:
+        raise ModuleNotFoundError(
+            "vise/pydefect is not installed. Please install it first."
+        )
 
 
 def get_structure_with_pot(directory: Path) -> Structure:
@@ -49,6 +53,7 @@ def get_structure_with_pot(directory: Path) -> Structure:
     Returns:
         Structure with "potential" site property.
     """
+    _check_import_pydefect()
     d_ = Path(directory)
     f_vasprun = get_zfile(d_, "vasprun.xml")
     f_outcar = get_zfile(d_, "OUTCAR")
@@ -84,6 +89,7 @@ def get_efnv_correction(
         dielectric_tensor: Dielectric tensor.
         **kwargs: Keyword arguments to pass to `make_efnv_correction`.
     """
+    _check_import_pydefect()
     # ensure that the structures have the "potential" site property
     bulk_potentials = [site.properties["potential"] for site in defect_structure]
     defect_potentials = [site.properties["potential"] for site in bulk_structure]

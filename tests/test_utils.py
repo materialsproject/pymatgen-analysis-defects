@@ -1,7 +1,9 @@
 import numpy as np
 import pytest
+from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.io.vasp.outputs import Chgcar
 
+from pymatgen.analysis.defects.core import Vacancy
 from pymatgen.analysis.defects.utils import (
     ChargeInsertionAnalyzer,
     TopographyAnalyzer,
@@ -9,6 +11,7 @@ from pymatgen.analysis.defects.utils import (
     get_avg_chg,
     get_local_extrema,
     get_localized_states,
+    group_docs,
 )
 
 
@@ -109,3 +112,31 @@ def test_get_localized_states(v_ga):
     ):
         loc_bands.add(iband)
     assert loc_bands == {75, 77}  # 75 and 77 are more localized core states
+
+
+def test_group_docs(gan_struct):
+    s = gan_struct.copy()
+    vac1 = Vacancy(s, s.sites[0])
+    vac2 = Vacancy(s, s.sites[1])
+    vac3 = Vacancy(s, s.sites[2])
+    vac4 = Vacancy(s, s.sites[3])
+    sm = StructureMatcher()
+    # Test that the grouping works without a key function (only structure)
+    sgroups = group_docs([vac1, vac2, vac3, vac4], sm, lambda x: x.defect_structure)
+    res = []
+    for _, group in sgroups:
+        names = ",".join([x.name for x in group])
+        res.append(names)
+    res.sort()
+    res = "|".join(res)
+    assert res == "v_Ga,v_Ga|v_N,v_N"
+
+    # # Test that the grouping works with a key function (structure and name)
+    # sgroups = group_docs([vac1, vac2, vac3, vac4], sm, lambda x: x.defect_structure, lambda x: x.name)
+    # res = []
+    # for _, group in sgroups:
+    #     names = ",".join([x.name for x in group])
+    #     res.append(names)
+    # res.sort()
+    # res = "|".join(res)
+    # assert res == 'v_Ga,v_Ga|v_N,v_N'
