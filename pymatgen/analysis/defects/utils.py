@@ -1036,10 +1036,10 @@ def group_docs(
     else:
         s_docs = sorted(docs, key=get_hash)
         for h, g in itertools.groupby(s_docs, key=get_hash):
-            sgroups = _group_docs_by_structure(g, sm, get_structure)
+            sgroups = list(_group_docs_by_structure(list(g), sm, get_structure))
             if len(sgroups) <= 1:
                 for group in sgroups:
                     yield h, group
             else:
                 for itr, group in enumerate(sgroups):
-                    yield f"{h}_{itr}", group
+                    yield f"{h}:{itr}", group
