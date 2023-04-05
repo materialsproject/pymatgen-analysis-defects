@@ -387,14 +387,14 @@ def plot_plnr_avg(plot_data, title=None, saved=False, ax=None):
     short_range = plot_data["pot_plot_data"]["short_range"]
     check = plot_data["pot_plot_data"]["check"]
     C = plot_data["pot_plot_data"]["shift"]
-    ax.axhline(C, color="k", linestyle="--")
-    ax.text(4, C, f"C={C:0.3f}", va="bottom")
 
     if ax is None:
         fig, ax = plt.subplots()
     ax.plot(x, v_R, c="black", zorder=1, label="long range from model")
     ax.plot(x, dft_diff, c="red", label="DFT locpot diff")
     ax.plot(x, short_range, c="green", label="short range (not aligned)")
+    ax.axhline(C, color="k", linestyle="--")
+    ax.text(4, C, f"C={C:0.3f}", va="bottom")
 
     tmpx = [x[i] for i in range(check[0], check[1])]
     ax.fill_between(
