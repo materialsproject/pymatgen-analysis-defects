@@ -340,8 +340,8 @@ def perform_pot_corr(
 
     C = np.mean(tmppot)
     _logger.debug("C = %f", C)
-    final_shift = [short[j] + C for j in range(len(v_R))]
-    v_R = [elmnt - C for elmnt in v_R]
+    short_range = short
+    v_R = [elmnt for elmnt in v_R]
 
     _logger.info("C value is averaged to be %f eV ", C)
     _logger.info("Potentital alignment energy correction (q * Delta):  %f (eV)", q * C)
@@ -352,7 +352,8 @@ def perform_pot_corr(
         "Vr": v_R,
         "x": axis_grid,
         "dft_diff": np.array(defavg) - np.array(pureavg),
-        "final_shift": final_shift,
+        "short_range": short_range,
+        "shift": C,
         "check": [mid - checkdis, mid + checkdis + 1],
     }
     # log uncertainty:
@@ -383,14 +384,17 @@ def plot_plnr_avg(plot_data, title=None, saved=False, ax=None):
     x = plot_data["pot_plot_data"]["x"]
     v_R = plot_data["pot_plot_data"]["Vr"]
     dft_diff = plot_data["pot_plot_data"]["dft_diff"]
-    final_shift = plot_data["pot_plot_data"]["final_shift"]
+    short_range = plot_data["pot_plot_data"]["short_range"]
     check = plot_data["pot_plot_data"]["check"]
+    C = plot_data["pot_plot_data"]["shift"]
+    ax.axhline(C, color="k", linestyle="--")
+    ax.text(4, C, f"C={C:0.3f}", va="bottom")
 
     if ax is None:
         fig, ax = plt.subplots()
-    ax.plot(x, v_R, c="green", zorder=1, label="long range from model")
+    ax.plot(x, v_R, c="black", zorder=1, label="long range from model")
     ax.plot(x, dft_diff, c="red", label="DFT locpot diff")
-    ax.plot(x, final_shift, c="blue", label="short range (aligned)")
+    ax.plot(x, short_range, c="green", label="short range (not aligned)")
 
     tmpx = [x[i] for i in range(check[0], check[1])]
     ax.fill_between(
@@ -398,8 +402,8 @@ def plot_plnr_avg(plot_data, title=None, saved=False, ax=None):
     )
 
     ax.set_xlim(round(x[0]), round(x[-1]))
-    ymin = min(min(v_R), min(dft_diff), min(final_shift))
-    ymax = max(max(v_R), max(dft_diff), max(final_shift))
+    ymin = min(min(v_R), min(dft_diff), min(short_range))
+    ymax = max(max(v_R), max(dft_diff), max(short_range))
     ax.set_ylim(-0.2 + ymin, 0.2 + ymax)
     ax.set_xlabel(r"distance along axis ($\AA$)", fontsize=15)
     ax.set_ylabel("Potential (V)", fontsize=15)
