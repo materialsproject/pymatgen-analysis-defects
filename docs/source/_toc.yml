@@ -8,10 +8,12 @@ parts:
   chapters:
   - file: content/quickstart
   - file: content/defining-defects
+  - file: content/defect-finder
   - file: content/nonradiative
   - file: content/photo-conduct
-  - file: content/references
   - file: content/formation-energy
+  - file: content/freysoldt-correction
+  - file: content/references
 - caption: API References
   chapters:
   - file: api_ref/index

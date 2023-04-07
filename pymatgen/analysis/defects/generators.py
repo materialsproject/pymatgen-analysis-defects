@@ -41,8 +41,10 @@ class DefectGenerator(MSONable, metaclass=ABCMeta):
                 symprec=self.symprec,
                 angle_tolerance=self.angle_tolerance,
             )
-        else:
-            raise ValueError("This generator does not have symprec and angle_tolerance")
+        else:  # pragma: no cover
+            raise ValueError(
+                "This generator is using the `SpaceGroupAnalyzer` and requires `symprec` and `angle_tolerance` to be set."
+            )
 
     def get_defects(self, *args, **kwargs) -> list[Defect]:
         """Call the generator and convert the results into a list."""
@@ -291,7 +293,7 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
             insert_species: The species to be inserted.
             **kwargs: Additional keyword arguments for the ``Interstitial`` constructor.
         """
-        if len(set(insert_species)) != len(insert_species):
+        if len(set(insert_species)) != len(insert_species):  # pragma: no cover
             raise ValueError("Insert species must be unique.")
         cand_sites_and_mul = [*self._get_candidate_sites(structure)]
         for species in insert_species:
@@ -368,7 +370,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
             insert_species: The species to be inserted.
             **kwargs: Additional keyword arguments for the ``Interstitial`` constructor.
         """
-        if len(set(insert_species)) != len(insert_species):
+        if len(set(insert_species)) != len(insert_species):  # pragma: no cover
             raise ValueError("Insert species must be unique.")
         cand_sites_and_mul = [*self._get_candidate_sites(chgcar)]
         for species in insert_species:

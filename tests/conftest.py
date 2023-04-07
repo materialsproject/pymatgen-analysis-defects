@@ -86,7 +86,7 @@ def defect_entries_Mg_Ga(data_Mg_Ga, defect_Mg_Ga):
     for qq in [-2, -1, 0, 1]:
         defect_entry, frey_summary = get_data(qq)
         defect_entries[qq] = defect_entry
-        plot_data[qq] = frey_summary.metadata
+        plot_data[qq] = frey_summary.metadata["plot_data"]
     return defect_entries, plot_data
 
 
@@ -114,3 +114,18 @@ def v_ga(test_dir):
             "wswqs": wswqs,
         }
     return res
+
+
+@pytest.fixture(scope="session")
+def v_N_GaN(test_dir):
+    """More complex."""
+    bulk_locpot = Locpot.from_file(test_dir / "v_N_GaN/bulk/LOCPOT.gz")
+    return {
+        "bulk_locpot": bulk_locpot,
+        "defect_locpots": {
+            -1: Locpot.from_file(test_dir / "v_N_GaN/q=-1/LOCPOT.gz"),
+            0: Locpot.from_file(test_dir / "v_N_GaN/q=0/LOCPOT.gz"),
+            1: Locpot.from_file(test_dir / "v_N_GaN/q=1/LOCPOT.gz"),
+            2: Locpot.from_file(test_dir / "v_N_GaN/q=2/LOCPOT.gz"),
+        },
+    }
