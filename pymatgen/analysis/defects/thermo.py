@@ -15,7 +15,7 @@ from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
-from pymatgen.core import Composition, Structure
+from pymatgen.core import Composition, Element, Structure
 from pymatgen.electronic_structure.dos import Dos, FermiDos
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
 from pymatgen.io.vasp import Locpot, Vasprun
@@ -557,6 +557,53 @@ class FormationEnergyDiagram(MSONable):
         l_ = map(lambda x: x.get_summary_dict(), defect_entries)
         df = DataFrame(l_)
         return df
+
+    def get_chempot(self, rich_element: Element, en_tol: float = 0.01):
+        """Get the chemical potential for a desired growth condition.
+
+        Choose an element to be rich in, require the chemical potential of that element
+        to be near zero (en_tol, 0), then sort the remaining elements by:
+            1. Are they in the bulk structure:
+                elements in the bulk structure are prioritized.
+            2. how similar they in electron affinity to the rich element:
+                dis-similar elements are prioritized.
+
+        .. note::
+            Priority 2 is pretty arbitrary, but it is a good starting point.
+
+
+        Based on that priority list, take the minimum chemical potential extrema.
+
+        Args:
+            rich_element: The element that are rich in the growth condition.
+            en_tol: Energy tolerance for the chemical potential of the rich element.
+
+        Returns:
+            A dictionary of the chemical potentials for the growth condition.
+        """
+        rich_conditions = list(
+            filter(lambda cp: abs(cp[rich_element]) < en_tol, self.chempot_limits)
+        )
+        if len(rich_conditions) == 0:
+            raise ValueError(
+                f"Cannot find a chemical potential condition with {rich_element} near zero."
+            )
+        defect = self.defect_entries[0].defect
+        in_bulk = defect.structure.composition.elements
+        # make sure they are of type Element
+        in_bulk = list(map(lambda x: Element(x.symbol), in_bulk))
+        not_in_bulk = list(set(self.chempot_limits[0].keys()) - set(in_bulk))
+        in_bulk = list(filter(lambda x: x != rich_element, in_bulk))
+
+        def el_sorter(element):
+            return -abs(element.electron_affinity - rich_element.electron_affinity)
+
+        el_list = sorted(in_bulk, key=el_sorter) + sorted(not_in_bulk, key=el_sorter)
+
+        def chempot_sorter(chempot_dict):
+            return (chempot_dict[el] for el in el_list)
+
+        return min(rich_conditions, key=chempot_sorter)
 
 
 @dataclass
