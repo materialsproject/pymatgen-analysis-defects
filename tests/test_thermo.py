@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from matplotlib import pyplot as plt
 from pymatgen.analysis.phase_diagram import PhaseDiagram
-from pymatgen.core import PeriodicSite
+from pymatgen.core import Element, PeriodicSite
 
 from pymatgen.analysis.defects.core import Interstitial
 from pymatgen.analysis.defects.corrections.freysoldt import plot_plnr_avg
@@ -171,6 +171,9 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
 
     # dataframe conversion
     fed.as_dataframe()
+
+    # test that you can get the Ga-rich chempot
+    fed.get_chempot(Element("Ga"))
 
 
 def test_multi(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
