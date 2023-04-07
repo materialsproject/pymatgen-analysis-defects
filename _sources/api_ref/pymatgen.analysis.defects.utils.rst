@@ -26,6 +26,7 @@
       get_localized_states
       get_symmetry_labeled_structures
       get_zfile
+      group_docs
       remove_collisions
       sort_positive_definite
    

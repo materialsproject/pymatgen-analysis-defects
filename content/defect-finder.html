@@ -61,8 +61,6 @@ const thebe_selector_input = "pre"
 const thebe_selector_output = ".output, .cell_output"
 </script>
     <script async="async" src="../_static/sphinx-thebe.js"></script>
-    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'content/defect-finder';</script>
     <link rel="canonical" href="https://materialsproject.github.io/pymatgen-analysis-defects/content/defect-finder.html" />
     <link rel="index" title="Index" href="../genindex.html" />
@@ -398,34 +396,24 @@ document.write(`
 during the atomic relaxation process. This can be especially problematic for native point defects, since the similar atoms in the simulation cell are technically fungible so split-vacancies and split-interstitials can be created with ill-defined positions.
 The <code class="docutils literal notranslate"><span class="pre">DefectSiteFinder</span></code> can be used to identify the location of the defect in a simulation cell without any prior knowledge of the how the defect is created.
 This is especially useful during database building since the location of the defect is now provence agnostic which means that the database requires less context information during the build process.</p>
-<p>To use the <code class="docutils literal notranslate"><span class="pre">DefectSiteFinder</span></code>, simply instantiate the class and call the <code class="docutils literal notranslate"><span class="pre">find_defect_fpos</span></code> method with the defective and pristine structures as arguments.  We show that the <code class="docutils literal notranslate"><span class="pre">DefectSiteFinder</span></code> can be used to identify the location of oxygen vacancies in a cubic ZrO<span class="math notranslate nohighlight">\(_2\)</span> structure blow.</p>
+<p>To use the <code class="docutils literal notranslate"><span class="pre">DefectSiteFinder</span></code>, simply instantiate the class and call the <code class="docutils literal notranslate"><span class="pre">find_defect_fpos</span></code> method with the defective and pristine structures as arguments.  We show that the <code class="docutils literal notranslate"><span class="pre">DefectSiteFinder</span></code> can be used to identify the location of nitrogen vacancies in wz-GaN structure blow.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">Locpot</span>
+
 <span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../../../tests/test_files&quot;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
-    <span class="n">sub_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">TEST_FILES</span><span class="p">)</span><span class="si">}</span><span class="s2">/v_N_GaN/q=</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="n">fname</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">sub_dir</span><span class="p">)</span><span class="si">}</span><span class="s2">/LOCPOT.gz&quot;</span>
-    <span class="n">loc</span> <span class="o">=</span> <span class="n">Locpot</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
-    <span class="n">loc</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sub_dir</span><span class="si">}</span><span class="s2">/POSCAR.gz&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+
 <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.finder</span> <span class="kn">import</span> <span class="n">DefectSiteFinder</span>
 <span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="kn">import</span> <span class="n">Structure</span>
 
-<span class="n">base_struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span>
-    <span class="s2">&quot;/Users/shen9/repos/mp/pymatgen-analysis-defects/tests/test_files/v_N_GaN/bulk/CONTCAR.gz&quot;</span>
-<span class="p">)</span>
+<span class="n">base_struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;v_N_GaN/bulk/CONTCAR.gz&quot;</span><span class="p">)</span>
 <span class="n">finder</span> <span class="o">=</span> <span class="n">DefectSiteFinder</span><span class="p">()</span>
 
-<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
     <span class="n">fname</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">TEST_FILES</span><span class="p">)</span><span class="si">}</span><span class="s2">/v_N_GaN/q=</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">/CONTCAR.gz&quot;</span>
     <span class="n">struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
     <span class="n">fpos</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">get_defect_fpos</span><span class="p">(</span><span class="n">defect_structure</span><span class="o">=</span><span class="n">struct</span><span class="p">,</span> <span class="n">base_structure</span><span class="o">=</span><span class="n">base_struct</span><span class="p">)</span>
@@ -435,50 +423,15 @@ This is especially useful during database building since the location of the def
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">FileNotFoundError</span><span class="g g-Whitespace">                         </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">5</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.finder</span> <span class="kn">import</span> <span class="n">DefectSiteFinder</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">from</span> <span class="nn">pymatgen.core.structure</span> <span class="kn">import</span> <span class="n">Structure</span>
-<span class="ne">----&gt; </span><span class="mi">5</span> <span class="n">base_struct</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span>
-<span class="g g-Whitespace">      </span><span class="mi">6</span>     <span class="s2">&quot;/Users/shen9/repos/mp/pymatgen-analysis-defects/tests/test_files/v_N_GaN/bulk/CONTCAR.gz&quot;</span>
-<span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="p">)</span>
-<span class="g g-Whitespace">      </span><span class="mi">8</span> <span class="n">finder</span> <span class="o">=</span> <span class="n">DefectSiteFinder</span><span class="p">()</span>
-<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/pymatgen/core/structure.py:2682,</span> in <span class="ni">IStructure.from_file</span><span class="nt">(cls, filename, primitive, sort, merge_tol, **kwargs)</span>
-<span class="g g-Whitespace">   </span><span class="mi">2679</span> <span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">Chgcar</span><span class="p">,</span> <span class="n">Vasprun</span>
-<span class="g g-Whitespace">   </span><span class="mi">2681</span> <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-<span class="ne">-&gt; </span><span class="mi">2682</span> <span class="k">with</span> <span class="n">zopen</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rt&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<span class="g g-Whitespace">   </span><span class="mi">2683</span>     <span class="n">contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-<span class="g g-Whitespace">   </span><span class="mi">2684</span> <span class="k">if</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="s2">&quot;*.cif*&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="s2">&quot;*.mcif*&quot;</span><span class="p">):</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/monty/io.py:42,</span> in <span class="ni">zopen</span><span class="nt">(filename, *args, **kwargs)</span>
-<span class="g g-Whitespace">     </span><span class="mi">40</span>     <span class="k">return</span> <span class="n">bz2</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">41</span> <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;.GZ&quot;</span><span class="p">,</span> <span class="s2">&quot;.Z&quot;</span><span class="p">):</span>
-<span class="ne">---&gt; </span><span class="mi">42</span>     <span class="k">return</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">43</span> <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;.XZ&quot;</span><span class="p">,</span> <span class="s2">&quot;.LZMA&quot;</span><span class="p">):</span>
-<span class="g g-Whitespace">     </span><span class="mi">44</span>     <span class="k">return</span> <span class="n">lzma</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/gzip.py:58,</span> in <span class="ni">open</span><span class="nt">(filename, mode, compresslevel, encoding, errors, newline)</span>
-<span class="g g-Whitespace">     </span><span class="mi">56</span> <span class="n">gz_mode</span> <span class="o">=</span> <span class="n">mode</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">57</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)):</span>
-<span class="ne">---&gt; </span><span class="mi">58</span>     <span class="n">binary_file</span> <span class="o">=</span> <span class="n">GzipFile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">gz_mode</span><span class="p">,</span> <span class="n">compresslevel</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">59</span> <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;read&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;write&quot;</span><span class="p">):</span>
-<span class="g g-Whitespace">     </span><span class="mi">60</span>     <span class="n">binary_file</span> <span class="o">=</span> <span class="n">GzipFile</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">gz_mode</span><span class="p">,</span> <span class="n">compresslevel</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
-
-<span class="nn">File /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/gzip.py:174,</span> in <span class="ni">GzipFile.__init__</span><span class="nt">(self, filename, mode, compresslevel, fileobj, mtime)</span>
-<span class="g g-Whitespace">    </span><span class="mi">172</span>     <span class="n">mode</span> <span class="o">+=</span> <span class="s1">&#39;b&#39;</span>
-<span class="g g-Whitespace">    </span><span class="mi">173</span> <span class="k">if</span> <span class="n">fileobj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<span class="ne">--&gt; </span><span class="mi">174</span>     <span class="n">fileobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">myfileobj</span> <span class="o">=</span> <span class="n">builtins</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span> <span class="ow">or</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">175</span> <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">176</span>     <span class="n">filename</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fileobj</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-
-<span class="ne">FileNotFoundError</span>: [Errno 2] No such file or directory: &#39;/Users/shen9/repos/mp/pymatgen-analysis-defects/tests/test_files/v_N_GaN/bulk/CONTCAR.gz&#39;
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[0.16666602 0.33333386 0.16692487]
+[0.16666664 0.33333324 0.1657773 ]
+[0.16666658 0.33333331 0.16008467]
+[-0.01832584  0.39998153  0.22418941]
 </pre></div>
 </div>
 </div>
 </div>
+<p>The last for <code class="docutils literal notranslate"><span class="pre">q=3</span></code> demonstrates that doing this in a smaller simulation cell with large distortions can be problematic so always double check your results.</p>
 <p>On a larger ZrO2 cell, the identified vacancy is shown</p>
 <img src="https://raw.githubusercontent.com/materialsproject/pymatgen-analysis-defects/main/docs/source/_static/img/v_O_ZrO2_defect_finder.png" width="800"/><section id="how-does-it-work">
 <h2>How does it work?<a class="headerlink" href="#how-does-it-work" title="Permalink to this heading">#</a></h2>
@@ -486,7 +439,7 @@ This is especially useful during database building since the location of the def
 <ol class="arabic simple">
 <li><p>Caclulate the anonymized SOAP vector for each symmetry distinct site in the pristine structure.</p></li>
 <li><p>Calculate the SOAP vector for each site in the defective structure.</p></li>
-<li><p>For each site in the defective structure, find the closest match in the pristine structure using the cosine similarity of the SOAP vectors. This cosine similarity becomes a measure of how defective the site is.</p></li>
+<li><p>For each site in the defective structure, find the closest match in the pristine structure using the cosine similarity of the SOAP vectors. This cosine similarity becomes a measure of how defective the site is (how different from a bulk site).</p></li>
 <li><p>Rank the sites by the their defectiveness as defined above.</p></li>
 <li><p>Compute the periodic average of a subset of the most defective sites.</p></li>
 </ol>

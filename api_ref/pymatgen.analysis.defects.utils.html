@@ -424,10 +424,13 @@ document.write(`
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_zfile</span></code>(directory, base_name[, allow_missing])</p></td>
 <td><p>Find gzipped or non-gzipped versions of a file in a directory listing.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_collisions</span></code>(fcoords, structure[, min_dist])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_docs</span></code>(docs, sm, get_structure[, get_hash])</p></td>
+<td><p>Group docs by a simple hash followed by structure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_collisions</span></code>(fcoords, structure[, min_dist])</p></td>
 <td><p>Removed points that are too close to existing atoms in the structure.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_positive_definite</span></code>(list_in, ref1, ref2, dist)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_positive_definite</span></code>(list_in, ref1, ref2, dist)</p></td>
 <td><p>Sort a list where we can only compute a positive-definite distance.</p></td>
 </tr>
 </tbody>
