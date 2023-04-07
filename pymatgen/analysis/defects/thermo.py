@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from itertools import groupby
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -15,6 +14,7 @@ from monty.json import MSONable
 from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
 from pymatgen.analysis.phase_diagram import PhaseDiagram
+from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.core import Composition, Structure
 from pymatgen.electronic_structure.dos import Dos, FermiDos
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
@@ -26,7 +26,7 @@ from scipy.spatial import ConvexHull
 from pymatgen.analysis.defects.core import Defect
 from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
 from pymatgen.analysis.defects.finder import DefectSiteFinder
-from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile
+from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile, group_docs
 
 __author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -644,14 +644,32 @@ class MultiFormationEnergyDiagram(MSONable):
         return bisect(_get_total_q, -1.0, fdos_cbm - fdos_vbm + 1.0)
 
 
-def group_defects(defect_entries: list[DefectEntry]):
-    """Group defects by their representation.
+def group_defects(defect_entries: list[DefectEntry], sm: StructureMatcher = None):
+    """Group defect entries by their representation.
 
-    TODO: Fix this with `defect_structure` grouping with `StructureMatcher`.
+    First by name then by structure.
+
+    Args:
+        defect_entries: list of defect entries
+        sm: StructureMatcher to use for grouping
+
+    Returns:
+        Generator of (name, list of defect entries) tuples
     """
-    sents = sorted(defect_entries, key=lambda x: x.defect.__repr__())
-    for k, group in groupby(sents, key=lambda x: x.defect.__repr__()):
-        yield k, list(group)
+    if sm is None:
+        sm = StructureMatcher(comparator=ElementComparator())
+
+    def _get_structure(entry):
+        return entry.defect.structure
+
+    def _get_name(entry):
+        return entry.defect.name
+
+    ent_groups = group_docs(
+        defect_entries, sm=sm, get_structure=_get_structure, get_hash=_get_name
+    )
+    for g_name, g_entries in ent_groups:
+        yield g_name, g_entries
 
 
 def ensure_stable_bulk(
