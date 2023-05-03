@@ -13,6 +13,7 @@ from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatc
 from pymatgen.core import Element, PeriodicSite, Species, Structure
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.symmetry.structure import SymmetrizedStructure
+from pyrho.utils import get_plane_spacing
 
 from pymatgen.analysis.defects.supercells import get_sc_fromstruct
 
@@ -162,6 +163,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         max_atoms: int = 240,
         min_length: float = 10.0,
         force_diagonal: bool = False,
+        relax_radius: float | str | None = None,
     ) -> Structure:
         """Generate the supercell for a defect.
 
@@ -172,6 +174,7 @@ class Defect(MSONable, metaclass=ABCMeta):
             min_atoms: Minimum number of atoms allowed in the supercell.
             min_length: Minimum length of the smallest supercell lattice vector.
             force_diagonal: If True, return a transformation with a diagonal transformation matrix.
+            relax_radius: Relax the supercell atoms to a sphere of this radius around the defect site.
 
         Returns:
             Structure: The supercell structure.
@@ -195,11 +198,28 @@ class Defect(MSONable, metaclass=ABCMeta):
         )
         sc_defect_struct = sc_defect.defect_structure
         sc_defect_struct.remove_oxidation_states()
+
         if dummy_species is not None:
             dummy_pos = np.dot(self.site.frac_coords, sc_mat_inv)
             dummy_pos = np.mod(dummy_pos, 1)
             sc_defect_struct.insert(len(sc_structure), dummy_species, dummy_pos)
 
+        if relax_radius is None:
+            return sc_defect_struct
+        if relax_radius == "auto":
+            relax_radius = min(get_plane_spacing(sc_defect_struct.lattice.matrix)) / 2.0
+        if not isinstance(relax_radius, float):
+            raise ValueError("relax_radius must be a float or 'auto' or None")
+
+        sc_defect_struct.get_sites_in_sphere(sc_pos, relax_radius)
+        relax_sites = sc_defect_struct.get_sites_in_sphere(
+            [0, 0, 0], relax_radius, include_index=True
+        )
+        relax_indices = [site.index for site in relax_sites]
+        relax_mask = [[False, False, False]] * len(sc_defect_struct)
+        for i in relax_indices:
+            relax_mask[i] = [[True, True, True]]
+        sc_defect_struct.add_site_property("selective_dynamics", relax_mask)
         return sc_defect_struct
 
     @property
@@ -569,6 +589,7 @@ class DefectComplex(Defect):
         max_atoms: int = 240,
         min_length: float = 10.0,
         force_diagonal: bool = False,
+        relax_radius: float | str | None = None,
     ) -> Structure:
         """Generate the supercell for a defect.
 
