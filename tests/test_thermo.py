@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from matplotlib import pyplot as plt
 from pymatgen.analysis.phase_diagram import PhaseDiagram
-from pymatgen.core import PeriodicSite
+from pymatgen.core import Element, PeriodicSite
 
 from pymatgen.analysis.defects.core import Interstitial
 from pymatgen.analysis.defects.corrections.freysoldt import plot_plnr_avg
@@ -172,6 +172,9 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
     # dataframe conversion
     fed.as_dataframe()
 
+    # test that you can get the Ga-rich chempot
+    fed.get_chempots(Element("Ga"))
+
 
 def test_multi(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
     bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
@@ -211,7 +214,7 @@ def test_multi(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
     )
     mfed = MultiFormationEnergyDiagram(formation_energy_diagrams=[fed])
     ef = mfed.solve_for_fermi_level(
-        chempots=mfed.chempot_limits[0], temperature=300, dos=bulk_dos
+        rich_element=Element("Ga"), temperature=300, dos=bulk_dos
     )
     assert ef > 0
 

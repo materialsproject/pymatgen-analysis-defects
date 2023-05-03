@@ -15,7 +15,7 @@ from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
-from pymatgen.core import Composition, Structure
+from pymatgen.core import Composition, Element, Structure
 from pymatgen.electronic_structure.dos import Dos, FermiDos
 from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
 from pymatgen.io.vasp import Locpot, Vasprun
@@ -227,7 +227,7 @@ class FormationEnergyDiagram(MSONable):
         - Make sure that the bulk entry is stable
         - create the chemical potential diagram using only the formation energies
         """
-        g = group_defects(self.defect_entries)
+        g = group_defect_entries(self.defect_entries)
         if next(g, True) and next(g, False):
             raise ValueError(
                 "Defects are not of same type! "
@@ -558,6 +558,54 @@ class FormationEnergyDiagram(MSONable):
         df = DataFrame(l_)
         return df
 
+    def get_chempots(self, rich_element: Element | str, en_tol: float = 0.01):
+        """Get the chemical potential for a desired growth condition.
+
+        Choose an element to be rich in, require the chemical potential of that element
+        to be near zero (en_tol, 0), then sort the remaining elements by:
+            1. Are they in the bulk structure:
+                elements in the bulk structure are prioritized.
+            2. how similar they in electron affinity to the rich element:
+                dis-similar elements are prioritized.
+
+        .. note::
+            Priority 2 is pretty arbitrary, but it is a good starting point.
+
+
+        Based on that priority list, take the minimum chemical potential extrema.
+
+        Args:
+            rich_element: The element that are rich in the growth condition.
+            en_tol: Energy tolerance for the chemical potential of the rich element.
+
+        Returns:
+            A dictionary of the chemical potentials for the growth condition.
+        """
+        rich_element = Element(rich_element)
+        rich_conditions = list(
+            filter(lambda cp: abs(cp[rich_element]) < en_tol, self.chempot_limits)
+        )
+        if len(rich_conditions) == 0:
+            raise ValueError(
+                f"Cannot find a chemical potential condition with {rich_element} near zero."
+            )
+        defect = self.defect_entries[0].defect
+        in_bulk = defect.structure.composition.elements
+        # make sure they are of type Element
+        in_bulk = list(map(lambda x: Element(x.symbol), in_bulk))
+        not_in_bulk = list(set(self.chempot_limits[0].keys()) - set(in_bulk))
+        in_bulk = list(filter(lambda x: x != rich_element, in_bulk))
+
+        def el_sorter(element):
+            return -abs(element.electron_affinity - rich_element.electron_affinity)
+
+        el_list = sorted(in_bulk, key=el_sorter) + sorted(not_in_bulk, key=el_sorter)
+
+        def chempot_sorter(chempot_dict):
+            return (chempot_dict[el] for el in el_list)
+
+        return min(rich_conditions, key=chempot_sorter)
+
 
 @dataclass
 class MultiFormationEnergyDiagram(MSONable):
@@ -569,8 +617,6 @@ class MultiFormationEnergyDiagram(MSONable):
         """Set some attributes after initialization."""
         self.band_gap = self.formation_energy_diagrams[0].band_gap
         self.vbm = self.formation_energy_diagrams[0].vbm
-        self.chempot_limits = self.formation_energy_diagrams[0].chempot_limits
-        self.chempot_diagram = self.formation_energy_diagrams[0].chempot_diagram
 
     @classmethod
     def with_atomic_entries(
@@ -588,7 +634,7 @@ class MultiFormationEnergyDiagram(MSONable):
         FormationEnergyDiagram using the with_atomic_entries method (see above)
         """
         single_form_en_diagrams = []
-        for _, defect_group in group_defects(defect_entries=defect_entries):
+        for _, defect_group in group_defect_entries(defect_entries=defect_entries):
             _fd = FormationEnergyDiagram.with_atomic_entries(
                 bulk_entry=bulk_entry,
                 defect_entries=defect_group,
@@ -644,7 +690,9 @@ class MultiFormationEnergyDiagram(MSONable):
         return bisect(_get_total_q, -1.0, fdos_cbm - fdos_vbm + 1.0)
 
 
-def group_defects(defect_entries: list[DefectEntry], sm: StructureMatcher = None):
+def group_defect_entries(
+    defect_entries: list[DefectEntry], sm: StructureMatcher = None
+):
     """Group defect entries by their representation.
 
     First by name then by structure.
@@ -660,7 +708,7 @@ def group_defects(defect_entries: list[DefectEntry], sm: StructureMatcher = None
         sm = StructureMatcher(comparator=ElementComparator())
 
     def _get_structure(entry):
-        return entry.defect.structure
+        return entry.defect.defect_structure
 
     def _get_name(entry):
         return entry.defect.name
@@ -669,6 +717,36 @@ def group_defects(defect_entries: list[DefectEntry], sm: StructureMatcher = None
         defect_entries, sm=sm, get_structure=_get_structure, get_hash=_get_name
     )
     for g_name, g_entries in ent_groups:
+        yield g_name, g_entries
+
+
+def group_formation_energy_diagrams(
+    feds: list[FormationEnergyDiagram], sm: StructureMatcher = None
+):
+    """Group formation energy diagrams by their representation.
+
+    First by name then by structure.
+
+    Args:
+        feds: list of formation energy diagrams
+        sm: StructureMatcher to use for grouping
+
+    Returns:
+        Generator of (name, list of formation energy diagrams) tuples
+    """
+    if sm is None:
+        sm = StructureMatcher(comparator=ElementComparator())
+
+    def _get_structure(fed):
+        return fed.defect.defect_structure
+
+    def _get_name(fed):
+        return fed.defect.name
+
+    fed_groups = group_docs(
+        feds, sm=sm, get_structure=_get_structure, get_hash=_get_name
+    )
+    for g_name, g_entries in fed_groups:
         yield g_name, g_entries
 
 
@@ -863,7 +941,8 @@ def plot_formation_energy_diagrams(
     formation_energy_diagrams: FormationEnergyDiagram
     | List[FormationEnergyDiagram]
     | MultiFormationEnergyDiagram,
-    chempots: Dict,
+    rich_element: Element | None = None,
+    chempots: Dict | None = None,
     alignment: float = 0.0,
     xlim: list | None = None,
     ylim: list | None = None,
@@ -880,12 +959,14 @@ def plot_formation_energy_diagrams(
     line_alpha: float = 0.5,
     band_edge_color="k",
     filterfunction: Callable | None = None,
+    legend_loc: str = "lower center",
     axis=None,
 ):
     """Plot the formation energy diagram.
 
     Args:
         formation_energy_diagrams: Which formation energy lines to plot.
+        rich_element: The abundant element used to set the limit of the chemical potential.
         chempots: Chemical potentials at which to plot the formation energy lines
             Should be bounded by the chempot_limits property
         alignment: shift the energy axis by this amount. For example, giving bandgap/2
@@ -929,8 +1010,9 @@ def plot_formation_energy_diagrams(
     if not xlim and not band_gap:
         raise ValueError("Must specify xlim or set band_gap attribute")
 
-    if not axis:
+    if axis is None:
         _, axis = plt.subplots()
+    axis.plot([0, 0], [0, 1], color=band_edge_color, linestyle="--", linewidth=1)
     if not xlim and band_gap:
         xmin, xmax = np.subtract(-0.2, alignment), np.subtract(
             band_gap + 0.2, alignment
@@ -951,15 +1033,35 @@ def plot_formation_energy_diagrams(
         if len(formation_energy_diagrams) <= 8
         else cm.gist_rainbow(np.linspace(0, 1, len(formation_energy_diagrams)))
     )
+    named_feds = []
+    for name_, feds_ in group_formation_energy_diagrams(formation_energy_diagrams):
+        for fed_ in feds_:
+            named_feds.append((name_, fed_))
 
-    for fid, single_fed in enumerate(formation_energy_diagrams):
-        lines = single_fed._get_lines(chempots=chempots)
-        lowerlines = get_lower_envelope(lines)
-        trans = get_transitions(
-            lowerlines, np.add(xmin, alignment), np.add(xmax, alignment)
+    for fid, (fed_name, single_fed) in enumerate(named_feds):
+        chempots_ = (
+            chempots
+            if chempots
+            else single_fed.get_chempots(rich_element=Element(rich_element))
         )
-
-        # plot lines
+        lines = single_fed._get_lines(chempots=chempots_)
+        lowerlines = get_lower_envelope(lines)
+        trans = np.array(
+            get_transitions(
+                lowerlines, np.add(xmin, alignment), np.add(xmax, alignment)
+            )
+        )
+        axis.plot(
+            np.subtract(trans[:, 0], alignment),
+            trans[:, 1],
+            color=colors[fid],
+            ls=linestyle,
+            lw=linewidth,
+            alpha=envelope_alpha,
+            label=fed_name,
+            marker=transition_marker,
+            markersize=transition_markersize,
+        )
         if not only_lower_envelope:
             for line in lines:
                 x = np.linspace(xmin, xmax)
@@ -967,31 +1069,6 @@ def plot_formation_energy_diagrams(
                 axis.plot(
                     np.subtract(x, alignment), y, color=colors[fid], alpha=line_alpha
                 )
-
-        # plot connecting envelop lines
-        for i, (_x, _y) in enumerate(trans[:-1]):
-            x = np.linspace(_x, trans[i + 1][0])
-            y = ((trans[i + 1][1] - _y) / (trans[i + 1][0] - _x)) * (x - _x) + _y
-            axis.plot(
-                np.subtract(x, alignment),
-                y,
-                color=colors[fid],
-                ls=linestyle,
-                lw=linewidth,
-                alpha=envelope_alpha,
-            )
-
-        # Plot transitions
-        for _x, _y in trans:
-            ymax = max((ymax, _y))
-            ymin = min((ymin, _y))
-            axis.plot(
-                np.subtract(_x, alignment),
-                _y,
-                marker=transition_marker,
-                color=colors[fid],
-                markersize=transition_markersize,
-            )
 
         # get latex-like legend titles
         dfct = single_fed.defect_entries[0].defect
@@ -1046,12 +1123,13 @@ def plot_formation_energy_diagrams(
         handle, leg = lg.legendHandles, [txt._text for txt in lg.texts]
     else:
         handle, leg = [], []
+
     axis.legend(
         handles=artists + handle,
         labels=legends_txt + leg,
         fontsize=lg_fontsize * ax_fontsize,
         ncol=3,
-        loc="lower center",
+        loc=legend_loc,
     )
 
     if save:

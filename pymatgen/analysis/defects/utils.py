@@ -1028,7 +1028,7 @@ def group_docs(
         get_structure (function): function to get the structure from the document
 
     Returns:
-        Generator of lists of grouped documents/objects.
+        Generator of (name, group)
     """
     if get_hash is None:
         for g in _group_docs_by_structure(docs, sm, get_structure):
