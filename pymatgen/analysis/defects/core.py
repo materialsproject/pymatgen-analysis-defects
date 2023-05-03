@@ -204,22 +204,11 @@ class Defect(MSONable, metaclass=ABCMeta):
             dummy_pos = np.mod(dummy_pos, 1)
             sc_defect_struct.insert(len(sc_structure), dummy_species, dummy_pos)
 
-        if relax_radius is None:
-            return sc_defect_struct
-        if relax_radius == "auto":
-            relax_radius = min(get_plane_spacing(sc_defect_struct.lattice.matrix)) / 2.0
-        if not isinstance(relax_radius, float):
-            raise ValueError("relax_radius must be a float or 'auto' or None")
-
-        sc_defect_struct.get_sites_in_sphere(sc_pos, relax_radius)
-        relax_sites = sc_defect_struct.get_sites_in_sphere(
-            [0, 0, 0], relax_radius, include_index=True
+        _set_selective_dynamics(
+            structure=sc_defect_struct,
+            site_pos=sc_pos,
+            relax_radius=relax_radius,
         )
-        relax_indices = [site.index for site in relax_sites]
-        relax_mask = [[False, False, False]] * len(sc_defect_struct)
-        for i in relax_indices:
-            relax_mask[i] = [[True, True, True]]
-        sc_defect_struct.add_site_property("selective_dynamics", relax_mask)
         return sc_defect_struct
 
     @property
@@ -613,22 +602,27 @@ class DefectComplex(Defect):
                 min_length=min_length,
                 force_diagonal=force_diagonal,
             )
-        sc_structure = self.structure * sc_mat
+        sc_defect_struct = self.structure * sc_mat
         sc_mat_inv = np.linalg.inv(sc_mat)
         complex_pos = np.zeros(3)
         for defect in self.defects:
             sc_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
             complex_pos += sc_pos
-            sc_site = PeriodicSite(defect.site.specie, sc_pos, sc_structure.lattice)
-            update_structure(sc_structure, sc_site, defect_type=defect.defect_type)
-        complex_pos /= len(self.defects)
+            sc_site = PeriodicSite(defect.site.specie, sc_pos, sc_defect_struct.lattice)
+            update_structure(sc_defect_struct, sc_site, defect_type=defect.defect_type)
+        complex_pos /= float(len(self.defects))
         if dummy_species is not None:
             for defect in self.defects:
                 dummy_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
                 dummy_pos = np.mod(dummy_pos, 1)
-                sc_structure.insert(len(sc_structure), dummy_species, dummy_pos)
+                sc_defect_struct.insert(len(sc_defect_struct), dummy_species, dummy_pos)
 
-        return sc_structure
+        _set_selective_dynamics(
+            structure=sc_defect_struct,
+            site_pos=sc_pos,
+            relax_radius=relax_radius,
+        )
+        return sc_defect_struct
 
 
 def update_structure(structure, site, defect_type):
@@ -720,6 +714,25 @@ def get_vacancy(structure: Structure, isite: int, **kwargs) -> Vacancy:
     """
     site = structure[isite]
     return Vacancy(structure=structure, site=site, **kwargs)
+
+
+def _set_selective_dynamics(structure, site_pos, relax_radius):
+    if relax_radius is None:
+        return
+    if relax_radius == "auto":
+        relax_radius = min(get_plane_spacing(structure.lattice.matrix)) / 2.0
+    if not isinstance(relax_radius, float):
+        raise ValueError("relax_radius must be a float or 'auto' or None")
+
+    structure.get_sites_in_sphere(site_pos, relax_radius)
+    relax_sites = structure.get_sites_in_sphere(
+        [0, 0, 0], relax_radius, include_index=True
+    )
+    relax_indices = [site.index for site in relax_sites]
+    relax_mask = [[False, False, False]] * len(structure)
+    for i in relax_indices:
+        relax_mask[i] = [[True, True, True]]
+    structure.add_site_property("selective_dynamics", relax_mask)
 
 
 # TODO: matching defect complexes might be done with some kind of CoM site to fix the periodicity
