@@ -731,7 +731,7 @@ def _set_selective_dynamics(structure, site_pos, relax_radius):
     relax_indices = [site.index for site in relax_sites]
     relax_mask = [[False, False, False]] * len(structure)
     for i in relax_indices:
-        relax_mask[i] = [[True, True, True]]
+        relax_mask[i] = [True, True, True]
     structure.add_site_property("selective_dynamics", relax_mask)
 
 
