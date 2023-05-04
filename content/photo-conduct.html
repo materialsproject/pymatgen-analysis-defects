@@ -438,8 +438,24 @@ Since the <code class="docutils literal notranslate"><span class="pre">PROCAR</s
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The defect band is [(138, 0, 1), (138, 1, 1)]
-The vibrational frequency is omega=1.0 in this case is gibberish.
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ValueError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">2</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="n">dir0</span> <span class="o">=</span> <span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="s2">&quot;optics&quot;</span>
+<span class="ne">----&gt; </span><span class="mi">2</span> <span class="n">hd0</span> <span class="o">=</span> <span class="n">HarmonicDefect</span><span class="o">.</span><span class="n">from_directories</span><span class="p">(</span><span class="n">directories</span><span class="o">=</span><span class="p">[</span><span class="n">dir0</span><span class="p">])</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The defect band is </span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The vibrational frequency is omega=</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">omega</span><span class="si">}</span><span class="s2"> in this case is gibberish.&quot;</span><span class="p">)</span>
+
+<span class="nn">File ~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/ccd.py:276,</span> in <span class="ni">HarmonicDefect.from_directories</span><span class="nt">(cls, directories, charge_state, relaxed_index, defect_band, store_bandstructure, get_band_structure_kwargs, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">274</span> <span class="k">if</span> <span class="n">charge_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">275</span>     <span class="k">if</span> <span class="n">vaspruns</span><span class="p">[</span><span class="n">min_idx</span><span class="p">]</span><span class="o">.</span><span class="n">final_structure</span><span class="o">.</span><span class="n">_charge</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">276</span>         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">277</span>             <span class="s2">&quot;Charge state is not provided and cannot be parsed from the POTCAR.&quot;</span>
+<span class="g g-Whitespace">    </span><span class="mi">278</span>         <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">279</span>     <span class="n">charge_state</span> <span class="o">=</span> <span class="n">vaspruns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">final_structure</span><span class="o">.</span><span class="n">charge</span>
+<span class="g g-Whitespace">    </span><span class="mi">281</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">final_structure</span><span class="o">.</span><span class="n">charge</span> <span class="o">!=</span> <span class="n">charge_state</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vaspruns</span><span class="p">):</span>
+
+<span class="ne">ValueError</span>: Charge state is not provided and cannot be parsed from the POTCAR.
 </pre></div>
 </div>
 </div>
@@ -485,21 +501,6 @@ The user can refine the definition of the defect band by passing in a list of <c
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>band s=0,k=0  s=0,k=1  s=1,k=0  s=1,k=1
-134  3.46880  3.77960  3.86670  4.22680
-135  3.58800  4.06530  4.04520  4.26400
-136  3.70270  4.25190  4.62880  4.79700
-137  3.89660  4.28290  4.94740  4.98330
-138  4.11920  4.34290  5.5338*  5.7531*
-139  7.98830  6.26990  8.08180  6.35690
-140  8.71050  8.44200  8.81040  8.53660
-141  8.80880  8.55270  8.86150  8.60610
-142  9.12240  8.76330  9.16820  8.86680
-143  9.12980  9.35840  9.17690  9.36620
-</pre></div>
-</div>
-</div>
 </div>
 <p>From the eigenvalues above, we can see that isolated defect band is <code class="docutils literal notranslate"><span class="pre">[(138,</span> <span class="pre">0,</span> <span class="pre">1),</span> <span class="pre">(138,</span> <span class="pre">1,</span> <span class="pre">1)]</span></code> which matches with starred values determined by the data from inverse participation ratio (IPR) analysis.</p>
 </section>
@@ -527,9 +528,6 @@ Which requires the <code class="docutils literal notranslate"><span class="pre">
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../_images/c593bfce1b5c9139aa86b2950390cfd9aee6b0788e3c4acf92d447a6ed8405f3.png" src="../_images/c593bfce1b5c9139aa86b2950390cfd9aee6b0788e3c4acf92d447a6ed8405f3.png" />
 </div>
 </div>
 <p>From the dielectric function above we see that this particular defect (the Ga vacancy in the neutral <code class="docutils literal notranslate"><span class="pre">q=0</span></code> state) is much better at capturing electrons from the valence band via dipole transitions than it is at emitting electrons to the conduction band via dipole transitions.</p>

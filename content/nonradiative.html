@@ -445,9 +445,27 @@ The relaxed structure will be taken from the <code class="docutils literal notra
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The relaxed structure is in dirs01[1]
-HarmonicDefect(omega=0.033 eV, charge=0.0, relaxed_index=1, spin=1, defect_band=[(138, 0, 1), (138, 1, 1)])
-The spin channel (-1) is also automaticalliy determined by the IPR, by taking the spin channel who&#39;s defect states have the lowest average IPR across the different k-points.
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ValueError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">2</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="n">dirs01</span> <span class="o">=</span> <span class="p">[</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+<span class="ne">----&gt; </span><span class="mi">2</span> <span class="n">hd0</span> <span class="o">=</span> <span class="n">HarmonicDefect</span><span class="o">.</span><span class="n">from_directories</span><span class="p">(</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span>     <span class="n">directories</span><span class="o">=</span><span class="n">dirs01</span><span class="p">,</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span>     <span class="n">store_bandstructure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The relaxed structure is in dirs01[</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">relaxed_index</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="nb">print</span><span class="p">(</span><span class="n">hd0</span><span class="p">)</span>
+
+<span class="nn">File ~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/ccd.py:276,</span> in <span class="ni">HarmonicDefect.from_directories</span><span class="nt">(cls, directories, charge_state, relaxed_index, defect_band, store_bandstructure, get_band_structure_kwargs, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">274</span> <span class="k">if</span> <span class="n">charge_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">275</span>     <span class="k">if</span> <span class="n">vaspruns</span><span class="p">[</span><span class="n">min_idx</span><span class="p">]</span><span class="o">.</span><span class="n">final_structure</span><span class="o">.</span><span class="n">_charge</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">276</span>         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">277</span>             <span class="s2">&quot;Charge state is not provided and cannot be parsed from the POTCAR.&quot;</span>
+<span class="g g-Whitespace">    </span><span class="mi">278</span>         <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">279</span>     <span class="n">charge_state</span> <span class="o">=</span> <span class="n">vaspruns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">final_structure</span><span class="o">.</span><span class="n">charge</span>
+<span class="g g-Whitespace">    </span><span class="mi">281</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">final_structure</span><span class="o">.</span><span class="n">charge</span> <span class="o">!=</span> <span class="n">charge_state</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vaspruns</span><span class="p">):</span>
+
+<span class="ne">ValueError</span>: Charge state is not provided and cannot be parsed from the POTCAR.
 </pre></div>
 </div>
 </div>
@@ -479,9 +497,6 @@ Please report any issues you encounter to the github issue tracker.
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<img alt="../_images/84e74183a9449f1d871d5ee45e3f8f087ddf39aebff875b9a38d3be69039ae47.png" src="../_images/84e74183a9449f1d871d5ee45e3f8f087ddf39aebff875b9a38d3be69039ae47.png" />
-</div>
 </div>
 <p>The band structure of the relaxed structure has a state that can be identified as the defect state using the inverse participation ratio.</p>
 <div class="cell docutils container">
@@ -496,9 +511,6 @@ Please report any issues you encounter to the github issue tracker.
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Energy Level Spin:</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">spin</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../_images/19b7821474acd1c0f87b7c38866ae7b302882deb9207f3539d772a6bde01e033.png" src="../_images/19b7821474acd1c0f87b7c38866ae7b302882deb9207f3539d772a6bde01e033.png" />
 </div>
 </div>
 </section>
@@ -532,14 +544,6 @@ As an example, we will use the three <code class="docutils literal notranslate">
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The parsed WSWQ files are: [&#39;WSWQ.1&#39;, &#39;WSWQ.2&#39;, &#39;WSWQ.0&#39;]
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Parsed 3 WSWQ files.
-</pre></div>
-</div>
-</div>
 </div>
 <p>The epME is computed by the <code class="docutils literal notranslate"><span class="pre">HarmonicDefect.get_elph_me</span></code> method, which requires the defect band index.
 Since we know the band edge state is at the Gamma point from analyzing the bulk cell and that the second kpoint index is Gamma in our supercell calculations, can pass the <code class="docutils literal notranslate"><span class="pre">ikpt</span> <span class="pre">=</span> <span class="pre">1</span></code> defect electronic state into the <code class="docutils literal notranslate"><span class="pre">get_elph_me</span></code> method.</p>
@@ -550,12 +554,6 @@ Since we know the band edge state is at the Gamma point from analyzing the bulk 
 <span class="n">epME</span> <span class="o">=</span> <span class="n">hd0</span><span class="o">.</span><span class="n">get_elph_me</span><span class="p">(</span><span class="n">defect_state</span><span class="o">=</span><span class="p">(</span><span class="mi">138</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The resulting array of shape </span><span class="si">{</span><span class="n">epME</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> contains the matrix elements from the &quot;</span>
     <span class="s2">&quot;defect state to all other states at the same k-point.&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The automatically determined defect electronic states are: [(138, 0, 1), (138, 1, 1)] (with [band, k-point, spin] indexing).
-The resulting array of shape (216,) contains the matrix elements from the defect state to all other states at the same k-point.
 </pre></div>
 </div>
 </div>
@@ -585,9 +583,6 @@ The resulting array of shape (216,) contains the matrix elements from the defect
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;SRH coefficient [cm$^{-3}$s$^{-1}$]&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<img alt="../_images/df86a855a3f29366da609bcda1b114b2c0ab3a0d89d344e4983b62f3ed4eb784.png" src="../_images/df86a855a3f29366da609bcda1b114b2c0ab3a0d89d344e4983b62f3ed4eb784.png" />
 </div>
 </div>
 </section>
