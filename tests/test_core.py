@@ -1,5 +1,6 @@
 import numpy as np
 from pymatgen.core.periodic_table import Element, Specie
+from pymatgen.io.vasp import Poscar
 
 from pymatgen.analysis.defects.core import (
     Adsorbate,
@@ -44,6 +45,12 @@ def test_substitution(gan_struct):
     assert sub.name == "O_N"
     assert sub == sub
     assert sub.element_changes == {Element("N"): -1, Element("O"): 1}
+
+    # test supercell with locking
+    sc_locked = sub.get_supercell_structure(relax_radius=1.0)
+    poscar_locked = Poscar(sc_locked)
+    poscar_string = poscar_locked.get_string()
+    assert len(poscar_string.split("\n")) == 138
 
     # test for user defined charge
     dd = sub.as_dict()
