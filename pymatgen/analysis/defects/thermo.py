@@ -1007,19 +1007,20 @@ def plot_formation_energy_diagrams(
     formation_energy_diagrams = list(filter(filterfunction, formation_energy_diagrams))
 
     band_gap = formation_energy_diagrams[0].band_gap
-    if not xlim and not band_gap:
+    if not xlim and band_gap is None:
         raise ValueError("Must specify xlim or set band_gap attribute")
 
     if axis is None:
         _, axis = plt.subplots()
-    axis.plot([0, 0], [0, 1], color=band_edge_color, linestyle="--", linewidth=1)
-    if not xlim and band_gap:
+    axis.axvline(band_gap, color=band_edge_color, linestyle="--", linewidth=1)
+    axis.axvline(0, color=band_edge_color, linestyle="--", linewidth=1)
+    if not xlim:
         xmin, xmax = np.subtract(-0.2, alignment), np.subtract(
             band_gap + 0.2, alignment
         )
     else:
         xmin, xmax = xlim
-    ymin, ymax = 0.0, 1.0
+    ymin, ymax = np.inf, -np.inf
     legends_txt = []
     artists = []
     fontwidth = 12
@@ -1051,9 +1052,12 @@ def plot_formation_energy_diagrams(
                 lowerlines, np.add(xmin, alignment), np.add(xmax, alignment)
             )
         )
+        trans_y = trans[:, 1]
+        ymin = min(ymin, min(trans_y))
+        ymax = max(ymax, max(trans_y))
         axis.plot(
             np.subtract(trans[:, 0], alignment),
-            trans[:, 1],
+            trans_y,
             color=colors[fid],
             ls=linestyle,
             lw=linewidth,
