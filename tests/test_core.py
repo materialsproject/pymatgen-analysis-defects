@@ -56,11 +56,13 @@ def test_substitution(gan_struct):
 
     finder = DefectSiteFinder()
     fpos = finder.get_defect_fpos(sc_locked, sub.structure)
-    free_sites_ref = sc_locked.get_sites_in_sphere(fpos, 5.0, include_index=True)
+    cpos = sc_locked.lattice.get_cartesian_coords(fpos)
+    free_sites_ref = sc_locked.get_sites_in_sphere(cpos, 5.0, include_index=True)
     free_sites_ref = [site.index for site in free_sites_ref]
     free_sites_union = set(free_sites_ref) | set(free_sites)
     free_sites_intersection = set(free_sites_ref) & set(free_sites)
-    assert len(free_sites_intersection) / len(free_sites_union) > 0.7
+    assert len(free_sites_intersection) / len(free_sites_union) == 1.0
+
     # Since there is some fuzziness in the finder algorithm, we only require 70% of the sites to be the same
 
     # test for user defined charge

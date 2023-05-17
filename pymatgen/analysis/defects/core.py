@@ -737,7 +737,6 @@ def _set_selective_dynamics(structure, site_pos, relax_radius):
         relax_radius = min(get_plane_spacing(structure.lattice.matrix)) / 2.0
     if not isinstance(relax_radius, float):
         raise ValueError("relax_radius must be a float or 'auto' or None")
-
     structure.get_sites_in_sphere(site_pos, relax_radius)
     relax_sites = structure.get_sites_in_sphere(
         site_pos, relax_radius, include_index=True
