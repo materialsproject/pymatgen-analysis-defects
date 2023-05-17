@@ -1,6 +1,5 @@
 import numpy as np
 from pymatgen.core.periodic_table import Element, Specie
-from pymatgen.io.vasp import Poscar
 
 from pymatgen.analysis.defects.core import (
     Adsorbate,
@@ -10,6 +9,7 @@ from pymatgen.analysis.defects.core import (
     Substitution,
     Vacancy,
 )
+from pymatgen.analysis.defects.finder import DefectSiteFinder
 
 
 def test_vacancy(gan_struct):
@@ -47,10 +47,21 @@ def test_substitution(gan_struct):
     assert sub.element_changes == {Element("N"): -1, Element("O"): 1}
 
     # test supercell with locking
-    sc_locked = sub.get_supercell_structure(relax_radius=1.0)
-    poscar_locked = Poscar(sc_locked)
-    poscar_string = poscar_locked.get_string()
-    assert len(poscar_string.split("\n")) == 138
+    sc_locked = sub.get_supercell_structure(relax_radius=5.0)
+    free_sites = [
+        i
+        for i, site in enumerate(sc_locked)
+        if site.properties["selective_dynamics"][0]
+    ]
+
+    finder = DefectSiteFinder()
+    fpos = finder.get_defect_fpos(sc_locked, sub.structure)
+    free_sites_ref = sc_locked.get_sites_in_sphere(fpos, 5.0, include_index=True)
+    free_sites_ref = [site.index for site in free_sites_ref]
+    free_sites_union = set(free_sites_ref) | set(free_sites)
+    free_sites_intersection = set(free_sites_ref) & set(free_sites)
+    assert len(free_sites_intersection) / len(free_sites_union) > 0.7
+    # Since there is some fuzziness in the finder algorithm, we only require 70% of the sites to be the same
 
     # test for user defined charge
     dd = sub.as_dict()
