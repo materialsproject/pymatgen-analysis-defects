@@ -164,7 +164,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         min_length: float = 10.0,
         force_diagonal: bool = False,
         relax_radius: float | str | None = None,
-        perturb: float = 0.0,
+        perturb: float | None = None,
     ) -> Structure:
         """Generate the supercell for a defect.
 
@@ -212,7 +212,7 @@ class Defect(MSONable, metaclass=ABCMeta):
             site_pos=sc_pos,
             relax_radius=relax_radius,
         )
-        if perturb > 0.0:
+        if perturb is not None:
             _perturb_dynamic_sites(sc_defect_struct, distance=perturb)
 
         return sc_defect_struct
@@ -585,7 +585,7 @@ class DefectComplex(Defect):
         min_length: float = 10.0,
         force_diagonal: bool = False,
         relax_radius: float | str | None = None,
-        perturb: float = 0.0,
+        perturb: float | None = None,
     ) -> Structure:
         """Generate the supercell for a defect.
 
@@ -633,7 +633,7 @@ class DefectComplex(Defect):
             relax_radius=relax_radius,
         )
 
-        if perturb > 0.0:
+        if perturb is not None:
             _perturb_dynamic_sites(sc_defect_struct, distance=perturb)
 
         return sc_defect_struct
