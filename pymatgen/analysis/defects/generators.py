@@ -404,8 +404,17 @@ def generate_all_native_defects(
     sub_generator: SubstitutionGenerator | None = None,
     vac_generator: VacancyGenerator | None = None,
     int_generator: ChargeInterstitialGenerator | None = None,
+    max_interstitials: int | None = None,
 ):
-    """Generate all native defects."""
+    """Generate all native defects.
+
+    Args:
+        host: The host structure or chgcar object.
+        sub_generator: The substitution generator, if None, a default generator is used.
+        vac_generator: The vacancy generator, if None, a default generator is used.
+        int_generator: The interstitial generator, if None, a default
+            ChargeInterstitialGenerator is used.
+    """
     if isinstance(host, Chgcar):
         struct = host.structure
         chgcar = host
@@ -427,7 +436,8 @@ def generate_all_native_defects(
     # generate interstitials if a chgcar is provided
     if chgcar is not None:
         int_generator = int_generator or ChargeInterstitialGenerator()
-        yield from int_generator.generate(chgcar, insert_species=species)
+        int_defects = [*int_generator.generate(chgcar, insert_species=species)]
+        yield from int_defects[:max_interstitials]
 
 
 def _element_str(sp_or_el: Species | Element) -> str:
