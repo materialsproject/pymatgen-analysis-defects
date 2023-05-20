@@ -146,7 +146,6 @@ class SubstitutionGenerator(DefectGenerator):
                     structure.lattice,
                     properties=site.properties,
                 )
-                print(sub_el, sub_site)
                 yield Substitution(structure, sub_site, **kwargs)
             elif isinstance(sub_el, list):
                 for el in sub_el:

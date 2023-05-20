@@ -363,10 +363,10 @@ class Substitution(Defect):
         """Returns the defect structure."""
         struct: Structure = self.structure.copy()
         struct.remove_sites([self.defect_site_index])
-        print(">>", self.site.species_string)
+        insert_el = get_element(self.site.specie)
         struct.insert(
             self.defect_site_index,
-            species=self.site.species_string,
+            species=insert_el,
             coords=np.mod(self.site.frac_coords, 1),
         )
         return struct
