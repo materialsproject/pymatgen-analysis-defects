@@ -362,16 +362,11 @@ class Substitution(Defect):
     def defect_structure(self) -> Structure:
         """Returns the defect structure."""
         struct: Structure = self.structure.copy()
-        rm_oxi = struct.sites[self.defect_site_index].specie.oxi_state
         struct.remove_sites([self.defect_site_index])
-        sub_states = self.site.specie.icsd_oxidation_states
-        if len(sub_states) == 0:
-            sub_states = self.site.specie.oxidation_states
-        sub_oxi = min(sub_states, key=lambda x: abs(x - rm_oxi))
-        sub_specie = Species(self.site.specie.symbol, sub_oxi)
+        print(">>", self.site.species_string)
         struct.insert(
             self.defect_site_index,
-            species=sub_specie,
+            species=self.site.species_string,
             coords=np.mod(self.site.frac_coords, 1),
         )
         return struct
@@ -412,9 +407,15 @@ class Substitution(Defect):
         Returns:
             float: The oxidation state of the defect.
         """
-        orig_site = self.defect_site
-        sub_site = self.defect_structure[self.defect_site_index]
-        return sub_site.specie.oxi_state - orig_site.specie.oxi_state
+        rm_oxi = self.structure[self.defect_site_index].specie.oxi_state
+        sub_states = self.site.specie.common_oxidation_states
+        if len(sub_states) == 0:
+            raise ValueError(
+                f"No common oxidation states found for {self.site.specie}."
+                "Please specify the oxidation state manually."
+            )
+        sub_oxi = sub_states[0]
+        return sub_oxi - rm_oxi
 
     def __repr__(self) -> str:
         """Representation of a substitutional defect."""
