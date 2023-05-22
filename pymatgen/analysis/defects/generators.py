@@ -353,6 +353,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         min_dist: float = 1.0,
         avg_radius: float = 0.4,
         max_avg_charge: float = 0.9,
+        max_insertions: int | None = None,
     ) -> None:
         self.clustering_tol = clustering_tol
         self.ltol = ltol
@@ -360,6 +361,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         self.angle_tol = angle_tol
         self.avg_radius = avg_radius
         self.max_avg_charge = max_avg_charge
+        self.max_insertions = max_insertions
         super().__init__(min_dist=min_dist)
 
     def generate(self, chgcar: Chgcar, insert_species: set[str] | list[str], **kwargs) -> Generator[Interstitial, None, None]:  # type: ignore[override]
@@ -375,6 +377,8 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         cand_sites_and_mul = [*self._get_candidate_sites(chgcar)]
         for species in insert_species:
             cand_sites = [cand_site for cand_site, mul in cand_sites_and_mul]
+            if self.max_insertions is not None:
+                cand_sites = cand_sites[: self.max_insertions]
             multiplicity = [mul for cand_site, mul in cand_sites_and_mul]
             yield from super().generate(
                 chgcar.structure,
@@ -404,9 +408,11 @@ def generate_all_native_defects(
     sub_generator: SubstitutionGenerator | None = None,
     vac_generator: VacancyGenerator | None = None,
     int_generator: ChargeInterstitialGenerator | None = None,
-    max_interstitials: int | None = None,
+    max_insertions: int | None = None,
 ):
     """Generate all native defects.
+
+    Convenience function to generate all native defects for a host structure or chgcar object.
 
     Args:
         host: The host structure or chgcar object.
@@ -414,6 +420,7 @@ def generate_all_native_defects(
         vac_generator: The vacancy generator, if None, a default generator is used.
         int_generator: The interstitial generator, if None, a default
             ChargeInterstitialGenerator is used.
+        max_insertions: The maximum number of interstitials to attempt to insert.
     """
     if isinstance(host, Chgcar):
         struct = host.structure
@@ -435,9 +442,10 @@ def generate_all_native_defects(
         yield from sub_generator.generate(struct, {sp2: sp1})
     # generate interstitials if a chgcar is provided
     if chgcar is not None:
-        int_generator = int_generator or ChargeInterstitialGenerator()
-        int_defects = [*int_generator.generate(chgcar, insert_species=species)]
-        yield from int_defects[:max_interstitials]
+        int_generator = int_generator or ChargeInterstitialGenerator(
+            max_insertions=max_insertions
+        )
+        yield from int_generator.generate(chgcar, insert_species=species)
 
 
 def _element_str(sp_or_el: Species | Element) -> str:
