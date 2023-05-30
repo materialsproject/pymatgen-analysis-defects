@@ -63,7 +63,12 @@ def test_substitution(gan_struct):
     free_sites_intersection = set(free_sites_ref) & set(free_sites)
     assert len(free_sites_intersection) / len(free_sites_union) == 1.0
 
-    # Since there is some fuzziness in the finder algorithm, we only require 70% of the sites to be the same
+    # test perturbation
+    sc_locked = sub.get_supercell_structure(relax_radius=5.0, perturb=0.0)
+    free_sites_ref2 = sc_locked.get_sites_in_sphere(cpos, 5.0, include_index=True)
+    free_sites_ref2 = [site.index for site in free_sites_ref]
+    
+    assert set(free_sites_ref2) == set(free_sites_ref)
 
     # test for user defined charge
     dd = sub.as_dict()
