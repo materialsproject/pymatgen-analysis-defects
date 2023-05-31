@@ -48,18 +48,26 @@ class DefectSiteFinder(MSONable):
         self.angle_tolerance = angle_tolerance
 
     def get_defect_fpos(
-        self, defect_structure: Structure, base_structure: Structure
+        self,
+        defect_structure: Structure,
+        base_structure: Structure,
+        remove_oxi: bool = True,
     ) -> ArrayLike:
         """Get the position of a defect in the pristine structure.
 
         Args:
             defect_structure: Relaxed structure containing the defect
             base_structure: Structure for the pristine cell
+            remove_oxi: Whether to remove oxidation states from the structures
 
         Returns:
             ArrayLike: Position of the defect in the pristine structure
             (in fractional coordinates)
         """
+        if remove_oxi:
+            defect_structure.remove_oxidation_states()
+            base_structure.remove_oxidation_states()
+
         if self._is_impurity(defect_structure, base_structure):
             return self.get_impurity_position(defect_structure, base_structure)
         else:

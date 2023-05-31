@@ -164,6 +164,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         min_length: float = 10.0,
         force_diagonal: bool = False,
         relax_radius: float | str | None = None,
+        perturb: float | None = None,
     ) -> Structure:
         """Generate the supercell for a defect.
 
@@ -175,6 +176,8 @@ class Defect(MSONable, metaclass=ABCMeta):
             min_length: Minimum length of the smallest supercell lattice vector.
             force_diagonal: If True, return a transformation with a diagonal transformation matrix.
             relax_radius: Relax the supercell atoms to a sphere of this radius around the defect site.
+            perturb: The amount to perturb the sites in the supercell. Only perturb the sites with
+                selective dynamics set to True. So this setting only works with `relax_radius`.
 
         Returns:
             Structure: The supercell structure.
@@ -206,9 +209,12 @@ class Defect(MSONable, metaclass=ABCMeta):
 
         _set_selective_dynamics(
             structure=sc_defect_struct,
-            site_pos=sc_pos,
+            site_pos=sc_site.coords,
             relax_radius=relax_radius,
         )
+        if perturb is not None:
+            _perturb_dynamic_sites(sc_defect_struct, distance=perturb)
+
         return sc_defect_struct
 
     @property
@@ -356,16 +362,11 @@ class Substitution(Defect):
     def defect_structure(self) -> Structure:
         """Returns the defect structure."""
         struct: Structure = self.structure.copy()
-        rm_oxi = struct.sites[self.defect_site_index].specie.oxi_state
         struct.remove_sites([self.defect_site_index])
-        sub_states = self.site.specie.icsd_oxidation_states
-        if len(sub_states) == 0:
-            sub_states = self.site.specie.oxidation_states
-        sub_oxi = min(sub_states, key=lambda x: abs(x - rm_oxi))
-        sub_specie = Species(self.site.specie.symbol, sub_oxi)
+        insert_el = get_element(self.site.specie)
         struct.insert(
             self.defect_site_index,
-            species=sub_specie,
+            species=insert_el,
             coords=np.mod(self.site.frac_coords, 1),
         )
         return struct
@@ -406,9 +407,15 @@ class Substitution(Defect):
         Returns:
             float: The oxidation state of the defect.
         """
-        orig_site = self.defect_site
-        sub_site = self.defect_structure[self.defect_site_index]
-        return sub_site.specie.oxi_state - orig_site.specie.oxi_state
+        rm_oxi = self.structure[self.defect_site_index].specie.oxi_state
+        sub_states = self.site.specie.common_oxidation_states
+        if len(sub_states) == 0:
+            raise ValueError(
+                f"No common oxidation states found for {self.site.specie}."
+                "Please specify the oxidation state manually."
+            )
+        sub_oxi = sub_states[0]
+        return sub_oxi - rm_oxi
 
     def __repr__(self) -> str:
         """Representation of a substitutional defect."""
@@ -579,6 +586,7 @@ class DefectComplex(Defect):
         min_length: float = 10.0,
         force_diagonal: bool = False,
         relax_radius: float | str | None = None,
+        perturb: float | None = None,
     ) -> Structure:
         """Generate the supercell for a defect.
 
@@ -590,6 +598,9 @@ class DefectComplex(Defect):
             min_atoms: Minimum number of atoms allowed in the supercell.
             min_length: Minimum length of the smallest supercell lattice vector.
             force_diagonal: If True, return a transformation with a diagonal transformation matrix.
+            relax_radius: Relax the supercell atoms to a sphere of this radius around the defect site.
+            perturb: The amount to perturb the sites in the supercell. Only perturb the sites with
+                selective dynamics set to True. So this setting only works with `relax_radius`.
 
         Returns:
             Structure: The supercell structure.
@@ -619,9 +630,13 @@ class DefectComplex(Defect):
 
         _set_selective_dynamics(
             structure=sc_defect_struct,
-            site_pos=sc_pos,
+            site_pos=sc_site.coords,
             relax_radius=relax_radius,
         )
+
+        if perturb is not None:
+            _perturb_dynamic_sites(sc_defect_struct, distance=perturb)
+
         return sc_defect_struct
 
 
@@ -723,16 +738,65 @@ def _set_selective_dynamics(structure, site_pos, relax_radius):
         relax_radius = min(get_plane_spacing(structure.lattice.matrix)) / 2.0
     if not isinstance(relax_radius, float):
         raise ValueError("relax_radius must be a float or 'auto' or None")
-
     structure.get_sites_in_sphere(site_pos, relax_radius)
     relax_sites = structure.get_sites_in_sphere(
-        [0, 0, 0], relax_radius, include_index=True
+        site_pos, relax_radius, include_index=True
     )
     relax_indices = [site.index for site in relax_sites]
     relax_mask = [[False, False, False]] * len(structure)
     for i in relax_indices:
         relax_mask[i] = [True, True, True]
     structure.add_site_property("selective_dynamics", relax_mask)
+
+
+def perturb_sites(
+    structure,
+    distance: float,
+    min_distance: float | None = None,
+    site_indices: list | None = None,
+) -> None:
+    """
+    Performs a random perturbation of the sites in a structure to break
+    symmetries.
+
+    Args:
+        structure (Structure): Input structure.
+        distance (float): Distance in angstroms by which to perturb each
+            site.
+        min_distance (None, int, or float): if None, all displacements will
+            be equal amplitude. If int or float, perturb each site a
+            distance drawn from the uniform distribution between
+            'min_distance' and 'distance'.
+        site_indices (list): List of site indices on which to perform the
+            perturbation. If None, all sites will be perturbed.
+
+    """
+
+    def get_rand_vec():
+        # deals with zero vectors.
+        vector = np.random.randn(3)
+        vnorm = np.linalg.norm(vector)
+        dist = distance
+        if isinstance(min_distance, (float, int)):
+            dist = np.random.uniform(min_distance, dist)
+        return vector / vnorm * dist if vnorm != 0 else get_rand_vec()
+
+    if site_indices is None:
+        site_indices_ = list(range(len(structure._sites)))
+    else:
+        site_indices_ = site_indices
+
+    for i in site_indices_:
+        structure.translate_sites([i], get_rand_vec(), frac_coords=False)
+
+
+def _perturb_dynamic_sites(structure, distance):
+    free_indices = [
+        i
+        for i, site in enumerate(structure)
+        if site.properties["selective_dynamics"][0]
+    ]
+    perturb_sites(structure=structure, distance=distance, site_indices=free_indices)
 
 
 # TODO: matching defect complexes might be done with some kind of CoM site to fix the periodicity
