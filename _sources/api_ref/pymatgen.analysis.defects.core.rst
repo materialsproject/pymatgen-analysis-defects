@@ -15,6 +15,7 @@
    
       get_element
       get_vacancy
+      perturb_sites
       update_structure
    
    
