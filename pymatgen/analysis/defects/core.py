@@ -169,6 +169,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         relax_radius: float | str | None = None,
         perturb: float | None = None,
         target_frac_coords: np.ndarray | None = None,
+        return_site: bool = False,
     ) -> Structure:
         """Generate the supercell for a defect.
 
@@ -184,6 +185,7 @@ class Defect(MSONable, metaclass=ABCMeta):
                 selective dynamics set to True. So this setting only works with `relax_radius`.
             target_frac_coords: If set, defect will be placed at the closest equivalent site to these
                 fractional coordinates.
+            return_site: If True, also return the defect site in the supercell.
 
         Returns:
             Structure: The supercell structure.
@@ -249,6 +251,9 @@ class Defect(MSONable, metaclass=ABCMeta):
         )
         if perturb is not None:
             _perturb_dynamic_sites(sc_defect_struct, distance=perturb)
+
+        if return_site:
+            return sc_defect_struct, sc_site
 
         return sc_defect_struct
 
