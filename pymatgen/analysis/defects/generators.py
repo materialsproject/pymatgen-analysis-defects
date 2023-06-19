@@ -316,7 +316,16 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
         """
         framework = list(structure.symbol_set)
         top = TopographyAnalyzer(
-            structure, framework, [], check_volume=False, **self.top_kwargs
+            structure,
+            framework,
+            [],
+            check_volume=False,
+            clustering_tol=self.clustering_tol,
+            min_dist=self.min_dist,
+            ltol=self.ltol,
+            stol=self.stol,
+            angle_tol=self.angle_tol,
+            **self.top_kwargs,
         )
         insert_sites = dict()
         multiplicity: dict[int, int] = dict()
