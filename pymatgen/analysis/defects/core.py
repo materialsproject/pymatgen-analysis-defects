@@ -49,6 +49,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         site: PeriodicSite,
         multiplicity: int | None = None,
         oxi_state: float | None = None,
+        equivalent_sites: list[PeriodicSite] | None = None,
         symprec: float = 0.01,
         angle_tolerance: float = 5,
         user_charges: list[int] | None = None,
@@ -61,6 +62,7 @@ class Defect(MSONable, metaclass=ABCMeta):
             multiplicity: The multiplicity of the defect.
             oxi_state: The oxidation state of the defect, if not specified,
                 this will be determined automatically.
+            equivalent_sites: A list of equivalent sites for the defect in the structure.
             symprec: Tolerance for symmetry finding.
             angle_tolerance: Angle tolerance for symmetry finding.
             user_charges: User specified charge states. If specified,
@@ -74,6 +76,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         self.multiplicity = (
             multiplicity if multiplicity is not None else self.get_multiplicity()
         )
+        self.equivalent_sites = equivalent_sites if equivalent_sites is not None else []
         self.user_charges = user_charges if user_charges else []
         if oxi_state is None:
             # Try to use the reduced cell first since oxidation state assignment
@@ -165,6 +168,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         force_diagonal: bool = False,
         relax_radius: float | str | None = None,
         perturb: float | None = None,
+        target_frac_coords: np.ndarray | None = None,
     ) -> Structure:
         """Generate the supercell for a defect.
 
@@ -178,6 +182,8 @@ class Defect(MSONable, metaclass=ABCMeta):
             relax_radius: Relax the supercell atoms to a sphere of this radius around the defect site.
             perturb: The amount to perturb the sites in the supercell. Only perturb the sites with
                 selective dynamics set to True. So this setting only works with `relax_radius`.
+            target_frac_coords: If set, defect will be placed at the closest equivalent site to these
+                fractional coordinates.
 
         Returns:
             Structure: The supercell structure.
@@ -191,21 +197,50 @@ class Defect(MSONable, metaclass=ABCMeta):
                 force_diagonal=force_diagonal,
             )
 
-        sc_structure = self.structure * sc_mat
-        sc_mat_inv = np.linalg.inv(sc_mat)
-        sc_pos = np.dot(self.site.frac_coords, sc_mat_inv)
-        sc_site = PeriodicSite(self.site.specie, sc_pos, sc_structure.lattice)
+        if target_frac_coords is None:
+            sc_structure = self.structure * sc_mat
+            sc_mat_inv = np.linalg.inv(sc_mat)
+            sc_pos = np.dot(self.site.frac_coords, sc_mat_inv)
+            sc_site = PeriodicSite(self.site.specie, sc_pos, sc_structure.lattice)
+
+        else:
+            structure_w_all_defect_sites = Structure.from_sites(
+                [
+                    PeriodicSite("X", site.frac_coords, self.structure.lattice)
+                    for site in self.equivalent_sites
+                ]
+            )
+            sc_structure_w_all_defect_sites = structure_w_all_defect_sites * sc_mat
+            # sort by distance from (0.5, 0.5, 0.5), then by magnitude of fractional coordinates:
+            sc_x_site = sorted(
+                sc_structure_w_all_defect_sites,
+                key=lambda site: (
+                    round(
+                        np.linalg.norm(site.frac_coords - np.array(target_frac_coords)),
+                        4,
+                    ),
+                    round(np.linalg.norm(site.frac_coords), 4),
+                    round(np.abs(site.frac_coords[0]), 4),
+                    round(np.abs(site.frac_coords[1]), 4),
+                    round(np.abs(site.frac_coords[2]), 4),
+                ),
+            )[0]
+            sc_site = PeriodicSite(
+                self.site.specie, sc_x_site.frac_coords, sc_x_site.lattice
+            )
 
         sc_defect = self.__class__(
-            structure=sc_structure, site=sc_site, oxi_state=self.oxi_state
+            structure=self.structure * sc_mat, site=sc_site, oxi_state=self.oxi_state
         )
         sc_defect_struct = sc_defect.defect_structure
         sc_defect_struct.remove_oxidation_states()
 
         if dummy_species is not None:
-            dummy_pos = np.dot(self.site.frac_coords, sc_mat_inv)
+            dummy_pos = np.dot(self.site.frac_coords, np.linalg.inv(sc_mat))
             dummy_pos = np.mod(dummy_pos, 1)
-            sc_defect_struct.insert(len(sc_structure), dummy_species, dummy_pos)
+            sc_defect_struct.insert(
+                len(self.structure * sc_mat), dummy_species, dummy_pos
+            )
 
         _set_selective_dynamics(
             structure=sc_defect_struct,
@@ -436,6 +471,7 @@ class Interstitial(Defect):
         site: PeriodicSite,
         multiplicity: int = 1,
         oxi_state: float | None = None,
+        equivalent_sites: list[PeriodicSite] | None = None,
         **kwargs,
     ) -> None:
         """Initialize an interstitial defect object.
@@ -449,7 +485,9 @@ class Interstitial(Defect):
             oxi_state: The oxidation state of the defect, if not specified,
                 this will be determined automatically.
         """
-        super().__init__(structure, site, multiplicity, oxi_state, **kwargs)
+        super().__init__(
+            structure, site, multiplicity, oxi_state, equivalent_sites, **kwargs
+        )
 
     def get_multiplicity(self) -> int:
         """Determine the multiplicity of the defect site within the structure."""
