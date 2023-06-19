@@ -236,7 +236,7 @@ class InterstitialGenerator(DefectGenerator):
 
     def _filter_colliding(
         self, fcoords: list[list[float]], structure: Structure
-    ) -> Generator[list[float], None, None]:
+    ) -> Generator[tuple[int, list[float]], None, None]:
         """Check the sites for collisions.
 
         Args:
