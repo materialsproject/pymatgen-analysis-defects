@@ -227,9 +227,7 @@ class InterstitialGenerator(DefectGenerator):
             }
 
         for el_str, coords in insertions.items():
-            for i, coord in enumerate(
-                self._filter_colliding(coords, structure=structure)
-            ):
+            for i, coord in self._filter_colliding(coords, structure=structure):
                 mul = multiplicies[el_str][i]
                 isite = PeriodicSite(
                     species=Species(el_str), coords=coord, lattice=structure.lattice
@@ -250,10 +248,10 @@ class InterstitialGenerator(DefectGenerator):
             fcoords=list(unique_fcoords), structure=structure, min_dist=self.min_dist
         )
         cleaned_fcoords = set(tuple(f) for f in cleaned_fcoords)
-        for fc in fcoords:
+        for i, fc in enumerate(fcoords):
             if tuple(fc) not in cleaned_fcoords:
                 continue
-            yield fc
+            yield i, fc
 
 
 class VoronoiInterstitialGenerator(InterstitialGenerator):
