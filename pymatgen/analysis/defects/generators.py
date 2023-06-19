@@ -283,7 +283,7 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
         self.stol = stol
         self.angle_tol = angle_tol
         self.top_kwargs = kwargs
-        super().__init__()
+        super().__init__(min_dist=min_dist)
 
     def generate(self, structure: Structure, insert_species: set[str] | list[str], **kwargs) -> Generator[Interstitial, None, None]:  # type: ignore[override]
         """Generate interstitials.
