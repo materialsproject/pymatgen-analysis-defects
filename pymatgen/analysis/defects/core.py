@@ -203,7 +203,7 @@ class Defect(MSONable, metaclass=ABCMeta):
             sc_structure = self.structure * sc_mat
             sc_mat_inv = np.linalg.inv(sc_mat)
             sc_pos = np.dot(self.site.frac_coords, sc_mat_inv)
-            sc_site = PeriodicSite(self.site.specie, sc_pos, sc_structure.lattice)
+            sc_site = PeriodicSite(self.site.specie, sc_pos, sc_structure.lattice).to_unit_cell()
 
         else:
             structure_w_all_defect_sites = Structure.from_sites(
@@ -229,7 +229,7 @@ class Defect(MSONable, metaclass=ABCMeta):
             )[0]
             sc_site = PeriodicSite(
                 self.site.specie, sc_x_site.frac_coords, sc_x_site.lattice
-            )
+            ).to_unit_cell()
 
         sc_defect = self.__class__(
             structure=self.structure * sc_mat, site=sc_site, oxi_state=self.oxi_state
@@ -238,10 +238,8 @@ class Defect(MSONable, metaclass=ABCMeta):
         sc_defect_struct.remove_oxidation_states()
 
         if dummy_species is not None:
-            dummy_pos = np.dot(self.site.frac_coords, np.linalg.inv(sc_mat))
-            dummy_pos = np.mod(dummy_pos, 1)
             sc_defect_struct.insert(
-                len(self.structure * sc_mat), dummy_species, dummy_pos
+                len(self.structure * sc_mat), dummy_species, sc_site.frac_coords
             )
 
         _set_selective_dynamics(
