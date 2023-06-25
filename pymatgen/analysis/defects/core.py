@@ -203,7 +203,9 @@ class Defect(MSONable, metaclass=ABCMeta):
             sc_structure = self.structure * sc_mat
             sc_mat_inv = np.linalg.inv(sc_mat)
             sc_pos = np.dot(self.site.frac_coords, sc_mat_inv)
-            sc_site = PeriodicSite(self.site.specie, sc_pos, sc_structure.lattice).to_unit_cell()
+            sc_site = PeriodicSite(
+                self.site.specie, sc_pos, sc_structure.lattice
+            ).to_unit_cell()
 
         else:
             structure_w_all_defect_sites = Structure.from_sites(
@@ -446,13 +448,26 @@ class Substitution(Defect):
             float: The oxidation state of the defect.
         """
         rm_oxi = self.structure[self.defect_site_index].specie.oxi_state
-        sub_states = self.site.specie.common_oxidation_states
-        if len(sub_states) == 0:
-            raise ValueError(
-                f"No common oxidation states found for {self.site.specie}."
-                "Please specify the oxidation state manually."
+
+        # check if substitution atom is present in structure (i.e. antisite substitution):
+        sub_elt_sites_in_struct = [
+            site
+            for site in self.structure
+            if site.specie.symbol == self.site.specie.symbol
+        ]
+        if len(sub_elt_sites_in_struct) == 0:
+            sub_states = self.site.specie.common_oxidation_states
+            if len(sub_states) == 0:
+                raise ValueError(
+                    f"No common oxidation states found for {self.site.specie}."
+                    "Please specify the oxidation state manually."
+                )
+            sub_oxi = sub_states[0]
+        else:
+            sub_oxi = int(
+                np.mean([site.specie.oxi_state for site in sub_elt_sites_in_struct])
             )
-        sub_oxi = sub_states[0]
+
         return sub_oxi - rm_oxi
 
     def __repr__(self) -> str:
