@@ -457,9 +457,10 @@ class TopographyAnalyzer:
                 voronoi construction. This is because the Voronoi poly
                 extends beyond the standard unit cell because of PBC.
                 Typically, the default value of 1 works fine for most
-                structures and is fast. But for really small unit
-                cells with high symmetry, you may need to increase this to 2
-                or higher.
+                structures and is fast. But for very small unit
+                cells with high symmetry, this may need to be increased to 2
+                or higher. If there are < 5 atoms in the input structure and
+                max_cell_range is 1, this will automatically be increased to 2.
             check_volume (bool): Set False when ValueError always happen after
                 tuning tolerance.
             constrained_c_frac (float): Constraint the region where users want
@@ -484,6 +485,11 @@ class TopographyAnalyzer:
         self.clustering_tol = clustering_tol
         self.min_dist = min_dist
         self.sm = StructureMatcher(ltol=ltol, stol=stol, angle_tol=angle_tol)
+
+        # if input cell is very small (< 5 atoms) and max cell range is 1 (default), bump to 2 for
+        # accurate Voronoi tessellation:
+        if len(structure) < 5 and max_cell_range == 1:
+            max_cell_range = 2
 
         # Let us first map all sites to the standard unit cell, i.e.,
         # 0 ≤ coordinates < 1.
