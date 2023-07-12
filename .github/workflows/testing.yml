@@ -76,7 +76,6 @@ jobs:
     - name: Build package
       run: python -m build
     - name: Publish package to TestPyPI
-      if: matrix.python-version == 3.10
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
