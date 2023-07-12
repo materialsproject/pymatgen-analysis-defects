@@ -207,7 +207,7 @@ class InterstitialGenerator(DefectGenerator):
         self,
         structure: Structure,
         insertions: dict[str, list[list[float]]],
-        multiplicies: dict[str, list[int]] | None = None,
+        multiplicities: dict[str, list[int]] | None = None,
         **kwargs,
     ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
@@ -215,22 +215,20 @@ class InterstitialGenerator(DefectGenerator):
         Args:
             structure: The bulk structure the interstitials are generated from.
             insertions: The insertions to be made given as a dictionary {"Mg": [[0.0, 0.0, 0.0], [0.5, 0.5, 0.5]]}.
-            multiplicies: The multiplicities of the insertions to be made given as a dictionary {"Mg": [1, 2]}.
+            multiplicities: The multiplicities of the insertions to be made given as a dictionary {"Mg": [1, 2]}.
             **kwargs: Additional keyword arguments for the ``Interstitial`` constructor.
 
         Returns:
             Generator[Interstitial, None, None]: Generator that yields a list of ``Interstitial`` objects
         """
-        if multiplicies is None:
-            multiplicies = {
+        if multiplicities is None:
+            multiplicities = {
                 el_str: [1] * len(coords) for el_str, coords in insertions.items()
             }
 
         for el_str, coords in insertions.items():
-            for i, coord in enumerate(
-                self._filter_colliding(coords, structure=structure)
-            ):
-                mul = multiplicies[el_str][i]
+            for i, coord in self._filter_colliding(coords, structure=structure):
+                mul = multiplicities[el_str][i]
                 isite = PeriodicSite(
                     species=Species(el_str), coords=coord, lattice=structure.lattice
                 )
@@ -238,7 +236,7 @@ class InterstitialGenerator(DefectGenerator):
 
     def _filter_colliding(
         self, fcoords: list[list[float]], structure: Structure
-    ) -> Generator[list[float], None, None]:
+    ) -> Generator[tuple[int, list[float]], None, None]:
         """Check the sites for collisions.
 
         Args:
@@ -250,10 +248,10 @@ class InterstitialGenerator(DefectGenerator):
             fcoords=list(unique_fcoords), structure=structure, min_dist=self.min_dist
         )
         cleaned_fcoords = set(tuple(f) for f in cleaned_fcoords)
-        for fc in fcoords:
+        for i, fc in enumerate(fcoords):
             if tuple(fc) not in cleaned_fcoords:
                 continue
-            yield fc
+            yield i, fc
 
 
 class VoronoiInterstitialGenerator(InterstitialGenerator):
@@ -283,7 +281,7 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
         self.stol = stol
         self.angle_tol = angle_tol
         self.top_kwargs = kwargs
-        super().__init__()
+        super().__init__(min_dist=min_dist)
 
     def generate(self, structure: Structure, insert_species: set[str] | list[str], **kwargs) -> Generator[Interstitial, None, None]:  # type: ignore[override]
         """Generate interstitials.
@@ -302,7 +300,7 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
             yield from super().generate(
                 structure,
                 insertions={species: cand_sites},
-                multiplicies={species: multiplicity},
+                multiplicities={species: multiplicity},
                 **kwargs,
             )
 
@@ -316,7 +314,16 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
         """
         framework = list(structure.symbol_set)
         top = TopographyAnalyzer(
-            structure, framework, [], check_volume=False, **self.top_kwargs
+            structure,
+            framework,
+            [],
+            check_volume=False,
+            clustering_tol=self.clustering_tol,
+            min_dist=self.min_dist,
+            ltol=self.ltol,
+            stol=self.stol,
+            angle_tol=self.angle_tol,
+            **self.top_kwargs,
         )
         insert_sites = dict()
         multiplicity: dict[int, int] = dict()
@@ -383,7 +390,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
             yield from super().generate(
                 chgcar.structure,
                 insertions={species: cand_sites},
-                multiplicies={species: multiplicity},
+                multiplicities={species: multiplicity},
                 **kwargs,
             )
 
