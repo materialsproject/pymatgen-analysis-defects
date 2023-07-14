@@ -643,6 +643,8 @@ class DefectComplex(Defect):
         force_diagonal: bool = False,
         relax_radius: float | str | None = None,
         perturb: float | None = None,
+        target_frac_coords: np.ndarray | None = None,
+        return_site: bool = False,
     ) -> Structure:
         """Generate the supercell for a defect.
 
@@ -657,10 +659,18 @@ class DefectComplex(Defect):
             relax_radius: Relax the supercell atoms to a sphere of this radius around the defect site.
             perturb: The amount to perturb the sites in the supercell. Only perturb the sites with
                 selective dynamics set to True. So this setting only works with `relax_radius`.
+            target_frac_coords: If set, defect will be placed at the closest equivalent site to these
+                fractional coordinates. Not yet supported for complex defects!
+            return_site: If True, also return the defect sites in the supercell.
 
         Returns:
             Structure: The supercell structure.
         """
+        if target_frac_coords is not None:
+            raise NotImplementedError(
+                "`target_frac_coords` is not yet supported for complex defects!"
+            )
+
         if sc_mat is None:
             sc_mat = get_sc_fromstruct(
                 self.structure,
@@ -672,11 +682,14 @@ class DefectComplex(Defect):
         sc_defect_struct = self.structure * sc_mat
         sc_mat_inv = np.linalg.inv(sc_mat)
         complex_pos = np.zeros(3)
+        complex_sc_sites = []
         for defect in self.defects:
             sc_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
             complex_pos += sc_pos
             sc_site = PeriodicSite(defect.site.specie, sc_pos, sc_defect_struct.lattice)
             update_structure(sc_defect_struct, sc_site, defect_type=defect.defect_type)
+            complex_sc_sites.append(sc_site)
+
         complex_pos /= float(len(self.defects))
         if dummy_species is not None:
             for defect in self.defects:
@@ -692,6 +705,9 @@ class DefectComplex(Defect):
 
         if perturb is not None:
             _perturb_dynamic_sites(sc_defect_struct, distance=perturb)
+
+        if return_site:
+            return sc_defect_struct, complex_sc_sites
 
         return sc_defect_struct
 
