@@ -15,7 +15,7 @@ classifiers = [
   "Topic :: Other/Nonlisted Topic",
   "Topic :: Scientific/Engineering",
 ]
-dependencies = ["pymatgen>=2023.5.8", "scikit-image>=0.19.3", "mp-pyrho>=0.3.0", "numpy<=1.23.5"]
+dependencies = ["pymatgen>=2023.5.8", "scikit-image>=0.19.3", "mp-pyrho>=0.3.0", "numpy<=1.25"]
 description = "Pymatgen extension for defects analysis"
 dynamic = ["version"]
 keywords = ["high-throughput", "automated", "dft", "defects"]
@@ -25,7 +25,7 @@ readme = "README.rst"
 requires-python = '>=3.8'
 
 [project.optional-dependencies]
-finder = ["dscribe>=1.2.1"]
+finder = ["dscribe>=2.0.0"]
 dev = ["pre-commit>=2.12.1"]
 docs = [
   "jupyter-book>=0.13.1",
@@ -34,13 +34,13 @@ pydefect = ["pydefect>=0.6.2"]
 
 strict = [
   "pymatgen>=2023.5.8",
-  "dscribe==1.2.2",
-  "scikit-image==0.20.0",
+  "dscribe==2.0.0",
+  "scikit-image==0.21.0",
   "pytest==7.2.2",
   "pytest-cov==4.0.0",
   "pre-commit==3.3.3",
-  "mp-pyrho==0.3.0",
-  "numpy==1.23.5"
+  "numpy==1.24.1",
+  "scipy==1.11.1"
 ]
 
 tests = ["pytest==7.2.2", "pytest-cov==4.0.0"]

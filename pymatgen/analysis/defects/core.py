@@ -13,9 +13,10 @@ from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatc
 from pymatgen.core import Element, PeriodicSite, Species, Structure
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.symmetry.structure import SymmetrizedStructure
-from pyrho.utils import get_plane_spacing
 
 from pymatgen.analysis.defects.supercells import get_sc_fromstruct
+
+from .utils import get_plane_spacing
 
 # TODO Possible redesign idea: ``DefectSite`` class defined with a defect object.
 # This makes some of the accounting logic a bit harder since we will probably
@@ -414,7 +415,7 @@ class Substitution(Defect):
                 f"No common oxidation states found for {self.site.specie}."
                 "Please specify the oxidation state manually."
             )
-        sub_oxi = sub_states[0]
+        sub_oxi = min(sub_states, key=lambda x: abs(x - rm_oxi))
         return sub_oxi - rm_oxi
 
     def __repr__(self) -> str:
