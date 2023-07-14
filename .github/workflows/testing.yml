@@ -102,7 +102,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -e .[strict, docs]
+          pip install -e .[strict,docs]
       - name: Build
         run: jupyter-book build --path-output docs docs/source
         # Develop branch only
