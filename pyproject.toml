@@ -33,7 +33,7 @@ docs = [
 pydefect = ["pydefect>=0.6.2"]
 
 strict = [
-  "pymatgen>=2023.7.11",
+  "pymatgen==2023.7.11",
   "dscribe==2.0.0",
   "scikit-image==0.21.0",
   "pytest==7.4.0",
