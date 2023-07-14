@@ -215,7 +215,7 @@ class InterstitialGenerator(DefectGenerator):
         structure: Structure,
         insertions: dict[str, list[list[float]]],
         multiplicities: dict[str, list[int]] | None = None,
-        equivalent_positions: dict[str, list[list[float]]] | None = None,
+        equivalent_positions: dict[str, list[list[list[float]]]] | None = None,
         **kwargs,
     ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
@@ -311,7 +311,9 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
         self.top_kwargs = kwargs
         super().__init__(min_dist=min_dist)
 
-    def generate(self, structure: Structure, insert_species: set[str] | list[str], **kwargs) -> Generator[Interstitial, None, None]:  # type: ignore[override]
+    def generate(  # type: ignore[override]
+        self, structure: Structure, insert_species: set[str] | list[str], **kwargs
+    ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
 
         Args:
@@ -327,9 +329,9 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
 
             yield from super().generate(
                 structure,
-                insertions={species: cand_sites},
-                multiplicities={species: multiplicity},
-                equivalent_positions={species: equiv_fpos},
+                insertions={species: list(cand_sites)},
+                multiplicities={species: list(multiplicity)},
+                equivalent_positions={species: list(equiv_fpos)},
                 **kwargs,
             )
 
