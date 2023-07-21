@@ -40,7 +40,6 @@ strict = [
   "pymatgen==2023.7.20",
   "dscribe==2.0.0",
   "scikit-image==0.21.0",
-  "pre-commit==3.3.3",
   "numpy==1.24.4",
 ]
 
