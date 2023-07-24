@@ -24,6 +24,7 @@
       get_ipr_in_window
       get_local_extrema
       get_localized_states
+      get_plane_spacing
       get_symmetry_labeled_structures
       get_zfile
       group_docs
