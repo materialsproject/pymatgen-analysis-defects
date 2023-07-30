@@ -215,7 +215,7 @@ class Defect(MSONable, metaclass=ABCMeta):
                 ]
             )
             sc_structure_w_all_defect_sites = structure_w_all_defect_sites * sc_mat
-            # sort by distance from (0.5, 0.5, 0.5), then by magnitude of fractional coordinates:
+            # sort by distance from target_frac_coords, then by magnitude of fractional coordinates:
             sc_x_site = sorted(
                 sc_structure_w_all_defect_sites,
                 key=lambda site: (
