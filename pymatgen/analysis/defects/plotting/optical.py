@@ -129,8 +129,6 @@ def _plot_eigs(
     colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
     collections.defaultdict(list)
     eigenvalues = np.array(list(d_eigs.values()))
-    # print(x0, x_width)
-    # import ipdb; ipdb.set_trace()
     if e_fermi is None:
         e_fermi = -np.inf
 
@@ -193,8 +191,6 @@ def _plot_matrix_elements(
     y0 = d_eig[jb, jkpt, jspin]
     plot_data = []
     for (ib, ik, ispin), eig in d_eig.items():
-        # if ib == jb:
-        #     continue
         A = 0
         for idir, jdir in directions:
             A += np.abs(
