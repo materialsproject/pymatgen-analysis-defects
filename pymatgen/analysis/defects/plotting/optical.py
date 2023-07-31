@@ -186,9 +186,6 @@ def _plot_eigs(
         eigs_, x0 - (x_width / 2.0), x0 + (x_width / 2.0), color=colors[1], **kwargs
     )
 
-    # turn off x-aixs
-    ax.get_xaxis().set_visible(False)
-
 
 def _plot_matrix_elements(
     cder,
