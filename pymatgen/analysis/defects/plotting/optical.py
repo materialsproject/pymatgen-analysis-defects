@@ -25,12 +25,54 @@ def plot_optical_transitions(
     kpt_index: int = 0,
     band_window: int = 5,
     user_defect_band: tuple = tuple(),
+    ijdirs=((0, 0), (1, 1), (2, 2)),
     shift_eig: dict[tuple, float] = None,
     x0: float = 0,
     x_width: float = 2,
     ax=None,
+    cmap=None,
+    norm=None,
 ):
-    """Plot the optical transitions from the defect state to all other states."""
+    """Plot the optical transitions from the defect state to all other states.
+
+    Only plot the transitions for a specific kpoint index. The arrows present the transitions
+    between the defect state of interest and all other states. The color of the arrows
+    indicate the magnitude of the matrix element (derivative of the wavefunction) for the
+    transition.
+
+    Args:
+        defect:
+            The HarmonicDefect object, the `relaxed_bandstructure` attribute
+            must be set since this contains the eigenvalues.
+            Please see the `store_bandstructure` option in the constructor.
+        kpt_index:
+            The kpoint index to read the eigenvalues from.
+        band_window:
+            The number of bands above and below the defect state to include in the output.
+        user_defect_band:
+            (band, kpt, spin) tuple to specify the defect state. If not provided,
+            the defect state will be determined automatically using the inverse
+            participation ratio and the `kpt_index` argument.
+        ijdirs:
+            The cartesian direction of the WAVDER tensor to sum over for the plot.
+            If not provided, all the absolute values of the matrix for all
+            three diagonal entries will be summed.
+        shift_eig:
+            A dictionary of the format `(band, kpt, spin) -> float` to apply to the
+            eigenvalues. This is useful for aligning the defect state with the
+            valence or conduction band for plotting and schematic purposes.
+        x0:
+            The x coordinate of the center of the set of arrows and the eigenvalue plot.
+        x_width:
+            The width of the set of arrows and the eigenvalue plot.
+        ax:
+            The matplotlib axis object to plot on.
+        cmap:
+            The matplotlib color map to use for the color of the arrorws.
+        norm:
+            The matplotlib normalization to use for the color map of the arrows.
+
+    """
     d_eigs = get_bs_eigenvalues(
         defect=defect,
         kpt_index=kpt_index,
@@ -56,9 +98,12 @@ def plot_optical_transitions(
         defect.waveder.cder,
         d_eigs,
         defect_band_index=defect_band_index,
+        ijdirs=ijdirs,
         ax=ax_,
         x0=x0,
         x_width=x_width,
+        cmap=cmap,
+        norm=norm,
     )
     return _get_dataframe(d_eigs=d_eigs, me_plot_data=me_plot_data), cmap, norm
 
@@ -149,13 +194,13 @@ def _plot_matrix_elements(
     cder,
     d_eig,
     defect_band_index,
-    ax,
-    color_range=None,
+    ijdirs=((0, 0), (1, 1), (2, 2)),
+    ax=None,
     x0=0,
     x_width=0.6,
     arrow_width=0.1,
     cmap=None,
-    ijdir=None,
+    norm=None,
 ):
     """Plot arrow for the transition from the defect state to all other states.
 
@@ -169,9 +214,6 @@ def _plot_matrix_elements(
             The band index of the defect state.
         ax:
             The matplotlib axis object to plot on.
-        color_range:
-            The range of the color map. If not provided, the range will be determined
-            automatically.
         x0:
             The x coordinate of the center of the set of arrows.
         x_width:
@@ -180,19 +222,22 @@ def _plot_matrix_elements(
             The width of the arrow.
         cmap:
             The matplotlib color map to use.
-        ijdir:
-            The direction of the matrix element to plot. If not provided, all
-            the absolute values of the matrix for all three diagonal entries will
-            be summed.
+        norm:
+            The matplotlib normalization to use for the color map.
+        ijdirs:
+            The cartesian direction of the WAVDER tensor to sum over for the plot.
+            If not provided, all the absolute values of the matrix for all
+            three diagonal entries will be summed.
     """
+    if ax is None:
+        ax = plt.gca()
     ax.set_aspect("equal")
-    directions = ((0, 0), (1, 1), (2, 2)) if ijdir is None else (ijdir,)
     jb, jkpt, jspin = next(filter(lambda x: x[0] == defect_band_index, d_eig.keys()))
     y0 = d_eig[jb, jkpt, jspin]
     plot_data = []
     for (ib, ik, ispin), eig in d_eig.items():
         A = 0
-        for idir, jdir in directions:
+        for idir, jdir in ijdirs:
             A += np.abs(
                 cder[ib, jb, ik, ispin, idir]
                 * np.conjugate(cder[ib, jb, ik, ispin, jdir])
@@ -203,14 +248,13 @@ def _plot_matrix_elements(
         cmap = plt.get_cmap("viridis")
 
     # get the range of A values
-    if color_range is None:
+    if norm is None:
         A_min, A_max = (
             min(plot_data, key=lambda x: x[3])[3],
             max(plot_data, key=lambda x: x[3])[3],
         )
-    else:
-        A_min, A_max = color_range
-    norm = Normalize(vmin=A_min, vmax=A_max)
+        norm = Normalize(vmin=A_min, vmax=A_max)
+
     n_arrows = len(plot_data)
     x_step = x_width / n_arrows
     x = x0 - x_width / 2 + x_step / 2
