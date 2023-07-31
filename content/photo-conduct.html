@@ -551,15 +551,17 @@ The function returns a summary <code class="docutils literal notranslate"><span 
 <span class="n">df_k0</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">norm</span> <span class="o">=</span> <span class="n">plot_optical_transitions</span><span class="p">(</span><span class="n">hd0</span><span class="p">,</span> <span class="n">kpt_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">band_window</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
 <span class="n">df_k1</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plot_optical_transitions</span><span class="p">(</span><span class="n">hd0</span><span class="p">,</span> <span class="n">kpt_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">band_window</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
 <span class="n">mpl</span><span class="o">.</span><span class="n">colorbar</span><span class="o">.</span><span class="n">ColorbarBase</span><span class="p">(</span><span class="n">cm_ax</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span><span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Energy (eV)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Energy (eV)&quot;</span><span class="p">);</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;Kpoint-0&quot;</span><span class="p">,</span> <span class="s2">&quot;Kpoint-1&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, &#39;Energy (eV)&#39;)
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[Text(0, 0, &#39;Kpoint-0&#39;), Text(3, 0, &#39;Kpoint-1&#39;)]
 </pre></div>
 </div>
-<img alt="../_images/cab4fea536a89217fc24c1b8a4999df7df098b7d64d9be21ca3f3dab0f7bcff4.png" src="../_images/cab4fea536a89217fc24c1b8a4999df7df098b7d64d9be21ca3f3dab0f7bcff4.png" />
+<img alt="../_images/c8aa4f9661165fdd89f7035d36c1d3e60f20e7efc822dc3d7c134a2e9bec66e1.png" src="../_images/c8aa4f9661165fdd89f7035d36c1d3e60f20e7efc822dc3d7c134a2e9bec66e1.png" />
 </div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> object containing the dipole matrix elements can also be examined directly.</p>
