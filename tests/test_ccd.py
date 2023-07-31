@@ -158,7 +158,11 @@ def test_dielectric_func(test_dir):
     assert len(df) == 11
 
     df, cmap, norm = plot_optical_transitions(
-        hd0, kpt_index=-100, band_window=5, user_defect_band=(100, 0, 0)
+        hd0,
+        kpt_index=-100,
+        band_window=5,
+        user_defect_band=(100, 0, 0),
+        shift_eig={100: 0},
     )
     assert df.iloc[5]["ib"] == 100
     assert df.iloc[5]["jb"] == 100

@@ -89,7 +89,7 @@ def plot_optical_transitions(
 
     if ax is None:
         ax_ = plt.gca()
-    else:
+    else:  # pragma: no cover
         ax_ = ax
     _plot_eigs(
         d_eigs, defect.relaxed_bandstructure.efermi, ax=ax_, x0=x0, x_width=x_width
@@ -136,7 +136,7 @@ def get_bs_eigenvalues(
         Dictionary of the format: (iband, ikpt, ispin) -> eigenvalue
     """
 
-    if defect.relaxed_bandstructure is None:
+    if defect.relaxed_bandstructure is None:  # pragma: no cover
         raise ValueError("The defect object does not have a band structure.")
 
     if user_defect_band:
@@ -167,14 +167,14 @@ def _plot_eigs(
     **kwargs,
 ) -> None:
     """Plot the eigenvalues."""
-    if ax is None:
+    if ax is None:  # pragma: no cover
         ax = plt.gca()
 
     # Use current color scheme
     colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
     collections.defaultdict(list)
     eigenvalues = np.array(list(d_eigs.values()))
-    if e_fermi is None:
+    if e_fermi is None:  # pragma: no cover
         e_fermi = -np.inf
 
     eigs_ = eigenvalues[eigenvalues <= e_fermi]
@@ -229,7 +229,7 @@ def _plot_matrix_elements(
             If not provided, all the absolute values of the matrix for all
             three diagonal entries will be summed.
     """
-    if ax is None:
+    if ax is None:  # pragma: no cover
         ax = plt.gca()
     ax.set_aspect("equal")
     jb, jkpt, jspin = next(filter(lambda x: x[0] == defect_band_index, d_eig.keys()))
