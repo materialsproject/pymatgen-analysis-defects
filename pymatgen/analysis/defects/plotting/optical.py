@@ -193,8 +193,8 @@ def _plot_matrix_elements(
     y0 = d_eig[jb, jkpt, jspin]
     plot_data = []
     for (ib, ik, ispin), eig in d_eig.items():
-        if ib == jb:
-            continue
+        # if ib == jb:
+        #     continue
         A = 0
         for idir, jdir in directions:
             A += np.abs(
