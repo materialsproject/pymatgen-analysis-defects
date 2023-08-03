@@ -39,7 +39,7 @@ In addition to the focus on database building, we have also implemented several 
 
 1. Obtaining the chemical potential contribution to the defect formation energy without explicit calculations of the competing phases.
 1. Obtaining the Freysoldt finite-size correction without user intervention.
-2. Calculation of the optical transition between states under the single-particle approximation.
+2. Calculation of the optical transition between states under the independent-particle approximation.
 3. Calculation of the non-radiative recombination using the `nonrad` code [@turiansky_nonrad_2021].
 
 Details of the implementation and tutorials for using the different parts of the package are provided at:
