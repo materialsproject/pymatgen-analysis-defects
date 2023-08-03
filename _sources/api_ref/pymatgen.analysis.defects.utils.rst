@@ -22,10 +22,10 @@
       genrecip
       get_avg_chg
       get_ipr_in_window
+      get_labeled_inserted_structure
       get_local_extrema
       get_localized_states
       get_plane_spacing
-      get_symmetry_labeled_structures
       get_zfile
       group_docs
       remove_collisions
