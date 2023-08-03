@@ -22,8 +22,8 @@ bibliography: paper.bib
 
 # Summary
 
-Point defects can often be the determining factor in the properties of semiconductor and optoelectronic materials [@CGWalle_defects_RMP].
-Simulation of point defects is one of the most complex workflows in computational materials science, involving extensive pre- and post-processing of the structural and electronic structure data.
+Point defects can often determine the properties of semiconductor and optoelectronic materials.
+Simulation of point defects is one of the most complex workflows in computational materials science, involving extensive pre- and post-processing of the structural and electronic structure data[@CGWalle_defects_RMP].
 Multiple software packages exist to automate the simulation of point defects [@Broberg2018,@Kumagai2021,@Huang2022,], however, there is a lack of a code that focuses on:
 
 1. Integration with standardized high-throughput workflow frameworks.
@@ -37,8 +37,10 @@ Since the ability to revisit calculations is crucial to building a reliable data
 This allows for the creation of a database of point defects that can be easily extended to new calculations over time.
 In addition to the focus on database building, we have also implemented several tools for analyzing quantum recombination in defects, these include:
 
-1. Calculation of the optical transition between states under the single-particle approximation.
-2. Calculation of the non-radiative recombination using the `nonrad` code [@turiansky_nonrad_2021].
+1. Obtaining the chemical potential contribution to the defect formation energy without explicit calculations of the competing phases.
+1. Obtaining the Freysoldt finite-size correction without user intervention.
+2. Calculation of the optical transition between states under the single-particle approximation.
+3. Calculation of the non-radiative recombination using the `nonrad` code [@turiansky_nonrad_2021].
 
 Details of the implementation and tutorials for using the different parts of the package are provided at:
 
