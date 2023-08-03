@@ -65,7 +65,7 @@ flow = Flow(jobs)
 
 The code above will generate a `Flow` object that contains all of the instructions to dynamically create all of the required defect calculations, which can be sent to the job manager on HPC to be executed.
 In the code above, we query the materials project database for the charge density object which contains the information about the bulk structure as well as the electronic charge density.
-Using the `generate_all_native_defects` function, we can generate a list of all of the native point defect for this structure.
+Using the `generate_all_native_defects` function, we can generate a list of all of the native point defects for this structure.
 ![Figure 1. Defect generation.](fig1.png)
 
 Each defect object can be passed to the `FormationEnergyMaker` object to generate a `Job` object that contains all of the instructions to perform the defect calculation.
