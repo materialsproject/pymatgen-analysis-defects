@@ -10,7 +10,7 @@ from pymatgen.analysis.defects.ccd import (
     _get_wswq_slope,
     plot_pes,
 )
-from pymatgen.analysis.defects.plotting.optical import plot_optical_transitions
+from pymatgen.analysis.defects.plotting.optics import plot_optical_transitions
 
 
 @pytest.fixture(scope="session")

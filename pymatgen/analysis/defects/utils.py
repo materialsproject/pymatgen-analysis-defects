@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Callable, Generator
 
 import numpy as np
+from monty.dev import deprecated
 from monty.json import MSONable
 from numpy import typing as npt
 from numpy.linalg import norm
@@ -612,7 +613,7 @@ class TopographyAnalyzer:
         """
         # Get a reasonablly reduced set of candidate sites first
         candidate_sites = [v.frac_coords for v in self.vnodes]
-        return get_symmetry_labeled_structures(
+        return get_labeled_inserted_structure(
             candidate_sites,
             host_structure=self.structure,
             working_ion="X",
@@ -763,7 +764,7 @@ class ChargeInsertionAnalyzer(MSONable):
         """
         # Get a reasonablly reduced set of candidate sites first
         local_minima = get_local_extrema(self.chgcar, find_min=True)
-        return get_symmetry_labeled_structures(
+        return get_labeled_inserted_structure(
             sites=local_minima,
             host_structure=self.chgcar.structure,
             working_ion=self.working_ion,
@@ -927,7 +928,12 @@ def calculate_vol(coords: npt.NDArray):
     return ConvexHull(coords).volume
 
 
-def get_symmetry_labeled_structures(
+@deprecated("Name changed")
+def get_symmetry_labeled_structures():
+    pass
+
+
+def get_labeled_inserted_structure(
     sites: npt.NDArray,
     host_structure: Structure,
     working_ion: str,
