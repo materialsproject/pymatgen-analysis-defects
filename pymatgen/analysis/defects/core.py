@@ -84,7 +84,7 @@ class Defect(MSONable, metaclass=ABCMeta):
             try:
                 self.structure.add_oxidation_state_by_guess(max_sites=-1)
                 # check oxi_states assigned and not all zero
-                if all([specie.oxi_state == 0 for specie in self.structure.species]):
+                if all(specie.oxi_state == 0 for specie in self.structure.species):
                     self.structure.add_oxidation_state_by_guess()
             except:  # pragma: no cover
                 self.structure.add_oxidation_state_by_guess()
@@ -169,7 +169,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         relax_radius: float | str | None = None,
         perturb: float | None = None,
         target_frac_coords: np.ndarray | None = None,
-        return_site: bool = False,
+        return_sites: bool = False,
     ) -> Structure:
         """Generate the supercell for a defect.
 
@@ -185,7 +185,8 @@ class Defect(MSONable, metaclass=ABCMeta):
                 selective dynamics set to True. So this setting only works with `relax_radius`.
             target_frac_coords: If set, defect will be placed at the closest equivalent site to these
                 fractional coordinates.
-            return_site: If True, also return the defect site in the supercell.
+            return_sites: If True, returns a tuple of the defect supercell, defect supercell site and
+                list of equivalent supercell sites.
 
         Returns:
             Structure: The supercell structure.
@@ -199,6 +200,14 @@ class Defect(MSONable, metaclass=ABCMeta):
                 force_diagonal=force_diagonal,
             )
 
+        structure_w_all_defect_sites = Structure.from_sites(
+            [
+                PeriodicSite("X", site.frac_coords, self.structure.lattice)
+                for site in self.equivalent_sites
+            ]
+        )
+        sc_structure_w_all_defect_sites = structure_w_all_defect_sites * sc_mat
+
         if target_frac_coords is None:
             sc_structure = self.structure * sc_mat
             sc_mat_inv = np.linalg.inv(sc_mat)
@@ -208,13 +217,6 @@ class Defect(MSONable, metaclass=ABCMeta):
             ).to_unit_cell()
 
         else:
-            structure_w_all_defect_sites = Structure.from_sites(
-                [
-                    PeriodicSite("X", site.frac_coords, self.structure.lattice)
-                    for site in self.equivalent_sites
-                ]
-            )
-            sc_structure_w_all_defect_sites = structure_w_all_defect_sites * sc_mat
             # sort by distance from target_frac_coords, then by magnitude of fractional coordinates:
             sc_x_site = sorted(
                 sc_structure_w_all_defect_sites,
@@ -252,10 +254,20 @@ class Defect(MSONable, metaclass=ABCMeta):
         if perturb is not None:
             _perturb_dynamic_sites(sc_defect_struct, distance=perturb)
 
-        if return_site:
-            return sc_defect_struct, sc_site
-
-        return sc_defect_struct
+        return (
+            (
+                sc_defect_struct,
+                sc_site,
+                [
+                    PeriodicSite(
+                        self.site.specie, sc_x_site.frac_coords, sc_x_site.lattice
+                    ).to_unit_cell()
+                    for sc_x_site in sc_structure_w_all_defect_sites
+                ],
+            )
+            if return_sites
+            else sc_defect_struct
+        )
 
     @property
     def symmetrized_structure(self) -> SymmetrizedStructure:
