@@ -299,7 +299,7 @@ class Vacancy(Defect):
         Returns:
             Dict[Element, int]: The species changes of the defect.
         """
-        return {self.structure.sites[self.defect_site_index].specie.element: -1}
+        return {get_element(self.structure.sites[self.defect_site_index].specie): -1}
 
     def _guess_oxi_state(self) -> float:
         """Best guess for the oxidation state of the defect.
@@ -395,8 +395,8 @@ class Substitution(Defect):
             Dict[Element, int]: The species changes of the defect.
         """
         return {
-            self.structure.sites[self.defect_site_index].specie.element: -1,
-            self.site.specie.element: +1,
+            get_element(self.structure.sites[self.defect_site_index].specie): -1,
+            get_element(self.site.specie): +1,
         }
 
     def _guess_oxi_state(self) -> float:
@@ -498,7 +498,7 @@ class Interstitial(Defect):
             Dict[Element, int]: The species changes of the defect.
         """
         return {
-            self.site.specie.element: +1,
+            get_element(self.site.specie): +1,
         }
 
     def _guess_oxi_state(self) -> float:
