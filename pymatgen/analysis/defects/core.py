@@ -200,10 +200,11 @@ class Defect(MSONable, metaclass=ABCMeta):
                 force_diagonal=force_diagonal,
             )
 
+        sites = self.equivalent_sites or [self.site]
         structure_w_all_defect_sites = Structure.from_sites(
             [
                 PeriodicSite("X", site.frac_coords, self.structure.lattice)
-                for site in self.equivalent_sites
+                for site in sites
             ]
         )
         sc_structure_w_all_defect_sites = structure_w_all_defect_sites * sc_mat
