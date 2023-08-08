@@ -1,6 +1,7 @@
 from collections import namedtuple
 
 import numpy as np
+import pandas as pd
 import pytest
 
 from pymatgen.analysis.defects.ccd import (
@@ -9,6 +10,7 @@ from pymatgen.analysis.defects.ccd import (
     _get_wswq_slope,
     plot_pes,
 )
+from pymatgen.analysis.defects.plotting.optics import plot_optical_transitions
 
 
 @pytest.fixture(scope="session")
@@ -150,6 +152,20 @@ def test_dielectric_func(test_dir):
     inter_cbm = np.trapz(np.imag(eps_cbm[:100]), energy[:100])
     assert pytest.approx(inter_vbm, abs=0.01) == 6.31
     assert pytest.approx(inter_cbm, abs=0.01) == 0.27
+
+    df, cmap, norm = plot_optical_transitions(hd0, kpt_index=0, band_window=5)
+    assert isinstance(df, pd.DataFrame)
+    assert len(df) == 11
+
+    df, cmap, norm = plot_optical_transitions(
+        hd0,
+        kpt_index=-100,
+        band_window=5,
+        user_defect_band=(100, 0, 0),
+        shift_eig={100: 0},
+    )
+    assert df.iloc[5]["ib"] == 100
+    assert df.iloc[5]["jb"] == 100
 
 
 def test_plot_pes(hd0):

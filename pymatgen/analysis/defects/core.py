@@ -13,9 +13,10 @@ from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatc
 from pymatgen.core import Element, PeriodicSite, Species, Structure
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.symmetry.structure import SymmetrizedStructure
-from pyrho.utils import get_plane_spacing
 
 from pymatgen.analysis.defects.supercells import get_sc_fromstruct
+
+from .utils import get_plane_spacing
 
 # TODO Possible redesign idea: ``DefectSite`` class defined with a defect object.
 # This makes some of the accounting logic a bit harder since we will probably
@@ -350,7 +351,7 @@ class Vacancy(Defect):
         Returns:
             Dict[Element, int]: The species changes of the defect.
         """
-        return {self.structure.sites[self.defect_site_index].specie.element: -1}
+        return {get_element(self.structure.sites[self.defect_site_index].specie): -1}
 
     def _guess_oxi_state(self) -> float:
         """Best guess for the oxidation state of the defect.
@@ -446,8 +447,8 @@ class Substitution(Defect):
             Dict[Element, int]: The species changes of the defect.
         """
         return {
-            self.structure.sites[self.defect_site_index].specie.element: -1,
-            self.site.specie.element: +1,
+            get_element(self.structure.sites[self.defect_site_index].specie): -1,
+            get_element(self.site.specie): +1,
         }
 
     def _guess_oxi_state(self) -> float:
@@ -474,7 +475,7 @@ class Substitution(Defect):
                     f"No common oxidation states found for {self.site.specie}."
                     "Please specify the oxidation state manually."
                 )
-            sub_oxi = sub_states[0]
+            sub_oxi = min(sub_states, key=lambda x: abs(x - rm_oxi))
         else:
             sub_oxi = int(
                 np.mean([site.specie.oxi_state for site in sub_elt_sites_in_struct])
@@ -565,7 +566,7 @@ class Interstitial(Defect):
             Dict[Element, int]: The species changes of the defect.
         """
         return {
-            self.site.specie.element: +1,
+            get_element(self.site.specie): +1,
         }
 
     def _guess_oxi_state(self) -> float:
