@@ -228,7 +228,7 @@ def get_soap_vec(struct: Structure) -> NDArray:
     dummy_structure = struct.copy()
     for el in species_:
         dummy_structure.replace_species({str(el): DUMMY_SPECIES})
-    soap_desc = SOAP(species=[DUMMY_SPECIES], rcut=5, nmax=8, lmax=6, periodic=True)
+    soap_desc = SOAP(species=[DUMMY_SPECIES], r_cut=5, n_max=8, l_max=6, periodic=True)
     vecs = soap_desc.create(adaptor.get_atoms(dummy_structure))
     return vecs
 

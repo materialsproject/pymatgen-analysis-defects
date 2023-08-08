@@ -12,6 +12,7 @@ from pymatgen.analysis.defects.utils import (
     get_avg_chg,
     get_local_extrema,
     get_localized_states,
+    get_plane_spacing,
     group_docs,
 )
 
@@ -158,3 +159,8 @@ def test_group_docs(gan_struct):
         res.append(defect_names)
     assert "|".join(sorted(res)) == "N_i|N_i,N_i|v_Ga,v_Ga|v_N,v_N"
     assert "|".join(sorted(g_names)) == "N_i:0|N_i:1|v_Ga|v_N"
+
+
+def test_plane_spacing(gan_struct):
+    lattice = gan_struct.lattice.matrix
+    assert np.allclose(get_plane_spacing(lattice), [2.785, 2.785, 5.239], atol=0.001)
