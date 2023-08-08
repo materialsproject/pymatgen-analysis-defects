@@ -150,7 +150,18 @@ class SubstitutionGenerator(DefectGenerator):
                     properties=site.properties,
                 )
                 yield Substitution(
-                    structure, sub_site, equivalent_sites=site_group, **kwargs
+                    structure,
+                    sub_site,
+                    equivalent_sites=[
+                        PeriodicSite(
+                            Species(sub_el),
+                            site.frac_coords,
+                            structure.lattice,
+                            properties=site.properties,
+                        )
+                        for site in site_group
+                    ],
+                    **kwargs,
                 )
             elif isinstance(sub_el, list):
                 for el in sub_el:
@@ -161,7 +172,18 @@ class SubstitutionGenerator(DefectGenerator):
                         properties=site.properties,
                     )
                     yield Substitution(
-                        structure, sub_site, equivalent_sites=site_group, **kwargs
+                        structure,
+                        sub_site,
+                        equivalent_sites=[
+                            PeriodicSite(
+                                Species(sub_el),
+                                site.frac_coords,
+                                structure.lattice,
+                                properties=site.properties,
+                            )
+                            for site in site_group
+                        ],
+                        **kwargs,
                     )
 
 
