@@ -176,7 +176,7 @@ class SubstitutionGenerator(DefectGenerator):
                         sub_site,
                         equivalent_sites=[
                             PeriodicSite(
-                                Species(sub_el),
+                                Species(el),
                                 site.frac_coords,
                                 structure.lattice,
                                 properties=site.properties,
