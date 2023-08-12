@@ -10,7 +10,7 @@ from typing import Dict
 import numpy as np
 from monty.json import MSONable
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
-from pymatgen.core import Element, PeriodicSite, Species, Structure
+from pymatgen.core import Composition, Element, PeriodicSite, Species, Structure
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.symmetry.structure import SymmetrizedStructure
 
@@ -209,6 +209,12 @@ class Defect(MSONable, metaclass=ABCMeta):
             ]
         )
         sc_structure_w_all_defect_sites = structure_w_all_defect_sites * sc_mat
+        equiv_sites = [
+            PeriodicSite(
+                self.site.specie, sc_x_site.frac_coords, sc_x_site.lattice
+            ).to_unit_cell()
+            for sc_x_site in sc_structure_w_all_defect_sites
+        ]
 
         if target_frac_coords is None:
             sc_structure = self.structure * sc_mat
@@ -243,6 +249,22 @@ class Defect(MSONable, metaclass=ABCMeta):
         sc_defect_struct = sc_defect.defect_structure
         sc_defect_struct.remove_oxidation_states()
 
+        # also remove oxidation states from sites:
+        def _remove_site_oxi_state(site):
+            """
+            Remove site oxidation state in-place.
+            Same method as Structure.remove_oxidation_states()
+            """
+            new_sp: dict[Element, float] = collections.defaultdict(float)
+            for el, occu in site.species.items():
+                sym = el.symbol
+                new_sp[Element(sym)] += occu
+            site.species = Composition(new_sp)
+
+        _remove_site_oxi_state(sc_site)
+        for site in equiv_sites:
+            _remove_site_oxi_state(site)
+
         if dummy_species is not None:
             sc_defect_struct.insert(
                 len(self.structure * sc_mat), dummy_species, sc_site.frac_coords
@@ -260,12 +282,7 @@ class Defect(MSONable, metaclass=ABCMeta):
             (
                 sc_defect_struct,
                 sc_site,
-                [
-                    PeriodicSite(
-                        self.site.specie, sc_x_site.frac_coords, sc_x_site.lattice
-                    ).to_unit_cell()
-                    for sc_x_site in sc_structure_w_all_defect_sites
-                ],
+                equiv_sites,
             )
             if return_sites
             else sc_defect_struct
