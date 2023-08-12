@@ -484,7 +484,7 @@ class Substitution(Defect):
         sub_elt_sites_in_struct = [
             site
             for site in self.structure
-            if site.specie.symbol == self.site.specie.symbol
+            if site.specie.element.symbol == self.site.specie.element.symbol
         ]
         if len(sub_elt_sites_in_struct) == 0:
             sub_states = self.site.specie.common_oxidation_states
