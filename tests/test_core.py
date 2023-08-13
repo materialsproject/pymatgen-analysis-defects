@@ -79,6 +79,24 @@ def test_substitution(gan_struct):
     sub_ = Substitution.from_dict(dd)
     assert sub_.get_charge_states() == [-1, 0, 1, 2]
 
+    # test target_frac_coords with get_supercell_structure
+    sub_sc_struct = sub.get_supercell_structure()
+    finder = DefectSiteFinder()
+    fpos = finder.get_defect_fpos(sub_sc_struct, sub.structure)
+    assert np.allclose(fpos, [0.1250, 0.0833335, 0.18794])
+    # change target coords:
+    sub_sc_struct = sub.get_supercell_structure(target_frac_coords=[0.3, 0.5, 0.9])
+    fpos = finder.get_defect_fpos(sub_sc_struct, sub.structure)
+    assert np.allclose(fpos, [0.375, 0.5833335, 0.68794])  # closest equivalent site
+
+    # test oxidation state setting for substitutional defects when substitution is an antisite:
+    # from pymatgen.analysis.defects.generators import AntiSiteGenerator
+    ga_site = s.sites[0]
+    assert ga_site.specie.symbol == "Ga"
+    n_site = PeriodicSite(Specie("N"), ga_site.frac_coords, s.lattice)
+    n_ga = Substitution(s, n_site)
+    assert n_ga.get_charge_states() == [-7, -6, -5, -4, -3, -2, -1, 0, 1]
+
 
 def test_interstitial(gan_struct):
     s = gan_struct.copy()
@@ -93,6 +111,15 @@ def test_interstitial(gan_struct):
     assert inter.name == "N_i"
     assert str(inter) == "N intersitial site at [0.00,0.00,0.75]"
     assert inter.element_changes == {Element("N"): 1}
+
+    # test target_frac_coords with get_supercell_structure
+    finder = DefectSiteFinder()
+    fpos = finder.get_defect_fpos(sc, inter.structure)
+    assert np.allclose(fpos, [0, 0, 0.398096581])
+    # change target coords:
+    inter_sc_struct = inter.get_supercell_structure(target_frac_coords=[0.3, 0.5, 0.9])
+    fpos = finder.get_defect_fpos(inter_sc_struct, inter.structure)
+    assert np.allclose(fpos, [0.25, 0.5, 0.89809658])  # closest equivalent site
 
 
 def test_adsorbate(gan_struct):
