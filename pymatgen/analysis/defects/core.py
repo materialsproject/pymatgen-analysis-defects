@@ -246,6 +246,16 @@ class Defect(MSONable, metaclass=ABCMeta):
         """
         return getattr(DefectType, self.__class__.__name__)
 
+    @property
+    def latex_name(self) -> str:
+        """Get the latex name of the defect.
+
+        Returns:
+            str: The latex name of the defect.
+        """
+        root, suffix = self.name.split("_")
+        return rf"{root} $_{{\rm {suffix}}}$"
+
 
 class Vacancy(Defect):
     """Class representing a vacancy defect."""
