@@ -10,7 +10,8 @@ from typing import Dict
 import numpy as np
 from monty.json import MSONable
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
-from pymatgen.core import Composition, Element, PeriodicSite, Species, Structure
+from pymatgen.core import Element, PeriodicSite, Species, Structure
+from pymatgen.core.periodic_table import DummySpecies
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.symmetry.structure import SymmetrizedStructure
 
@@ -129,6 +130,21 @@ class Defect(MSONable, metaclass=ABCMeta):
             Dict[Element, int]: The species changes of the defect.
         """
 
+    @property
+    def centered_defect_structure(self) -> Structure:
+        """Get a defect structure that is centered around the site.
+
+        Move all the sites in the structure so that they
+        are in the periodic image closest to the defect site.
+        """
+        structure = self.defect_structure.copy()
+        for idx, d_site in enumerate(structure):
+            _, jiimage = structure.lattice.get_distance_and_image(
+                self.site.frac_coords, d_site.frac_coords
+            )
+            structure.translate_sites([idx], jiimage, to_unit_cell=False)
+        return structure
+
     def get_charge_states(self, padding: int = 1) -> list[int]:
         """Potential charge states for a given oxidation state.
 
@@ -162,6 +178,7 @@ class Defect(MSONable, metaclass=ABCMeta):
     def get_supercell_structure(
         self,
         sc_mat: np.ndarray | None = None,
+        defect_structure: Structure | None = None,
         dummy_species: str | None = None,
         min_atoms: int = 80,
         max_atoms: int = 240,
@@ -170,12 +187,31 @@ class Defect(MSONable, metaclass=ABCMeta):
         relax_radius: float | str | None = None,
         perturb: float | None = None,
         target_frac_coords: np.ndarray | None = None,
-        return_sites: bool = False,
+        return_site: bool = False,
     ) -> Structure:
         """Generate the supercell for a defect.
 
+        If the bulk structure (provided by `Defect.structure`) and defect structures
+        have oxidation state information, then the supercell will be decorated with
+        oxidation states.  Otherwise, the supercell structure will not have any oxidation
+        state information.  This also allows for oxidation state decoration of different
+        defect charge states.
+
+        .. code-block:: python
+            defect_struct = defect.defect_structure.copy()
+            defect_struct.add_oxidation_state_by_guess(target_charge=2)
+
+        .. note::
+            Since any algorithm for decorating the oxidation states will be combinatorial,
+            They can be very slow for large supercells. If you want to decorate the structure
+            with oxidation states, you have to first decorate the smaller unit cell defect
+            structure then implant it in the supercell.
+
         Args:
             sc_mat: supercell matrix if None, the supercell will be determined by `CubicSupercellAnalyzer`.
+            defect_structure: Alternative defect structure to use for generating the supercell.
+                You might want to use this if you want to decorate the oxidation states of the
+                defect structure using a custom method.
             dummy_species: Dummy species to highlight the defect position (for visualizing vacancies).
             max_atoms: Maximum number of atoms allowed in the supercell.
             min_atoms: Minimum number of atoms allowed in the supercell.
@@ -186,107 +222,84 @@ class Defect(MSONable, metaclass=ABCMeta):
                 selective dynamics set to True. So this setting only works with `relax_radius`.
             target_frac_coords: If set, defect will be placed at the closest equivalent site to these
                 fractional coordinates.
-            return_sites: If True, returns a tuple of the defect supercell, defect supercell site and
-                list of equivalent supercell sites.
+            return_site: If True, returns a tuple of the (defect supercell, defect site position).
 
         Returns:
             Structure: The supercell structure.
+            PeriodicSite (optional): The position of the defect site in the supercell.
         """
+
+        def _has_oxi(struct):
+            return all([hasattr(site.specie, "oxi_state") for site in struct])
+
+        bulk_structure = self.structure
+        if defect_structure is None:
+            defect_structure = self.centered_defect_structure
+        keep_oxi = _has_oxi(bulk_structure) and _has_oxi(defect_structure)
+
         if sc_mat is None:
             sc_mat = get_sc_fromstruct(
-                self.structure,
+                bulk_structure,
                 min_atoms=min_atoms,
                 max_atoms=max_atoms,
                 min_length=min_length,
                 force_diagonal=force_diagonal,
             )
 
-        sites = self.equivalent_sites or [self.site]
-        structure_w_all_defect_sites = Structure.from_sites(
-            [
-                PeriodicSite("X", site.frac_coords, self.structure.lattice)
-                for site in sites
-            ]
-        )
-        sc_structure_w_all_defect_sites = structure_w_all_defect_sites * sc_mat
-        equiv_sites = [
-            PeriodicSite(
-                self.site.specie, sc_x_site.frac_coords, sc_x_site.lattice
-            ).to_unit_cell()
-            for sc_x_site in sc_structure_w_all_defect_sites
-        ]
-
+        # Get the translation vector in to the desired cell in Cartesian coordinates
         if target_frac_coords is None:
-            sc_structure = self.structure * sc_mat
-            sc_mat_inv = np.linalg.inv(sc_mat)
-            sc_pos = np.dot(self.site.frac_coords, sc_mat_inv)
-            sc_site = PeriodicSite(
-                self.site.specie, sc_pos, sc_structure.lattice
-            ).to_unit_cell()
+            target_frac_coords = [1e-6, 1e-6, 1e-6]
+        trans_R = np.floor(np.dot(target_frac_coords, sc_mat))
+        trans_vec = np.dot(trans_R, bulk_structure.lattice.matrix)
+        sc_defect_struct = bulk_structure * sc_mat
 
-        else:
-            # sort by distance from target_frac_coords, then by magnitude of fractional coordinates:
-            sc_x_site = sorted(
-                sc_structure_w_all_defect_sites,
-                key=lambda site: (
-                    round(
-                        np.linalg.norm(site.frac_coords - np.array(target_frac_coords)),
-                        4,
-                    ),
-                    round(np.linalg.norm(site.frac_coords), 4),
-                    round(np.abs(site.frac_coords[0]), 4),
-                    round(np.abs(site.frac_coords[1]), 4),
-                    round(np.abs(site.frac_coords[2]), 4),
-                ),
-            )[0]
-            sc_site = PeriodicSite(
-                self.site.specie, sc_x_site.frac_coords, sc_x_site.lattice
-            ).to_unit_cell()
-
-        sc_defect = self.__class__(
-            structure=self.structure * sc_mat, site=sc_site, oxi_state=self.oxi_state
+        # Use the site as a reference point for the position
+        sc_mat_inv = np.linalg.inv(sc_mat)
+        sc_pos = np.dot(self.site.frac_coords, sc_mat_inv)
+        sc_site = PeriodicSite(
+            species=self.site.specie,
+            coords=sc_pos,
+            lattice=sc_defect_struct.lattice,
+            coords_are_cartesian=False,
         )
-        sc_defect_struct = sc_defect.defect_structure
-        sc_defect_struct.remove_oxidation_states()
 
-        # also remove oxidation states from sites:
-        def _remove_site_oxi_state(site):
-            """
-            Remove site oxidation state in-place.
-            Same method as Structure.remove_oxidation_states()
-            """
-            new_sp: dict[Element, float] = collections.defaultdict(float)
-            for el, occu in site.species.items():
-                sym = el.symbol
-                new_sp[Element(sym)] += occu
-            site.species = Composition(new_sp)
+        bulk_site_mapping = _get_mapped_sites(bulk_structure, sc_defect_struct)
+        defect_site_mapping = _get_mapped_sites(defect_structure, sc_defect_struct)
 
-        _remove_site_oxi_state(sc_site)
-        for site in equiv_sites:
-            _remove_site_oxi_state(site)
+        # Remove the indices that that are not mapped
+        rm_indices = set(bulk_site_mapping.values()) - set(defect_site_mapping.values())
 
-        if dummy_species is not None:
-            sc_defect_struct.insert(
-                len(self.structure * sc_mat), dummy_species, sc_site.frac_coords
-            )
+        # Set the species for the sites that are mapped
+        for defect_site, bulk_site in defect_site_mapping.items():
+            sc_defect_struct[bulk_site]._species = defect_structure[defect_site].species
 
+        # Remove the sites that are not mapped
+        sc_defect_struct.remove_sites(list(rm_indices))
         _set_selective_dynamics(
             structure=sc_defect_struct,
-            site_pos=sc_site.coords,
+            site_pos=sc_pos,
             relax_radius=relax_radius,
         )
         if perturb is not None:
             _perturb_dynamic_sites(sc_defect_struct, distance=perturb)
 
-        return (
-            (
-                sc_defect_struct,
-                sc_site,
-                equiv_sites,
-            )
-            if return_sites
-            else sc_defect_struct
+        # Translate the structure to the target position
+        sc_defect_struct.translate_sites(
+            indices=list(range(len(sc_defect_struct))),
+            vector=trans_vec,
+            frac_coords=False,
         )
+        sc_site._frac_coords += trans_vec
+
+        if not keep_oxi:
+            sc_defect_struct.remove_oxidation_states()
+
+        if dummy_species is not None:
+            sc_defect_struct.insert(0, dummy_species, sc_site.frac_coords)
+
+        if return_site:
+            return sc_defect_struct, sc_site
+        return sc_defect_struct
 
     @property
     def symmetrized_structure(self) -> SymmetrizedStructure:
@@ -636,10 +649,36 @@ class DefectComplex(Defect):
         self.defects = defects
         self.structure = self.defects[0].structure
         self.oxi_state = self._guess_oxi_state() if oxi_state is None else oxi_state
+        defect_sites = [d.site for d in self.defects]
+        center_of_mass = np.mean([s.coords for s in defect_sites], axis=0)
+        self.site = PeriodicSite(
+            species=DummySpecies(),
+            coords=center_of_mass,
+            coords_are_cartesian=True,
+        )
 
     def __repr__(self) -> str:
         """Representation of a complex defect."""
         return f"Complex defect containing: {[d.name for d in self.defects]}"
+
+    def __eq__(self, __o: object) -> bool:
+        """Check if  are equal."""
+        if not isinstance(__o, Defect):
+            raise TypeError("Can only compare Defects to Defects")
+        sm = StructureMatcher(comparator=ElementComparator())
+        this_structure = self.defect_structure_with_com
+        if isinstance(__o, DefectComplex):
+            that_structure = __o.defect_structure_with_com
+        else:
+            that_structure = __o.defect_structure
+        return sm.fit(this_structure, that_structure)
+
+    @property
+    def defect_structure_with_com(self) -> Structure:
+        """Returns the defect structure with the center of mass as dummy site."""
+        struct = self.defect_structure.copy()
+        struct.append(self.site)
+        return struct
 
     def get_multiplicity(self) -> int:
         """Determine the multiplicity of the defect site within the structure."""
@@ -674,84 +713,6 @@ class DefectComplex(Defect):
                 defect_structure, defect.site, defect_type=defect.defect_type
             )
         return defect_structure
-
-    def get_supercell_structure(
-        self,
-        sc_mat: np.ndarray | None = None,
-        dummy_species: Species | None = None,
-        min_atoms: int = 80,
-        max_atoms: int = 240,
-        min_length: float = 10.0,
-        force_diagonal: bool = False,
-        relax_radius: float | str | None = None,
-        perturb: float | None = None,
-        target_frac_coords: np.ndarray | None = None,
-        return_site: bool = False,
-    ) -> Structure:
-        """Generate the supercell for a defect.
-
-        Args:
-            sc_mat: supercell matrix if None, the supercell will be determined by `CubicSupercellAnalyzer`.
-            dummy_species: Dummy species used for visualization. Will be placed at the average
-                position of the defect sites.
-            max_atoms: Maximum number of atoms allowed in the supercell.
-            min_atoms: Minimum number of atoms allowed in the supercell.
-            min_length: Minimum length of the smallest supercell lattice vector.
-            force_diagonal: If True, return a transformation with a diagonal transformation matrix.
-            relax_radius: Relax the supercell atoms to a sphere of this radius around the defect site.
-            perturb: The amount to perturb the sites in the supercell. Only perturb the sites with
-                selective dynamics set to True. So this setting only works with `relax_radius`.
-            target_frac_coords: If set, defect will be placed at the closest equivalent site to these
-                fractional coordinates. Not yet supported for complex defects!
-            return_site: If True, also return the defect sites in the supercell.
-
-        Returns:
-            Structure: The supercell structure.
-        """
-        if target_frac_coords is not None:
-            raise NotImplementedError(
-                "`target_frac_coords` is not yet supported for complex defects!"
-            )
-
-        if sc_mat is None:
-            sc_mat = get_sc_fromstruct(
-                self.structure,
-                min_atoms=min_atoms,
-                max_atoms=max_atoms,
-                min_length=min_length,
-                force_diagonal=force_diagonal,
-            )
-        sc_defect_struct = self.structure * sc_mat
-        sc_mat_inv = np.linalg.inv(sc_mat)
-        complex_pos = np.zeros(3)
-        complex_sc_sites = []
-        for defect in self.defects:
-            sc_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
-            complex_pos += sc_pos
-            sc_site = PeriodicSite(defect.site.specie, sc_pos, sc_defect_struct.lattice)
-            update_structure(sc_defect_struct, sc_site, defect_type=defect.defect_type)
-            complex_sc_sites.append(sc_site)
-
-        complex_pos /= float(len(self.defects))
-        if dummy_species is not None:
-            for defect in self.defects:
-                dummy_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
-                dummy_pos = np.mod(dummy_pos, 1)
-                sc_defect_struct.insert(len(sc_defect_struct), dummy_species, dummy_pos)
-
-        _set_selective_dynamics(
-            structure=sc_defect_struct,
-            site_pos=sc_site.coords,
-            relax_radius=relax_radius,
-        )
-
-        if perturb is not None:
-            _perturb_dynamic_sites(sc_defect_struct, distance=perturb)
-
-        if return_site:
-            return sc_defect_struct, complex_sc_sites
-
-        return sc_defect_struct
 
 
 def update_structure(structure, site, defect_type):
@@ -913,101 +874,109 @@ def _perturb_dynamic_sites(structure, distance):
     perturb_sites(structure=structure, distance=distance, site_indices=free_indices)
 
 
-def get_charged_sc_struture(
-    defect: Defect,
-    sc_mat: np.ndarray | None = None,
-    defect_structure: Structure = None,
-    min_atoms: int = 80,
-    max_atoms: int = 240,
-    min_length: float = 10.0,
-    force_diagonal: bool = False,
-    relax_radius: float | str | None = None,
-    perturb: float | None = None,
-    target_frac_coords: np.ndarray | None = None,
-    return_sc_pos: bool = False,
-) -> Structure:
-    """Get a supercell structure.
+# def get_charged_sc_struture(
+#     defect: Defect,
+#     sc_mat: np.ndarray | None = None,
+#     defect_structure: Structure = None,
+#     min_atoms: int = 80,
+#     max_atoms: int = 240,
+#     min_length: float = 10.0,
+#     force_diagonal: bool = False,
+#     relax_radius: float | str | None = None,
+#     perturb: float | None = None,
+#     target_frac_coords: np.ndarray | None = None,
+# ) -> Structure:
+#     """Get a supercell structure.
 
-    If the bulk structure (provided by `Defect.structure`) and defect structures
-    have oxidation state information, then the supercell will be decorated with
-    oxidation states.  Otherwise, the supercell structure will not have any oxidation
-    state information.
+#     If the bulk structure (provided by `Defect.structure`) and defect structures
+#     have oxidation state information, then the supercell will be decorated with
+#     oxidation states.  Otherwise, the supercell structure will not have any oxidation
+#     state information.
 
-    Args:
-        bulk_structure: The bulk unit cell structure.
-        defect_structure: The defect structure to use,
-            must be defined on the same lattice as the bulk structure.
-        sc_mat: The supercell matrix to use.
-        min_atoms: The minimum number of atoms in the supercell.
-        max_atoms: The maximum number of atoms in the supercell.
-        min_length: The minimum length of the supercell.
-        force_diagonal: Whether to force the supercell matrix to be diagonal.
-        relax_radius: The radius to relax the structure by.
-        perturb: The perturbation to use.
-        target_frac_coords: The target fractional coordinates to use.
-        return_sc_pos: Whether to return the supercell position of the defect site.
-    """
+#     Args:
+#         bulk_structure: The bulk unit cell structure.
+#         defect_structure: The defect structure to use,
+#             must be defined on the same lattice as the bulk structure.
+#         sc_mat: The supercell matrix to use.
+#         min_atoms: The minimum number of atoms in the supercell.
+#         max_atoms: The maximum number of atoms in the supercell.
+#         min_length: The minimum length of the supercell.
+#         force_diagonal: Whether to force the supercell matrix to be diagonal.
+#         relax_radius: The radius to relax the structure by.
+#         perturb: The perturbation to use.
+#         target_frac_coords: The target fractional coordinates to use.
+#         return_sc_pos: Whether to return the supercell position of the defect site.
+#     """
 
-    def _has_oxi(struct):
-        return all([hasattr(site.specie, "oxidation_state") for site in struct])
+#     def _has_oxi(struct):
+#         return all([hasattr(site.specie, "oxi_state") for site in struct])
 
-    bulk_structure = defect.bulk_structure
-    if defect_structure is None:
-        defect_structure = defect.defect_structure
-    keep_oxi = _has_oxi(bulk_structure) and _has_oxi(defect_structure)
+#     bulk_structure = defect.structure
+#     if defect_structure is None:
+#         defect_structure = defect.centered_defect_structure
+#     keep_oxi = _has_oxi(bulk_structure) and _has_oxi(defect_structure)
 
-    if sc_mat is None:
-        sc_mat = get_sc_fromstruct(
-            bulk_structure,
-            min_atoms=min_atoms,
-            max_atoms=max_atoms,
-            min_length=min_length,
-            force_diagonal=force_diagonal,
-        )
+#     if sc_mat is None:
+#         sc_mat = get_sc_fromstruct(
+#             bulk_structure,
+#             min_atoms=min_atoms,
+#             max_atoms=max_atoms,
+#             min_length=min_length,
+#             force_diagonal=force_diagonal,
+#         )
 
-    # Get the translation vector in to the desired cell in Cartesian coordinates
-    trans_R = np.floor(np.dot(target_frac_coords, sc_mat))
-    trans_vec = np.dot(trans_R, bulk_structure.lattice.matrix)
-    sc_defect_struct = bulk_structure * sc_mat
+#     # Get the translation vector in to the desired cell in Cartesian coordinates
+#     if target_frac_coords is None:
+#         target_frac_coords = [1E-6, 1E-6, 1E-6]
+#     trans_R = np.floor(np.dot(target_frac_coords, sc_mat))
+#     trans_vec = np.dot(trans_R, bulk_structure.lattice.matrix)
+#     sc_defect_struct = bulk_structure * sc_mat
 
-    # Use the site as a reference point for the position
-    sc_mat_inv = np.linalg.inv(sc_mat)
-    sc_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
+#     # Use the site as a reference point for the position
+#     sc_mat_inv = np.linalg.inv(sc_mat)
+#     sc_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
 
-    bulk_site_mapping = _get_mapped_sites(bulk_structure, sc_defect_struct)
-    defect_site_mapping = _get_mapped_sites(defect_structure, sc_defect_struct)
+#     bulk_site_mapping = _get_mapped_sites(bulk_structure, sc_defect_struct)
+#     defect_site_mapping = _get_mapped_sites(defect_structure, sc_defect_struct)
 
-    # Remove the indices that that are not mapped
-    rm_indices = set(bulk_site_mapping.values()) - set(defect_site_mapping.values())
+#     # Remove the indices that that are not mapped
+#     rm_indices = set(bulk_site_mapping.values()) - set(defect_site_mapping.values())
 
-    # Set the species for the sites that are mapped
-    for defect_site, bulk_site in defect_site_mapping.items():
-        sc_defect_struct[bulk_site].specie = defect_structure[defect_site].species
+#     # Set the species for the sites that are mapped
+#     for defect_site, bulk_site in defect_site_mapping.items():
+#         sc_defect_struct[bulk_site]._species = defect_structure[defect_site].species
 
-    # Remove the sites that are not mapped
-    sc_defect_struct.remove_sites(list(rm_indices))
-    _set_selective_dynamics(
-        structure=sc_defect_struct,
-        site_pos=sc_pos,
-        relax_radius=relax_radius,
-    )
-    if perturb is not None:
-        _perturb_dynamic_sites(sc_defect_struct, distance=perturb)
+#     # Remove the sites that are not mapped
+#     sc_defect_struct.remove_sites(list(rm_indices))
+#     _set_selective_dynamics(
+#         structure=sc_defect_struct,
+#         site_pos=sc_pos,
+#         relax_radius=relax_radius,
+#     )
+#     if perturb is not None:
+#         _perturb_dynamic_sites(sc_defect_struct, distance=perturb)
 
-    # Translate the structure to the target position
-    sc_defect_struct.translate_sites(
-        indices=list(range(len(sc_defect_struct))),
-        vector=trans_vec,
-        frac_coords=False,
-    )
+#     # Translate the structure to the target position
+#     sc_defect_struct.translate_sites(
+#         indices=list(range(len(sc_defect_struct))),
+#         vector=trans_vec,
+#         frac_coords=False,
+#     )
 
-    if not keep_oxi:
-        sc_defect_struct.remove_oxidation_states()
+#     if not keep_oxi:
+#         sc_defect_struct.remove_oxidation_states()
 
-    if return_sc_pos:
-        return sc_defect_struct, sc_pos
-    else:
-        return sc_defect_struct
+
+#     if return_sc_pos:
+
+#     if return_sc_pos:
+#         return sc_defect_struct, sc_pos
+#         return sc_defect_struct, sc_pos
+#     else:
+#         return sc_defect_struct
+#     return sc_defect_struct, sc_pos
+#     else:
+#         return sc_defect_struct
 
 
 def _get_mapped_sites(uc_structure: Structure, sc_structure: Structure, r=0.001):
