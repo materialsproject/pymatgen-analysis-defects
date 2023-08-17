@@ -913,7 +913,7 @@ def _perturb_dynamic_sites(structure, distance):
     perturb_sites(structure=structure, distance=distance, site_indices=free_indices)
 
 
-def get_charge_sc_struture(
+def get_charged_sc_struture(
     defect: Defect,
     sc_mat: np.ndarray | None = None,
     defect_structure: Structure = None,
