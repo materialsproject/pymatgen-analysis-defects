@@ -99,7 +99,10 @@ class VacancyGenerator(DefectGenerator):
             site = site_group[0]
             if _element_str(site.specie) in rm_species:
                 yield Vacancy(
-                    structure=_remove_oxidation_states(structure), site=site, **kwargs
+                    structure=_remove_oxidation_states(structure),
+                    site=site,
+                    equivalent_sites=site_group,
+                    **kwargs,
                 )
 
 
@@ -146,7 +149,20 @@ class SubstitutionGenerator(DefectGenerator):
                     structure.lattice,
                     properties=site.properties,
                 )
-                yield Substitution(structure, sub_site, **kwargs)
+                yield Substitution(
+                    structure,
+                    sub_site,
+                    equivalent_sites=[
+                        PeriodicSite(
+                            Species(sub_el),
+                            site.frac_coords,
+                            structure.lattice,
+                            properties=site.properties,
+                        )
+                        for site in site_group
+                    ],
+                    **kwargs,
+                )
             elif isinstance(sub_el, list):
                 for el in sub_el:
                     sub_site = PeriodicSite(
@@ -155,7 +171,20 @@ class SubstitutionGenerator(DefectGenerator):
                         structure.lattice,
                         properties=site.properties,
                     )
-                    yield Substitution(structure, sub_site, **kwargs)
+                    yield Substitution(
+                        structure,
+                        sub_site,
+                        equivalent_sites=[
+                            PeriodicSite(
+                                Species(el),
+                                site.frac_coords,
+                                structure.lattice,
+                                properties=site.properties,
+                            )
+                            for site in site_group
+                        ],
+                        **kwargs,
+                    )
 
 
 class AntiSiteGenerator(DefectGenerator):
@@ -208,6 +237,7 @@ class InterstitialGenerator(DefectGenerator):
         structure: Structure,
         insertions: dict[str, list[list[float]]],
         multiplicities: dict[str, list[int]] | None = None,
+        equivalent_positions: dict[str, list[list[list[float]]]] | None = None,
         **kwargs,
     ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
@@ -225,14 +255,34 @@ class InterstitialGenerator(DefectGenerator):
             multiplicities = {
                 el_str: [1] * len(coords) for el_str, coords in insertions.items()
             }
+        if equivalent_positions is None:
+            equivalent_positions = {
+                el_str: [
+                    [insertions[el_str][i]] for i in range(len(insertions[el_str]))
+                ]
+                for el_str in insertions.keys()
+            }
 
         for el_str, coords in insertions.items():
             for i, coord in self._filter_colliding(coords, structure=structure):
                 mul = multiplicities[el_str][i]
+                equiv_positions = equivalent_positions[el_str][i]
                 isite = PeriodicSite(
                     species=Species(el_str), coords=coord, lattice=structure.lattice
                 )
-                yield Interstitial(structure, isite, multiplicity=mul, **kwargs)
+                equiv_sites = [
+                    PeriodicSite(
+                        species=Species(el_str), coords=coord, lattice=structure.lattice
+                    )
+                    for coord in equiv_positions
+                ]
+                yield Interstitial(
+                    structure,
+                    isite,
+                    multiplicity=mul,
+                    equivalent_sites=equiv_sites,
+                    **kwargs,
+                )
 
     def _filter_colliding(
         self, fcoords: list[list[float]], structure: Structure
@@ -283,7 +333,9 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
         self.top_kwargs = kwargs
         super().__init__(min_dist=min_dist)
 
-    def generate(self, structure: Structure, insert_species: set[str] | list[str], **kwargs) -> Generator[Interstitial, None, None]:  # type: ignore[override]
+    def generate(  # type: ignore[override]
+        self, structure: Structure, insert_species: set[str] | list[str], **kwargs
+    ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
 
         Args:
@@ -293,20 +345,21 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
         """
         if len(set(insert_species)) != len(insert_species):  # pragma: no cover
             raise ValueError("Insert species must be unique.")
-        cand_sites_and_mul = [*self._get_candidate_sites(structure)]
+        cand_sites_mul_and_equiv_fpos = [*self._get_candidate_sites(structure)]
         for species in insert_species:
-            cand_sites = [cand_site for cand_site, mul in cand_sites_and_mul]
-            multiplicity = [mul for cand_site, mul in cand_sites_and_mul]
+            cand_sites, multiplicity, equiv_fpos = zip(*cand_sites_mul_and_equiv_fpos)
+
             yield from super().generate(
                 structure,
-                insertions={species: cand_sites},
-                multiplicities={species: multiplicity},
+                insertions={species: list(cand_sites)},
+                multiplicities={species: list(multiplicity)},
+                equivalent_positions={species: list(equiv_fpos)},
                 **kwargs,
             )
 
     def _get_candidate_sites(
         self, structure: Structure
-    ) -> Generator[tuple[list[float], int], None, None]:
+    ) -> Generator[tuple[list[float], int, list[list[float]]], None, None]:
         """Get the candidate sites for interstitials.
 
         Args:
@@ -327,15 +380,18 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
         )
         insert_sites = dict()
         multiplicity: dict[int, int] = dict()
+        equiv_fpos: dict[int, list[list[float]]] = dict()
         for fpos, lab in top.labeled_sites:
             if lab in insert_sites:
                 multiplicity[lab] += 1
+                equiv_fpos[lab].append(fpos)
                 continue
             insert_sites[lab] = fpos
             multiplicity[lab] = 1
+            equiv_fpos[lab] = [fpos]
 
         for key in insert_sites.keys():
-            yield insert_sites[key], multiplicity[key]
+            yield insert_sites[key], multiplicity[key], equiv_fpos[key]
 
 
 class ChargeInterstitialGenerator(InterstitialGenerator):
@@ -381,16 +437,19 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         """
         if len(set(insert_species)) != len(insert_species):  # pragma: no cover
             raise ValueError("Insert species must be unique.")
-        cand_sites_and_mul = [*self._get_candidate_sites(chgcar)]
+        cand_sites_mul_and_equiv_fpos = [*self._get_candidate_sites(chgcar)]
         for species in insert_species:
-            cand_sites = [cand_site for cand_site, mul in cand_sites_and_mul]
+            cand_sites, multiplicity, equiv_fpos = zip(*cand_sites_mul_and_equiv_fpos)
             if self.max_insertions is not None:
                 cand_sites = cand_sites[: self.max_insertions]
-            multiplicity = [mul for cand_site, mul in cand_sites_and_mul]
+                multiplicity = multiplicity[: self.max_insertions]
+                equiv_fpos = equiv_fpos[: self.max_insertions]
+
             yield from super().generate(
                 chgcar.structure,
                 insertions={species: cand_sites},
                 multiplicities={species: multiplicity},
+                equivalent_positions={species: equiv_fpos},
                 **kwargs,
             )
 
@@ -407,7 +466,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
             avg_radius=self.avg_radius, max_avg_charge=self.max_avg_charge
         )
         for _, g in avg_chg_groups:
-            yield min(g), len(g)
+            yield min(g), len(g), g
 
 
 def generate_all_native_defects(
