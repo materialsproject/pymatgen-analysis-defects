@@ -926,9 +926,12 @@ def get_charge_sc_struture(
     target_frac_coords: np.ndarray | None = None,
     return_sc_pos: bool = False,
 ) -> Structure:
-    """Get a supercell structure decorated with oxidation states.
+    """Get a supercell structure.
 
-    Requires the bulk and defect structure to be provided with oxidation states.
+    If the bulk structure (provided by `Defect.structure`) and defect structures
+    have oxidation state information, then the supercell will be decorated with
+    oxidation states.  Otherwise, the supercell structure will not have any oxidation
+    state information.
 
     Args:
         bulk_structure: The bulk unit cell structure.
@@ -944,12 +947,14 @@ def get_charge_sc_struture(
         target_frac_coords: The target fractional coordinates to use.
         return_sc_pos: Whether to return the supercell position of the defect site.
     """
+
+    def _has_oxi(struct):
+        return all([hasattr(site.specie, "oxidation_state") for site in struct])
+
     bulk_structure = defect.bulk_structure
     if defect_structure is None:
         defect_structure = defect.defect_structure
-    keep_oxi = hasattr(bulk_structure[0].specie, "oxidation_state") and hasattr(
-        defect_structure[0].specie, "oxidation_state"
-    )
+    keep_oxi = _has_oxi(bulk_structure) and _has_oxi(defect_structure)
 
     if sc_mat is None:
         sc_mat = get_sc_fromstruct(
