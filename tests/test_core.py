@@ -97,6 +97,14 @@ def test_substitution(gan_struct):
     n_ga = Substitution(s, n_site)
     assert n_ga.get_charge_states() == [-7, -6, -5, -4, -3, -2, -1, 0, 1]
 
+    # test also works fine when input structure does not have oxidation states:
+    s.remove_oxidation_states()
+    ga_site = s.sites[0]
+    assert ga_site.specie.symbol == "Ga"
+    n_site = PeriodicSite(Element("N"), ga_site.frac_coords, s.lattice)
+    n_ga = Substitution(s, n_site)
+    assert n_ga.get_charge_states() == [-7, -6, -5, -4, -3, -2, -1, 0, 1]
+
 
 def test_interstitial(gan_struct):
     s = gan_struct.copy()
