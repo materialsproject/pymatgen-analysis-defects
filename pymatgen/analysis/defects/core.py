@@ -296,7 +296,7 @@ class Defect(MSONable, metaclass=ABCMeta):
             vector=trans_vec,
             frac_coords=False,
         )
-        sc_site._frac_coords += trans_vec
+        sc_site._frac_coords += trans_R
 
         if not keep_oxi:
             sc_defect_struct.remove_oxidation_states()
