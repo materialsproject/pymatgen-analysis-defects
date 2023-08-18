@@ -1070,7 +1070,7 @@ def plot_formation_energy_diagrams(
         if ":" in fed_name:
             latexname += f" ({fed_name.split(':')[1]})"
 
-        axis.plot(
+        (l,) = axis.plot(
             np.subtract(trans[:, 0], alignment),
             trans_y,
             color=cur_color,
@@ -1082,11 +1082,12 @@ def plot_formation_energy_diagrams(
             markersize=transition_markersize,
         )
         if not only_lower_envelope:
+            cur_color = l.get_color()
             for line in lines:
                 x = np.linspace(xmin, xmax)
                 y = line[0] * x + line[1]
                 axis.plot(
-                    np.subtract(x, alignment), y, color=colors[fid], alpha=line_alpha
+                    np.subtract(x, alignment), y, color=cur_color, alpha=line_alpha
                 )
 
     axis.set_xlim(xmin, xmax)
