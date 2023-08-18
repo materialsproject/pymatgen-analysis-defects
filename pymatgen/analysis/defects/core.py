@@ -685,7 +685,7 @@ class DefectComplex(Defect):
     def defect_structure_with_com(self) -> Structure:
         """Returns the defect structure with the center of mass as dummy site."""
         struct = self.defect_structure.copy()
-        struct.append(self.site)
+        struct.insert(0, self.site.specie, self.site.frac_coords)
         return struct
 
     def get_multiplicity(self) -> int:
