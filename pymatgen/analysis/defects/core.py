@@ -137,13 +137,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         Move all the sites in the structure so that they
         are in the periodic image closest to the defect site.
         """
-        structure = self.defect_structure.copy()
-        for idx, d_site in enumerate(structure):
-            _, jiimage = structure.lattice.get_distance_and_image(
-                self.site.frac_coords, d_site.frac_coords
-            )
-            structure.translate_sites([idx], jiimage, to_unit_cell=False)
-        return structure
+        return center_structure(self.defect_structure, self.site.frac_coords)
 
     def get_charge_states(self, padding: int = 1) -> list[int]:
         """Potential charge states for a given oxidation state.
@@ -232,9 +226,9 @@ class Defect(MSONable, metaclass=ABCMeta):
         def _has_oxi(struct):
             return all([hasattr(site.specie, "oxi_state") for site in struct])
 
-        bulk_structure = self.structure
         if defect_structure is None:
             defect_structure = self.centered_defect_structure
+        bulk_structure = center_structure(self.structure, self.site.frac_coords)
         keep_oxi = _has_oxi(bulk_structure) and _has_oxi(defect_structure)
 
         if sc_mat is None:
@@ -272,6 +266,19 @@ class Defect(MSONable, metaclass=ABCMeta):
         # Set the species for the sites that are mapped
         for defect_site, bulk_site in defect_site_mapping.items():
             sc_defect_struct[bulk_site]._species = defect_structure[defect_site].species
+
+        # interstitials
+        int_uc_indices = set(range(len(defect_structure))) - set(
+            defect_site_mapping.keys()
+        )
+        for i in int_uc_indices:
+            int_sc_pos = np.dot(defect_structure[i].frac_coords, sc_mat_inv)
+            sc_defect_struct.insert(
+                0,
+                defect_structure[i].specie,
+                int_sc_pos,
+                coords_are_cartesian=False,
+            )
 
         # Remove the sites that are not mapped
         sc_defect_struct.remove_sites(list(rm_indices))
@@ -654,6 +661,7 @@ class DefectComplex(Defect):
         self.site = PeriodicSite(
             species=DummySpecies(),
             coords=center_of_mass,
+            lattice=self.structure.lattice,
             coords_are_cartesian=True,
         )
 
@@ -987,6 +995,19 @@ def _get_mapped_sites(uc_structure: Structure, sc_structure: Structure, r=0.001)
         if len(sc_sites) == 1:
             mapped_site_indices[isite] = sc_sites[0].index
     return mapped_site_indices
+
+
+def center_structure(structure, ref_fpos) -> Structure:
+    """Shift the sites around a center.
+
+    Move all the sites in the structure so that they
+    are in the periodic image closest to the reference fractional position.
+    """
+    struct = structure.copy()
+    for idx, d_site in enumerate(struct):
+        _, jiimage = struct.lattice.get_distance_and_image(ref_fpos, d_site.frac_coords)
+        struct.translate_sites([idx], jiimage, to_unit_cell=False)
+    return struct
 
 
 # TODO: matching defect complexes might be done with some kind of CoM site to fix the periodicity
