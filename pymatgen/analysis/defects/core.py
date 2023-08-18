@@ -284,7 +284,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         sc_defect_struct.remove_sites(list(rm_indices))
         _set_selective_dynamics(
             structure=sc_defect_struct,
-            site_pos=sc_pos,
+            site_pos=sc_site.coords,
             relax_radius=relax_radius,
         )
         if perturb is not None:
