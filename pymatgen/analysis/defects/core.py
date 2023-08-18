@@ -344,7 +344,7 @@ class Defect(MSONable, metaclass=ABCMeta):
             str: The latex name of the defect.
         """
         root, suffix = self.name.split("_")
-        return rf"{root} $_{{\rm {suffix}}}$"
+        return rf"{root}$_{{\rm {suffix}}}$"
 
 
 class Vacancy(Defect):

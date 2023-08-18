@@ -43,6 +43,7 @@ def test_substitution(gan_struct):
     sc = sub.get_supercell_structure()
     assert sc.formula == "Ga64 N63 O1"
     assert sub.name == "O_N"
+    assert sub.latex_name == r"O$_{\rm N}$"
     assert sub == sub
     assert sub.element_changes == {Element("N"): -1, Element("O"): 1}
 
