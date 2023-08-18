@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from itertools import chain
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -747,13 +746,8 @@ def group_formation_energy_diagrams(
     fed_groups = group_docs(
         feds, sm=sm, get_structure=_get_structure, get_hash=_get_name
     )
-    for g_name, f_group in fed_groups:
-        print(g_name)
-        fed = f_group[0]
-        fed_d = fed.as_dict()
-        dents = [dfed.defect_entries for dfed in f_group]
-        fed_d["defect_entries"] = list(chain.from_iterable(dents))
-        yield g_name, FormationEnergyDiagram.from_dict(fed_d)
+    for g_name, g_entries in fed_groups:
+        yield g_name, g_entries
 
 
 def ensure_stable_bulk(
@@ -1041,8 +1035,9 @@ def plot_formation_energy_diagrams(
         else cm.gist_rainbow(np.linspace(0, 1, len(formation_energy_diagrams)))
     )
     named_feds = []
-    for name_, fed_ in group_formation_energy_diagrams(formation_energy_diagrams):
-        named_feds.append((name_, fed_))
+    for name_, feds_ in group_formation_energy_diagrams(formation_energy_diagrams):
+        for fed_ in feds_:
+            named_feds.append((name_, fed_))
 
     for fid, (fed_name, single_fed) in enumerate(named_feds):
         chempots_ = (
@@ -1083,8 +1078,6 @@ def plot_formation_energy_diagrams(
         dfct = single_fed.defect_entries[0].defect
         flds = dfct.name.split("_")
         latexname = f"${flds[0]}_{{{flds[1]}}}$"
-        if ":" in fed_name:
-            latexname += f" ({fed_name.split(':')[1]})"
         if legend_prefix:
             latexname = f"{legend_prefix} {latexname}"
         legends_txt.append(latexname)
