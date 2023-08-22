@@ -13,6 +13,7 @@
 
    .. autosummary::
    
+      center_structure
       get_element
       get_vacancy
       perturb_sites
