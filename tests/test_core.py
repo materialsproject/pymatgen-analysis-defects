@@ -43,6 +43,7 @@ def test_substitution(gan_struct):
     sc = sub.get_supercell_structure()
     assert sc.formula == "Ga64 N63 O1"
     assert sub.name == "O_N"
+    assert sub.latex_name == r"O$_{\rm N}$"
     assert sub == sub
     assert sub.element_changes == {Element("N"): -1, Element("O"): 1}
 
@@ -158,4 +159,7 @@ def test_complex(gan_struct):
     dc2 = DefectComplex([sub, vac, inter])
     assert dc2.name == "O_N+v_Ga+H_i"
     sc_struct = dc2.get_supercell_structure(dummy_species="Xe")
-    assert sc_struct.formula == "Ga63 H1 Xe3 N63 O1"  # Three defects three dummies
+    assert sc_struct.formula == "Ga63 H1 Xe1 N63 O1"  # Three defects only one dummy
+
+    assert dc2 == dc2
+    assert dc2 != dc
