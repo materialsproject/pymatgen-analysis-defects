@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from itertools import chain
+from itertools import chain, groupby
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -22,7 +22,7 @@ from scipy.constants import value as _cd
 from scipy.optimize import bisect
 from scipy.spatial import ConvexHull
 
-from pymatgen.analysis.defects.core import Defect
+from pymatgen.analysis.defects.core import Defect, NamedDefect
 from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
 from pymatgen.analysis.defects.finder import DefectSiteFinder
 from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile, group_docs
@@ -712,11 +712,21 @@ def group_defect_entries(
     def _get_name(entry):
         return entry.defect.name
 
-    ent_groups = group_docs(
-        defect_entries, sm=sm, get_structure=_get_structure, get_hash=_get_name
-    )
-    for g_name, g_entries in ent_groups:
-        yield g_name, g_entries
+    def _get_hash_no_structure(entry):
+        return entry.defect.bulk_formula, entry.defect.name
+
+    # import ipdb; ipdb.set_trace()
+    if all(isinstance(entry.defect, Defect) for entry in defect_entries):
+        ent_groups = group_docs(
+            defect_entries, sm=sm, get_structure=_get_structure, get_hash=_get_name
+        )
+        for g_name, g_entries in ent_groups:
+            yield g_name, g_entries
+    elif all(isinstance(entry.defect, NamedDefect) for entry in defect_entries):
+        l_ = sorted(defect_entries, key=_get_hash_no_structure)
+        for _, g_entries in groupby(l_, key=_get_hash_no_structure):
+            similar_ents = list(g_entries)
+            yield list(similar_ents)[0].defect.name, similar_ents
 
 
 def group_formation_energy_diagrams(

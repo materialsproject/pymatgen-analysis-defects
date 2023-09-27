@@ -26,10 +26,11 @@ Point defects can often determine the properties of semiconductor and optoelectr
 Simulation of point defects is one of the most complex workflows in computational materials science, involving extensive pre- and post-processing of the structural and electronic structure data[@CGWalle_defects_RMP].
 Multiple software packages exist to automate the simulation of point defects [@Broberg2018,@Kumagai2021,@Huang2022,], however, there is a lack of a code that focuses on:
 
-1. Integration with standardized high-throughput workflow frameworks.
+1. Integration but not insistence on standardized high-throughput workflow frameworks.
 2. Building large, persistent databases of point defects that are extensible to new calculations over time.
 
 Since the combinatorics of point defects in crystalline materials can be extremely large, it is important to have a software package that can be easily integrated into high-throughput workflows to manage these complex calculations.
+However, most users of a defect analysis packages will not need to rung thousands of calcualaitons so it is important to have code focused purely on the defect analysis and relegate the high-throughput workflow aspect to a separate package.
 Additionally, a well-known problem in the simulation of point defects is the fact that current structure optimization techniques can miss the ground state structure based on the initial guess in a sizable minority of cases, so the ability to easily re-visit and re-optimize structures is crucial to building a reliable database of point defects.
 Towards that end, we have developed a Python package, `pymatgen-analysis-defect`, and integrated it with the popular `atomate2` workflow framework to provide a complete set of tools for simulating, analyzing, and managing the results of point defect calculations.
 
@@ -45,6 +46,42 @@ In addition to the focus on database building, we have also implemented several 
 Details of the implementation and tutorials for using the different parts of the package are provided at:
 
 https://materialsproject.github.io/pymatgen-analysis-defects/intro.html
+
+## Defect Definition
+
+A core feature of `pymatgen-analysis-defect` is the ability to define a point defects automatically.
+While symmetry analysis on the atomic structure alone is usually enough to define the distinct substitutional and vacancy defects, we found that the electronic charge density was the most effective at placing the interstitial defect at symmetry-inequivalent positions.
+A basic example of creating a full list of defects is shown below:
+
+```python
+from pymatgen.analysis.defects.generators import generate_all_native_defects
+from pymatgen.ext.matproj import MPRester
+
+with MPRester() as mpr:
+    chgcar = mpr.get_charge_density_from_material_id("mp-804")
+
+defects = []
+for defect in generate_all_native_defects(chgcar):
+    print(defect)
+    defects.append(defect)
+```
+
+```
+Ga Vacancy defect at site #0
+N Vacancy defect at site #2
+N subsitituted on the Ga site at at site #0
+Ga subsitituted on the N site at at site #2
+Ga intersitial site at [0.00,0.00,0.20]
+Ga intersitial site at [0.35,0.65,0.69]
+N intersitial site at [0.00,0.00,0.20]
+N intersitial site at [0.35,0.65,0.69]
+```
+
+In the code above, we query the materials project database for the charge density object which contains the information about the bulk structure as well as the electronic charge density.
+Using the `generate_all_native_defects` function, we can generate a list of all of the native point defects for this structure.
+![Figure 1. Defect generation.](fig1.png)
+
+## Defect Simulation Workflow
 
 A basic example of integration with the `atomate2` workflow framework is provided below:
 
@@ -66,11 +103,6 @@ flow = Flow(jobs)
 ```
 
 The code above will generate a `Flow` object that contains all of the instructions to dynamically create all of the required defect calculations, which can be sent to the job manager on HPC to be executed.
-In the code above, we query the materials project database for the charge density object which contains the information about the bulk structure as well as the electronic charge density.
-Using the `generate_all_native_defects` function, we can generate a list of all of the native point defects for this structure.
-![Figure 1. Defect generation.](fig1.png)
-
-Each defect object can be passed to the `FormationEnergyMaker` object to generate a `Job` object that contains all of the instructions to perform the defect calculation.
 
 
 # Statement of need
