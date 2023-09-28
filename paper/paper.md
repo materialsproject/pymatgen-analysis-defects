@@ -79,7 +79,7 @@ N intersitial site at [0.35,0.65,0.69]
 
 In the code above, we query the materials project database for the charge density object which contains the information about the bulk structure as well as the electronic charge density.
 Using the `generate_all_native_defects` function, we can generate a list of all of the native point defects for this structure.
-![Figure 1. Defect generation.](fig1.png)
+![Figure 1. Defect generation.](fig1.png){ width=35% }
 
 ## Defect Simulation Workflow
 
