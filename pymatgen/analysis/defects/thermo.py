@@ -725,7 +725,7 @@ def group_defect_entries(
         l_ = sorted(defect_entries, key=_get_hash_no_structure)
         for _, g_entries in groupby(l_, key=_get_hash_no_structure):
             similar_ents = list(g_entries)
-            yield list(similar_ents)[0].defect.name, similar_ents
+            yield similar_ents[0].defect.name, similar_ents
 
 
 def group_formation_energy_diagrams(
