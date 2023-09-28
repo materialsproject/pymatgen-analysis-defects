@@ -1,10 +1,12 @@
 import numpy as np
+from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Element, Specie
 
 from pymatgen.analysis.defects.core import (
     Adsorbate,
     DefectComplex,
     Interstitial,
+    NamedDefect,
     PeriodicSite,
     Substitution,
     Vacancy,
@@ -163,3 +165,19 @@ def test_complex(gan_struct):
 
     assert dc2 == dc2
     assert dc2 != dc
+
+
+def test_parsing_and_grouping_NamedDefects(test_dir):
+    bulk_dir = test_dir / "Mg_Ga" / "bulk_sc"
+    defect_dir = test_dir / "Mg_Ga" / "q=0"
+    bulk_struct = Structure.from_file(bulk_dir / "CONTCAR.gz")
+    defect_struct = Structure.from_file(defect_dir / "CONTCAR.gz")
+
+    nd0 = NamedDefect.from_structures(
+        defect_structure=defect_struct, bulk_structure=bulk_struct
+    )
+    nd1 = NamedDefect(name="v_Ga", bulk_formula="GaN")
+    nd2 = NamedDefect(name="Mg_Ga", bulk_formula="GaN")
+    assert str(nd0) == "GaN:Mg_Ga"
+    assert nd0 != nd1
+    assert nd0 == nd2

@@ -385,7 +385,7 @@ class NamedDefect(MSONable):
         """Only need to compare names."""
         if not isinstance(__value, NamedDefect):
             raise TypeError("Can only compare NamedDefects to NamedDefects")
-        return self.__repr__ == __value.__repr__
+        return self.__repr__() == __value.__repr__()
 
     def __repr__(self) -> str:
         return f'{self.bulk_formula}:{"+".join(sorted(self.name.split("+")))}'
