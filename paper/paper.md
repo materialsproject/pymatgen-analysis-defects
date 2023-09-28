@@ -30,7 +30,7 @@ Multiple software packages exist to automate the simulation of point defects [@B
 2. Building large, persistent databases of point defects that are extensible to new calculations over time.
 
 Since the combinatorics of point defects in crystalline materials can be extremely large, it is important to have a software package that can be easily integrated into high-throughput workflows to manage these complex calculations.
-However, most users of a defect analysis packages will not need to rung thousands of calcualaitons so it is important to have code focused purely on the defect analysis and relegate the high-throughput workflow aspect to a separate package.
+However, most users of a defect analysis packages will not need to run thousands of calculations so it is important to have code focused purely on the defect analysis and relegate the high-throughput workflow aspect to a separate package.
 Additionally, a well-known problem in the simulation of point defects is the fact that current structure optimization techniques can miss the ground state structure based on the initial guess in a sizable minority of cases, so the ability to easily re-visit and re-optimize structures is crucial to building a reliable database of point defects.
 Towards that end, we have developed a Python package, `pymatgen-analysis-defect`, and integrated it with the popular `atomate2` workflow framework to provide a complete set of tools for simulating, analyzing, and managing the results of point defect calculations.
 
@@ -79,6 +79,7 @@ N intersitial site at [0.35,0.65,0.69]
 
 In the code above, we query the materials project database for the charge density object which contains the information about the bulk structure as well as the electronic charge density.
 Using the `generate_all_native_defects` function, we can generate a list of all of the native point defects for this structure.
+
 ![Figure 1. Defect generation.](fig1.png){ width=35% }
 
 ## Defect Simulation Workflow
@@ -112,6 +113,10 @@ As such, managing and curating the results of the defect calculations generated 
 Moreover, eventually building a high-quality, persistent defects database will significantly reduce the computational cost of defect calculations for the entire community.
 The present software package is designed to facilitate both of these goals.
 
+A focus of the present packages is also to provide a base library for the analysis of point defects without invoking any high-throughput workflow frameworks.
+This is important since the overwhelming majority of users of the defect analysis software will not need to thousands of defect calculations so time invested in learning a high-throughput workflow framework is not usually worthwhile.
+Even though this packages was designed with high-throughput in mind and developed alongside a high-throughput workflow framework, it is not dependent on any particular workflow framework and can be used as a standalone package.
+
 # Acknowledgements
 
-...
+Please add
