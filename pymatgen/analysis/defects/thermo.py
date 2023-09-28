@@ -715,7 +715,6 @@ def group_defect_entries(
     def _get_hash_no_structure(entry):
         return entry.defect.bulk_formula, entry.defect.name
 
-    # import ipdb; ipdb.set_trace()
     if all(isinstance(entry.defect, Defect) for entry in defect_entries):
         ent_groups = group_docs(
             defect_entries, sm=sm, get_structure=_get_structure, get_hash=_get_name
