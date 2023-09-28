@@ -950,7 +950,18 @@ def center_structure(structure, ref_fpos) -> Structure:
 
 
 def get_defect_name(defect_sc: Structure, bulk_sc: Structure) -> str:
-    """Get the name of the defect."""
+    """Get the name of the defect.
+
+    Parse the defect structure and bulk structure to get the name of the defect.
+
+    Args:
+        defect_sc: The defect structure.
+        bulk_sc: The bulk structure.
+
+    Returns:
+        str: The name of the defect, if the defect is a complex, the names of the
+            individual defects are separated by "+".
+    """
     comp_defect = defect_sc.composition.element_composition
     comp_bulk = bulk_sc.composition.element_composition
 
