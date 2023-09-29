@@ -120,7 +120,7 @@ class DefectEntry(MSONable):
         if bulk_struct is None:
             bulk_struct = getattr(bulk_locpot, "structure", None)
 
-        if defect_struct is None or bulk_struct is None:
+        if defect_struct is None or bulk_struct is None:  # pragma: no cover
             raise ValueError(
                 "defect_struct and/or bulk_struct is missing either provide the structure or provide the complete locpot."
             )
@@ -132,7 +132,7 @@ class DefectEntry(MSONable):
                 base_structure=bulk_struct,
             )
             self.sc_defect_frac_coords = defect_fpos
-        else:
+        else:  # pragma: no cover
             defect_fpos = self.sc_defect_frac_coords
 
         frey_corr = get_freysoldt_correction(
