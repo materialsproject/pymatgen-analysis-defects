@@ -322,7 +322,7 @@ class Defect(MSONable, metaclass=ABCMeta):
 
     def __eq__(self, __o: object) -> bool:
         """Equality operator."""
-        if not isinstance(__o, Defect):
+        if not isinstance(__o, Defect):  # pragma: no cover
             raise TypeError("Can only compare Defects to Defects")
         sm = StructureMatcher(comparator=ElementComparator())
         return sm.fit(self.defect_structure, __o.defect_structure)
@@ -383,7 +383,7 @@ class NamedDefect(MSONable):
 
     def __eq__(self, __value: object) -> bool:
         """Only need to compare names."""
-        if not isinstance(__value, NamedDefect):
+        if not isinstance(__value, NamedDefect):  # pragma: no cover
             raise TypeError("Can only compare NamedDefects to NamedDefects")
         return self.__repr__() == __value.__repr__()
 
