@@ -181,3 +181,5 @@ def test_parsing_and_grouping_NamedDefects(test_dir):
     assert str(nd0) == "GaN:Mg_Ga"
     assert nd0 != nd1
     assert nd0 == nd2
+
+    grou
