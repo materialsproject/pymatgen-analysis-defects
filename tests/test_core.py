@@ -42,7 +42,8 @@ def test_substitution(gan_struct):
     assert sub.oxi_state == 1
     assert sub.get_charge_states() == [-1, 0, 1, 2]
     assert sub.get_multiplicity() == 2
-    sc = sub.get_supercell_structure()
+    sc, site_ = sub.get_supercell_structure(return_site=True)
+    assert site_.specie.symbol == "O"
     assert sc.formula == "Ga64 N63 O1"
     assert sub.name == "O_N"
     assert sub.latex_name == r"O$_{\rm N}$"

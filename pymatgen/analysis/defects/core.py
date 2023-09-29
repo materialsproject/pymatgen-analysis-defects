@@ -159,7 +159,7 @@ class Defect(MSONable, metaclass=ABCMeta):
 
         if isinstance(self.oxi_state, int) or self.oxi_state.is_integer():
             oxi_state = int(self.oxi_state)
-        else:
+        else:  # pragma: no cover
             raise ValueError("Oxidation state must be an integer")
 
         if oxi_state >= 0:
