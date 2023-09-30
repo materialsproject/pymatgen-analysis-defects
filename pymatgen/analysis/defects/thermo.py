@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from itertools import chain
+from itertools import chain, groupby
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -22,7 +22,7 @@ from scipy.constants import value as _cd
 from scipy.optimize import bisect
 from scipy.spatial import ConvexHull
 
-from pymatgen.analysis.defects.core import Defect
+from pymatgen.analysis.defects.core import Defect, NamedDefect
 from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
 from pymatgen.analysis.defects.finder import DefectSiteFinder
 from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile, group_docs
@@ -120,7 +120,7 @@ class DefectEntry(MSONable):
         if bulk_struct is None:
             bulk_struct = getattr(bulk_locpot, "structure", None)
 
-        if defect_struct is None or bulk_struct is None:
+        if defect_struct is None or bulk_struct is None:  # pragma: no cover
             raise ValueError(
                 "defect_struct and/or bulk_struct is missing either provide the structure or provide the complete locpot."
             )
@@ -132,7 +132,7 @@ class DefectEntry(MSONable):
                 base_structure=bulk_struct,
             )
             self.sc_defect_frac_coords = defect_fpos
-        else:
+        else:  # pragma: no cover
             defect_fpos = self.sc_defect_frac_coords
 
         frey_corr = get_freysoldt_correction(
@@ -155,7 +155,7 @@ class DefectEntry(MSONable):
     @property
     def corrected_energy(self) -> float:
         """The energy of the defect entry with all corrections applied."""
-        return self.sc_entry.energy + self.corrections["freysoldt"]
+        return self.sc_entry.energy + sum(self.corrections.values())
 
     def get_ediff(self) -> float | None:
         """Get the energy difference between the defect and the bulk (including finite-size correction)."""
@@ -712,11 +712,20 @@ def group_defect_entries(
     def _get_name(entry):
         return entry.defect.name
 
-    ent_groups = group_docs(
-        defect_entries, sm=sm, get_structure=_get_structure, get_hash=_get_name
-    )
-    for g_name, g_entries in ent_groups:
-        yield g_name, g_entries
+    def _get_hash_no_structure(entry):
+        return entry.defect.bulk_formula, entry.defect.name
+
+    if all(isinstance(entry.defect, Defect) for entry in defect_entries):
+        ent_groups = group_docs(
+            defect_entries, sm=sm, get_structure=_get_structure, get_hash=_get_name
+        )
+        for g_name, g_entries in ent_groups:
+            yield g_name, g_entries
+    elif all(isinstance(entry.defect, NamedDefect) for entry in defect_entries):
+        l_ = sorted(defect_entries, key=_get_hash_no_structure)
+        for _, g_entries in groupby(l_, key=_get_hash_no_structure):
+            similar_ents = list(g_entries)
+            yield similar_ents[0].defect.name, similar_ents
 
 
 def group_formation_energy_diagrams(

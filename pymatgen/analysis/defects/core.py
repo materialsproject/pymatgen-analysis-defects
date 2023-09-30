@@ -159,7 +159,7 @@ class Defect(MSONable, metaclass=ABCMeta):
 
         if isinstance(self.oxi_state, int) or self.oxi_state.is_integer():
             oxi_state = int(self.oxi_state)
-        else:
+        else:  # pragma: no cover
             raise ValueError("Oxidation state must be an integer")
 
         if oxi_state >= 0:
@@ -322,7 +322,7 @@ class Defect(MSONable, metaclass=ABCMeta):
 
     def __eq__(self, __o: object) -> bool:
         """Equality operator."""
-        if not isinstance(__o, Defect):
+        if not isinstance(__o, Defect):  # pragma: no cover
             raise TypeError("Can only compare Defects to Defects")
         sm = StructureMatcher(comparator=ElementComparator())
         return sm.fit(self.defect_structure, __o.defect_structure)
@@ -345,6 +345,50 @@ class Defect(MSONable, metaclass=ABCMeta):
         """
         root, suffix = self.name.split("_")
         return rf"{root}$_{{\rm {suffix}}}$"
+
+
+class NamedDefect(MSONable):
+    """Class for defect definition without the UC structure.
+
+    The defect is defined only by its name. For complexes the name
+    should be created with "+" between the individual defects.
+
+    .. note::
+        This class is only used to help aggregate defects calculated
+        outside of our framework so a ``Defect`` object is missing.
+        The object will not have any mechanism for generating supercells
+        or guessing oxidation states.  It is simply a placeholder to help
+        with the grouping logic of the Formation Energy diagram analysis.
+
+    """
+
+    def __init__(self, name, bulk_formula) -> None:
+        self.name = name
+        self.bulk_formula = bulk_formula
+
+    @classmethod
+    def from_structures(cls, defect_structure: Structure, bulk_structure: Structure):
+        """Initialize a NameDefect object from structures.
+
+        Args:
+            defect_structure: The structure of the defect.
+            bulk_structure: The structure of the bulk.
+
+        Returns:
+            NamedDefect: The defect object.
+        """
+        name_ = get_defect_name(defect_structure, bulk_structure)
+        bulk_formula = bulk_structure.composition.reduced_formula
+        return cls(name=name_, bulk_formula=bulk_formula)
+
+    def __eq__(self, __value: object) -> bool:
+        """Only need to compare names."""
+        if not isinstance(__value, NamedDefect):  # pragma: no cover
+            raise TypeError("Can only compare NamedDefects to NamedDefects")
+        return self.__repr__() == __value.__repr__()
+
+    def __repr__(self) -> str:
+        return f'{self.bulk_formula}:{"+".join(sorted(self.name.split("+")))}'
 
 
 class Vacancy(Defect):
@@ -690,7 +734,9 @@ class DefectComplex(Defect):
 
     def get_multiplicity(self) -> int:
         """Determine the multiplicity of the defect site within the structure."""
-        raise NotImplementedError("Not implemented for defect complexes")
+        raise NotImplementedError(
+            "Not implemented for defect complexes"
+        )  # pragma: no cover
 
     @property
     def element_changes(self) -> Dict[Element, int]:
@@ -771,7 +817,7 @@ def update_structure(structure, site, defect_type):
     elif defect_type == DefectType.Interstitial:
         _update(structure, site, rm=False, replace=False)
     else:
-        raise ValueError("Unknown point defect type.")
+        raise ValueError("Unknown point defect type.")  # pragma: no cover
 
 
 class Adsorbate(Interstitial):
@@ -903,3 +949,63 @@ def center_structure(structure, ref_fpos) -> Structure:
         _, jiimage = struct.lattice.get_distance_and_image(ref_fpos, d_site.frac_coords)
         struct.translate_sites([idx], jiimage, to_unit_cell=False)
     return struct
+
+
+def get_defect_name(defect_sc: Structure, bulk_sc: Structure) -> str:
+    """Get the name of the defect.
+
+    Parse the defect structure and bulk structure to get the name of the defect.
+
+    Args:
+        defect_sc: The defect structure.
+        bulk_sc: The bulk structure.
+
+    Returns:
+        str: The name of the defect, if the defect is a complex, the names of the
+            individual defects are separated by "+".
+    """
+    comp_defect = defect_sc.composition.element_composition
+    comp_bulk = bulk_sc.composition.element_composition
+
+    # get the element changes
+    el_diff = {}
+    for el, cnt in comp_defect.items():
+        el_diff[el] = cnt - comp_bulk[el]
+        # has to be integer
+        if not (el_diff[el].is_integer() and cnt.is_integer()):
+            raise ValueError(
+                "Defect structure and bulk structure must have integer compositions."
+            )
+
+    added_list = [(el, int(cnt)) for el, cnt in el_diff.items() if cnt > 0]
+    removed_list = [(el, int(cnt)) for el, cnt in el_diff.items() if cnt < 0]
+
+    # rank the elements by electronegativity
+    added_list.sort()
+    removed_list.sort()
+
+    # get the different substitution names
+    sub_names = []
+    while added_list and removed_list:
+        add_el, add_cnt = added_list.pop(0)
+        rm_el, rm_cnt = removed_list.pop(0)
+        sub_names.append(f"{add_el}_{rm_el}")
+        add_cnt -= 1
+        rm_cnt += 1
+        if add_cnt != 0:
+            added_list.insert(0, (add_el, add_cnt))
+        if rm_cnt != 0:
+            removed_list.insert(0, (rm_el, rm_cnt))
+
+    # get the different vacancy names
+    vac_names = []
+    for el, cnt in removed_list:
+        vac_names.append(f"v_{el}")
+
+    # get the different interstitial names
+    int_names = []
+    for el, cnt in added_list:
+        int_names.append(f"{el}_i")
+
+    # combine the names
+    return "+".join(sub_names + vac_names + int_names)
