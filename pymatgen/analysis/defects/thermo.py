@@ -588,8 +588,8 @@ class FormationEnergyDiagram(MSONable):
             raise ValueError(
                 f"Cannot find a chemical potential condition with {rich_element} near zero."
             )
-        defect = self.defect_entries[0].defect
-        in_bulk = defect.structure.composition.elements
+        # defect = self.defect_entries[0].defect
+        in_bulk = self.defect_entries[0].sc_entry.composition.elements
         # make sure they are of type Element
         in_bulk = list(map(lambda x: Element(x.symbol), in_bulk))
         not_in_bulk = list(set(self.chempot_limits[0].keys()) - set(in_bulk))
@@ -601,7 +601,7 @@ class FormationEnergyDiagram(MSONable):
         el_list = sorted(in_bulk, key=el_sorter) + sorted(not_in_bulk, key=el_sorter)
 
         def chempot_sorter(chempot_dict):
-            return (chempot_dict[el] for el in el_list)
+            return tuple(chempot_dict[el] for el in el_list)
 
         return min(rich_conditions, key=chempot_sorter)
 
