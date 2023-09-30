@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.core import Element, PeriodicSite
 
-from pymatgen.analysis.defects.core import Interstitial
+from pymatgen.analysis.defects.core import Interstitial, NamedDefect
 from pymatgen.analysis.defects.corrections.freysoldt import plot_plnr_avg
 from pymatgen.analysis.defects.thermo import (
     Composition,
@@ -18,6 +18,7 @@ from pymatgen.analysis.defects.thermo import (
     ensure_stable_bulk,
     get_lower_envelope,
     get_transitions,
+    group_defect_entries,
     plot_formation_energy_diagrams,
 )
 
@@ -39,8 +40,8 @@ def test_lower_envelope():
     ]
 
 
-def test_defect_entry(defect_entries_Mg_Ga, data_Mg_Ga):
-    defect_entries, plot_data = defect_entries_Mg_Ga
+def test_defect_entry(defect_entries_and_plot_data_Mg_Ga, data_Mg_Ga):
+    defect_entries, plot_data = defect_entries_and_plot_data_Mg_Ga
 
     def_entry = defect_entries[0]
     assert def_entry.corrections["freysoldt"] == pytest.approx(0.00, abs=1e-4)
@@ -65,12 +66,14 @@ def test_defect_entry(defect_entries_Mg_Ga, data_Mg_Ga):
     assert def_entry.get_ediff() == pytest.approx(ediff, abs=1e-4)
 
 
-def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
+def test_formation_energy(
+    data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N
+):
     bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
     bulk_bs = bulk_vasprun.get_band_structure()
     vbm = bulk_bs.get_vbm()["energy"]
     bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
-    defect_entries, plot_data = defect_entries_Mg_Ga
+    defect_entries, plot_data = defect_entries_and_plot_data_Mg_Ga
 
     def_ent_list = list(defect_entries.values())
     fed = FormationEnergyDiagram(
@@ -176,12 +179,12 @@ def test_formation_energy(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga
     fed.get_chempots(Element("Ga"))
 
 
-def test_multi(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N):
+def test_multi(data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N):
     bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
     bulk_dos = bulk_vasprun.complete_dos
     _, vbm = bulk_dos.get_cbm_vbm()
     bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
-    defect_entries, plot_data = defect_entries_Mg_Ga
+    defect_entries, plot_data = defect_entries_and_plot_data_Mg_Ga
     def_ent_list = list(defect_entries.values())
 
     with pytest.raises(
@@ -265,12 +268,14 @@ def test_ensure_stable_bulk(stable_entries_Mg_Ga_N):
     assert "GaN" in [e.composition.reduced_formula for e in pd2.stable_entries]
 
 
-def test_plotter(data_Mg_Ga, defect_entries_Mg_Ga, stable_entries_Mg_Ga_N, plot_fn):
+def test_plotter(
+    data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N, plot_fn
+):
     bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
     bulk_dos = bulk_vasprun.complete_dos
     _, vbm = bulk_dos.get_cbm_vbm()
     bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
-    defect_entries, _ = defect_entries_Mg_Ga
+    defect_entries, _ = defect_entries_and_plot_data_Mg_Ga
     def_ent_list = list(defect_entries.values())
 
     fed = FormationEnergyDiagram(
@@ -321,3 +326,20 @@ def plot_fn():
         os.remove("formation_energy_diagram.png")
 
     return _plot
+
+
+def test_defect_entry_grouping(defect_entries_and_plot_data_Mg_Ga):
+    defect_entries_dict, _ = defect_entries_and_plot_data_Mg_Ga
+    defect_entries = list(defect_entries_dict.values())
+    for g_name, g in group_defect_entries(defect_entries=defect_entries):
+        for de in g:
+            assert de.defect.name == g_name
+
+    named_defect_entries = copy.deepcopy(defect_entries)
+    bulk_formula = defect_entries[0].defect.structure.composition.reduced_formula
+    for de in named_defect_entries:
+        de.defect = NamedDefect(name=de.defect.name, bulk_formula=bulk_formula)
+
+    for g_name, g in group_defect_entries(defect_entries=named_defect_entries):
+        for de in g:
+            assert de.defect.name == g_name
