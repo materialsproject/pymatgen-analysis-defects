@@ -734,7 +734,9 @@ class DefectComplex(Defect):
 
     def get_multiplicity(self) -> int:
         """Determine the multiplicity of the defect site within the structure."""
-        raise NotImplementedError("Not implemented for defect complexes")
+        raise NotImplementedError(
+            "Not implemented for defect complexes"
+        )  # pragma: no cover
 
     @property
     def element_changes(self) -> Dict[Element, int]:
@@ -815,7 +817,7 @@ def update_structure(structure, site, defect_type):
     elif defect_type == DefectType.Interstitial:
         _update(structure, site, rm=False, replace=False)
     else:
-        raise ValueError("Unknown point defect type.")
+        raise ValueError("Unknown point defect type.")  # pragma: no cover
 
 
 class Adsorbate(Interstitial):
