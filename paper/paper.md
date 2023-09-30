@@ -1,5 +1,5 @@
 ---
-title: 'pymatgen-analysis-defect: A Python package for analyzing point defects in crystalline materials'
+title: 'pymatgen-analysis-defects: A Python package for analyzing point defects in crystalline materials'
 
 tags:
   - python
@@ -32,7 +32,7 @@ Multiple software packages exist to automate the simulation of point defects [@B
 Since the combinatorics of point defects in crystalline materials can be extremely large, it is important to have a software package that can be easily integrated into high-throughput workflows to manage these complex calculations.
 However, most users of a defect analysis packages will not need to run thousands of calculations so it is important to have code focused purely on the defect analysis and relegate the high-throughput workflow aspect to a separate package.
 Additionally, a well-known problem in the simulation of point defects is the fact that current structure optimization techniques can miss the ground state structure based on the initial guess in a sizable minority of cases, so the ability to easily re-visit and re-optimize structures is crucial to building a reliable database of point defects.
-Towards that end, we have developed a Python package, `pymatgen-analysis-defect`, and integrated it with the popular `atomate2` workflow framework to provide a complete set of tools for simulating, analyzing, and managing the results of point defect calculations.
+Towards that end, we have developed a Python package, `pymatgen-analysis-defects`, and integrated it with the popular `atomate2` workflow framework to provide a complete set of tools for simulating, analyzing, and managing the results of point defect calculations.
 
 Since the ability to revisit calculations is crucial to building a reliable database, but user tagging of calculations is inconsistent, especially in a high-throughput context, we have codified a structure-only definition of point defects that can be used to aggregate the results of multiple calculations of the same defect.
 This allows for the creation of a database of point defects that can be easily extended to new calculations over time.
@@ -49,7 +49,7 @@ https://materialsproject.github.io/pymatgen-analysis-defects/intro.html
 
 ## Defect Definition
 
-A core feature of `pymatgen-analysis-defect` is the ability to define a point defects automatically.
+A core feature of `pymatgen-analysis-defects` is the ability to define a point defects automatically.
 While symmetry analysis on the atomic structure alone is usually enough to define the distinct substitutional and vacancy defects, we found that the electronic charge density was the most effective at placing the interstitial defect at symmetry-inequivalent positions.
 A basic example of creating a full list of defects is shown below:
 
