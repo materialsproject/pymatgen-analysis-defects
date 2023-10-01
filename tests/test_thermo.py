@@ -338,7 +338,9 @@ def test_defect_entry_grouping(defect_entries_and_plot_data_Mg_Ga):
     named_defect_entries = copy.deepcopy(defect_entries)
     bulk_formula = defect_entries[0].defect.structure.composition.reduced_formula
     for de in named_defect_entries:
-        de.defect = NamedDefect(name=de.defect.name, bulk_formula=bulk_formula)
+        de.defect = NamedDefect(
+            name=de.defect.name, bulk_formula=bulk_formula, element_changes=None
+        )
 
     for g_name, g in group_defect_entries(defect_entries=named_defect_entries):
         for de in g:
