@@ -177,8 +177,12 @@ def test_parsing_and_grouping_NamedDefects(test_dir):
     nd0 = NamedDefect.from_structures(
         defect_structure=defect_struct, bulk_structure=bulk_struct
     )
-    nd1 = NamedDefect(name="v_Ga", bulk_formula="GaN")
-    nd2 = NamedDefect(name="Mg_Ga", bulk_formula="GaN")
+
+    assert nd0.element_changes == {Element("Mg"): 1, Element("Ga"): -1}
+    nd1 = NamedDefect(name="v_Ga", bulk_formula="GaN", element_changes={"Ga": -1})
+    nd2 = NamedDefect(
+        name="Mg_Ga", bulk_formula="GaN", element_changes={"Mg": 1, "Ga": -1}
+    )
     assert str(nd0) == "GaN:Mg_Ga"
     assert nd0 != nd1
     assert nd0 == nd2

@@ -1,6 +1,7 @@
 """Classes and methods related to thermodynamics and energy."""
 from __future__ import annotations
 
+import collections
 import logging
 from dataclasses import dataclass, field
 from itertools import chain, groupby
@@ -605,6 +606,21 @@ class FormationEnergyDiagram(MSONable):
 
         return min(rich_conditions, key=chempot_sorter)
 
+    def __repr__(self) -> str:
+        """Representation."""
+        defect_entry_summary = []
+        for dent in self.defect_entries:
+            defect_entry_summary.append(
+                f"\t{dent.defect.name} {dent.charge_state} {dent.corrected_energy}"
+            )
+        # import ipdb; ipdb.set_trace()
+        txt = (
+            f"{self.__class__.__name__} for {self.defect.name}",
+            "Defect Entries:",
+            "\n".join(defect_entry_summary),
+        )
+        return "\n".join(txt)
+
 
 @dataclass
 class MultiFormationEnergyDiagram(MSONable):
@@ -857,6 +873,15 @@ def get_lower_envelope(lines):
         List[List[float]]:
             List lines that make up the lower envelope.
     """
+
+    def _hash_float(x):
+        return round(x, 10)
+
+    lines_dd = collections.defaultdict(lambda: float("inf"))
+    for m, b in lines:
+        lines_dd[_hash_float(m)] = min(lines_dd[_hash_float(m)], b)
+    lines = [(m, b) for m, b in lines_dd.items()]
+
     if len(lines) < 1:
         raise ValueError("Need at least one line to get lower envelope.")
     elif len(lines) == 1:

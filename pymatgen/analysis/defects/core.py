@@ -362,9 +362,16 @@ class NamedDefect(MSONable):
 
     """
 
-    def __init__(self, name, bulk_formula) -> None:
+    def __init__(self, name: str, bulk_formula: str, element_changes: dict) -> None:
+        """
+        Args:
+            name: The name of the defect.
+            bulk_formula: The formula of the bulk structure.
+            element_changes: The species changes of the defect.
+        """
         self.name = name
         self.bulk_formula = bulk_formula
+        self.element_changes = element_changes
 
     @classmethod
     def from_structures(cls, defect_structure: Structure, bulk_structure: Structure):
@@ -377,9 +384,24 @@ class NamedDefect(MSONable):
         Returns:
             NamedDefect: The defect object.
         """
-        name_ = get_defect_name(defect_structure, bulk_structure)
+        el_diff = _get_el_changes_from_structures(defect_structure, bulk_structure)
+        name_ = _get_defect_name(el_diff)
         bulk_formula = bulk_structure.composition.reduced_formula
-        return cls(name=name_, bulk_formula=bulk_formula)
+        return cls(name=name_, bulk_formula=bulk_formula, element_changes=el_diff)
+
+    @property
+    def latex_name(self) -> str:
+        """Get the latex name of the defect.
+
+        Returns:
+            str: The latex name of the defect.
+        """
+        single_names = self.name.split("+")
+        l_names = []
+        for n in single_names:
+            root, suffix = n.split("_")
+            l_names.append(rf"{root}$_{{\rm {suffix}}}$")
+        return " + ".join(l_names)
 
     def __eq__(self, __value: object) -> bool:
         """Only need to compare names."""
@@ -768,6 +790,11 @@ class DefectComplex(Defect):
             )
         return defect_structure
 
+    @property
+    def latex_name(self) -> str:
+        single_names = [d.latex_name for d in self.defects]
+        return "$+$".join(single_names)
+
 
 def update_structure(structure, site, defect_type):
     """Update the structure with the defect site.
@@ -951,7 +978,7 @@ def center_structure(structure, ref_fpos) -> Structure:
     return struct
 
 
-def get_defect_name(defect_sc: Structure, bulk_sc: Structure) -> str:
+def _get_el_changes_from_structures(defect_sc: Structure, bulk_sc: Structure) -> dict:
     """Get the name of the defect.
 
     Parse the defect structure and bulk structure to get the name of the defect.
@@ -964,38 +991,59 @@ def get_defect_name(defect_sc: Structure, bulk_sc: Structure) -> str:
         str: The name of the defect, if the defect is a complex, the names of the
             individual defects are separated by "+".
     """
+
+    def _check_int(n):
+        return isinstance(n, int) or n.is_integer()
+
     comp_defect = defect_sc.composition.element_composition
     comp_bulk = bulk_sc.composition.element_composition
 
     # get the element changes
     el_diff = {}
     for el, cnt in comp_defect.items():
-        el_diff[el] = cnt - comp_bulk[el]
         # has to be integer
-        if not (el_diff[el].is_integer() and cnt.is_integer()):
+        if not (_check_int(comp_bulk[el]) and _check_int(cnt)):
             raise ValueError(
                 "Defect structure and bulk structure must have integer compositions."
             )
+        tmp_ = int(cnt) - int(comp_bulk[el])
+        if tmp_ != 0:
+            el_diff[el] = tmp_
+    return el_diff
 
-    added_list = [(el, int(cnt)) for el, cnt in el_diff.items() if cnt > 0]
-    removed_list = [(el, int(cnt)) for el, cnt in el_diff.items() if cnt < 0]
+
+def _get_defect_name(element_diff: dict) -> str:
+    """Get the name of the defect.
+
+    Parse the defect structure and bulk structure to get the name of the defect.
+
+    Args:
+        defect_sc: The defect structure.
+        bulk_sc: The bulk structure.
+
+    Returns:
+        str: The name of the defect, if the defect is a complex, the names of the
+            individual defects are separated by "+".
+    """
+    added_list = [(el, int(cnt)) for el, cnt in element_diff.items() if cnt > 0]
+    removed_list = [(el, int(cnt)) for el, cnt in element_diff.items() if cnt < 0]
 
     # rank the elements by electronegativity
-    added_list.sort()
-    removed_list.sort()
+    added_list.sort(reverse=True)
+    removed_list.sort(reverse=True)
 
     # get the different substitution names
     sub_names = []
     while added_list and removed_list:
-        add_el, add_cnt = added_list.pop(0)
-        rm_el, rm_cnt = removed_list.pop(0)
+        add_el, add_cnt = added_list.pop()
+        rm_el, rm_cnt = removed_list.pop()
         sub_names.append(f"{add_el}_{rm_el}")
         add_cnt -= 1
         rm_cnt += 1
         if add_cnt != 0:
-            added_list.insert(0, (add_el, add_cnt))
+            added_list.append((add_el, add_cnt))
         if rm_cnt != 0:
-            removed_list.insert(0, (rm_el, rm_cnt))
+            removed_list.append((rm_el, rm_cnt))
 
     # get the different vacancy names
     vac_names = []
