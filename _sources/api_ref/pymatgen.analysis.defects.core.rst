@@ -14,7 +14,6 @@
    .. autosummary::
    
       center_structure
-      get_defect_name
       get_element
       get_vacancy
       perturb_sites
