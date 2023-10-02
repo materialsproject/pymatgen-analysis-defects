@@ -11,6 +11,7 @@ import numpy as np
 from monty.json import MSONable
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.core import Element, PeriodicSite, Species, Structure
+from pymatgen.core.periodic_table import DummySpecies
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.symmetry.structure import SymmetrizedStructure
 
@@ -50,6 +51,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         site: PeriodicSite,
         multiplicity: int | None = None,
         oxi_state: float | None = None,
+        equivalent_sites: list[PeriodicSite] | None = None,
         symprec: float = 0.01,
         angle_tolerance: float = 5,
         user_charges: list[int] | None = None,
@@ -62,6 +64,7 @@ class Defect(MSONable, metaclass=ABCMeta):
             multiplicity: The multiplicity of the defect.
             oxi_state: The oxidation state of the defect, if not specified,
                 this will be determined automatically.
+            equivalent_sites: A list of equivalent sites for the defect in the structure.
             symprec: Tolerance for symmetry finding.
             angle_tolerance: Angle tolerance for symmetry finding.
             user_charges: User specified charge states. If specified,
@@ -75,6 +78,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         self.multiplicity = (
             multiplicity if multiplicity is not None else self.get_multiplicity()
         )
+        self.equivalent_sites = equivalent_sites if equivalent_sites is not None else []
         self.user_charges = user_charges if user_charges else []
         if oxi_state is None:
             # Try to use the reduced cell first since oxidation state assignment
@@ -82,7 +86,7 @@ class Defect(MSONable, metaclass=ABCMeta):
             try:
                 self.structure.add_oxidation_state_by_guess(max_sites=-1)
                 # check oxi_states assigned and not all zero
-                if all([specie.oxi_state == 0 for specie in self.structure.species]):
+                if all(specie.oxi_state == 0 for specie in self.structure.species):
                     self.structure.add_oxidation_state_by_guess()
             except:  # pragma: no cover
                 self.structure.add_oxidation_state_by_guess()
@@ -126,6 +130,15 @@ class Defect(MSONable, metaclass=ABCMeta):
             Dict[Element, int]: The species changes of the defect.
         """
 
+    @property
+    def centered_defect_structure(self) -> Structure:
+        """Get a defect structure that is centered around the site.
+
+        Move all the sites in the structure so that they
+        are in the periodic image closest to the defect site.
+        """
+        return center_structure(self.defect_structure, self.site.frac_coords)
+
     def get_charge_states(self, padding: int = 1) -> list[int]:
         """Potential charge states for a given oxidation state.
 
@@ -146,7 +159,7 @@ class Defect(MSONable, metaclass=ABCMeta):
 
         if isinstance(self.oxi_state, int) or self.oxi_state.is_integer():
             oxi_state = int(self.oxi_state)
-        else:
+        else:  # pragma: no cover
             raise ValueError("Oxidation state must be an integer")
 
         if oxi_state >= 0:
@@ -159,6 +172,7 @@ class Defect(MSONable, metaclass=ABCMeta):
     def get_supercell_structure(
         self,
         sc_mat: np.ndarray | None = None,
+        defect_structure: Structure | None = None,
         dummy_species: str | None = None,
         min_atoms: int = 80,
         max_atoms: int = 240,
@@ -166,11 +180,32 @@ class Defect(MSONable, metaclass=ABCMeta):
         force_diagonal: bool = False,
         relax_radius: float | str | None = None,
         perturb: float | None = None,
+        target_frac_coords: np.ndarray | None = None,
+        return_site: bool = False,
     ) -> Structure:
         """Generate the supercell for a defect.
 
+        If the bulk structure (provided by `Defect.structure`) and defect structures
+        have oxidation state information, then the supercell will be decorated with
+        oxidation states.  Otherwise, the supercell structure will not have any oxidation
+        state information.  This also allows for oxidation state decoration of different
+        defect charge states.
+
+        .. code-block:: python
+            defect_struct = defect.defect_structure.copy()
+            defect_struct.add_oxidation_state_by_guess(target_charge=2)
+
+        .. note::
+            Since any algorithm for decorating the oxidation states will be combinatorial,
+            They can be very slow for large supercells. If you want to decorate the structure
+            with oxidation states, you have to first decorate the smaller unit cell defect
+            structure then implant it in the supercell.
+
         Args:
             sc_mat: supercell matrix if None, the supercell will be determined by `CubicSupercellAnalyzer`.
+            defect_structure: Alternative defect structure to use for generating the supercell.
+                You might want to use this if you want to decorate the oxidation states of the
+                defect structure using a custom method.
             dummy_species: Dummy species to highlight the defect position (for visualizing vacancies).
             max_atoms: Maximum number of atoms allowed in the supercell.
             min_atoms: Minimum number of atoms allowed in the supercell.
@@ -179,35 +214,74 @@ class Defect(MSONable, metaclass=ABCMeta):
             relax_radius: Relax the supercell atoms to a sphere of this radius around the defect site.
             perturb: The amount to perturb the sites in the supercell. Only perturb the sites with
                 selective dynamics set to True. So this setting only works with `relax_radius`.
+            target_frac_coords: If set, defect will be placed at the closest equivalent site to these
+                fractional coordinates.
+            return_site: If True, returns a tuple of the (defect supercell, defect site position).
 
         Returns:
             Structure: The supercell structure.
+            PeriodicSite (optional): The position of the defect site in the supercell.
         """
+
+        def _has_oxi(struct):
+            return all([hasattr(site.specie, "oxi_state") for site in struct])
+
+        if defect_structure is None:
+            defect_structure = self.centered_defect_structure
+        bulk_structure = center_structure(self.structure, self.site.frac_coords)
+        keep_oxi = _has_oxi(bulk_structure) and _has_oxi(defect_structure)
+
         if sc_mat is None:
             sc_mat = get_sc_fromstruct(
-                self.structure,
+                bulk_structure,
                 min_atoms=min_atoms,
                 max_atoms=max_atoms,
                 min_length=min_length,
                 force_diagonal=force_diagonal,
             )
 
-        sc_structure = self.structure * sc_mat
+        # Get the translation vector in to the desired cell in Cartesian coordinates
+        if target_frac_coords is None:
+            target_frac_coords = [1e-6, 1e-6, 1e-6]
+        trans_R = np.floor(np.dot(target_frac_coords, sc_mat))
+        trans_vec = np.dot(trans_R, bulk_structure.lattice.matrix)
+        sc_defect_struct = bulk_structure * sc_mat
+
+        # Use the site as a reference point for the position
         sc_mat_inv = np.linalg.inv(sc_mat)
         sc_pos = np.dot(self.site.frac_coords, sc_mat_inv)
-        sc_site = PeriodicSite(self.site.specie, sc_pos, sc_structure.lattice)
-
-        sc_defect = self.__class__(
-            structure=sc_structure, site=sc_site, oxi_state=self.oxi_state
+        sc_site = PeriodicSite(
+            species=self.site.specie,
+            coords=sc_pos,
+            lattice=sc_defect_struct.lattice,
+            coords_are_cartesian=False,
         )
-        sc_defect_struct = sc_defect.defect_structure
-        sc_defect_struct.remove_oxidation_states()
 
-        if dummy_species is not None:
-            dummy_pos = np.dot(self.site.frac_coords, sc_mat_inv)
-            dummy_pos = np.mod(dummy_pos, 1)
-            sc_defect_struct.insert(len(sc_structure), dummy_species, dummy_pos)
+        bulk_site_mapping = _get_mapped_sites(bulk_structure, sc_defect_struct)
+        defect_site_mapping = _get_mapped_sites(defect_structure, sc_defect_struct)
 
+        # Remove the indices that that are not mapped
+        rm_indices = set(bulk_site_mapping.values()) - set(defect_site_mapping.values())
+
+        # Set the species for the sites that are mapped
+        for defect_site, bulk_site in defect_site_mapping.items():
+            sc_defect_struct[bulk_site]._species = defect_structure[defect_site].species
+
+        # interstitials
+        int_uc_indices = set(range(len(defect_structure))) - set(
+            defect_site_mapping.keys()
+        )
+        for i in int_uc_indices:
+            int_sc_pos = np.dot(defect_structure[i].frac_coords, sc_mat_inv)
+            sc_defect_struct.insert(
+                0,
+                defect_structure[i].specie,
+                int_sc_pos,
+                coords_are_cartesian=False,
+            )
+
+        # Remove the sites that are not mapped
+        sc_defect_struct.remove_sites(list(rm_indices))
         _set_selective_dynamics(
             structure=sc_defect_struct,
             site_pos=sc_site.coords,
@@ -216,6 +290,22 @@ class Defect(MSONable, metaclass=ABCMeta):
         if perturb is not None:
             _perturb_dynamic_sites(sc_defect_struct, distance=perturb)
 
+        # Translate the structure to the target position
+        sc_defect_struct.translate_sites(
+            indices=list(range(len(sc_defect_struct))),
+            vector=trans_vec,
+            frac_coords=False,
+        )
+        sc_site._frac_coords += trans_R
+
+        if not keep_oxi:
+            sc_defect_struct.remove_oxidation_states()
+
+        if dummy_species is not None:
+            sc_defect_struct.insert(0, dummy_species, sc_site.frac_coords)
+
+        if return_site:
+            return sc_defect_struct, sc_site
         return sc_defect_struct
 
     @property
@@ -232,7 +322,7 @@ class Defect(MSONable, metaclass=ABCMeta):
 
     def __eq__(self, __o: object) -> bool:
         """Equality operator."""
-        if not isinstance(__o, Defect):
+        if not isinstance(__o, Defect):  # pragma: no cover
             raise TypeError("Can only compare Defects to Defects")
         sm = StructureMatcher(comparator=ElementComparator())
         return sm.fit(self.defect_structure, __o.defect_structure)
@@ -245,6 +335,82 @@ class Defect(MSONable, metaclass=ABCMeta):
             int: The defect type.
         """
         return getattr(DefectType, self.__class__.__name__)
+
+    @property
+    def latex_name(self) -> str:
+        """Get the latex name of the defect.
+
+        Returns:
+            str: The latex name of the defect.
+        """
+        root, suffix = self.name.split("_")
+        return rf"{root}$_{{\rm {suffix}}}$"
+
+
+class NamedDefect(MSONable):
+    """Class for defect definition without the UC structure.
+
+    The defect is defined only by its name. For complexes the name
+    should be created with "+" between the individual defects.
+
+    .. note::
+        This class is only used to help aggregate defects calculated
+        outside of our framework so a ``Defect`` object is missing.
+        The object will not have any mechanism for generating supercells
+        or guessing oxidation states.  It is simply a placeholder to help
+        with the grouping logic of the Formation Energy diagram analysis.
+
+    """
+
+    def __init__(self, name: str, bulk_formula: str, element_changes: dict) -> None:
+        """
+        Args:
+            name: The name of the defect.
+            bulk_formula: The formula of the bulk structure.
+            element_changes: The species changes of the defect.
+        """
+        self.name = name
+        self.bulk_formula = bulk_formula
+        self.element_changes = element_changes
+
+    @classmethod
+    def from_structures(cls, defect_structure: Structure, bulk_structure: Structure):
+        """Initialize a NameDefect object from structures.
+
+        Args:
+            defect_structure: The structure of the defect.
+            bulk_structure: The structure of the bulk.
+
+        Returns:
+            NamedDefect: The defect object.
+        """
+        el_diff = _get_el_changes_from_structures(defect_structure, bulk_structure)
+        name_ = _get_defect_name(el_diff)
+        bulk_formula = bulk_structure.composition.reduced_formula
+        return cls(name=name_, bulk_formula=bulk_formula, element_changes=el_diff)
+
+    @property
+    def latex_name(self) -> str:
+        """Get the latex name of the defect.
+
+        Returns:
+            str: The latex name of the defect.
+        """
+        single_names = self.name.split("+")
+        l_names = []
+        for n in single_names:
+            root, suffix = n.split("_")
+            l_names.append(rf"{root}$_{{\rm {suffix}}}$")
+        return " + ".join(l_names)
+
+    def __eq__(self, __value: object) -> bool:
+        """Only need to compare names."""
+        if not isinstance(__value, NamedDefect):  # pragma: no cover
+            raise TypeError("Can only compare NamedDefects to NamedDefects")
+        return self.__repr__() == __value.__repr__()
+
+    def __repr__(self) -> str:
+        return f'{self.bulk_formula}:{"+".join(sorted(self.name.split("+")))}'
 
 
 class Vacancy(Defect):
@@ -299,7 +465,7 @@ class Vacancy(Defect):
         Returns:
             Dict[Element, int]: The species changes of the defect.
         """
-        return {self.structure.sites[self.defect_site_index].specie.element: -1}
+        return {get_element(self.structure.sites[self.defect_site_index].specie): -1}
 
     def _guess_oxi_state(self) -> float:
         """Best guess for the oxidation state of the defect.
@@ -395,8 +561,8 @@ class Substitution(Defect):
             Dict[Element, int]: The species changes of the defect.
         """
         return {
-            self.structure.sites[self.defect_site_index].specie.element: -1,
-            self.site.specie.element: +1,
+            get_element(self.structure.sites[self.defect_site_index].specie): -1,
+            get_element(self.site.specie): +1,
         }
 
     def _guess_oxi_state(self) -> float:
@@ -409,13 +575,27 @@ class Substitution(Defect):
             float: The oxidation state of the defect.
         """
         rm_oxi = self.structure[self.defect_site_index].specie.oxi_state
-        sub_states = self.site.specie.common_oxidation_states
-        if len(sub_states) == 0:
-            raise ValueError(
-                f"No common oxidation states found for {self.site.specie}."
-                "Please specify the oxidation state manually."
+
+        # check if substitution atom is present in structure (i.e. antisite substitution):
+        sub_elt_sites_in_struct = [
+            site
+            for site in self.structure
+            if site.specie.symbol
+            == self.site.specie.symbol  # gives Element symbol (without oxi state)
+        ]
+        if len(sub_elt_sites_in_struct) == 0:
+            sub_states = self.site.specie.common_oxidation_states
+            if len(sub_states) == 0:
+                raise ValueError(
+                    f"No common oxidation states found for {self.site.specie}."
+                    "Please specify the oxidation state manually."
+                )
+            sub_oxi = min(sub_states, key=lambda x: abs(x - rm_oxi))
+        else:
+            sub_oxi = int(
+                np.mean([site.specie.oxi_state for site in sub_elt_sites_in_struct])
             )
-        sub_oxi = min(sub_states, key=lambda x: abs(x - rm_oxi))
+
         return sub_oxi - rm_oxi
 
     def __repr__(self) -> str:
@@ -437,6 +617,7 @@ class Interstitial(Defect):
         site: PeriodicSite,
         multiplicity: int = 1,
         oxi_state: float | None = None,
+        equivalent_sites: list[PeriodicSite] | None = None,
         **kwargs,
     ) -> None:
         """Initialize an interstitial defect object.
@@ -450,7 +631,9 @@ class Interstitial(Defect):
             oxi_state: The oxidation state of the defect, if not specified,
                 this will be determined automatically.
         """
-        super().__init__(structure, site, multiplicity, oxi_state, **kwargs)
+        super().__init__(
+            structure, site, multiplicity, oxi_state, equivalent_sites, **kwargs
+        )
 
     def get_multiplicity(self) -> int:
         """Determine the multiplicity of the defect site within the structure."""
@@ -473,7 +656,7 @@ class Interstitial(Defect):
         if len(inter_states) == 0:
             _logger.warning(
                 f"No oxidation states found for {self.site.specie.symbol}. "
-                "in ICSD using `oxidation_states` without frequencuy ranking."
+                "in ICSD using `oxidation_states` without frequency ranking."
             )
             inter_states = self.site.specie.oxidation_states
         inter_oxi = max(inter_states, key=abs)
@@ -498,7 +681,7 @@ class Interstitial(Defect):
             Dict[Element, int]: The species changes of the defect.
         """
         return {
-            self.site.specie.element: +1,
+            get_element(self.site.specie): +1,
         }
 
     def _guess_oxi_state(self) -> float:
@@ -539,14 +722,43 @@ class DefectComplex(Defect):
         self.defects = defects
         self.structure = self.defects[0].structure
         self.oxi_state = self._guess_oxi_state() if oxi_state is None else oxi_state
+        defect_sites = [d.site for d in self.defects]
+        center_of_mass = np.mean([s.coords for s in defect_sites], axis=0)
+        self.site = PeriodicSite(
+            species=DummySpecies(),
+            coords=center_of_mass,
+            lattice=self.structure.lattice,
+            coords_are_cartesian=True,
+        )
 
     def __repr__(self) -> str:
         """Representation of a complex defect."""
         return f"Complex defect containing: {[d.name for d in self.defects]}"
 
+    def __eq__(self, __o: object) -> bool:
+        """Check if  are equal."""
+        if not isinstance(__o, Defect):
+            raise TypeError("Can only compare Defects to Defects")
+        sm = StructureMatcher(comparator=ElementComparator())
+        this_structure = self.defect_structure_with_com
+        if isinstance(__o, DefectComplex):
+            that_structure = __o.defect_structure_with_com
+        else:
+            that_structure = __o.defect_structure
+        return sm.fit(this_structure, that_structure)
+
+    @property
+    def defect_structure_with_com(self) -> Structure:
+        """Returns the defect structure with the center of mass as dummy site."""
+        struct = self.defect_structure.copy()
+        struct.insert(0, self.site.specie, self.site.frac_coords)
+        return struct
+
     def get_multiplicity(self) -> int:
         """Determine the multiplicity of the defect site within the structure."""
-        raise NotImplementedError("Not implemented for defect complexes")
+        raise NotImplementedError(
+            "Not implemented for defect complexes"
+        )  # pragma: no cover
 
     @property
     def element_changes(self) -> Dict[Element, int]:
@@ -578,67 +790,10 @@ class DefectComplex(Defect):
             )
         return defect_structure
 
-    def get_supercell_structure(
-        self,
-        sc_mat: np.ndarray | None = None,
-        dummy_species: Species | None = None,
-        min_atoms: int = 80,
-        max_atoms: int = 240,
-        min_length: float = 10.0,
-        force_diagonal: bool = False,
-        relax_radius: float | str | None = None,
-        perturb: float | None = None,
-    ) -> Structure:
-        """Generate the supercell for a defect.
-
-        Args:
-            sc_mat: supercell matrix if None, the supercell will be determined by `CubicSupercellAnalyzer`.
-            dummy_species: Dummy species used for visualization. Will be placed at the average
-                position of the defect sites.
-            max_atoms: Maximum number of atoms allowed in the supercell.
-            min_atoms: Minimum number of atoms allowed in the supercell.
-            min_length: Minimum length of the smallest supercell lattice vector.
-            force_diagonal: If True, return a transformation with a diagonal transformation matrix.
-            relax_radius: Relax the supercell atoms to a sphere of this radius around the defect site.
-            perturb: The amount to perturb the sites in the supercell. Only perturb the sites with
-                selective dynamics set to True. So this setting only works with `relax_radius`.
-
-        Returns:
-            Structure: The supercell structure.
-        """
-        if sc_mat is None:
-            sc_mat = get_sc_fromstruct(
-                self.structure,
-                min_atoms=min_atoms,
-                max_atoms=max_atoms,
-                min_length=min_length,
-                force_diagonal=force_diagonal,
-            )
-        sc_defect_struct = self.structure * sc_mat
-        sc_mat_inv = np.linalg.inv(sc_mat)
-        complex_pos = np.zeros(3)
-        for defect in self.defects:
-            sc_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
-            complex_pos += sc_pos
-            sc_site = PeriodicSite(defect.site.specie, sc_pos, sc_defect_struct.lattice)
-            update_structure(sc_defect_struct, sc_site, defect_type=defect.defect_type)
-        complex_pos /= float(len(self.defects))
-        if dummy_species is not None:
-            for defect in self.defects:
-                dummy_pos = np.dot(defect.site.frac_coords, sc_mat_inv)
-                dummy_pos = np.mod(dummy_pos, 1)
-                sc_defect_struct.insert(len(sc_defect_struct), dummy_species, dummy_pos)
-
-        _set_selective_dynamics(
-            structure=sc_defect_struct,
-            site_pos=sc_site.coords,
-            relax_radius=relax_radius,
-        )
-
-        if perturb is not None:
-            _perturb_dynamic_sites(sc_defect_struct, distance=perturb)
-
-        return sc_defect_struct
+    @property
+    def latex_name(self) -> str:
+        single_names = [d.latex_name for d in self.defects]
+        return "$+$".join(single_names)
 
 
 def update_structure(structure, site, defect_type):
@@ -689,7 +844,7 @@ def update_structure(structure, site, defect_type):
     elif defect_type == DefectType.Interstitial:
         _update(structure, site, rm=False, replace=False)
     else:
-        raise ValueError("Unknown point defect type.")
+        raise ValueError("Unknown point defect type.")  # pragma: no cover
 
 
 class Adsorbate(Interstitial):
@@ -800,8 +955,105 @@ def _perturb_dynamic_sites(structure, distance):
     perturb_sites(structure=structure, distance=distance, site_indices=free_indices)
 
 
-# TODO: matching defect complexes might be done with some kind of CoM site to fix the periodicity
-# Get this by taking the periodic average of all the provided sites.
-# class DefectComplex(DummySpecies):
-#     def __init__(self, oxidation_state: float = 0, properties: dict | None = None):
-#         super().__init__("Vac", oxidation_state, properties)
+def _get_mapped_sites(uc_structure: Structure, sc_structure: Structure, r=0.001):
+    """Get the list of sites indices in the supercell corresponding to the unit cell."""
+    mapped_site_indices = {}
+    for isite, uc_site in enumerate(uc_structure):
+        sc_sites = sc_structure.get_sites_in_sphere(uc_site.coords, r)
+        if len(sc_sites) == 1:
+            mapped_site_indices[isite] = sc_sites[0].index
+    return mapped_site_indices
+
+
+def center_structure(structure, ref_fpos) -> Structure:
+    """Shift the sites around a center.
+
+    Move all the sites in the structure so that they
+    are in the periodic image closest to the reference fractional position.
+    """
+    struct = structure.copy()
+    for idx, d_site in enumerate(struct):
+        _, jiimage = struct.lattice.get_distance_and_image(ref_fpos, d_site.frac_coords)
+        struct.translate_sites([idx], jiimage, to_unit_cell=False)
+    return struct
+
+
+def _get_el_changes_from_structures(defect_sc: Structure, bulk_sc: Structure) -> dict:
+    """Get the name of the defect.
+
+    Parse the defect structure and bulk structure to get the name of the defect.
+
+    Args:
+        defect_sc: The defect structure.
+        bulk_sc: The bulk structure.
+
+    Returns:
+        str: The name of the defect, if the defect is a complex, the names of the
+            individual defects are separated by "+".
+    """
+
+    def _check_int(n):
+        return isinstance(n, int) or n.is_integer()
+
+    comp_defect = defect_sc.composition.element_composition
+    comp_bulk = bulk_sc.composition.element_composition
+
+    # get the element changes
+    el_diff = {}
+    for el, cnt in comp_defect.items():
+        # has to be integer
+        if not (_check_int(comp_bulk[el]) and _check_int(cnt)):
+            raise ValueError(
+                "Defect structure and bulk structure must have integer compositions."
+            )
+        tmp_ = int(cnt) - int(comp_bulk[el])
+        if tmp_ != 0:
+            el_diff[el] = tmp_
+    return el_diff
+
+
+def _get_defect_name(element_diff: dict) -> str:
+    """Get the name of the defect.
+
+    Parse the defect structure and bulk structure to get the name of the defect.
+
+    Args:
+        defect_sc: The defect structure.
+        bulk_sc: The bulk structure.
+
+    Returns:
+        str: The name of the defect, if the defect is a complex, the names of the
+            individual defects are separated by "+".
+    """
+    added_list = [(el, int(cnt)) for el, cnt in element_diff.items() if cnt > 0]
+    removed_list = [(el, int(cnt)) for el, cnt in element_diff.items() if cnt < 0]
+
+    # rank the elements by electronegativity
+    added_list.sort(reverse=True)
+    removed_list.sort(reverse=True)
+
+    # get the different substitution names
+    sub_names = []
+    while added_list and removed_list:
+        add_el, add_cnt = added_list.pop()
+        rm_el, rm_cnt = removed_list.pop()
+        sub_names.append(f"{add_el}_{rm_el}")
+        add_cnt -= 1
+        rm_cnt += 1
+        if add_cnt != 0:
+            added_list.append((add_el, add_cnt))
+        if rm_cnt != 0:
+            removed_list.append((rm_el, rm_cnt))
+
+    # get the different vacancy names
+    vac_names = []
+    for el, cnt in removed_list:
+        vac_names.append(f"v_{el}")
+
+    # get the different interstitial names
+    int_names = []
+    for el, cnt in added_list:
+        int_names.append(f"{el}_i")
+
+    # combine the names
+    return "+".join(sub_names + vac_names + int_names)

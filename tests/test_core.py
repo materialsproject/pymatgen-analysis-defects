@@ -1,10 +1,12 @@
 import numpy as np
+from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Element, Specie
 
 from pymatgen.analysis.defects.core import (
     Adsorbate,
     DefectComplex,
     Interstitial,
+    NamedDefect,
     PeriodicSite,
     Substitution,
     Vacancy,
@@ -40,9 +42,11 @@ def test_substitution(gan_struct):
     assert sub.oxi_state == 1
     assert sub.get_charge_states() == [-1, 0, 1, 2]
     assert sub.get_multiplicity() == 2
-    sc = sub.get_supercell_structure()
+    sc, site_ = sub.get_supercell_structure(return_site=True)
+    assert site_.specie.symbol == "O"
     assert sc.formula == "Ga64 N63 O1"
     assert sub.name == "O_N"
+    assert sub.latex_name == r"O$_{\rm N}$"
     assert sub == sub
     assert sub.element_changes == {Element("N"): -1, Element("O"): 1}
 
@@ -79,6 +83,32 @@ def test_substitution(gan_struct):
     sub_ = Substitution.from_dict(dd)
     assert sub_.get_charge_states() == [-1, 0, 1, 2]
 
+    # test target_frac_coords with get_supercell_structure
+    sub_sc_struct = sub.get_supercell_structure()
+    finder = DefectSiteFinder()
+    fpos = finder.get_defect_fpos(sub_sc_struct, sub.structure)
+    assert np.allclose(fpos, [0.1250, 0.0833335, 0.18794])
+    # change target coords:
+    sub_sc_struct = sub.get_supercell_structure(target_frac_coords=[0.3, 0.5, 0.9])
+    fpos = finder.get_defect_fpos(sub_sc_struct, sub.structure)
+    assert np.allclose(fpos, [0.375, 0.5833335, 0.68794])  # closest equivalent site
+
+    # test oxidation state setting for substitutional defects when substitution is an antisite:
+    # from pymatgen.analysis.defects.generators import AntiSiteGenerator
+    ga_site = s.sites[0]
+    assert ga_site.specie.symbol == "Ga"
+    n_site = PeriodicSite(Specie("N"), ga_site.frac_coords, s.lattice)
+    n_ga = Substitution(s, n_site)
+    assert n_ga.get_charge_states() == [-7, -6, -5, -4, -3, -2, -1, 0, 1]
+
+    # test also works fine when input structure does not have oxidation states:
+    s.remove_oxidation_states()
+    ga_site = s.sites[0]
+    assert ga_site.specie.symbol == "Ga"
+    n_site = PeriodicSite(Element("N"), ga_site.frac_coords, s.lattice)
+    n_ga = Substitution(s, n_site)
+    assert n_ga.get_charge_states() == [-7, -6, -5, -4, -3, -2, -1, 0, 1]
+
 
 def test_interstitial(gan_struct):
     s = gan_struct.copy()
@@ -93,6 +123,15 @@ def test_interstitial(gan_struct):
     assert inter.name == "N_i"
     assert str(inter) == "N intersitial site at [0.00,0.00,0.75]"
     assert inter.element_changes == {Element("N"): 1}
+
+    # test target_frac_coords with get_supercell_structure
+    finder = DefectSiteFinder()
+    fpos = finder.get_defect_fpos(sc, inter.structure)
+    assert np.allclose(fpos, [0, 0, 0.398096581])
+    # change target coords:
+    inter_sc_struct = inter.get_supercell_structure(target_frac_coords=[0.3, 0.5, 0.9])
+    fpos = finder.get_defect_fpos(inter_sc_struct, inter.structure)
+    assert np.allclose(fpos, [0.25, 0.5, 0.89809658])  # closest equivalent site
 
 
 def test_adsorbate(gan_struct):
@@ -123,4 +162,27 @@ def test_complex(gan_struct):
     dc2 = DefectComplex([sub, vac, inter])
     assert dc2.name == "O_N+v_Ga+H_i"
     sc_struct = dc2.get_supercell_structure(dummy_species="Xe")
-    assert sc_struct.formula == "Ga63 H1 Xe3 N63 O1"  # Three defects three dummies
+    assert sc_struct.formula == "Ga63 H1 Xe1 N63 O1"  # Three defects only one dummy
+
+    assert dc2 == dc2
+    assert dc2 != dc
+
+
+def test_parsing_and_grouping_NamedDefects(test_dir):
+    bulk_dir = test_dir / "Mg_Ga" / "bulk_sc"
+    defect_dir = test_dir / "Mg_Ga" / "q=0"
+    bulk_struct = Structure.from_file(bulk_dir / "CONTCAR.gz")
+    defect_struct = Structure.from_file(defect_dir / "CONTCAR.gz")
+
+    nd0 = NamedDefect.from_structures(
+        defect_structure=defect_struct, bulk_structure=bulk_struct
+    )
+
+    assert nd0.element_changes == {Element("Mg"): 1, Element("Ga"): -1}
+    nd1 = NamedDefect(name="v_Ga", bulk_formula="GaN", element_changes={"Ga": -1})
+    nd2 = NamedDefect(
+        name="Mg_Ga", bulk_formula="GaN", element_changes={"Mg": 1, "Ga": -1}
+    )
+    assert str(nd0) == "GaN:Mg_Ga"
+    assert nd0 != nd1
+    assert nd0 == nd2

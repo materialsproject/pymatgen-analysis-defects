@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Callable, Generator
 
 import numpy as np
+from monty.dev import deprecated
 from monty.json import MSONable
 from numpy import typing as npt
 from numpy.linalg import norm
@@ -457,9 +458,10 @@ class TopographyAnalyzer:
                 voronoi construction. This is because the Voronoi poly
                 extends beyond the standard unit cell because of PBC.
                 Typically, the default value of 1 works fine for most
-                structures and is fast. But for really small unit
-                cells with high symmetry, you may need to increase this to 2
-                or higher.
+                structures and is fast. But for very small unit
+                cells with high symmetry, this may need to be increased to 2
+                or higher. If there are < 5 atoms in the input structure and
+                max_cell_range is 1, this will automatically be increased to 2.
             check_volume (bool): Set False when ValueError always happen after
                 tuning tolerance.
             constrained_c_frac (float): Constraint the region where users want
@@ -484,6 +486,11 @@ class TopographyAnalyzer:
         self.clustering_tol = clustering_tol
         self.min_dist = min_dist
         self.sm = StructureMatcher(ltol=ltol, stol=stol, angle_tol=angle_tol)
+
+        # if input cell is very small (< 5 atoms) and max cell range is 1 (default), bump to 2 for
+        # accurate Voronoi tessellation:
+        if len(structure) < 5 and max_cell_range == 1:
+            max_cell_range = 2
 
         # Let us first map all sites to the standard unit cell, i.e.,
         # 0 ≤ coordinates < 1.
@@ -612,7 +619,7 @@ class TopographyAnalyzer:
         """
         # Get a reasonablly reduced set of candidate sites first
         candidate_sites = [v.frac_coords for v in self.vnodes]
-        return get_symmetry_labeled_structures(
+        return get_labeled_inserted_structure(
             candidate_sites,
             host_structure=self.structure,
             working_ion="X",
@@ -763,7 +770,7 @@ class ChargeInsertionAnalyzer(MSONable):
         """
         # Get a reasonablly reduced set of candidate sites first
         local_minima = get_local_extrema(self.chgcar, find_min=True)
-        return get_symmetry_labeled_structures(
+        return get_labeled_inserted_structure(
             sites=local_minima,
             host_structure=self.chgcar.structure,
             working_ion=self.working_ion,
@@ -927,7 +934,12 @@ def calculate_vol(coords: npt.NDArray):
     return ConvexHull(coords).volume
 
 
-def get_symmetry_labeled_structures(
+@deprecated("Name changed")
+def get_symmetry_labeled_structures():
+    pass
+
+
+def get_labeled_inserted_structure(
     sites: npt.NDArray,
     host_structure: Structure,
     working_ion: str,

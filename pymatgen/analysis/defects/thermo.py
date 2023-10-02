@@ -1,15 +1,15 @@
 """Classes and methods related to thermodynamics and energy."""
 from __future__ import annotations
 
+import collections
 import logging
 from dataclasses import dataclass, field
+from itertools import chain, groupby
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
-from matplotlib import cm
 from matplotlib import pyplot as plt
-from matplotlib.lines import Line2D
 from monty.json import MSONable
 from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
@@ -23,7 +23,7 @@ from scipy.constants import value as _cd
 from scipy.optimize import bisect
 from scipy.spatial import ConvexHull
 
-from pymatgen.analysis.defects.core import Defect
+from pymatgen.analysis.defects.core import Defect, NamedDefect
 from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
 from pymatgen.analysis.defects.finder import DefectSiteFinder
 from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile, group_docs
@@ -121,7 +121,7 @@ class DefectEntry(MSONable):
         if bulk_struct is None:
             bulk_struct = getattr(bulk_locpot, "structure", None)
 
-        if defect_struct is None or bulk_struct is None:
+        if defect_struct is None or bulk_struct is None:  # pragma: no cover
             raise ValueError(
                 "defect_struct and/or bulk_struct is missing either provide the structure or provide the complete locpot."
             )
@@ -133,7 +133,7 @@ class DefectEntry(MSONable):
                 base_structure=bulk_struct,
             )
             self.sc_defect_frac_coords = defect_fpos
-        else:
+        else:  # pragma: no cover
             defect_fpos = self.sc_defect_frac_coords
 
         frey_corr = get_freysoldt_correction(
@@ -156,7 +156,7 @@ class DefectEntry(MSONable):
     @property
     def corrected_energy(self) -> float:
         """The energy of the defect entry with all corrections applied."""
-        return self.sc_entry.energy + self.corrections["freysoldt"]
+        return self.sc_entry.energy + sum(self.corrections.values())
 
     def get_ediff(self) -> float | None:
         """Get the energy difference between the defect and the bulk (including finite-size correction)."""
@@ -589,8 +589,8 @@ class FormationEnergyDiagram(MSONable):
             raise ValueError(
                 f"Cannot find a chemical potential condition with {rich_element} near zero."
             )
-        defect = self.defect_entries[0].defect
-        in_bulk = defect.structure.composition.elements
+        # defect = self.defect_entries[0].defect
+        in_bulk = self.defect_entries[0].sc_entry.composition.elements
         # make sure they are of type Element
         in_bulk = list(map(lambda x: Element(x.symbol), in_bulk))
         not_in_bulk = list(set(self.chempot_limits[0].keys()) - set(in_bulk))
@@ -602,9 +602,24 @@ class FormationEnergyDiagram(MSONable):
         el_list = sorted(in_bulk, key=el_sorter) + sorted(not_in_bulk, key=el_sorter)
 
         def chempot_sorter(chempot_dict):
-            return (chempot_dict[el] for el in el_list)
+            return tuple(chempot_dict[el] for el in el_list)
 
         return min(rich_conditions, key=chempot_sorter)
+
+    def __repr__(self) -> str:
+        """Representation."""
+        defect_entry_summary = []
+        for dent in self.defect_entries:
+            defect_entry_summary.append(
+                f"\t{dent.defect.name} {dent.charge_state} {dent.corrected_energy}"
+            )
+        # import ipdb; ipdb.set_trace()
+        txt = (
+            f"{self.__class__.__name__} for {self.defect.name}",
+            "Defect Entries:",
+            "\n".join(defect_entry_summary),
+        )
+        return "\n".join(txt)
 
 
 @dataclass
@@ -713,15 +728,26 @@ def group_defect_entries(
     def _get_name(entry):
         return entry.defect.name
 
-    ent_groups = group_docs(
-        defect_entries, sm=sm, get_structure=_get_structure, get_hash=_get_name
-    )
-    for g_name, g_entries in ent_groups:
-        yield g_name, g_entries
+    def _get_hash_no_structure(entry):
+        return entry.defect.bulk_formula, entry.defect.name
+
+    if all(isinstance(entry.defect, Defect) for entry in defect_entries):
+        ent_groups = group_docs(
+            defect_entries, sm=sm, get_structure=_get_structure, get_hash=_get_name
+        )
+        for g_name, g_entries in ent_groups:
+            yield g_name, g_entries
+    elif all(isinstance(entry.defect, NamedDefect) for entry in defect_entries):
+        l_ = sorted(defect_entries, key=_get_hash_no_structure)
+        for _, g_entries in groupby(l_, key=_get_hash_no_structure):
+            similar_ents = list(g_entries)
+            yield similar_ents[0].defect.name, similar_ents
 
 
 def group_formation_energy_diagrams(
-    feds: list[FormationEnergyDiagram], sm: StructureMatcher = None
+    feds: list[FormationEnergyDiagram],
+    sm: StructureMatcher = None,
+    combine_diagrams: bool = True,
 ):
     """Group formation energy diagrams by their representation.
 
@@ -730,9 +756,12 @@ def group_formation_energy_diagrams(
     Args:
         feds: list of formation energy diagrams
         sm: StructureMatcher to use for grouping
+        combine_diagrams: whether to combine matching diagrams into a single diagram
 
     Returns:
-        Generator of (name, list of formation energy diagrams) tuples
+        If combine_diagrams is True, generator of (name, combined formation energy diagram) tuples.
+        If combine_diagrams is False, generator of (name, list of formation energy diagrams) tuples.
+
     """
     if sm is None:
         sm = StructureMatcher(comparator=ElementComparator())
@@ -746,8 +775,15 @@ def group_formation_energy_diagrams(
     fed_groups = group_docs(
         feds, sm=sm, get_structure=_get_structure, get_hash=_get_name
     )
-    for g_name, g_entries in fed_groups:
-        yield g_name, g_entries
+    for g_name, f_group in fed_groups:
+        if combine_diagrams:
+            fed = f_group[0]
+            fed_d = fed.as_dict()
+            dents = [dfed.defect_entries for dfed in f_group]
+            fed_d["defect_entries"] = list(chain.from_iterable(dents))
+            yield g_name, FormationEnergyDiagram.from_dict(fed_d)
+        else:
+            yield g_name, f_group
 
 
 def ensure_stable_bulk(
@@ -837,6 +873,15 @@ def get_lower_envelope(lines):
         List[List[float]]:
             List lines that make up the lower envelope.
     """
+
+    def _hash_float(x):
+        return round(x, 10)
+
+    lines_dd = collections.defaultdict(lambda: float("inf"))
+    for m, b in lines:
+        lines_dd[_hash_float(m)] = min(lines_dd[_hash_float(m)], b)
+    lines = [(m, b) for m, b in lines_dd.items()]
+
     if len(lines) < 1:
         raise ValueError("Need at least one line to get lower envelope.")
     elif len(lines) == 1:
@@ -960,6 +1005,7 @@ def plot_formation_energy_diagrams(
     band_edge_color="k",
     filterfunction: Callable | None = None,
     legend_loc: str = "lower center",
+    show_legend: bool = True,
     axis=None,
 ):
     """Plot the formation energy diagram.
@@ -1021,25 +1067,19 @@ def plot_formation_energy_diagrams(
     else:
         xmin, xmax = xlim
     ymin, ymax = np.inf, -np.inf
-    legends_txt = []
-    artists = []
+    legends_txt: list = []
+    artists: list = []
     fontwidth = 12
     ax_fontsize = 1.3
     lg_fontsize = 10
 
-    colors = (
-        colors
-        if colors
-        else cm.Dark2(np.linspace(0, 1, len(formation_energy_diagrams)))
-        if len(formation_energy_diagrams) <= 8
-        else cm.gist_rainbow(np.linspace(0, 1, len(formation_energy_diagrams)))
-    )
     named_feds = []
-    for name_, feds_ in group_formation_energy_diagrams(formation_energy_diagrams):
-        for fed_ in feds_:
-            named_feds.append((name_, fed_))
+    for name_, fed_ in group_formation_energy_diagrams(formation_energy_diagrams):
+        named_feds.append((name_, fed_))
 
+    color_line_gen = _get_line_color_and_style(colors, linestyle)
     for fid, (fed_name, single_fed) in enumerate(named_feds):
+        cur_color, cur_style = next(color_line_gen)
         chempots_ = (
             chempots
             if chempots
@@ -1055,33 +1095,34 @@ def plot_formation_energy_diagrams(
         trans_y = trans[:, 1]
         ymin = min(ymin, min(trans_y))
         ymax = max(ymax, max(trans_y))
-        axis.plot(
+
+        dfct: Defect = single_fed.defect_entries[0].defect
+        latexname = dfct.latex_name
+        if legend_prefix is not None:
+            latexname = f"{legend_prefix} {latexname}"
+
+        if ":" in fed_name:
+            latexname += f" ({fed_name.split(':')[1]})"
+
+        (l,) = axis.plot(
             np.subtract(trans[:, 0], alignment),
             trans_y,
-            color=colors[fid],
-            ls=linestyle,
+            color=cur_color,
+            ls=cur_style,
             lw=linewidth,
             alpha=envelope_alpha,
-            label=fed_name,
+            label=latexname,
             marker=transition_marker,
             markersize=transition_markersize,
         )
         if not only_lower_envelope:
+            cur_color = l.get_color()
             for line in lines:
                 x = np.linspace(xmin, xmax)
                 y = line[0] * x + line[1]
                 axis.plot(
-                    np.subtract(x, alignment), y, color=colors[fid], alpha=line_alpha
+                    np.subtract(x, alignment), y, color=cur_color, alpha=line_alpha
                 )
-
-        # get latex-like legend titles
-        dfct = single_fed.defect_entries[0].defect
-        flds = dfct.name.split("_")
-        latexname = f"${flds[0]}_{{{flds[1]}}}$"
-        if legend_prefix:
-            latexname = f"{legend_prefix} {latexname}"
-        legends_txt.append(latexname)
-        artists.append(Line2D([0], [0], color=colors[fid], lw=4))
 
     axis.set_xlim(xmin, xmax)
     axis.set_ylim(ylim[0] if ylim else ymin - 0.1, ylim[1] if ylim else ymax + 0.1)
@@ -1122,19 +1163,20 @@ def plot_formation_energy_diagrams(
             alpha=0.8,
         )
 
-    lg = axis.get_legend()
-    if lg:
-        handle, leg = lg.legendHandles, [txt._text for txt in lg.texts]
-    else:
-        handle, leg = [], []
+    if show_legend:
+        lg = axis.get_legend()
+        if lg:
+            handle, leg = lg.legendHandles, [txt._text for txt in lg.texts]
+        else:
+            handle, leg = [], []
 
-    axis.legend(
-        handles=artists + handle,
-        labels=legends_txt + leg,
-        fontsize=lg_fontsize * ax_fontsize,
-        ncol=3,
-        loc=legend_loc,
-    )
+        axis.legend(
+            handles=artists + handle,
+            labels=legends_txt + leg,
+            fontsize=lg_fontsize * ax_fontsize,
+            ncol=3,
+            loc=legend_loc,
+        )
 
     if save:
         save = save if isinstance(save, str) else "formation_energy_diagram.png"
@@ -1143,3 +1185,16 @@ def plot_formation_energy_diagrams(
         plt.show()
 
     return axis
+
+
+def _get_line_color_and_style(colors=None, styles=None):
+    if colors is None:
+        colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+    if styles is None:
+        styles = ["-", "--", "-.", ":"]
+    else:
+        styles = [styles] if isinstance(styles, str) else styles
+
+    for style in styles:
+        for color in colors:
+            yield color, style

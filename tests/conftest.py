@@ -64,7 +64,7 @@ def data_Mg_Ga(test_dir):
 
 
 @pytest.fixture(scope="session")
-def defect_entries_Mg_Ga(data_Mg_Ga, defect_Mg_Ga):
+def defect_entries_and_plot_data_Mg_Ga(data_Mg_Ga, defect_Mg_Ga):
     bulk_locpot = data_Mg_Ga["bulk_sc"]["locpot"]
 
     def get_data(q):
