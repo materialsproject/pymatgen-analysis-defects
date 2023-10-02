@@ -11,7 +11,7 @@ authors:
   - name: Jimmy-Xuan Shen
     orcid: 0000-0002-2743-7531
     affiliation: "1" # (Multiple affiliations must be quoted)
-  - name: Joel Varley
+  - name: Joel B. Varley
     affiliation: "1"
 affiliations:
   - name: Lawrence Livermore National Laboratory, Livermore, California 94550, United States
