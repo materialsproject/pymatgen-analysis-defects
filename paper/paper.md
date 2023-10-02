@@ -119,6 +119,6 @@ Even though this packages was designed with high-throughput in mind and develope
 
 # Acknowledgements
 
-The follow parts of the present package contains contributions from other open-sources probjects:
-the finite size correction is based on the original implementation in `pyCDT` by Dr. Andrew Broberg, the non-radiative recombination code is based on the original implementation in `nonrad` by Dr. Mark Turiansky.
+The follow parts of the present package contains contributions from other open-sources projects:
+the finite size correction is based on the original implementation in `pyCDT` by Dr. Danny Broberg, the non-radiative recombination code is based on the original implementation in `nonrad` by Dr. Mark E. Turiansky.
 This work was performed under the auspices of the U.S. DOE by Lawrence Livermore National Laboratory under contract DE-AC52-07NA27344, and partially supported by LLNL LDRD funding under project number 22-SI-003.
