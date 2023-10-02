@@ -114,8 +114,8 @@ Moreover, eventually building a high-quality, persistent defects database will s
 The present software package is designed to facilitate both of these goals.
 
 A focus of the present packages is also to provide a base library for the analysis of point defects without invoking any high-throughput workflow frameworks.
-This is important since the overwhelming majority of users of the defect analysis software will not need to thousands of defect calculations so time invested in learning a high-throughput workflow framework is not usually worthwhile.
-Even though this packages was designed with high-throughput in mind and developed alongside a high-throughput workflow framework, it is not dependent on any particular workflow framework and can be used as a standalone package.
+This is important since the overwhelming majority of users of the defect analysis software will not need to run thousands of defect calculations so time invested in learning a high-throughput workflow framework only worthwhile for true high-throughput studies.
+Even though this packages was designed with high-throughput in mind and developed alongside a high-throughput workflow framework, it is not dependent on any particular workflow framework and can be used as a standalone analysis package.
 
 # Acknowledgements
 
