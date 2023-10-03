@@ -33,7 +33,7 @@ repos:
     entry: pflake8
     files: ^src/
     additional_dependencies:
-    - pyproject-flake8==6.0.0
+    - pyproject-flake8==6.1.0
     - flake8-bugbear==22.12.6
     - flake8-typing-imports==1.14.0
     - flake8-docstrings==1.6.0
@@ -72,8 +72,8 @@ repos:
     language: python
     types: [text]
     args: [
-      --ignore-words-list, 'titel,statics,ba,nd,te,mater,commun,vise',
-      --skip, "*.ipynb,./tests"
+      --ignore-words-list, 'titel,statics,ba,nd,te,mater,commun,vise,dscribe',
+      --skip, "*.ipynb,./tests,*paper*",
       ]
 - repo: https://github.com/kynan/nbstripout
   rev: 0.6.1
