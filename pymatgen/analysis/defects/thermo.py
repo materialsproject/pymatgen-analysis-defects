@@ -461,9 +461,32 @@ class FormationEnergyDiagram(MSONable):
         return res
 
     @property
+    def competing_phases(self) -> list[dict[str, ComputedEntry]]:
+        """Return the competing phases."""
+        bulk_formula = self.get_bulk_entry().composition.reduced_formula
+        cd = self.chempot_diagram
+        res = []
+        for pt in self._chempot_limits_arr:
+            competing_phases = dict()
+            for hp_ent, hp in zip(cd._hyperplane_entries, cd._hyperplanes):
+                if hp_ent.composition.reduced_formula == bulk_formula:
+                    continue
+                if _is_on_hyperplane(pt, hp):
+                    competing_phases[hp_ent.composition.reduced_formula] = hp_ent
+            res.append(competing_phases)
+        return res
+
+    @property
     def defect(self):
         """Get the defect that this FormationEnergyDiagram represents."""
         return self.defect_entries[0].defect
+
+    @property
+    def get_bulk_entry(self):
+        """Get the bulk entry."""
+        if self.bulk_entry is None:
+            return self.defect_entries[0].bulk_entry
+        return self.bulk_entry
 
     def _get_lines(self, chempots: Dict) -> list[tuple[float, float]]:
         """Get the lines for the formation energy diagram.
@@ -1198,3 +1221,17 @@ def _get_line_color_and_style(colors=None, styles=None):
     for style in styles:
         for color in colors:
             yield color, style
+
+
+def _is_on_hyperplane(pt: np.array, hp: np.array, tol: float = 1e-8):
+    """Check if a point lies on a hyperplane.
+
+    Args:
+        pt: point to check
+        hp: hyperplane ((a, b, c, d) such that ax + by + cz + d = 0)
+        tol: tolerance for checking if the point lies on the hyperplane
+
+    Returns:
+        bool: True if the point lies on the hyperplane
+    """
+    return abs(np.dot(pt, hp[:-1]) + hp[-1]) < tol
