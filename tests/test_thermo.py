@@ -23,6 +23,56 @@ from pymatgen.analysis.defects.thermo import (
 )
 
 
+@pytest.fixture(scope="module")
+def formation_energy_diagram(
+    data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N
+):
+    bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
+    bulk_bs = bulk_vasprun.get_band_structure()
+    vbm = bulk_bs.get_vbm()["energy"]
+    bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
+    defect_entries, _ = defect_entries_and_plot_data_Mg_Ga
+
+    def_ent_list = list(defect_entries.values())
+    # test the constructor with materials project phase diagram
+    atomic_entries = list(
+        filter(lambda x: len(x.composition.elements) == 1, stable_entries_Mg_Ga_N)
+    )
+    pd = PhaseDiagram(stable_entries_Mg_Ga_N)
+
+    # test basic constructor
+    fed_ = FormationEnergyDiagram(
+        bulk_entry=bulk_entry,
+        defect_entries=def_ent_list,
+        vbm=vbm,
+        pd_entries=stable_entries_Mg_Ga_N,
+        inc_inf_values=True,  # include the two additional points at infinity
+    )
+    assert len(fed_.chempot_limits) == 5
+
+    # test the constructor with atomic entries
+    # this is the one we will use for the rest of the tests
+    fed = FormationEnergyDiagram.with_atomic_entries(
+        defect_entries=def_ent_list,
+        atomic_entries=atomic_entries,
+        vbm=vbm,
+        inc_inf_values=False,
+        phase_diagram=pd,
+        bulk_entry=bulk_entry,
+    )
+    assert len(fed.chempot_limits) == 3
+
+    # dataframe conversion
+    df = fed.as_dataframe()
+    assert df.shape == (4, 5)
+
+    # test that you can get the Ga-rich chempot
+    cp = fed.get_chempots(rich_element=Element("Ga"))
+    assert cp[Element("Ga")] == pytest.approx(0, abs=1e-2)
+
+    return fed
+
+
 def test_lower_envelope():
     # Test the lower envelope and transition code with a simple example
     lines = [[4, 12], [-1, 3], [-5, 4], [-2, 1], [3, 8], [-4, 14], [2, 12], [3, 8]]
@@ -68,58 +118,43 @@ def test_defect_entry(defect_entries_and_plot_data_Mg_Ga, data_Mg_Ga):
     assert def_entry.get_ediff() == pytest.approx(ediff, abs=1e-4)
 
 
-def test_formation_energy(
-    data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N
-):
-    bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
-    bulk_bs = bulk_vasprun.get_band_structure()
-    vbm = bulk_bs.get_vbm()["energy"]
-    bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
-    defect_entries, plot_data = defect_entries_and_plot_data_Mg_Ga
-
-    def_ent_list = list(defect_entries.values())
-    fed = FormationEnergyDiagram(
-        bulk_entry=bulk_entry,
-        defect_entries=def_ent_list,
-        vbm=vbm,
-        pd_entries=stable_entries_Mg_Ga_N,
-        inc_inf_values=True,
-    )
-    assert len(fed.chempot_limits) == 5
-
-    # check that the constructor raises an error if `bulk_entry` is is provided for all defect entries
-    def_ents_w_bulk = copy.deepcopy(def_ent_list)
-    for dent in def_ents_w_bulk:
-        dent.bulk_entry = bulk_entry
-
-    fed = FormationEnergyDiagram(
-        defect_entries=def_ents_w_bulk,
-        vbm=vbm,
-        pd_entries=stable_entries_Mg_Ga_N,
-        inc_inf_values=True,
-    )
-    assert len(fed.chempot_limits) == 5
+def test_formation_energy_diagram_using_bulk_entry(formation_energy_diagram):
+    fed = copy.deepcopy(formation_energy_diagram)
+    def_ents_w_bulk = copy.deepcopy(fed.defect_entries)
 
     # Raise error if bulk_entry is not provided when some
     # of the defect entries are missing bulk_entry data
     with pytest.raises(RuntimeError):
         FormationEnergyDiagram(
-            defect_entries=def_ent_list,
-            vbm=vbm,
-            pd_entries=stable_entries_Mg_Ga_N,
-            inc_inf_values=True,
+            defect_entries=fed.defect_entries,
+            vbm=fed.vbm,
+            pd_entries=fed.pd_entries,
         )
+
+    # Should work with if bulk_entry is provided by the defect entries
+    for dent in def_ents_w_bulk:
+        dent.bulk_entry = fed.bulk_entry
+
+    fed = FormationEnergyDiagram(
+        defect_entries=def_ents_w_bulk,
+        vbm=fed.vbm,
+        pd_entries=fed.pd_entries,
+    )
+    assert len(fed.chempot_limits) == 3
 
     # if both bulk_entry and defect_entries.bulk_entry are provided (by accident)
     # the code should still work.
     fed = FormationEnergyDiagram(
-        bulk_entry=bulk_entry,
-        defect_entries=def_ent_list,
-        vbm=vbm,
-        pd_entries=stable_entries_Mg_Ga_N,
-        inc_inf_values=False,
+        defect_entries=def_ents_w_bulk,
+        vbm=fed.vbm,
+        bulk_entry=fed.bulk_entry,
+        pd_entries=fed.pd_entries,
     )
     assert len(fed.chempot_limits) == 3
+
+
+def test_formation_energy_diagram_shape_fixed(formation_energy_diagram):
+    fed = copy.deepcopy(formation_energy_diagram)
 
     # check that the shape of the formation energy diagram does not change
     cp_dict = fed.chempot_limits[0]
@@ -136,75 +171,68 @@ def test_formation_energy(
         assert np.allclose(x, x_ref)
         assert np.allclose(y, y_ref)
 
+
+def test_formation_energy_diagram_using_atomic_entries(formation_energy_diagram):
     # test the constructor with materials project phase diagram
+    fed = copy.deepcopy(formation_energy_diagram)
     atomic_entries = list(
-        filter(lambda x: len(x.composition.elements) == 1, stable_entries_Mg_Ga_N)
+        filter(lambda x: len(x.composition.elements) == 1, fed.pd_entries)
     )
-    pd = PhaseDiagram(stable_entries_Mg_Ga_N)
+    pd = PhaseDiagram(fed.pd_entries)
     fed = FormationEnergyDiagram.with_atomic_entries(
-        defect_entries=def_ent_list,
+        defect_entries=fed.defect_entries,
         atomic_entries=atomic_entries,
-        vbm=vbm,
+        vbm=fed.vbm,
         inc_inf_values=False,
         phase_diagram=pd,
-        bulk_entry=bulk_entry,
+        bulk_entry=fed.bulk_entry,
     )
     assert len(fed.chempot_limits) == 3
 
+
+def test_formation_energy_diagram_numerical(formation_energy_diagram):
     # Create a fake defect entry independent of the test data
-    fake_defect_entry = defect_entries[0]
-    fake_defect_entry.sc_entry._energy = bulk_entry.energy + 1
+    fed = copy.deepcopy(formation_energy_diagram)
+    fake_defect_entry = fed.defect_entries[0]
+    fake_defect_entry.sc_entry._energy = fed.bulk_entry.energy + 1
     fake_defect_entry.charge_state = 0
-    for p in pd.stable_entries:
+    fake_defect_entry.corrections = {}
+    pd_entries = copy.deepcopy(fed.pd_entries)
+    for p in pd_entries:
         p._energy = 0
+
     fed = FormationEnergyDiagram(
-        bulk_entry=bulk_entry,
+        bulk_entry=fed.bulk_entry,
         defect_entries=[fake_defect_entry],
-        vbm=vbm,
-        pd_entries=pd.stable_entries,
-        inc_inf_values=False,
+        vbm=fed.vbm,
+        pd_entries=pd_entries,
     )
     assert fed.get_formation_energy(
-        fermi_level=vbm,
-        chempot_dict={e: 0 for e in def_ent_list[0].defect.element_changes},
+        fermi_level=fed.vbm,
+        chempot_dict={e: 0 for e in fed.defect_entries[0].defect.element_changes},
     ) == pytest.approx(1)
+
     assert fed.get_concentration(
-        fermi_level=vbm,
-        chempots={e: 0 for e in def_ent_list[0].defect.element_changes},
+        fermi_level=fed.vbm,
+        chempots={e: 0 for e in fed.defect_entries[0].defect.element_changes},
         temperature=300,
     ) == pytest.approx(2 * 1.5875937551666035e-17)
 
-    # dataframe conversion
-    fed.as_dataframe()
 
-    # test that you can get the Ga-rich chempot
-    fed.get_chempots(Element("Ga"))
+def test_competing_phases(formation_energy_diagram):
+    fed = copy.deepcopy(formation_energy_diagram)
+    cp_at_point = dict()
+    for chempot_, competing_phases_ in zip(fed.chempot_limits, fed.competing_phases):
+        key = ",".join([f"{k}:{v:0.2f}" for k, v in chempot_.items()])
+        cp_at_point[key] = set(competing_phases_.keys())
 
+    ref_dict = {
+        "Mg:-1.50,Ga:-1.75,N:0.00": {"N2", "Mg3N2"},
+        "Mg:-0.35,Ga:-0.03,N:-1.71": {"Mg2Ga5", "Mg3N2"},
+        "Mg:-0.44,Ga:0.00,N:-1.75": {"Mg2Ga5", "Ga"},
+    }
 
-def test_competing_phases(
-    data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N
-):
-    bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
-    bulk_bs = bulk_vasprun.get_band_structure()
-    vbm = bulk_bs.get_vbm()["energy"]
-    bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
-    defect_entries, plot_data = defect_entries_and_plot_data_Mg_Ga
-
-    def_ent_list = list(defect_entries.values())
-    # test the constructor with materials project phase diagram
-    atomic_entries = list(
-        filter(lambda x: len(x.composition.elements) == 1, stable_entries_Mg_Ga_N)
-    )
-    pd = PhaseDiagram(stable_entries_Mg_Ga_N)
-    fed = FormationEnergyDiagram.with_atomic_entries(
-        defect_entries=def_ent_list,
-        atomic_entries=atomic_entries,
-        vbm=vbm,
-        inc_inf_values=False,
-        phase_diagram=pd,
-        bulk_entry=bulk_entry,
-    )
-    fed.competing_phases
+    assert cp_at_point == ref_dict
 
 
 def test_multi(data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N):
