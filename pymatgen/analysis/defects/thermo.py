@@ -53,8 +53,10 @@ class DefectEntry(MSONable):
             If None, structures attributes of the locpot file will be used to
             automatically determine the defect location.
         bulk_entry:
-            The ComputedEntry for the bulk. If this is provided, the energy difference
-            can be calculated from this automatically.
+            The ComputedEntry for the bulk material. If this is provided, the energy difference
+            can be calculated from this automatically. The `bulk_entry` can also be provided as
+            an attribute of the `DefectEntry` object. If both are provided, the one for
+            `FormationEnergyDiagram` has precedence.
         corrections:
             A dictionary of corrections to the energy.
         corrections_metadata:
@@ -160,10 +162,11 @@ class DefectEntry(MSONable):
 
     def get_ediff(self) -> float | None:
         """Get the energy difference between the defect and the bulk (including finite-size correction)."""
-        if self.bulk_entry:
-            return self.corrected_energy - self.bulk_entry.energy
-        else:
-            return None
+        if self.bulk_entry is None:
+            raise RuntimeError(
+                "Attempting to compute the energy difference without a bulk entry data."
+            )
+        return self.corrected_energy - self.bulk_entry.energy
 
     def get_summary_dict(self) -> dict:
         """Get a summary dictionary for the defect entry."""
@@ -200,7 +203,7 @@ class FormationEnergyDiagram(MSONable):
             This is only used in case where the bulk entry data is not provided by
             the individual defect entries themselves. Default is None.
             The data from the `bulk_entry` attached to each `defect_entry` will be
-            preferrentially used if it is available.
+            preferentially used if it is available.
         inc_inf_values:
             If False these boundary points at infinity are ignored when we look at the
             chemical potential limits.
@@ -241,6 +244,7 @@ class FormationEnergyDiagram(MSONable):
                 )
 
         bulk_entry = self.bulk_entry or self.defect_entries[0].bulk_entry
+        self.bulk_entry = bulk_entry
         pd_ = PhaseDiagram(self.pd_entries)
         entries = pd_.stable_entries | {bulk_entry}
         pd_ = PhaseDiagram(entries)
@@ -422,6 +426,8 @@ class FormationEnergyDiagram(MSONable):
 
         Compute the formation energy at the VBM (essentially the y-intercept)
         for a given defect entry and set of chemical potentials.
+        If the `bulk_entry` attribute is set, this will be used
+        difference will be computed using that value.
 
         Args:
             defect_entry:
@@ -440,16 +446,21 @@ class FormationEnergyDiagram(MSONable):
                 for el, fac in defect_entry.defect.element_changes.items()
             ]
         )
-        ediff = defect_entry.get_ediff()
-        if ediff is not None:
-            formation_en = ediff - en_change + self.vbm * defect_entry.charge_state
-        else:
+
+        if self.bulk_entry is not None:
             formation_en = (
                 defect_entry.corrected_energy
                 - self.bulk_entry.energy
                 - en_change
                 + self.vbm * defect_entry.charge_state
             )
+        else:
+            formation_en = (
+                defect_entry.get_ediff()
+                - en_change
+                + self.vbm * defect_entry.charge_state
+            )
+
         return formation_en
 
     @property
@@ -463,7 +474,7 @@ class FormationEnergyDiagram(MSONable):
     @property
     def competing_phases(self) -> list[dict[str, ComputedEntry]]:
         """Return the competing phases."""
-        bulk_formula = self.get_bulk_entry().composition.reduced_formula
+        bulk_formula = self.bulk_entry.composition.reduced_formula
         cd = self.chempot_diagram
         res = []
         for pt in self._chempot_limits_arr:
@@ -480,13 +491,6 @@ class FormationEnergyDiagram(MSONable):
     def defect(self):
         """Get the defect that this FormationEnergyDiagram represents."""
         return self.defect_entries[0].defect
-
-    @property
-    def get_bulk_entry(self):
-        """Get the bulk entry."""
-        if self.bulk_entry is None:
-            return self.defect_entries[0].bulk_entry
-        return self.bulk_entry
 
     def _get_lines(self, chempots: Dict) -> list[tuple[float, float]]:
         """Get the lines for the formation energy diagram.

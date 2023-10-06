@@ -179,6 +179,32 @@ def test_formation_energy(
     fed.get_chempots(Element("Ga"))
 
 
+def test_competing_phases(
+    data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N
+):
+    bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
+    bulk_bs = bulk_vasprun.get_band_structure()
+    vbm = bulk_bs.get_vbm()["energy"]
+    bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
+    defect_entries, plot_data = defect_entries_and_plot_data_Mg_Ga
+
+    def_ent_list = list(defect_entries.values())
+    # test the constructor with materials project phase diagram
+    atomic_entries = list(
+        filter(lambda x: len(x.composition.elements) == 1, stable_entries_Mg_Ga_N)
+    )
+    pd = PhaseDiagram(stable_entries_Mg_Ga_N)
+    fed = FormationEnergyDiagram.with_atomic_entries(
+        defect_entries=def_ent_list,
+        atomic_entries=atomic_entries,
+        vbm=vbm,
+        inc_inf_values=False,
+        phase_diagram=pd,
+        bulk_entry=bulk_entry,
+    )
+    fed.competing_phases
+
+
 def test_multi(data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N):
     bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
     bulk_dos = bulk_vasprun.complete_dos
