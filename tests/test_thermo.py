@@ -59,7 +59,9 @@ def test_defect_entry(defect_entries_and_plot_data_Mg_Ga, data_Mg_Ga):
     bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
     bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
     def_entry = defect_entries[0]
-    assert def_entry.get_ediff() is None
+    # raise runtime error if bulk_entry is not provided
+    with pytest.raises(RuntimeError):
+        def_entry.get_ediff()
 
     def_entry.bulk_entry = bulk_entry
     ediff = def_entry.sc_entry.energy - bulk_entry.energy
