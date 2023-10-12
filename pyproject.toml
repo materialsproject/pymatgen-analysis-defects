@@ -16,7 +16,7 @@ classifiers = [
   "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-  "pymatgen>=2023.10.11",
+  "pymatgen>=v2023.10.11",
   "scikit-image>=0.19.3",
   "numpy"
 ]
