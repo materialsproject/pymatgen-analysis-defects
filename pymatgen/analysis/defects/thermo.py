@@ -589,7 +589,8 @@ class FormationEnergyDiagram(MSONable):
         """Get the chemical potential for a desired growth condition.
 
         Choose an element to be rich in, require the chemical potential of that element
-        to be near zero (en_tol, 0), then sort the remaining elements by:
+        to be near the MAX energy among the points (MAX_EN - en_tol, MAX_EN), then sort
+        the remaining elements by:
             1. Are they in the bulk structure:
                 elements in the bulk structure are prioritized.
             2. how similar they in electron affinity to the rich element:
