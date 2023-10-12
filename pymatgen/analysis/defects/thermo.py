@@ -53,8 +53,10 @@ class DefectEntry(MSONable):
             If None, structures attributes of the locpot file will be used to
             automatically determine the defect location.
         bulk_entry:
-            The ComputedEntry for the bulk. If this is provided, the energy difference
-            can be calculated from this automatically.
+            The ComputedEntry for the bulk material. If this is provided, the energy difference
+            can be calculated from this automatically. The `bulk_entry` can also be provided as
+            an attribute of the `DefectEntry` object. If both are provided, the one for
+            `FormationEnergyDiagram` has precedence.
         corrections:
             A dictionary of corrections to the energy.
         corrections_metadata:
@@ -160,10 +162,11 @@ class DefectEntry(MSONable):
 
     def get_ediff(self) -> float | None:
         """Get the energy difference between the defect and the bulk (including finite-size correction)."""
-        if self.bulk_entry:
-            return self.corrected_energy - self.bulk_entry.energy
-        else:
-            return None
+        if self.bulk_entry is None:
+            raise RuntimeError(
+                "Attempting to compute the energy difference without a bulk entry data."
+            )
+        return self.corrected_energy - self.bulk_entry.energy
 
     def get_summary_dict(self) -> dict:
         """Get a summary dictionary for the defect entry."""
@@ -200,7 +203,7 @@ class FormationEnergyDiagram(MSONable):
             This is only used in case where the bulk entry data is not provided by
             the individual defect entries themselves. Default is None.
             The data from the `bulk_entry` attached to each `defect_entry` will be
-            preferrentially used if it is available.
+            preferentially used if it is available.
         inc_inf_values:
             If False these boundary points at infinity are ignored when we look at the
             chemical potential limits.
@@ -241,6 +244,7 @@ class FormationEnergyDiagram(MSONable):
                 )
 
         bulk_entry = self.bulk_entry or self.defect_entries[0].bulk_entry
+        self.bulk_entry = bulk_entry
         pd_ = PhaseDiagram(self.pd_entries)
         entries = pd_.stable_entries | {bulk_entry}
         pd_ = PhaseDiagram(entries)
@@ -422,6 +426,8 @@ class FormationEnergyDiagram(MSONable):
 
         Compute the formation energy at the VBM (essentially the y-intercept)
         for a given defect entry and set of chemical potentials.
+        If the `bulk_entry` attribute is set, this will be used
+        difference will be computed using that value.
 
         Args:
             defect_entry:
@@ -436,20 +442,25 @@ class FormationEnergyDiagram(MSONable):
         chempots = self._parse_chempots(chempots)
         en_change = sum(
             [
-                (self.dft_energies[el] + chempots[el]) * fac
+                (self.dft_energies[Element(el)] + chempots[Element(el)]) * fac
                 for el, fac in defect_entry.defect.element_changes.items()
             ]
         )
-        ediff = defect_entry.get_ediff()
-        if ediff is not None:
-            formation_en = ediff - en_change + self.vbm * defect_entry.charge_state
-        else:
+
+        if self.bulk_entry is not None:
             formation_en = (
                 defect_entry.corrected_energy
                 - self.bulk_entry.energy
                 - en_change
                 + self.vbm * defect_entry.charge_state
             )
+        else:
+            formation_en = (
+                defect_entry.get_ediff()
+                - en_change
+                + self.vbm * defect_entry.charge_state
+            )
+
         return formation_en
 
     @property
@@ -458,6 +469,22 @@ class FormationEnergyDiagram(MSONable):
         res = []
         for vertex in self._chempot_limits_arr:
             res.append(dict(zip(self.chempot_diagram.elements, vertex)))
+        return res
+
+    @property
+    def competing_phases(self) -> list[dict[str, ComputedEntry]]:
+        """Return the competing phases."""
+        bulk_formula = self.bulk_entry.composition.reduced_formula
+        cd = self.chempot_diagram
+        res = []
+        for pt in self._chempot_limits_arr:
+            competing_phases = dict()
+            for hp_ent, hp in zip(cd._hyperplane_entries, cd._hyperplanes):
+                if hp_ent.composition.reduced_formula == bulk_formula:
+                    continue
+                if _is_on_hyperplane(pt, hp):
+                    competing_phases[hp_ent.composition.reduced_formula] = hp_ent
+            res.append(competing_phases)
         return res
 
     @property
@@ -562,7 +589,8 @@ class FormationEnergyDiagram(MSONable):
         """Get the chemical potential for a desired growth condition.
 
         Choose an element to be rich in, require the chemical potential of that element
-        to be near zero (en_tol, 0), then sort the remaining elements by:
+        to be near the MAX energy among the points (MAX_EN - en_tol, MAX_EN), then sort
+        the remaining elements by:
             1. Are they in the bulk structure:
                 elements in the bulk structure are prioritized.
             2. how similar they in electron affinity to the rich element:
@@ -582,8 +610,11 @@ class FormationEnergyDiagram(MSONable):
             A dictionary of the chemical potentials for the growth condition.
         """
         rich_element = Element(rich_element)
+        max_val = max(self.chempot_limits, key=lambda x: x[rich_element])[rich_element]
         rich_conditions = list(
-            filter(lambda cp: abs(cp[rich_element]) < en_tol, self.chempot_limits)
+            filter(
+                lambda cp: abs(cp[rich_element] - max_val) < en_tol, self.chempot_limits
+            )
         )
         if len(rich_conditions) == 0:
             raise ValueError(
@@ -613,7 +644,6 @@ class FormationEnergyDiagram(MSONable):
             defect_entry_summary.append(
                 f"\t{dent.defect.name} {dent.charge_state} {dent.corrected_energy}"
             )
-        # import ipdb; ipdb.set_trace()
         txt = (
             f"{self.__class__.__name__} for {self.defect.name}",
             "Defect Entries:",
@@ -1198,3 +1228,17 @@ def _get_line_color_and_style(colors=None, styles=None):
     for style in styles:
         for color in colors:
             yield color, style
+
+
+def _is_on_hyperplane(pt: np.array, hp: np.array, tol: float = 1e-8):
+    """Check if a point lies on a hyperplane.
+
+    Args:
+        pt: point to check
+        hp: hyperplane ((a, b, c, d) such that ax + by + cz + d = 0)
+        tol: tolerance for checking if the point lies on the hyperplane
+
+    Returns:
+        bool: True if the point lies on the hyperplane
+    """
+    return abs(np.dot(pt, hp[:-1]) + hp[-1]) < tol

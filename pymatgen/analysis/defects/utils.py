@@ -236,7 +236,7 @@ def get_zfile(
     raise FileNotFoundError(f"Could not find {base_name} or {base_name}.gz file.")
 
 
-def generic_groupby(list_in, comp=operator.eq):
+def generic_group_labels(list_in, comp=operator.eq):
     """Group a list of unsortable objects.
 
     Args:
@@ -982,7 +982,7 @@ def get_labeled_inserted_structure(
         inserted_structs.append(tmp_struct)
 
     # Label the groups by structure matching
-    site_labels = generic_groupby(inserted_structs, comp=sm.fit)
+    site_labels = generic_group_labels(inserted_structs, comp=sm.fit)
     return [*zip(sites.tolist(), site_labels)]
 
 
@@ -1011,7 +1011,7 @@ def _group_docs_by_structure(docs: list, sm: StructureMatcher, get_structure: Ca
     Returns:
         Generator of lists of grouped documents/objects.
     """
-    labs = generic_groupby(
+    labs = generic_group_labels(
         docs,
         comp=lambda x, y: sm.fit(get_structure(x), get_structure(y), symmetric=True),
     )
