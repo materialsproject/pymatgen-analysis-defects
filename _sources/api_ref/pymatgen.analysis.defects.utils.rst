@@ -18,7 +18,7 @@
       converge
       eV_to_k
       generate_reciprocal_vectors_squared
-      generic_groupby
+      generic_group_labels
       genrecip
       get_avg_chg
       get_ipr_in_window
