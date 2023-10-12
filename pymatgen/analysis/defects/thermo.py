@@ -442,7 +442,7 @@ class FormationEnergyDiagram(MSONable):
         chempots = self._parse_chempots(chempots)
         en_change = sum(
             [
-                (self.dft_energies[el] + chempots[el]) * fac
+                (self.dft_energies[Element(el)] + chempots[Element(el)]) * fac
                 for el, fac in defect_entry.defect.element_changes.items()
             ]
         )
@@ -609,8 +609,11 @@ class FormationEnergyDiagram(MSONable):
             A dictionary of the chemical potentials for the growth condition.
         """
         rich_element = Element(rich_element)
+        max_val = max(self.chempot_limits, key=lambda x: x[rich_element])[rich_element]
         rich_conditions = list(
-            filter(lambda cp: abs(cp[rich_element]) < en_tol, self.chempot_limits)
+            filter(
+                lambda cp: abs(cp[rich_element] - max_val) < en_tol, self.chempot_limits
+            )
         )
         if len(rich_conditions) == 0:
             raise ValueError(
@@ -640,7 +643,6 @@ class FormationEnergyDiagram(MSONable):
             defect_entry_summary.append(
                 f"\t{dent.defect.name} {dent.charge_state} {dent.corrected_energy}"
             )
-        # import ipdb; ipdb.set_trace()
         txt = (
             f"{self.__class__.__name__} for {self.defect.name}",
             "Defect Entries:",
