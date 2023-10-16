@@ -39,7 +39,7 @@ pydefect = ["pydefect>=0.6.2"]
 strict = [
   "pymatgen==2023.10.11",
   "dscribe==2.1.0",
-  "scikit-image==0.21.0",
+  "scikit-image==0.22.0",
 ]
 
 tests = ["pytest==7.4.2", "pytest-cov==4.1.0"]
