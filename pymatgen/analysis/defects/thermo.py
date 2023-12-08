@@ -213,7 +213,9 @@ class FormationEnergyDiagram(MSONable):
             A artificial value is needed to help the half-space intersection algorithm.
             This can be justified since these tend to be the substitutional elements
             which should not have very negative chemical potential.
-
+        bulk_stability:
+            If the bulk energy is above the convex hull, lower it to this value below
+            the convex hull.
     """
 
     defect_entries: List[DefectEntry]
@@ -222,6 +224,7 @@ class FormationEnergyDiagram(MSONable):
     band_gap: Optional[float] = None
     bulk_entry: Optional[ComputedStructureEntry] = None
     inc_inf_values: bool = False
+    bulk_stability: float = 0.001
 
     def __post_init__(self):
         """Post-initialization.
@@ -248,7 +251,7 @@ class FormationEnergyDiagram(MSONable):
         pd_ = PhaseDiagram(self.pd_entries)
         entries = pd_.stable_entries | {bulk_entry}
         pd_ = PhaseDiagram(entries)
-        self.phase_diagram = ensure_stable_bulk(pd_, bulk_entry)
+        self.phase_diagram = ensure_stable_bulk(pd_, bulk_entry, self.bulk_stability)
         entries = []
         for entry in self.phase_diagram.stable_entries:
             d_ = dict(
@@ -259,8 +262,12 @@ class FormationEnergyDiagram(MSONable):
             )
             entries.append(ComputedEntry.from_dict(d_))
             entries.append(ComputedEntry.from_dict(d_))
-
         self.chempot_diagram = ChemicalPotentialDiagram(entries)
+        if bulk_entry.composition.reduced_formula not in self.chempot_diagram.domains:
+            raise ValueError(
+                "Bulk entry is not stable in the chemical potential diagram."
+                "Consider increasing the `bulk_stability` to make it more stable."
+            )
         chempot_limits = self.chempot_diagram.domains[
             bulk_entry.composition.reduced_formula
         ]
@@ -819,6 +826,7 @@ def group_formation_energy_diagrams(
 def ensure_stable_bulk(
     pd: PhaseDiagram,
     entry: ComputedEntry,
+    threshold: float = 0.001,
 ) -> PhaseDiagram:
     """Added entry to phase diagram and ensure that it is stable.
 
@@ -834,14 +842,16 @@ def ensure_stable_bulk(
             Phase diagram.
         entry:
             entry to be added
+        threshold:
+            If the bulk energy is above the convex hull, lower it to this value below
+            the convex hull.
 
     Returns:
         PhaseDiagram:
             Modified Phase diagram.
     """
-    SMALL_NUM = 1e-8
     stable_entry = ComputedEntry(
-        entry.composition, pd.get_hull_energy(entry.composition) - SMALL_NUM
+        entry.composition, pd.get_hull_energy(entry.composition) - threshold
     )
     pd = PhaseDiagram(pd.all_entries + [stable_entry])
     return pd
