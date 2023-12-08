@@ -263,7 +263,9 @@ class FormationEnergyDiagram(MSONable):
             entries.append(ComputedEntry.from_dict(d_))
             entries.append(ComputedEntry.from_dict(d_))
         self.chempot_diagram = ChemicalPotentialDiagram(entries)
-        if bulk_entry.composition.reduced_formula not in self.chempot_diagram.domains:
+        if (
+            bulk_entry.composition.reduced_formula not in self.chempot_diagram.domains
+        ):  # pragma: no cover
             raise ValueError(
                 "Bulk entry is not stable in the chemical potential diagram."
                 "Consider increasing the `bulk_stability` to make it more stable."
