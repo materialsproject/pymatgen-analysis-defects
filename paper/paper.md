@@ -115,11 +115,11 @@ The present software package is designed to facilitate both of these goals.
 
 A focus of the present package is also to provide a base library for the analysis of point defects without invoking any high-throughput workflow frameworks.
 This is important since the overwhelming majority of users of the defect analysis software will not need to run thousands of defect calculations.
-As such, time invested in learning a high-throughput workflow framework only worthwhile for true high-throughput studies.
-Even though this packages was designed with high-throughput in mind and developed alongside a high-throughput workflow framework, it is not dependent on any particular workflow framework and can be used as a standalone analysis package.
+As such, time invested in learning a high-throughput workflow framework is only worthwhile for true high-throughput studies.
+Even though this package was designed with high-throughput in mind and developed alongside a high-throughput workflow framework, it is not dependent on any particular workflow framework and can be used as a standalone analysis package.
 
 # Acknowledgements
 
-The follow parts of the present package contains contributions from other open-sources projects:
+The following parts of the present package contain contributions from other open-source projects:
 the finite size correction is based on the original implementation in `pyCDT` by Dr. Danny Broberg, the non-radiative recombination code is based on the original implementation in `nonrad` by Dr. Mark E. Turiansky.
 This work was performed under the auspices of the U.S. DOE by Lawrence Livermore National Laboratory under contract DE-AC52-07NA27344, and partially supported by LLNL LDRD funding under project number 22-SI-003.
