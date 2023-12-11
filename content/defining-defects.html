@@ -527,30 +527,22 @@ The two vacancies v_N and v_N are equivalent.
 </div>
 </div>
 </div>
-<p>The <code class="docutils literal notranslate"><span class="pre">defect_structure</span></code> for each complex is shown blow.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">defect_structure</span></code> for each complex is shown below.</p>
 <img src="https://raw.githubusercontent.com/materialsproject/pymatgen-analysis-defects/main/docs/source/_static/img/defect_complex_equiv.png" width="800"/>
-<p>By inspection it is clear that <code class="docutils literal notranslate"><span class="pre">def_comp0</span></code> and <code class="docutils literal notranslate"><span class="pre">def_comp2</span></code> are symmetrically equivalent to each other and distinct from <code class="docutils literal notranslate"><span class="pre">def_comp1</span></code>, and our basic implementation of defect equivalence is able to verify this:</p>
+<p>By inspection, <code class="docutils literal notranslate"><span class="pre">def_comp0</span></code> and <code class="docutils literal notranslate"><span class="pre">def_comp2</span></code> appear symmetrically equivalent to each other at first and distinct from <code class="docutils literal notranslate"><span class="pre">def_comp1</span></code>.
+However, there are two distinct Mg_Ga+V_N complexes in the structure:</p>
+<ul class="simple">
+<li><p>One where the two parts of the defect complex are nearest neighbors (<code class="docutils literal notranslate"><span class="pre">def_comp0</span></code>).</p></li>
+<li><p>One where the two defects are next-nearest neighbors (<code class="docutils literal notranslate"><span class="pre">def_comp2</span></code>).</p></li>
+</ul>
+<p>Since our defect complex definition accounts for an effective <em>Center of Mass</em> site, we can properly account for periodic boundary conditions. the two defect complexes will be considered not equal.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">assert</span> <span class="n">def_comp0</span> <span class="o">==</span> <span class="n">def_comp2</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">assert</span> <span class="n">def_comp0</span> <span class="o">!=</span> <span class="n">def_comp2</span>
 <span class="k">assert</span> <span class="n">def_comp0</span> <span class="o">!=</span> <span class="n">def_comp1</span>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">AssertionError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="k">assert</span> <span class="n">def_comp0</span> <span class="o">==</span> <span class="n">def_comp2</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="k">assert</span> <span class="n">def_comp0</span> <span class="o">!=</span> <span class="n">def_comp1</span>
-
-<span class="ne">AssertionError</span>: 
-</pre></div>
-</div>
-</div>
-</div>
-<p>However some defect complexes might become nonequivalent based on the periodic image you consider for the combination of sites.</p>
-<div class="alert alert-block alert-info"><b>Note:</b> To deal with these edge cases, we might have to add a dummy "DefectComplex" species at the "center" of the defect complex which will fix the selection of periodic for the different sites.  This is easy to implement but should be done when there is a good test case.
 </div>
 </section>
 <section id="obtaining-the-simulation-supercell">
@@ -562,6 +554,11 @@ If a valid supercell is not discovered this way, ASE’s <code class="docutils l
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc_struct</span> <span class="o">=</span> <span class="n">mg_ga_defect0</span><span class="o">.</span><span class="n">get_supercell_structure</span><span class="p">()</span>
 <span class="n">sc_struct</span><span class="o">.</span><span class="n">num_sites</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>128
 </pre></div>
 </div>
 </div>
