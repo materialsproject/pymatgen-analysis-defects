@@ -8,9 +8,19 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.patches import Polygon
 from pymatgen.core import Element
+from pymatgen.util.string import latexify
 from scipy.spatial import ConvexHull
 
 from pymatgen.analysis.defects.thermo import FormationEnergyDiagram
+
+# check if labellines is installed
+try:
+    from labellines import labelLines
+except ImportError:
+
+    def labelLines(*args, **kwargs):
+        pass
+
 
 __author__ = "Jimmy Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -26,6 +36,9 @@ def plot_chempot_2d(
     y_element: Element,
     ax: Axes | None = None,
     min_mu: float = -5.0,
+    label_lines: bool = False,
+    x_vals: list[float] | None = None,
+    label_fontsize: int = 12,
 ):
     """Plot the chemical potential diagram for two elements.
 
@@ -40,6 +53,10 @@ def plot_chempot_2d(
             The matplotlib axes to plot on. If None, a new figure will be created.
         min_mu:
             The minimum chemical potential to plot.
+        label_lines:
+            Whether to label the lines with the competing phases. Requires Labellines to be installed.
+        x_vals:
+            The x position of the line labels. If None, defaults will be used.
     """
     PLOT_PADDING = 0.1
     ax = ax or plt.gca()
@@ -53,7 +70,7 @@ def plot_chempot_2d(
     y_min = float("inf")
     clip_path = []
     for p1, p2, phase in hull2d:
-        p_txt = ", ".join(phase.keys())
+        p_txt = ", ".join(map(latexify, phase.keys()))
         ax.axline(p1, p2, label=p_txt, color="k")
         ax.scatter(p1[0], p1[1], color="k")
         x_m_ = p1[0] if p1[0] > min_mu else float("inf")
@@ -72,6 +89,8 @@ def plot_chempot_2d(
     ax.set_ylabel(f"$\Delta\mu_{{{y_element}}}$ (eV)")
     ax.set_xlim(x_min - PLOT_PADDING, 0 + PLOT_PADDING)
     ax.set_ylim(y_min - PLOT_PADDING, 0 + PLOT_PADDING)
+    if label_lines:
+        labelLines(ax.get_lines(), align=False, xvals=x_vals, fontsize=label_fontsize)
 
 
 def _convex_hull_2d(
