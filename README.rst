@@ -73,6 +73,12 @@ The previous module was used by ``pyCDT`` code which will continue to work with 
 Contributing
 ------------
 
+The source code can be downloaded from the GitHub repository at
+
+.. code-block:: bash
+
+    $ git clone https://github.com/materialsproject/pymatgen-analysis-defects.git
+
 All code contributions are welcome. Please submit a pull request on GitHub.
 To make maintenance easier, please use a workflow similar to the automated CI
 `workflow <https://github.com/materialsproject/pymatgen-analysis-defects/blob/main/.github/workflows/testing.yml>`_.
@@ -95,6 +101,8 @@ And run these commands for testing:
     $ pytest --cov=pymatgen
     $ pytest --nbmake ./docs/source/content
 
+For more details about what is actually installed with each of the ``pip install .[arg]`` commands, please inspect the
+``pyproject.toml`` file.
 
 Contributors
 ------------
