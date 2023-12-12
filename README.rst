@@ -78,7 +78,7 @@ To make maintenance easier, please use a workflow similar to the automated CI ![
 
 Specifically, please make sure to run the following commands for linting:
 
-.. code-block:: bash
+..  code-block:: bash
    pip install -e .[strict]
    pip install -e .[dev]
    pre-commit install
@@ -86,7 +86,7 @@ Specifically, please make sure to run the following commands for linting:
 
 And run these commands for testing:
 
-.. code-block:: bash
+..  code-block:: bash
    pip install -e .[strict]
    pip install -e .[tests]
    pytest --cov=pymatgen --cov-report=xml
