@@ -95,7 +95,7 @@ Specifically, please make sure to run the following commands for linting:
 
 And run these commands for testing:
 
-..  code-block:: bash
+.. code-block:: bash
 
     $ pip install -e .[strict]
     $ pip install -e .[tests]
