@@ -70,6 +70,31 @@ Previous versions of the defects code
 This package replaces the older ``pymatgen.analysis.defects`` modules.
 The previous module was used by ``pyCDT`` code which will continue to work with version ``2022.7.8`` of ``pymatgen``.
 
+Contributing
+------------
+
+All code contributions are welcome. Please submit a pull request on GitHub.
+To make maintenance easier, please use a workflow similar to the automated CI ![workflow](https://github.com/materialsproject/pymatgen-analysis-defects/blob/main/.github/workflows/testing.yml)
+
+Specifically, please make sure to run the following commands for linting:
+
+```
+pip install -e .[strict]
+pip install -e .[dev]
+pre-commit install
+pre-commit run --all-files
+```
+
+And run these commands for testing:
+
+```
+pip install -e .[strict]
+pip install -e .[tests]
+pytest --cov=pymatgen --cov-report=xml
+pytest --nbmake ./docs/source/content
+```
+
+
 Contributor
 -----------
 
