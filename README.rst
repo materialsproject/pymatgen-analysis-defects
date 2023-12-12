@@ -96,8 +96,8 @@ And run these commands for testing:
     $ pytest --nbmake ./docs/source/content
 
 
-Contributor
------------
+Contributors
+------------
 
 * Lead developer: Dr. Jimmy-Xuan Shen
 * This code contains contributions from the original defects analysis module of ``pymatgen`` from Dr. Danny Broberg and Dr. Shyam Dwaraknath.
