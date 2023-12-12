@@ -79,26 +79,19 @@ To make maintenance easier, please use a workflow similar to the automated CI
 
 Specifically, please make sure to run the following commands for linting:
 
-.. code-block:: bash
-
-    $ pip install -r requirements.txt
+..  code-block:: bash
+    $ pip install -e .[strict]
+    $ pip install -e .[dev]
     $ pre-commit install
     $ pre-commit run --all-files
-
-
-..  code-block:: bash
-      pip install -e .[strict]
-      pip install -e .[dev]
-      pre-commit install
-      pre-commit run --all-files
 
 And run these commands for testing:
 
 ..  code-block:: bash
-      pip install -e .[strict]
-      pip install -e .[tests]
-      pytest --cov=pymatgen --cov-report=xml
-      pytest --nbmake ./docs/source/content
+    $ pip install -e .[strict]
+    $ pip install -e .[tests]
+    $ pytest --cov=pymatgen --cov-report=xml
+    $ pytest --nbmake ./docs/source/content
 
 
 Contributor
