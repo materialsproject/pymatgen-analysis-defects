@@ -79,8 +79,11 @@ To make maintenance easier, please use a workflow similar to the automated CI
 
 Specifically, please make sure to run the following commands for linting:
 
-..  code-block:: python
-   code
+.. code-block:: bash
+
+    $ pip install -r requirements.txt
+    $ pre-commit install
+    $ pre-commit run --all-files
 
 
 ..  code-block:: bash
