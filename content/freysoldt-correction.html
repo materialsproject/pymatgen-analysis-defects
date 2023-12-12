@@ -534,17 +534,17 @@ The <code class="docutils literal notranslate"><span class="pre">plot_sxd_output
 </div>
 </div>
 </div>
-<p>The results from <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code> is show on the right column.
-The peak in the LOCPOT difference correspond to the position of the defect.
-And we find that in region furthest away from that peak, the plateau value computed by python matched the plateau value visually.
-Note the in the case of the python-only plots the defect position is set to the origin and the different alignment terms are set to zero far from the origin.</p>
-<p>It is recommend to check the results of your Freysoldt correction by running something like</p>
+<p>The results from <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code> are shown in the right column.
+The peak in the LOCPOT difference corresponds to the position of the defect.
+We find that in the region furthest away from that peak, the plateau value computed by Python matched the plateau value visually.
+Note that in the case of the Python-only plots the defect position is set to the origin and the different alignment terms are set to zero far from the origin.</p>
+<p>We recommend checking the results of your Freysoldt correction by running something like</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_plnr_avg</span><span class="p">(</span>
     <span class="n">result</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;plot_data&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>Since this immediately lets you know that, the defect positions was identified correctly if the LOCPOT diff is peaked at the origin and the curves are relatively flat in the sampling region.</p>
+<p>This immediately lets you know that, the defect positions were identified correctly if the LOCPOT diff is peaked at the origin and the curves are relatively flat in the sampling region.</p>
 <p>Note that in the example here, the simulation cell is far too small for standard defect calculations but the defect finder is still able to find the defect position automatically.  Expect it to behave better in larger simulation cells.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -557,9 +557,9 @@ Note the in the case of the python-only plots the defect position is set to the 
 </div>
 </div>
 <p><em>Result from larger simulation cell</em> The LOCPOT data is too large to be included in the repository.
-For a 144 atom cell, the positions of the defect is visually obvious.
+For a 144-atom cell, the positions of the defect is visually obvious.
 <img src="https://raw.githubusercontent.com/materialsproject/pymatgen-analysis-defects/main/docs/source/_static/img/freysoldt_compare_large_cell.png" width="850"/></p>
-<p>After accounting for the electrostatic and potential alignment corrections we can see how the python correction compares with the results of <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code></p>
+<p>After accounting for the electrostatic and potential alignment corrections we can see how the Python correction compares with the results of <code class="docutils literal notranslate"><span class="pre">sxdefectalign</span></code></p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_sxd_result</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
