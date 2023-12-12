@@ -92,7 +92,7 @@ And run these commands for testing:
 
     $ pip install -e .[strict]
     $ pip install -e .[tests]
-    $ pytest --cov=pymatgen --cov-report=xml
+    $ pytest --cov=pymatgen
     $ pytest --nbmake ./docs/source/content
 
 
