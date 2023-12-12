@@ -74,9 +74,14 @@ Contributing
 ------------
 
 All code contributions are welcome. Please submit a pull request on GitHub.
-To make maintenance easier, please use a workflow similar to the automated CI `workflow <https://github.com/materialsproject/pymatgen-analysis-defects/blob/main/.github/workflows/testing.yml>`_
+To make maintenance easier, please use a workflow similar to the automated CI
+`workflow <https://github.com/materialsproject/pymatgen-analysis-defects/blob/main/.github/workflows/testing.yml>`_.
 
 Specifically, please make sure to run the following commands for linting:
+
+..  code-block:: python
+   code
+
 
 ..  code-block:: bash
       pip install -e .[strict]
