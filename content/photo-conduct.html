@@ -409,10 +409,10 @@ document.write(`
   <section class="tex2jax_ignore mathjax_ignore" id="photo-conductivity">
 <h1>Photo Conductivity<a class="headerlink" href="#photo-conductivity" title="Permalink to this heading">#</a></h1>
 <p>When the electronic state of the defect interacts with radiation, carriers can be excited to the conduction band. This is called photoconductivity. To help elucidate how likely a defect is to cause photoconductivity, we can look at the band-decomposed contribution to the frequency-dependent dielectric function.
-Here we have replicated <code class="docutils literal notranslate"><span class="pre">VASP</span></code>’s density-density optical response calculated in the independent-particle picture in the <code class="docutils literal notranslate"><span class="pre">pymatgen.io.vasp.optics</span></code> module, and a allowed users to control which dipole matrix elements are accounted for by masking the dipole matrix elements stored in the <code class="docutils literal notranslate"><span class="pre">WAVEDER</span></code> file and manipulate the Fermi level to populate or depopulate the defect state.
+Here we have replicated <code class="docutils literal notranslate"><span class="pre">VASP</span></code>’s density-density optical response calculated in the independent-particle picture in the <code class="docutils literal notranslate"><span class="pre">pymatgen.io.vasp.optics</span></code> module and allowed users to control which dipole matrix elements are accounted for by masking the dipole matrix elements stored in the <code class="docutils literal notranslate"><span class="pre">WAVEDER</span></code> file and manipulate the Fermi level to populate or depopulate the defect state.
 This essentially allows us to calculate the optical response for (defect)→(conduction band) and (valence band)→(defect) transitions in isolation.</p>
 <p>For more information on how <code class="docutils literal notranslate"><span class="pre">VASP</span></code> handles optical response, see the <a class="reference external" href="https://www.vasp.at/wiki/index.php/LOPTICS">VASP documentation</a>.</p>
-<p>For more details on how the python code works, please see the documentation for the <code class="docutils literal notranslate"><span class="pre">pymatgen.io.vasp.optics</span></code> module.</p>
+<p>For more details on how the Python code works, please see the documentation for the <code class="docutils literal notranslate"><span class="pre">pymatgen.io.vasp.optics</span></code> module.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># disable tqdm progress bar</span>
@@ -441,7 +441,7 @@ This essentially allows us to calculate the optical response for (defect)→(con
 </div>
 </div>
 <p>To compute the optical response of a defect we can use the <code class="docutils literal notranslate"><span class="pre">HarmonicDefect</span></code> object again.
-Although this time, since we don’t need to consider the vibrational modes of the defect, we only need to pass in the directory containing the relaxed structure and the <code class="docutils literal notranslate"><span class="pre">WAVEDER</span></code> file.
+However, this time, since we don’t need to consider the vibrational modes of the defect, we only need to pass in the directory containing the relaxed structure and the <code class="docutils literal notranslate"><span class="pre">WAVEDER</span></code> file.
 Since the <code class="docutils literal notranslate"><span class="pre">PROCAR</span></code> file is also present in the directory, the <code class="docutils literal notranslate"><span class="pre">(band,</span> <span class="pre">kpoint,</span> <span class="pre">spin)</span></code> indices representing the singular, most localized, state will be automatically determined.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -518,7 +518,7 @@ The user can refine the definition of the defect band by passing in a list of <c
 </div>
 </div>
 </div>
-<p>From the eigenvalues above, we can see that isolated defect band is <code class="docutils literal notranslate"><span class="pre">[(138,</span> <span class="pre">0,</span> <span class="pre">1),</span> <span class="pre">(138,</span> <span class="pre">1,</span> <span class="pre">1)]</span></code> which matches with starred values determined by the data from inverse participation ratio (IPR) analysis.</p>
+<p>From the eigenvalues above, we can see that the isolated defect band is <code class="docutils literal notranslate"><span class="pre">[(138,</span> <span class="pre">0,</span> <span class="pre">1),</span> <span class="pre">(138,</span> <span class="pre">1,</span> <span class="pre">1)]</span></code> which matches with starred values determined by the data from the inverse participation ratio (IPR) analysis.</p>
 </section>
 <section id="frequency-dependent-dielectric-function">
 <h2>Frequency-Dependent Dielectric Function<a class="headerlink" href="#frequency-dependent-dielectric-function" title="Permalink to this heading">#</a></h2>
@@ -550,12 +550,12 @@ Which requires the <code class="docutils literal notranslate"><span class="pre">
 </div>
 </div>
 <p>From the dielectric function above we see that this particular defect (the Ga vacancy in the neutral <code class="docutils literal notranslate"><span class="pre">q=0</span></code> state) is much better at capturing electrons from the valence band via dipole transitions than it is at emitting electrons to the conduction band via dipole transitions.</p>
-<p>Of course for a complete picture of photoconductivity, the Frank-Condon type ofr vibrational state transition should also be considered, but we are already pushing the limits of what is acceptable in the independent-particle picture so we will leave that for another time.</p>
+<p>Of course for a complete picture of photoconductivity, the Frank-Condon type of vibrational state transition should also be considered, but we are already pushing the limits of what is acceptable in the independent-particle picture so we will leave that for another time.</p>
 </section>
 <section id="dipole-matrix-elements">
 <h2>Dipole Matrix Elements<a class="headerlink" href="#dipole-matrix-elements" title="Permalink to this heading">#</a></h2>
 <p>We can also check the dipole matrix elements for the (VBM)→(defect) and (defect)→(CBM) transitions explicitly by calling the <code class="docutils literal notranslate"><span class="pre">plot_optical_transitions</span></code> method as shown below.
-The function returns a summary <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> object with the dipole matrix elements as well as the <code class="docutils literal notranslate"><span class="pre">ListedColormap</span></code> and <code class="docutils literal notranslate"><span class="pre">Normalize</span></code> objects for plotting the colorbar.  These objects can then be passed to other instances of the plotting function to ensure that the colorbar is consistent.</p>
+The function returns a summary <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> object with the dipole matrix elements as well as the <code class="docutils literal notranslate"><span class="pre">ListedColormap</span></code> and <code class="docutils literal notranslate"><span class="pre">Normalize</span></code> objects for plotting the color bar.  These objects can then be passed to other instances of the plotting function to ensure that the color bar is consistent.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.plotting.optics</span> <span class="kn">import</span> <span class="n">plot_optical_transitions</span>

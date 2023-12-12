@@ -415,10 +415,10 @@ document.write(`
   <section class="tex2jax_ignore mathjax_ignore" id="formation-energy-diagrams">
 <h1>Formation Energy Diagrams<a class="headerlink" href="#formation-energy-diagrams" title="Permalink to this heading">#</a></h1>
 <p>The formation energy diagram is perhaps the most important tool in analyzing the defect properties.
-It informs both the likelihood of a defect to form and transition level where the charge state of the defect changes.</p>
+It informs both the likelihood of a defect forming and the transition level where the charge state of the defect changes.</p>
 <p>The formation energy of a defect is determined by the chemical potential of everything that goes into forming the defect.
 While all of the different chemical potentials are interconnected, it is conceptually easier to separate them into two groups: the chemical potential of the elements and the chemical potential of the electron.
-The chemical potential of the electron, often called the <em>Fermi level</em>, accounts for how all of the external conditions, including the presence of other defects, affect the thermodynamics of adding or removing an electron from the defect.
+The chemical potential of the electron often called the <em>Fermi level</em>, accounts for how all of the external conditions, including the presence of other defects, affect the thermodynamics of adding or removing an electron from the defect.
 Since the electrons in the system can be manipulated after the defect is formed, the <em>Fermi level</em> is often considered a free variable and is shown as the x-axis in the formation energy diagram.
 The chemical potentials of the different atoms added or removed to form the defect are less dynamic and assumed to be fixed after the defect is formed.</p>
 <p>The expression for the formation energy of a defect is given by:</p>
@@ -488,7 +488,7 @@ The chemical potentials of the different atoms added or removed to form the defe
 </div>
 <section id="getting-the-elemental-chemical-potentials">
 <h2>Getting the Elemental Chemical Potentials<a class="headerlink" href="#getting-the-elemental-chemical-potentials" title="Permalink to this heading">#</a></h2>
-<p>All of the chemical potentials are, in principle, free variables that indicates the conditions of the surrounding environment while the defect is formed.
+<p>All of the chemical potentials are, in principle, free variables that indicate the conditions of the surrounding environment while the defect is formed.
 These free variables are bound by the enthalpies of formation of the various compounds that share the same elements as the defect and bulk material.
 These competing compounds essentially establish the boundaries of the allowed chemical potentials, while the VBM and CBM of the bulk material determine the allowed range of the Fermi level.
 As such, first-principles calculations can be used to determine the limits of the various chemical potentials.
@@ -501,7 +501,7 @@ As an example, the elemental chemical potentials for the Mg<span class="math not
 3\mu_{\rm Mg} + 2\mu_{\rm N} &amp;\leq \Delta H_{\rm Mg_3N_2} \\
 \end{aligned}
 \end{split}\]</div>
-<p>Here since the defect must for in GaN the chemical potentials are pinned by the plane defined by the enthalpy of formation of GaN.
+<p>Here since the defect must form in GaN the chemical potentials are pinned by the plane defined by the enthalpy of formation of GaN.
 The limits imposed by the competing compounds are shown by the additional inequalities.
 The points of interest are usually vertex points in the constrained chemical potential space so we report the full set of vertex points in <code class="docutils literal notranslate"><span class="pre">FormationEnergyDiagram.chempot_limits</span></code>.</p>
 <div class="cell docutils container">
@@ -548,7 +548,7 @@ The intermediate analysis (planar-averaged potentials) for calculating the Freys
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.corrections.freysoldt</span> <span class="kn">import</span> <span class="n">plot_plnr_avg</span>
-<span class="n">plot_data</span> <span class="o">=</span> <span class="n">fed</span><span class="o">.</span><span class="n">defect_entries</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">correction_metadata</span><span class="p">[</span><span class="s2">&quot;freysoldt&quot;</span><span class="p">]</span>
+<span class="n">plot_data</span> <span class="o">=</span> <span class="n">fed</span><span class="o">.</span><span class="n">defect_entries</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">corrections_metadata</span><span class="p">[</span><span class="s2">&quot;freysoldt&quot;</span><span class="p">][</span><span class="s2">&quot;plot_data&quot;</span><span class="p">]</span>
 <span class="n">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lattice Direction 1&quot;</span><span class="p">)</span>
 <span class="n">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lattice Direction 2&quot;</span><span class="p">)</span>
 <span class="n">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lattice Direction 3&quot;</span><span class="p">)</span>
@@ -556,17 +556,12 @@ The intermediate analysis (planar-averaged potentials) for calculating the Freys
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">AttributeError</span><span class="g g-Whitespace">                            </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">2</span>
-<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.corrections.freysoldt</span> <span class="kn">import</span> <span class="n">plot_plnr_avg</span>
-<span class="ne">----&gt; </span><span class="mi">2</span> <span class="n">plot_data</span> <span class="o">=</span> <span class="n">fed</span><span class="o">.</span><span class="n">defect_entries</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">correction_metadata</span><span class="p">[</span><span class="s2">&quot;freysoldt&quot;</span><span class="p">]</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lattice Direction 1&quot;</span><span class="p">)</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lattice Direction 2&quot;</span><span class="p">)</span>
-
-<span class="ne">AttributeError</span>: &#39;DefectEntry&#39; object has no attribute &#39;correction_metadata&#39;
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;Axes: title={&#39;center&#39;: &#39;Lattice Direction 3&#39;}, xlabel=&#39;distance along axis ($\\AA$)&#39;, ylabel=&#39;Potential (V)&#39;&gt;
 </pre></div>
 </div>
+<img alt="../_images/7a06eaa8a4807ed77f4f0ee99f0e9bb4d24e720042c138ad23dd176c022dabf2.png" src="../_images/7a06eaa8a4807ed77f4f0ee99f0e9bb4d24e720042c138ad23dd176c022dabf2.png" />
+<img alt="../_images/01a2fa965ee5b4312e78b79f96c725e81ae77a87747669961e506dfc5aa85958.png" src="../_images/01a2fa965ee5b4312e78b79f96c725e81ae77a87747669961e506dfc5aa85958.png" />
+<img alt="../_images/eb01f0f03e77a61fa0cbad4533c0f0fa9fab01fde6ece34865fc4edbbbabff88.png" src="../_images/eb01f0f03e77a61fa0cbad4533c0f0fa9fab01fde6ece34865fc4edbbbabff88.png" />
 </div>
 </div>
 </section>
