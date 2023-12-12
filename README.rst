@@ -81,13 +81,6 @@ Specifically, please make sure to run the following commands for linting:
 
 .. code-block:: bash
 
-    $ pip install -r requirements.txt
-    $ pre-commit install
-    $ pre-commit run --all-files
-
-
-.. code-block:: bash
-
     $ pip install -e .[strict]
     $ pip install -e .[dev]
     $ pre-commit install
