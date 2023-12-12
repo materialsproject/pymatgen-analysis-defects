@@ -535,7 +535,8 @@ However, there are two distinct Mg_Ga+V_N complexes in the structure:</p>
 <li><p>One where the two parts of the defect complex are nearest neighbors (<code class="docutils literal notranslate"><span class="pre">def_comp0</span></code>).</p></li>
 <li><p>One where the two defects are next-nearest neighbors (<code class="docutils literal notranslate"><span class="pre">def_comp2</span></code>).</p></li>
 </ul>
-<p>Since our defect complex definition accounts for an effective <em>Center of Mass</em> site, we can properly account for periodic boundary conditions. the two defect complexes will be considered not equal.</p>
+<p>Since our defect complex definition accounts for an effective <em>Center of Mass</em> site, we can properly account for periodic boundary conditions. the two defect complexes will be considered not equal.
+For complexes, we recommend checking the structure with the center of mass (<code class="docutils literal notranslate"><span class="pre">defect_structure_with_com</span></code>) to make sure you understand exactly what will be simulated in the supercell.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">assert</span> <span class="n">def_comp0</span> <span class="o">!=</span> <span class="n">def_comp2</span>
