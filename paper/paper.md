@@ -24,7 +24,7 @@ bibliography: paper.bib
 
 Point defects can often determine the properties of semiconductor and optoelectronic materials.
 Simulation of point defects is one of the most complex workflows in computational materials science, involving extensive pre- and post-processing of the structural and electronic structure data[@CGWalle_defects_RMP].
-Multiple software packages exist to automate the simulation of point defects from [@Broberg2018], [@Kumagai2021], and [@Huang2022,] and analysis of defects [@Arrigoni2021Jul,], however, there is a lack of a code that focuses on:
+Multiple software packages exist to automate the simulation of point defects including work from [@Broberg2018], [@Kumagai2021], [@Huang2022,] [@Arrigoni2021Jul], [@Goyal2017Apr], and [@Smtg-Bham2023Dec ]however, there is a lack of a code that focuses on:
 
 1. Integration but not insistence on standardized high-throughput workflow frameworks.
 2. Building large, persistent databases of point defects that are extensible to new calculations over time.
