@@ -61,21 +61,6 @@ where = ["./"]
 default-tag = "0.0.1"
 method = "git"
 
-[tool.isort]
-profile = "black"
-
-[tool.black]
-line-length = 88
-
-[tool.blacken-docs]
-line-length = 88
-
-[tool.flake8]
-extend-ignore = "E203, W503, E501, F401, RST21"
-max-line-length = 120
-max-doc-length = 120
-min-python-version = "3.9.0"
-
 [tool.mypy]
 ignore_missing_imports = true
 no_strict_optional = true
@@ -91,12 +76,6 @@ source = ["pymatgen/"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-
-[tool.pydocstyle]
-convention = 'google'
-match = '^pymatgen/(?!_).*\.py'
-inherit = false
-add-ignore = "D107, "
 
 [tool.autoflake]
 in-place = true
