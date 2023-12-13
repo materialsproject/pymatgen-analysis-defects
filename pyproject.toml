@@ -75,8 +75,6 @@ extend-ignore = "E203, W503, E501, F401, RST21"
 max-line-length = 120
 max-doc-length = 120
 min-python-version = "3.9.0"
-rst-roles = "class, func, ref, obj"
-select = "C, E, F, W, B, B950"
 
 [tool.mypy]
 ignore_missing_imports = true
@@ -106,3 +104,42 @@ remove-unused-variables = true
 remove-all-unused-imports = true
 expand-star-imports = true
 ignore-init-module-imports = true
+
+[tool.ruff]
+src = ["pymatgen", "tests"]
+
+line-length = 88
+indent-width = 4
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`).
+select = ["E4", "E7", "E9", "F", "D", "I001"]
+ignore = ["E203", "E501", "F401"]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-type-checking]
+exempt-modules = ["typing", "typing_extensions"]
+quote-annotations = true
+
