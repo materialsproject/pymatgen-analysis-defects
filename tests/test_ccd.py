@@ -6,10 +6,10 @@ import pytest
 
 from pymatgen.analysis.defects.ccd import (
     HarmonicDefect,
-    Waveder,
     _get_wswq_slope,
     plot_pes,
 )
+from pymatgen.io.vasp.outputs import Waveder
 from pymatgen.analysis.defects.plotting.optics import plot_optical_transitions
 
 

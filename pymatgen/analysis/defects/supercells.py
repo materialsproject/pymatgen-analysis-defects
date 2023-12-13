@@ -4,13 +4,16 @@ from __future__ import annotations
 
 import logging
 import math
+from typing import TYPE_CHECKING
 
-import numpy as np
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
 
 # from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape
 # from pymatgen.io.ase import AseAtomsAdaptor
-from pymatgen.core import Structure
+
+if TYPE_CHECKING:
+    import numpy as np
+    from pymatgen.core import Structure
 
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"

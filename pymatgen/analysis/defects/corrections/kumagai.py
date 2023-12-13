@@ -9,10 +9,13 @@ from __future__ import annotations
 import logging
 import math
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile
-from pymatgen.core import Structure
 from pymatgen.io.vasp import Outcar, Vasprun
+
+if TYPE_CHECKING:
+    from pymatgen.core import Structure
 
 try:
     from vise import user_settings

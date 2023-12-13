@@ -11,25 +11,29 @@ from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
 from functools import cached_property
-from pathlib import Path
-from typing import Any, Callable, Generator
+from typing import TYPE_CHECKING, Any, Callable, Generator
 
 import numpy as np
 from monty.dev import deprecated
 from monty.json import MSONable
-from numpy import typing as npt
 from numpy.linalg import norm
 from pymatgen.analysis.local_env import cn_opt_params
 from pymatgen.analysis.structure_matcher import StructureMatcher
-from pymatgen.core import Lattice, Structure
+from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Element, get_el_sp
 from pymatgen.electronic_structure.core import Spin
-from pymatgen.io.vasp.outputs import BandStructure, Procar, VolumetricData
 from pymatgen.io.vasp.sets import get_valid_magmom_struct
 from pymatgen.util.coord import pbc_diff
 from scipy.cluster.hierarchy import fcluster, linkage
 from scipy.spatial import ConvexHull, Voronoi
 from scipy.spatial.distance import squareform
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from numpy import typing as npt
+    from pymatgen.core import Lattice
+    from pymatgen.io.vasp.outputs import BandStructure, Procar, VolumetricData
 
 try:
     from skimage.feature import peak_local_max
@@ -122,7 +126,7 @@ def eV_to_k(energy):
     """Convert energy to reciprocal vector magnitude k via hbar*k^2/2m.
 
     Args:
-        a: Energy in eV.
+        energy: Energy in eV.
 
     Returns:
         (double) Reciprocal vector magnitude (units of 1/Bohr).
@@ -271,6 +275,7 @@ def get_local_extrema(chgcar: VolumetricData, find_min: bool = True) -> npt.NDAr
     symmetrically.
 
     Args:
+        chgcar: charge density data
         find_min (bool): True to find local minimum else maximum, otherwise
             find local maximum.
 
@@ -306,6 +311,7 @@ def remove_collisions(
 
     Args:
         fcoords (npt.ArrayLike): fractional coordinates of points to remove
+        structure (Structure): The structure in which to check for collisions.
         min_dist(float): The minimum distance that a vertex needs to be
             from existing atoms.
 
@@ -753,6 +759,7 @@ class ChargeInsertionAnalyzer(MSONable):
         angle_tol: float = 5,
         min_dist: float = 0.9,
     ):
+        """Initialize the ChargeInsertionAnalyzer."""
         self.chgcar = chgcar
         self.working_ion = working_ion
         self.sm = StructureMatcher(ltol=ltol, stol=stol, angle_tol=angle_tol)
@@ -782,7 +789,7 @@ class ChargeInsertionAnalyzer(MSONable):
     @cached_property
     def local_minima(self) -> list[npt.ArrayLike]:
         """Get the full list of local minima."""
-        return [s for s, l in self.labeled_sites]
+        return [s for s, _ in self.labeled_sites]
 
     def filter_and_group(
         self, avg_radius: float = 0.4, max_avg_charge: float = 1.0
@@ -837,7 +844,7 @@ def get_ipr_in_window(
             The band just below the fermi level is used as the center of band window.
         procar: The procar object.
         k_index: The index of the k-point to use. If None, the IPR is averaged over all k-points.
-        band_range: The number of bands above and blow the fermi level to include in the search window.
+        band_window: The number of bands above and blow the fermi level to include in the search window.
 
     Returns:
         dict[(int, int), npt.NDArray]: The IPR of the states in the band window keyed for each k-point and spin.
@@ -936,6 +943,7 @@ def calculate_vol(coords: npt.NDArray):
 
 @deprecated("Name changed")
 def get_symmetry_labeled_structures():
+    """Deprecated."""
     pass
 
 
@@ -961,6 +969,7 @@ def get_labeled_inserted_structure(
         working_ion: The working ion.
         min_dist: The minimum distance between the working ion and atoms in the host structure.
         clustering_tol: The tolerance for clustering the candidate sites.
+        sm: The StructureMatcher object to use for grouping the sites.
 
     Returns:
         list[tuple[list[float], int]]: A list of tuples of the form (fcoords, label)
@@ -1004,9 +1013,9 @@ def _group_docs_by_structure(docs: list, sm: StructureMatcher, get_structure: Ca
     """Group docs by structure.
 
     Args:
-        docs (list): list of generic documents/objects
-        sm (StructureMatcher): StructureMatcher object
-        get_hash (function): function to get the hash from the document
+        docs (list): list of generic documents/objects.
+        sm (StructureMatcher): StructureMatcher object.
+        get_structure (function): function to get the representative structure from the document.
 
     Returns:
         Generator of lists of grouped documents/objects.
@@ -1058,8 +1067,10 @@ def group_docs(
 
 
 def get_plane_spacing(lattice: npt.NDArray) -> list[float]:
-    """Get the cartesian spacing between periodic planes of a unit cell.
-    Copied from materialsproject/pyrho
+    """Compute the plane spacing of a lattice.
+
+    Get the cartesian spacing between periodic planes of a unit cell.
+    Copied from materialsproject/pyrho.
 
     >>> get_plane_spacing([[1,0,0], [1,1,0], [0,0,2]])
     [0.7653..., 1.042..., 2.0]

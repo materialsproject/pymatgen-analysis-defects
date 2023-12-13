@@ -3,14 +3,17 @@
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 from matplotlib import pyplot as plt
-from matplotlib.axes import Axes
 from matplotlib.patches import Polygon
-from pymatgen.analysis.defects.thermo import FormationEnergyDiagram
-from pymatgen.core import Element
 from pymatgen.util.string import latexify
 from scipy.spatial import ConvexHull
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from pymatgen.analysis.defects.thermo import FormationEnergyDiagram
+    from pymatgen.core import Element
 
 # check if labellines is installed
 try:
@@ -18,6 +21,7 @@ try:
 except ImportError:
 
     def labelLines(*args, **kwargs):
+        """Dummy function if labellines is not installed."""
         pass
 
 
@@ -56,6 +60,8 @@ def plot_chempot_2d(
             Whether to label the lines with the competing phases. Requires Labellines to be installed.
         x_vals:
             The x position of the line labels. If None, defaults will be used.
+        label_fontsize:
+            The fontsize for the line labels.
     """
     PLOT_PADDING = 0.1
     ax = ax or plt.gca()

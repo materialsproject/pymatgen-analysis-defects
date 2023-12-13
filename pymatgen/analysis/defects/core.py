@@ -5,18 +5,21 @@ import collections
 import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 from enum import Enum
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
 
 import numpy as np
 from monty.json import MSONable
 from pymatgen.analysis.defects.supercells import get_sc_fromstruct
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
-from pymatgen.core import Element, PeriodicSite, Species, Structure
+from pymatgen.core import Element, PeriodicSite, Species
 from pymatgen.core.periodic_table import DummySpecies
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-from pymatgen.symmetry.structure import SymmetrizedStructure
 
 from .utils import get_plane_spacing
+
+if TYPE_CHECKING:
+    from pymatgen.core import Structure
+    from pymatgen.symmetry.structure import SymmetrizedStructure
 
 # TODO Possible redesign idea: ``DefectSite`` class defined with a defect object.
 # This makes some of the accounting logic a bit harder since we will probably

@@ -3,13 +3,16 @@ from __future__ import annotations
 
 import collections
 import logging
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.colors import Normalize
-from pymatgen.analysis.defects.ccd import HarmonicDefect
 from pymatgen.electronic_structure.core import Spin
+
+if TYPE_CHECKING:
+    from pymatgen.analysis.defects.ccd import HarmonicDefect
 
 __author__ = "Jimmy Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -135,6 +138,13 @@ def get_bs_eigenvalues(
             the defect state will be determined automatically using the inverse
             participation ratio.
             The user provided kpoint index here will overwrite the kpt_index argument.
+        other_defect_bands:
+            A list of band indices to exclude from the plot.
+        shift_eig:
+            A dictionary of the format `(band, kpt, spin) -> float` to apply to the
+            eigenvalues. This is useful for aligning the defect state with the
+            valence or conduction band for plotting and schematic purposes.
+
 
     Returns:
         Dictionary of the format: (iband, ikpt, ispin) -> eigenvalue

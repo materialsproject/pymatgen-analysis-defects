@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
-from numpy.typing import ArrayLike
 from pymatgen.analysis.defects.finder import DefectSiteFinder
 from pymatgen.analysis.defects.utils import (
     CorrectionResult,
@@ -19,9 +18,12 @@ from pymatgen.analysis.defects.utils import (
     generate_reciprocal_vectors_squared,
     hart_to_ev,
 )
-from pymatgen.core import Lattice
 from pymatgen.io.vasp.outputs import Locpot
 from scipy import stats
+
+if TYPE_CHECKING:
+    from numpy.typing import ArrayLike
+    from pymatgen.core import Lattice
 
 __author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -62,6 +64,9 @@ def get_freysoldt_correction(
             Locpot of bulk
         defect_frac_coords:
             Fractional coordinates of the defect.
+        lattice:
+            Lattice of the defect supercell. If None, then uses the lattice of the
+            defect_locpot.
         energy_cutoff:
             Maximum energy in eV in reciprocal space to perform integration
         mad_tol:
@@ -255,25 +260,31 @@ def perform_pot_corr(
     """For performing planar averaging potential alignment.
 
     Args:
-        axis_grid (1 x NGX where NGX is the length of the NGX grid
-            in the axis direction. Same length as pureavg list):
-                A numpy array which contain the Cartesian axis
-                values (in angstroms) that correspond to each planar avg
-                potential supplied.
-        pureavg (1 x NGX where NGX is the length of the NGX grid in
-            the axis direction.):
-                A numpy array for the planar averaged
-                electrostatic potential of the bulk supercell.
-        defavg (1 x NGX where NGX is the length of the NGX grid in
+        axis_grid:
+            (1 x NGX where NGX is the length of the NGX grid
+            in the axis direction. Same length as pureavg list)
+            A numpy array which contain the Cartesian axis
+            values (in angstroms) that correspond to each planar avg
+            potential supplied.
+        pureavg:
+            (1 x NGX where NGX is the length of the NGX grid in
+            the axis direction.)
+            A numpy array for the planar averaged
+            electrostatic potential of the bulk supercell.
+        defavg:
+            (1 x NGX where NGX is the length of the NGX grid in
             the axis direction.):
             A numpy array for the planar averaged
             electrostatic potential of the defect supercell.
         lattice: Pymatgen Lattice object of the defect supercell
         q (float or int): charge of the defect
-        defect_frac_position: Fracitional Coordinates of the defect in the supercell
-        axis (int): axis for performing the freysoldt correction on
+        defect_frac_coords: Fractional Coordinates of the defect in the supercell
+        axis (int): axis for performing the Freysoldt correction on.
+        dielectric (float): dielectric constant of the bulk.
+        q_model (QModel): QModel object to use for Freysoldt correction. If None, uses default.
+        mad_tol (float): convergence criteria for the Madelung energy for potential correction.
         widthsample (float): width (in Angstroms) of the region in between defects
-        where the potential alignment correction is averaged. Default is 1 Angstrom.
+            where the potential alignment correction is averaged. Default is 1 Angstrom.
 
     Returns:
         (float) Potential Alignment shift required to make the short range potential
