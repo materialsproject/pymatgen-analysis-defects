@@ -88,7 +88,7 @@ class Defect(MSONable, metaclass=ABCMeta):
                 # check oxi_states assigned and not all zero
                 if all(specie.oxi_state == 0 for specie in self.structure.species):
                     self.structure.add_oxidation_state_by_guess()
-            except:  # pragma: no cover
+            except Exception:
                 self.structure.add_oxidation_state_by_guess()
             self.oxi_state = self._guess_oxi_state()
         else:
@@ -1047,12 +1047,12 @@ def _get_defect_name(element_diff: dict) -> str:
 
     # get the different vacancy names
     vac_names = []
-    for el, cnt in removed_list:
+    for el, _cnt in removed_list:
         vac_names.append(f"v_{el}")
 
     # get the different interstitial names
     int_names = []
-    for el, cnt in added_list:
+    for el, _cnt in added_list:
         int_names.append(f"{el}_i")
 
     # combine the names

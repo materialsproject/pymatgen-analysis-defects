@@ -11,7 +11,7 @@ from typing import Generator
 
 from monty.json import MSONable
 from pymatgen.core import Element, PeriodicSite, Species, Structure
-from pymatgen.io.vasp import Chgcar
+from pymatgen.io.vasp import Chgcar, VolumetricData
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 from pymatgen.analysis.defects.core import Defect, Interstitial, Substitution, Vacancy
@@ -334,7 +334,10 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
         super().__init__(min_dist=min_dist)
 
     def generate(  # type: ignore[override]
-        self, structure: Structure, insert_species: set[str] | list[str], **kwargs
+        self,
+        structure: Structure | VolumetricData,
+        insert_species: set[str] | list[str],
+        **kwargs,
     ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
 
@@ -427,7 +430,9 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         self.max_insertions = max_insertions
         super().__init__(min_dist=min_dist)
 
-    def generate(self, chgcar: Chgcar, insert_species: set[str] | list[str], **kwargs) -> Generator[Interstitial, None, None]:  # type: ignore[override]
+    def generate(  # type: ignore[override]
+        self, chgcar: VolumetricData, insert_species: set[str] | list[str], **kwargs
+    ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
 
         Args:
