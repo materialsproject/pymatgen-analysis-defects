@@ -9,13 +9,12 @@ from typing import Dict
 
 import numpy as np
 from monty.json import MSONable
+from pymatgen.analysis.defects.supercells import get_sc_fromstruct
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.core import Element, PeriodicSite, Species, Structure
 from pymatgen.core.periodic_table import DummySpecies
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.symmetry.structure import SymmetrizedStructure
-
-from pymatgen.analysis.defects.supercells import get_sc_fromstruct
 
 from .utils import get_plane_spacing
 
@@ -363,7 +362,8 @@ class NamedDefect(MSONable):
     """
 
     def __init__(self, name: str, bulk_formula: str, element_changes: dict) -> None:
-        """
+        """Initialize a NamedDefect object.
+
         Args:
             name: The name of the defect.
             bulk_formula: The formula of the bulk structure.
@@ -410,6 +410,7 @@ class NamedDefect(MSONable):
         return self.__repr__() == __value.__repr__()
 
     def __repr__(self) -> str:
+        """String representation of the NamedDefect."""
         return f'{self.bulk_formula}:{"+".join(sorted(self.name.split("+")))}'
 
 
@@ -505,7 +506,8 @@ class Substitution(Defect):
             site: Replace the nearest site with this one.
             multiplicity: The multiplicity of the defect.
             oxi_state: The oxidation state of the defect, if not specified,
-            this will be determined automatically.
+                this will be determined automatically.
+            **kwargs: Additional kwargs to pass to the Defect constructor.
         """
         super().__init__(structure, site, multiplicity, oxi_state, **kwargs)
 
@@ -630,6 +632,8 @@ class Interstitial(Defect):
             multiplicity: The multiplicity of the defect.
             oxi_state: The oxidation state of the defect, if not specified,
                 this will be determined automatically.
+            equivalent_sites: A list of equivalent sites for the defect in the structure.
+            **kwargs: Additional kwargs to pass to the Defect constructor.
         """
         super().__init__(
             structure, site, multiplicity, oxi_state, equivalent_sites, **kwargs
@@ -792,6 +796,7 @@ class DefectComplex(Defect):
 
     @property
     def latex_name(self) -> str:
+        """Get the latex name of the defect."""
         single_names = [d.latex_name for d in self.defects]
         return "$+$".join(single_names)
 
@@ -911,9 +916,10 @@ def perturb_sites(
     min_distance: float | None = None,
     site_indices: list | None = None,
 ) -> None:
-    """
-    Performs a random perturbation of the sites in a structure to break
-    symmetries.
+    """Performs a random perturbation.
+
+    Perturb the sites in a structure to break symmetry.  This is useful for
+    finding energy minimum configurations.
 
     Args:
         structure (Structure): Input structure.
@@ -1015,11 +1021,10 @@ def _get_el_changes_from_structures(defect_sc: Structure, bulk_sc: Structure) ->
 def _get_defect_name(element_diff: dict) -> str:
     """Get the name of the defect.
 
-    Parse the defect structure and bulk structure to get the name of the defect.
+    Parse the change in different elements to get the name of the defect.
 
     Args:
-        defect_sc: The defect structure.
-        bulk_sc: The bulk structure.
+        element_diff: A dictionary representing the species changes of the defect.
 
     Returns:
         str: The name of the defect, if the defect is a complex, the names of the

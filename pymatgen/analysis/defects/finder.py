@@ -299,7 +299,7 @@ def get_weighted_average_position(lattice, frac_positions, weights=None) -> NDAr
         frac_positions (3xN array-like): The positions to average.
         weights (1xN array-like): The weights of the positions.
 
-    Returns
+    Returns:
     -------
         NDArray: (3x1 array): The weighted average position in fractional coordinates.
     """

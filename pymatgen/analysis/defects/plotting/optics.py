@@ -8,9 +8,8 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.colors import Normalize
-from pymatgen.electronic_structure.core import Spin
-
 from pymatgen.analysis.defects.ccd import HarmonicDefect
+from pymatgen.electronic_structure.core import Spin
 
 __author__ = "Jimmy Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -140,7 +139,6 @@ def get_bs_eigenvalues(
     Returns:
         Dictionary of the format: (iband, ikpt, ispin) -> eigenvalue
     """
-
     if defect.relaxed_bandstructure is None:  # pragma: no cover
         raise ValueError("The defect object does not have a band structure.")
 

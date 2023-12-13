@@ -7,11 +7,10 @@ import logging
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.patches import Polygon
+from pymatgen.analysis.defects.thermo import FormationEnergyDiagram
 from pymatgen.core import Element
 from pymatgen.util.string import latexify
 from scipy.spatial import ConvexHull
-
-from pymatgen.analysis.defects.thermo import FormationEnergyDiagram
 
 # check if labellines is installed
 try:
@@ -101,7 +100,6 @@ def _convex_hull_2d(
     competing_phases: list = None,
 ) -> list[dict]:
     """Compute the convex hull of a set of points in 2D.
-
 
     Args:
         points:

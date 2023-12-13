@@ -113,11 +113,11 @@ indent-width = 4
 
 [tool.ruff.lint]
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`).
-select = ["E4", "E7", "E9", "F", "D", "I001"]
+select = ["E4", "E7", "E9", "F", "D", "I001", "TCH"]
 ignore = ["E203", "E501", "F401"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
-fixable = ["ALL"]
+fixable = ["ALL", "TCH"]
 unfixable = []
 
 # Allow unused variables when underscore-prefixed.
@@ -140,6 +140,6 @@ line-ending = "auto"
 convention = "google"
 
 [tool.ruff.lint.flake8-type-checking]
-exempt-modules = ["typing", "typing_extensions"]
+strict=true
 quote-annotations = true
 

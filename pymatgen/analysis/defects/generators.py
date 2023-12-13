@@ -10,16 +10,15 @@ from itertools import combinations
 from typing import Generator
 
 from monty.json import MSONable
-from pymatgen.core import Element, PeriodicSite, Species, Structure
-from pymatgen.io.vasp import Chgcar, VolumetricData
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-
 from pymatgen.analysis.defects.core import Defect, Interstitial, Substitution, Vacancy
 from pymatgen.analysis.defects.utils import (
     ChargeInsertionAnalyzer,
     TopographyAnalyzer,
     remove_collisions,
 )
+from pymatgen.core import Element, PeriodicSite, Species, Structure
+from pymatgen.io.vasp import Chgcar, VolumetricData
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"

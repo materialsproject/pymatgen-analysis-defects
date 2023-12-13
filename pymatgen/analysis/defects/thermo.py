@@ -13,6 +13,10 @@ from matplotlib import pyplot as plt
 from monty.json import MSONable
 from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
+from pymatgen.analysis.defects.core import Defect, NamedDefect
+from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
+from pymatgen.analysis.defects.finder import DefectSiteFinder
+from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile, group_docs
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.core import Composition, Element, Structure
@@ -22,11 +26,6 @@ from pymatgen.io.vasp import Locpot, Vasprun
 from scipy.constants import value as _cd
 from scipy.optimize import bisect
 from scipy.spatial import ConvexHull
-
-from pymatgen.analysis.defects.core import Defect, NamedDefect
-from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
-from pymatgen.analysis.defects.finder import DefectSiteFinder
-from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile, group_docs
 
 __author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -1103,8 +1102,9 @@ def plot_formation_energy_diagrams(
     axis.axvline(band_gap, color=band_edge_color, linestyle="--", linewidth=1)
     axis.axvline(0, color=band_edge_color, linestyle="--", linewidth=1)
     if not xlim:
-        xmin, xmax = np.subtract(-0.2, alignment), np.subtract(
-            band_gap + 0.2, alignment
+        xmin, xmax = (
+            np.subtract(-0.2, alignment),
+            np.subtract(band_gap + 0.2, alignment),
         )
     else:
         xmin, xmax = xlim

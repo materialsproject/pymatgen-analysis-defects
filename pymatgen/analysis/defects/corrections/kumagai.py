@@ -10,10 +10,9 @@ import logging
 import math
 from pathlib import Path
 
+from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile
 from pymatgen.core import Structure
 from pymatgen.io.vasp import Outcar, Vasprun
-
-from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile
 
 try:
     from vise import user_settings
