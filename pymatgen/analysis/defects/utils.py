@@ -196,8 +196,18 @@ def generate_reciprocal_vectors_squared(a1, a2, a3, encut):
         yield np.dot(vec, vec)
 
 
-def converge(f, step, tol, max_h):
-    """Simple newton iteration based convergence function."""
+def converge(f, step, tol, max_h) -> float:
+    """Simple newton iteration based convergence function.
+
+    Args:
+        f: function to converge
+        step: step size for newton iteration
+        tol: tolerance for convergence
+        max_h: maximum value of h to try before giving up
+
+    Returns:
+        converged value of f
+    """
     g = f(0)
     dx = 10000
     h = step
@@ -843,7 +853,6 @@ def get_ipr_in_window(
         bandstructure: The bandstructure object.
             The band just below the fermi level is used as the center of band window.
         procar: The procar object.
-        k_index: The index of the k-point to use. If None, the IPR is averaged over all k-points.
         band_window: The number of bands above and blow the fermi level to include in the search window.
 
     Returns:

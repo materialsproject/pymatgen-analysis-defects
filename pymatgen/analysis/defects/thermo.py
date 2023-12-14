@@ -69,7 +69,9 @@ class DefectEntry(MSONable):
             about how the corrections were calculated.  These should are only used
             for debugging and plotting purposes.
             PLEASE DO NOT USE THIS AS A CONTAINER FOR IMPORTANT DATA.
-
+        entry_id:
+            The entry_id for the defect entry. Usually the same as the entry_id of the
+            defect supercell entry.
     """
 
     defect: Defect
@@ -331,7 +333,8 @@ class FormationEnergyDiagram(MSONable):
             bulk_entry:
                 The bulk computed entry to get the total energy of the bulk supercell.
             band_gap:
-                The band gap of the bulk crystal.
+                The band gap of the bulk crystal. Passed directly to the \
+                FormationEnergyDiagram constructor.
             inc_inf_values:
                 If False these boundary points at infinity are ignored when we look at
                 the chemical potential limits.
@@ -697,6 +700,14 @@ class MultiFormationEnergyDiagram(MSONable):
 
         Initializes by grouping defect types, and creating a list of single
         FormationEnergyDiagram using the with_atomic_entries method (see above)
+
+        Args:
+            bulk_entry: bulk entry
+            defect_entries: list of defect entries
+            atomic_entries: list of atomic entries
+            phase_diagram: phase diagram
+            vbm: valence band maximum for the bulk phase
+            **kwargs: additional kwargs for FormationEnergyDiagram
         """
         single_form_en_diagrams = []
         for _, defect_group in group_defect_entries(defect_entries=defect_entries):
@@ -1030,7 +1041,11 @@ def fermi_dirac(energy: float, temperature: int | float) -> float:
 
     Gets the defects equilibrium concentration (up to the multiplicity factor)
     at a particular fermi level, chemical potential, and temperature (in Kelvin),
-    assuming dilue limit thermodynamics (non-interacting defects) using FD statistics.
+    assuming dilute limit thermodynamics (non-interacting defects) using FD statistics.
+
+    Args:
+        energy: Energy of the defect with respect to the VBM.
+        temperature: Temperature in Kelvin.
     """
     return 1.0 / (1.0 + np.exp((energy) / (boltzman_eV_K * temperature)))
 
@@ -1244,6 +1259,17 @@ def plot_formation_energy_diagrams(
 
 
 def _get_line_color_and_style(colors=None, styles=None):
+    """Get a generator for colors and styles.
+
+    Create an iterator that will cycle through the colors and styles.
+
+    Args:
+        colors: List of colors to use, if None, use the default matplotlib colors.
+        styles: List of styles to use, if None, will use ["-", "--", "-.", ":"]
+
+    Returns:
+        Generator of (color, style) tuples
+    """
     if colors is None:
         colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
     if styles is None:

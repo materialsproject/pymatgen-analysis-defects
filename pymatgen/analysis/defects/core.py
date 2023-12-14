@@ -18,6 +18,7 @@ from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from .utils import get_plane_spacing
 
 if TYPE_CHECKING:
+    from numpy.typing import ArrayLike
     from pymatgen.core import Structure
     from pymatgen.symmetry.structure import SymmetrizedStructure
 
@@ -312,11 +313,7 @@ class Defect(MSONable, metaclass=ABCMeta):
 
     @property
     def symmetrized_structure(self) -> SymmetrizedStructure:
-        """Returns the multiplicity of a defect site within the structure.
-
-        This is required for concentration analysis and confirms that defect_site is a
-        site in bulk_structure.
-        """
+        """Get the symmetrized version of the bulk structure."""
         sga = SpacegroupAnalyzer(
             self.structure, symprec=self.symprec, angle_tolerance=self.angle_tolerance
         )
@@ -895,7 +892,19 @@ def get_vacancy(structure: Structure, isite: int, **kwargs) -> Vacancy:
     return Vacancy(structure=structure, site=site, **kwargs)
 
 
-def _set_selective_dynamics(structure, site_pos, relax_radius):
+def _set_selective_dynamics(
+    structure: Structure, site_pos: ArrayLike, relax_radius: float | str | None
+):
+    """Set the selective dynamics behavior.
+
+    Allow atoms to move for sites within a given radius of a given site,
+    all other atoms are fixed.  Modify the structure in place.
+
+    Args:
+        structure: The structure to set the selective dynamics.
+        site_pos: The center of the relaxation sphere.
+        relax_radius: The radius of the relaxation sphere.
+    """
     if relax_radius is None:
         return
     if relax_radius == "auto":
@@ -974,11 +983,15 @@ def _get_mapped_sites(uc_structure: Structure, sc_structure: Structure, r=0.001)
     return mapped_site_indices
 
 
-def center_structure(structure, ref_fpos) -> Structure:
+def center_structure(structure: Structure, ref_fpos: ArrayLike) -> Structure:
     """Shift the sites around a center.
 
     Move all the sites in the structure so that they
     are in the periodic image closest to the reference fractional position.
+
+    Args:
+        structure: The structure to be centered.
+        ref_fpos: The reference fractional position that will be set to the center.
     """
     struct = structure.copy()
     for idx, d_site in enumerate(struct):
@@ -997,8 +1010,7 @@ def _get_el_changes_from_structures(defect_sc: Structure, bulk_sc: Structure) ->
         bulk_sc: The bulk structure.
 
     Returns:
-        str: The name of the defect, if the defect is a complex, the names of the
-            individual defects are separated by "+".
+        dict: A dictionary representing the species changes in creating the defect.
     """
 
     def _check_int(n):

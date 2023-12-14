@@ -102,7 +102,6 @@ def _convex_hull_2d(
     points: list[dict],
     x_element: Element,
     y_element: Element,
-    tol: float = 0.001,
     competing_phases: list = None,
 ) -> list[dict]:
     """Compute the convex hull of a set of points in 2D.
