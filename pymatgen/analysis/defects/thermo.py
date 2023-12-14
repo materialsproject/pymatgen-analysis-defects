@@ -1041,7 +1041,11 @@ def fermi_dirac(energy: float, temperature: int | float) -> float:
 
     Gets the defects equilibrium concentration (up to the multiplicity factor)
     at a particular fermi level, chemical potential, and temperature (in Kelvin),
-    assuming dilue limit thermodynamics (non-interacting defects) using FD statistics.
+    assuming dilute limit thermodynamics (non-interacting defects) using FD statistics.
+
+    Args:
+        energy: Energy of the defect with respect to the VBM.
+        temperature: Temperature in Kelvin.
     """
     return 1.0 / (1.0 + np.exp((energy) / (boltzman_eV_K * temperature)))
 
