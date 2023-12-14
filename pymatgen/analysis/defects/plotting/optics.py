@@ -233,7 +233,7 @@ def _plot_matrix_elements(
     arrow_width=0.1,
     cmap=None,
     norm=None,
-):
+) -> tuple[list[tuple], plt.cm, plt.Normalize]:
     """Plot arrow for the transition from the defect state to all other states.
 
     Args:
@@ -260,13 +260,21 @@ def _plot_matrix_elements(
             The cartesian direction of the WAVDER tensor to sum over for the plot.
             If not provided, all the absolute values of the matrix for all
             three diagonal entries will be summed.
+
+    Returns:
+        plot_data:
+            A list of tuples in the format of (iband, ikpt, ispin, eigenvalue, matrix element)
+        cmap:
+            The matplotlib color map used.
+        norm:
+            The matplotlib normalization used.
     """
     if ax is None:  # pragma: no cover
         ax = plt.gca()
     ax.set_aspect("equal")
     jb, jkpt, jspin = next(filter(lambda x: x[0] == defect_band_index, d_eig.keys()))
     y0 = d_eig[jb, jkpt, jspin]
-    plot_data = []
+    plot_data: list[tuple] = []
     for (ib, ik, ispin), eig in d_eig.items():
         A = 0
         for idir, jdir in ijdirs:
@@ -307,7 +315,7 @@ def _plot_matrix_elements(
     return plot_data, cmap, norm
 
 
-def _get_dataframe(d_eigs, me_plot_data) -> pd.DataFrame:
+def _get_dataframe(d_eigs: dict, me_plot_data: list[tuple]) -> pd.DataFrame:
     """Convert the eigenvalue and matrix element data into a pandas dataframe."""
     _, ikpt, ispin = next(iter(d_eigs.keys()))
     df = pd.DataFrame(
