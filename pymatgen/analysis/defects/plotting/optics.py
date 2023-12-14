@@ -183,7 +183,25 @@ def _plot_eigs(
     x_width: float = 0.3,
     **kwargs,
 ) -> None:
-    """Plot the eigenvalues."""
+    """Plot the eigenvalues.
+
+    Args:
+        d_eigs:
+            The dictionary of eigenvalues for the defect state. In the format of
+            (iband, ikpt, ispin) -> eigenvalue
+        e_fermi:
+            The bands above and below the Fermi level will be colored differently.
+            If not provided, they will all be colored the same.
+        ax:
+            The matplotlib axis object to plot on.
+        x0:
+            The x coordinate of the center of the set of lines representing the eigenvalues.
+        x_width:
+            The width of the set of lines representing the eigenvalues.
+        **kwargs:
+            Keyword arguments to pass to `matplotlib.pyplot.hlines`.
+            For example, `linestyles`, `alpha`, etc.
+    """
     if ax is None:  # pragma: no cover
         ax = plt.gca()
 
