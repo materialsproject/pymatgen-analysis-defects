@@ -217,7 +217,7 @@ def get_site_groups(struct, symprec=0.01, angle_tolerance=5.0) -> List[SiteGroup
     return site_groups
 
 
-def get_soap_vec(struct: "Structure") -> "NDArray":
+def get_soap_vec(struct: "Structure") -> NDArray:
     """Get the SOAP vector for each site in the structure.
 
     Args:
@@ -237,21 +237,32 @@ def get_soap_vec(struct: "Structure") -> "NDArray":
     return vecs
 
 
-def get_site_vecs(struct: Structure):
+def get_site_vecs(struct: Structure) -> List[SiteVec]:
     """Get the SiteVec representation of each site in the structure.
 
     Args:
         struct: Structure object to compute the site vectors (SOAP).
+
+    Returns:
+        List[SiteVec]: List of SiteVec representing each site in the structure.
     """
     vecs = get_soap_vec(struct)
-    site_vecs = []
-    for i, site in enumerate(struct):
-        site_vecs.append(SiteVec(species=site.species_string, site=site, vec=vecs[i]))
-    return site_vecs
+    return [
+        SiteVec(species=site.species_string, site=site, vec=vecs[i])
+        for i, site in enumerate(struct)
+    ]
 
 
 def cosine_similarity(vec1, vec2) -> float:
-    """Cosine similarity between two vectors."""
+    """Cosine similarity between two vectors.
+
+    Args:
+        vec1: First vector
+        vec2: Second vector
+
+    Returns:
+        float: Cosine similarity between the two vectors
+    """
     return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
 
@@ -282,11 +293,19 @@ def best_match(sv: SiteVec, sgs: List[SiteGroup]) -> Tuple[SiteGroup, float]:
     return best_match, best_similarity
 
 
-def _get_broundary(arr, n_max=16, n_skip=3):
+def _get_broundary(arr, n_max=16, n_skip=3) -> int:
     """Get the boundary index for the high-distortion indices.
 
     Assuming arr is sorted in reverse order,
     find the biggest value drop in arr[n_skip:n_max].
+
+    Args:
+        arr: List of numbers
+        n_max: Maximum index to consider
+        n_skip: Number of indices to skip
+
+    Returns:
+        int: The boundary index
     """
     sub_arr = np.array(arr[n_skip:n_max])
     diffs = sub_arr[1:] - sub_arr[:-1]
@@ -295,7 +314,7 @@ def _get_broundary(arr, n_max=16, n_skip=3):
 
 def get_weighted_average_position(
     lattice: Lattice, frac_positions: ArrayLike, weights: ArrayLike | None = None
-) -> "NDArray":
+) -> NDArray:
     """Get the weighted average position of a set of positions in frac coordinates.
 
     The algorithm starts at position with the highest weight, and gradually moves
