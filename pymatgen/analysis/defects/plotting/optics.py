@@ -316,7 +316,24 @@ def _plot_matrix_elements(
 
 
 def _get_dataframe(d_eigs: dict, me_plot_data: list[tuple]) -> pd.DataFrame:
-    """Convert the eigenvalue and matrix element data into a pandas dataframe."""
+    """Convert the eigenvalue and matrix element data into a pandas dataframe.
+
+    Args:
+        d_eigs:
+            The dictionary of eigenvalues for the defect state. In the format of
+            (iband, ikpt, ispin) -> eigenvalue
+        me_plot_data:
+            A list of tuples in the format of (iband, ikpt, ispin, eigenvalue, matrix element)
+
+    Returns:
+        A pandas dataframe with the following columns:
+            ib: The band index of the state the arrow is pointing to.
+            jb: The band index of the defect state.
+            kpt: The kpoint index of the state the arrow is pointing to.
+            spin: The spin index of the state the arrow is pointing to.
+            eig: The eigenvalue of the state the arrow is pointing to.
+            M.E.: The matrix element of the transition.
+    """
     _, ikpt, ispin = next(iter(d_eigs.keys()))
     df = pd.DataFrame(
         me_plot_data,
