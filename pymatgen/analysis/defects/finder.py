@@ -237,8 +237,12 @@ def get_soap_vec(struct: "Structure") -> "NDArray":
     return vecs
 
 
-def get_site_vecs(struct: "Structure"):
-    """Get the SiteVec representation of each site in the structure."""
+def get_site_vecs(struct: Structure):
+    """Get the SiteVec representation of each site in the structure.
+
+    Args:
+        struct: Structure object to compute the site vectors (SOAP).
+    """
     vecs = get_soap_vec(struct)
     site_vecs = []
     for i, site in enumerate(struct):

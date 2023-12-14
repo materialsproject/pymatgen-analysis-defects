@@ -418,6 +418,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         min_dist: Minimum to atoms in the host structure
         avg_radius: The radius around each local minima used to evaluate the average charge.
         max_avg_charge: The maximum average charge to accept.
+        max_insertions: The maximum number of insertion sites to consider.  Will choose the sites with the lowest average charge.
     """
 
     def __init__(

@@ -380,7 +380,6 @@ class HarmonicDefect(MSONable):
             rearrangement here so that we have a single point of failure.
 
         Args:
-            band_structure: The band structure of the relaxed defect calculation.
             output_order: The order of the output. Defaults to "skb" (spin, kpoint, band]).
                 You can also use "bks" (band, kpoint, spin).
 
