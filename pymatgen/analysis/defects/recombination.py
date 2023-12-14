@@ -6,13 +6,16 @@ The the SRH recombination code is taken from the NonRad code (www.github.com/mtu
 from __future__ import annotations
 
 import itertools
+from typing import TYPE_CHECKING
 
 import numpy as np
 from numba import njit
-from numpy import typing as npt
 from scipy.interpolate import PchipInterpolator
 
 from .constants import AMU2KG, ANGS2M, EV2J, HBAR_EV, HBAR_J, KB, LOOKUP_TABLE
+
+if TYPE_CHECKING:
+    from numpy import typing as npt
 
 __author__ = "Jimmy Shen"
 __copyright__ = "The Materials Project"
@@ -68,7 +71,7 @@ def analytic_overlap_NM(
     [Taken from NONRAD.]
 
     Args:
-        DQ: Displacement between harmonic oscillators in amu^{1/2} Angstrom
+        dQ: Displacement between harmonic oscillators in amu^{1/2} Angstrom
         omega1: Frequency of oscillator 1 in eV
         omega2: Frequency of oscillator 2 in eV
         n1: Quantum number of oscillator 1
@@ -183,6 +186,7 @@ def get_mn(
     ``en_final - en_pad`` and ``en_final + en_pad`` reference to the bottom of the final state parabola.
 
     Args:
+        dQ: The displacement between the initial and final phonon states.
         omega_i: The initial phonon frequency in eV.
         omega_f: The final phonon frequency in eV.
         m_init: The initial phonon quantum number.

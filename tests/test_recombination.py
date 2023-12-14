@@ -2,7 +2,6 @@ import itertools
 
 import numpy as np
 import pytest
-
 from pymatgen.analysis.defects.recombination import (
     analytic_overlap_NM,
     boltzmann_filling,

@@ -1,5 +1,4 @@
 import pytest
-
 from pymatgen.analysis.defects.core import Interstitial, Substitution, Vacancy
 from pymatgen.analysis.defects.generators import (
     AntiSiteGenerator,

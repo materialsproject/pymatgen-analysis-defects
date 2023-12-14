@@ -1,5 +1,4 @@
 import numpy as np
-
 from pymatgen.analysis.defects.supercells import (
     _ase_cubic,
     get_matched_structure_mapping,

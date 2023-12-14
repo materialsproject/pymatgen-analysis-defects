@@ -2,24 +2,28 @@
 from __future__ import annotations
 
 import logging
-from ctypes import Structure
 from dataclasses import dataclass
 from itertools import groupby
-from pathlib import Path
-from typing import Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Optional, Sequence, Tuple
 
 import numpy as np
-import numpy.typing as npt
-from matplotlib.axes import Axes
 from monty.json import MSONable
 from pymatgen.electronic_structure.core import Spin
 from pymatgen.io.vasp.optics import DielectricFunctionCalculator
-from pymatgen.io.vasp.outputs import WSWQ, BandStructure, Procar, Vasprun, Waveder
+from pymatgen.io.vasp.outputs import WSWQ, Procar, Vasprun
 from scipy.optimize import curve_fit
 
 from .constants import AMU2KG, ANGS2M, EV2J, HBAR_EV, KB
 from .recombination import get_SRH_coef
 from .utils import get_localized_states, get_zfile, sort_positive_definite
+
+if TYPE_CHECKING:
+    from ctypes import Structure
+    from pathlib import Path
+
+    import numpy.typing as npt
+    from matplotlib.axes import Axes
+    from pymatgen.io.vasp.outputs import BandStructure, Waveder
 
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
@@ -142,6 +146,8 @@ class HarmonicDefect(MSONable):
         Args:
             vaspruns: A list of Vasprun objects.
             charge_state: The charge state for the defect.
+            spin_index: The index of the spin channel to use. If None, the spin channel
+                is determined by the channel with the most localized state.
             relaxed_index: The index of the relaxed structure in the list of structures.
             defect_band: The the index of the defect band since the defect for different
                 kpoints and spins presented as `[(band, kpt, spin), ...]`.
@@ -149,6 +155,7 @@ class HarmonicDefect(MSONable):
             store_bandstructure: Whether to store the bandstructure of the relaxed defect calculation.
                 Defaults to False to save space.
             get_band_structure_kwargs: Keyword arguments to pass to the ``get_band_structure`` method.
+            band_window: The number of bands above and below the defect band to include when searching for the defect band.
             **kwargs: Additional keyword arguments to pass to the constructor.
 
         Returns:
@@ -213,13 +220,13 @@ class HarmonicDefect(MSONable):
                 spin: list(bands)
                 for spin, bands in groupby(defect_band_2s, lambda x: x[2])
             }
-            avg_localization = {
-                spin: np.average([val for _, _, _, val in bands])
+            min_localization = {
+                spin: np.min([val for _, _, _, val in bands])
                 for spin, bands in defect_band_grouped.items()
             }
             if spin_index is None:
                 # get the most localized spin
-                spin_index = min(avg_localization, key=avg_localization.get)
+                spin_index = min(min_localization, key=min_localization.get)
             # drop the val
             defect_band = [r_[:3] for r_ in defect_band_grouped[spin_index]]
 
@@ -761,7 +768,7 @@ def _get_ks_ediff(
     for ispin, eigs in bandstructure.bands.items():
         spin_index = 0 if ispin == Spin.up else 1
         res[ispin] = np.zeros_like(eigs)
-        for ikpt, kpt in enumerate(bandstructure.kpoints):
+        for ikpt, _kpt in enumerate(bandstructure.kpoints):
             iband = b_at_kpt_and_spin.get((ikpt, spin_index), None)
             if iband is None:
                 continue
@@ -780,6 +787,8 @@ def plot_pes(
         hd: HarmonicDefect object
         x_shift: shift the PES by this amount in the x-direction
         y_shift: shift the PES by this amount in the y-direction
+        width: the x-range for the PES plot
+        ax: matplotlib axes object
 
     Returns:
         None

@@ -61,23 +61,6 @@ where = ["./"]
 default-tag = "0.0.1"
 method = "git"
 
-[tool.isort]
-profile = "black"
-
-[tool.black]
-line-length = 88
-
-[tool.blacken-docs]
-line-length = 88
-
-[tool.flake8]
-extend-ignore = "E203, W503, E501, F401, RST21"
-max-line-length = 120
-max-doc-length = 120
-min-python-version = "3.9.0"
-rst-roles = "class, func, ref, obj"
-select = "C, E, F, W, B, B950"
-
 [tool.mypy]
 ignore_missing_imports = true
 no_strict_optional = true
@@ -93,12 +76,18 @@ source = ["pymatgen/"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-
-[tool.pydocstyle]
-convention = 'google'
-match = '^pymatgen/(?!_).*\.py'
-inherit = false
-add-ignore = "D107, "
+exclude_also = [
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    ]
 
 [tool.autoflake]
 in-place = true
@@ -106,3 +95,81 @@ remove-unused-variables = true
 remove-all-unused-imports = true
 expand-star-imports = true
 ignore-init-module-imports = true
+
+[tool.ruff]
+src = ["pymatgen", "tests"]
+
+line-length = 88
+indent-width = 4
+
+
+# By default, ruff only uses all "E" (pycodestyle) and "F" (pyflakes) rules.
+# Here we append to the defaults.
+select = [
+  # (flake8-builtins) detect shadowing of python builtin symbols by variables and arguments.
+  # Attributes are OK (which is why A003) is not included here.
+  "A001",
+  "A002",
+  # (useless expression): Expressions that aren't assigned to anything are typically bugs.
+  "B018",
+  # (pydocstyle) Docstring-related rules. A large subset of these are ignored by the
+  # "convention=google" setting, we set under tool.ruff.pydocstyle.
+  "D",
+  # (pycodestyle) pycodestyle rules
+  "E",
+  # (pyflakes) pyflakes rules
+  "F",
+  # (isort) detect improperly sorted imports
+  "I001",
+  # (pylint) use all pylint rules from categories "Convention", "Error", and "Warning" (ruff
+  # currently implements only a subset of pylint's rules)
+  "PLE",
+  "PLW",
+  # (no commented out code) keep commented out code blocks out of the codebase
+  # "ERA001",
+  # (ruff-specific) Enable all ruff-specific checks (i.e. not ports of
+  # functionality from an existing linter).
+  "RUF",
+  # (private member access) Flag access to `_`-prefixed symbols. By default the various special
+  # methods on `NamedTuple` are ignored (e.g. `_replace`).
+  "SLF001",
+  # (flake8-type-checking) Auto-sort imports into TYPE_CHECKING blocks depending on whether
+  # they are runtime or type-only imports.
+  "TCH",
+  # (banned-api) Flag use of banned APIs. See tool.ruff.flake8-tidy-imports.banned-api for details.
+  "TID251",
+  # (disallow print statements) keep debugging statements out of the codebase
+  "T20",
+  # (f-strings) use f-strings instead of .format()
+  "UP032",
+  # (invalid escape sequence) flag errant backslashes
+  "W605",
+]
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`).
+select = ["E4", "E7", "E9", "F", "D", "I001", "TCH"]
+ignore = ["E203", "E501", "F401"]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL", "TCH"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
