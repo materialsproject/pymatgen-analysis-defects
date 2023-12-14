@@ -4,9 +4,6 @@ import os
 import numpy as np
 import pytest
 from matplotlib import pyplot as plt
-from pymatgen.analysis.phase_diagram import PhaseDiagram
-from pymatgen.core import Element, PeriodicSite
-
 from pymatgen.analysis.defects.core import Interstitial, NamedDefect
 from pymatgen.analysis.defects.corrections.freysoldt import plot_plnr_avg
 from pymatgen.analysis.defects.thermo import (
@@ -21,6 +18,8 @@ from pymatgen.analysis.defects.thermo import (
     group_defect_entries,
     plot_formation_energy_diagrams,
 )
+from pymatgen.analysis.phase_diagram import PhaseDiagram
+from pymatgen.core import Element, PeriodicSite
 
 
 @pytest.fixture(scope="module")

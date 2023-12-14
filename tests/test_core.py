@@ -1,7 +1,4 @@
 import numpy as np
-from pymatgen.core import Structure
-from pymatgen.core.periodic_table import Element, Specie
-
 from pymatgen.analysis.defects.core import (
     Adsorbate,
     DefectComplex,
@@ -12,6 +9,8 @@ from pymatgen.analysis.defects.core import (
     Vacancy,
 )
 from pymatgen.analysis.defects.finder import DefectSiteFinder
+from pymatgen.core import Structure
+from pymatgen.core.periodic_table import Element, Specie
 
 
 def test_vacancy(gan_struct):
