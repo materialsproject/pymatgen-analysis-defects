@@ -853,7 +853,6 @@ def get_ipr_in_window(
         bandstructure: The bandstructure object.
             The band just below the fermi level is used as the center of band window.
         procar: The procar object.
-        k_index: The index of the k-point to use. If None, the IPR is averaged over all k-points.
         band_window: The number of bands above and blow the fermi level to include in the search window.
 
     Returns:
