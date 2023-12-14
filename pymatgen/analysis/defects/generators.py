@@ -49,8 +49,20 @@ class DefectGenerator(MSONable, metaclass=ABCMeta):
                 "This generator is using the `SpaceGroupAnalyzer` and requires `symprec` and `angle_tolerance` to be set."
             )
 
+    def generate(self, *args, **kwargs) -> Generator[Defect, None, None]:
+        """Generate a defect.
+
+        Args:
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            Generator[Defect, None, None]: Generator that yields a list of ``Defect`` objects.
+        """
+        raise NotImplementedError
+
     def get_defects(self, *args, **kwargs) -> list[Defect]:
-        """Call the generator and convert the results into a list."""
+        """Alias for self.generate."""
         return list(self.generate(*args, **kwargs))
 
 
