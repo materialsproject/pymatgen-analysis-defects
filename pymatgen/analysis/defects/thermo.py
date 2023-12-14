@@ -69,7 +69,9 @@ class DefectEntry(MSONable):
             about how the corrections were calculated.  These should are only used
             for debugging and plotting purposes.
             PLEASE DO NOT USE THIS AS A CONTAINER FOR IMPORTANT DATA.
-
+        entry_id:
+            The entry_id for the defect entry. Usually the same as the entry_id of the
+            defect supercell entry.
     """
 
     defect: Defect
@@ -331,7 +333,8 @@ class FormationEnergyDiagram(MSONable):
             bulk_entry:
                 The bulk computed entry to get the total energy of the bulk supercell.
             band_gap:
-                The band gap of the bulk crystal.
+                The band gap of the bulk crystal. Passed directly to the \
+                FormationEnergyDiagram constructor.
             inc_inf_values:
                 If False these boundary points at infinity are ignored when we look at
                 the chemical potential limits.
@@ -697,6 +700,14 @@ class MultiFormationEnergyDiagram(MSONable):
 
         Initializes by grouping defect types, and creating a list of single
         FormationEnergyDiagram using the with_atomic_entries method (see above)
+
+        Args:
+            bulk_entry: bulk entry
+            defect_entries: list of defect entries
+            atomic_entries: list of atomic entries
+            phase_diagram: phase diagram
+            vbm: valence band maximum for the bulk phase
+            **kwargs: additional kwargs for FormationEnergyDiagram
         """
         single_form_en_diagrams = []
         for _, defect_group in group_defect_entries(defect_entries=defect_entries):
