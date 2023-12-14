@@ -1259,6 +1259,17 @@ def plot_formation_energy_diagrams(
 
 
 def _get_line_color_and_style(colors=None, styles=None):
+    """Get a generator for colors and styles.
+
+    Create an iterator that will cycle through the colors and styles.
+
+    Args:
+        colors: List of colors to use, if None, use the default matplotlib colors.
+        styles: List of styles to use, if None, will use ["-", "--", "-.", ":"]
+
+    Returns:
+        Generator of (color, style) tuples
+    """
     if colors is None:
         colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
     if styles is None:

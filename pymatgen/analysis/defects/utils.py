@@ -196,8 +196,18 @@ def generate_reciprocal_vectors_squared(a1, a2, a3, encut):
         yield np.dot(vec, vec)
 
 
-def converge(f, step, tol, max_h):
-    """Simple newton iteration based convergence function."""
+def converge(f, step, tol, max_h) -> float:
+    """Simple newton iteration based convergence function.
+
+    Args:
+        f: function to converge
+        step: step size for newton iteration
+        tol: tolerance for convergence
+        max_h: maximum value of h to try before giving up
+
+    Returns:
+        converged value of f
+    """
     g = f(0)
     dx = 10000
     h = step
