@@ -266,7 +266,7 @@ class InterstitialGenerator(DefectGenerator):
             insertions: The insertions to be made given as a dictionary {"Mg": [[0.0, 0.0, 0.0], [0.5, 0.5, 0.5]]}.
             multiplicities: The multiplicities of the insertions to be made given as a dictionary {"Mg": [1, 2]}.
             equivalent_positions: The equivalent positions of the each inserted species given as a dictionary.
-                Note that they should typically be the same but we allow for more flexibility.
+                Note that they should typically be the same but we allow for more flexibility here.
             **kwargs: Additional keyword arguments for the ``Interstitial`` constructor.
 
         Returns:
@@ -430,7 +430,8 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         min_dist: Minimum to atoms in the host structure
         avg_radius: The radius around each local minima used to evaluate the average charge.
         max_avg_charge: The maximum average charge to accept.
-        max_insertions: The maximum number of insertion sites to consider.  Will choose the sites with the lowest average charge.
+        max_insertions: The maximum number of insertion sites to consider.
+            Will choose the sites with the lowest average charge.
     """
 
     def __init__(

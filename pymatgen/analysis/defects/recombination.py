@@ -30,7 +30,14 @@ Factor3 = 1 / HBAR_EV
 
 @njit(cache=True)
 def fact(n: int) -> float:  # pragma: no cover
-    """Compute the factorial of n."""
+    """Compute the factorial of n.
+
+    Args:
+        n: The number to compute the factorial of.
+
+    Returns:
+        The factorial of n.
+    """
     if n > 20:
         return LOOKUP_TABLE[-1] * np.prod(
             np.array(list(range(21, n + 1)), dtype=np.double)
@@ -40,7 +47,15 @@ def fact(n: int) -> float:  # pragma: no cover
 
 @njit(cache=True)
 def herm(x: float, n: int) -> float:  # pragma: no cover
-    """Recursive definition of hermite polynomial."""
+    """Recursive definition of hermite polynomial.
+
+    Args:
+        x: The value to evaluate the hermite polynomial at.
+        n: The order of the hermite polynomial.
+
+    Returns:
+        The value of the hermite polynomial at x.
+    """
     if n == 0:
         return 1.0
     if n == 1:
