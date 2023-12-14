@@ -530,6 +530,10 @@ The <code class="docutils literal notranslate"><span class="pre">plot_sxd_output
         <span class="n">plot_plnr_avg</span><span class="p">(</span>
             <span class="n">freysoldt_results</span><span class="p">[</span><span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;plot_data&quot;</span><span class="p">][</span><span class="n">direction</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="n">direction</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="n">direction</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;q=</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2"> direction=</span><span class="si">{</span><span class="n">direction</span><span class="si">}</span><span class="s2"> (Python)&quot;</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="n">direction</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;q=</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2"> direction=</span><span class="si">{</span><span class="n">direction</span><span class="si">}</span><span class="s2"> (SXDefectAlign)&quot;</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="n">direction</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="n">direction</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -553,7 +557,7 @@ Note that in the case of the Python-only plots the defect position is set to the
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/12b94744957638a952621f3eba27496aaf5264deab480ae537894bb965ab24fb.png" src="../_images/12b94744957638a952621f3eba27496aaf5264deab480ae537894bb965ab24fb.png" />
+<img alt="../_images/6cc905e40d855818af0f907a2b95f8422e6ac9cab34515ab2e5fd6d532fc4c4c.png" src="../_images/6cc905e40d855818af0f907a2b95f8422e6ac9cab34515ab2e5fd6d532fc4c4c.png" />
 </div>
 </div>
 <p><em>Result from larger simulation cell</em> The LOCPOT data is too large to be included in the repository.

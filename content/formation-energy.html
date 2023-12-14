@@ -496,9 +496,9 @@ As an example, the elemental chemical potentials for the Mg<span class="math not
 <div class="math notranslate nohighlight">
 \[\begin{split}
 \begin{aligned}
-\mu_{\rm Ga} + \mu_{\rm N} &amp;= \Delta H_{\rm GaN} \\
-5\mu_{\rm Mg} + 2\mu_{\rm Ga} + \mu_{\rm N} &amp;\leq \Delta H_{\rm Mg_5Ga_2} \\
-3\mu_{\rm Mg} + 2\mu_{\rm N} &amp;\leq \Delta H_{\rm Mg_3N_2} \\
+\Delta\mu_{\rm Ga} + \Delta\mu_{\rm N} &amp;= \Delta H_{\rm GaN} \\
+5\Delta\mu_{\rm Mg} + 2\Delta\mu_{\rm Ga} + \Delta\mu_{\rm N} &amp;\leq \Delta H_{\rm Mg_5Ga_2} \\
+3\Delta\mu_{\rm Mg} + 2\Delta\mu_{\rm N} &amp;\leq \Delta H_{\rm Mg_3N_2} \\
 \end{aligned}
 \end{split}\]</div>
 <p>Here since the defect must form in GaN the chemical potentials are pinned by the plane defined by the enthalpy of formation of GaN.
@@ -507,25 +507,25 @@ The points of interest are usually vertex points in the constrained chemical pot
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fed</span><span class="o">.</span><span class="n">chempot_limits</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Chemical potential limits for point </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Limits for the chemical potential changes for point </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;μ_</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> eV&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Δμ_</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> eV&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Chemical potential limits for point 0
-μ_Mg = -1.49 eV
-μ_Ga = -1.75 eV
-μ_N = 0.00 eV
-Chemical potential limits for point 1
-μ_Mg = -0.35 eV
-μ_Ga = -0.03 eV
-μ_N = -1.71 eV
-Chemical potential limits for point 2
-μ_Mg = -0.44 eV
-μ_Ga = 0.00 eV
-μ_N = -1.75 eV
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Limits for the chemical potential changes for point 0
+Δμ_Mg = -1.49 eV
+Δμ_Ga = -1.75 eV
+Δμ_N = 0.00 eV
+Limits for the chemical potential changes for point 1
+Δμ_Mg = -0.35 eV
+Δμ_Ga = -0.03 eV
+Δμ_N = -1.71 eV
+Limits for the chemical potential changes for point 2
+Δμ_Mg = -0.44 eV
+Δμ_Ga = 0.00 eV
+Δμ_N = -1.75 eV
 </pre></div>
 </div>
 </div>
