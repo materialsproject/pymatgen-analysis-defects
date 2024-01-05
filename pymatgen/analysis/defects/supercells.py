@@ -4,13 +4,16 @@ from __future__ import annotations
 
 import logging
 import math
+from typing import TYPE_CHECKING
 
-import numpy as np
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
 
 # from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape
 # from pymatgen.io.ase import AseAtomsAdaptor
-from pymatgen.core import Structure
+
+if TYPE_CHECKING:
+    from numpy.typing import ArrayLike, NDArray
+    from pymatgen.core import Structure
 
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -26,7 +29,7 @@ def get_sc_fromstruct(
     max_atoms: int = 240,
     min_length: float = 10.0,
     force_diagonal: bool = False,
-) -> np.ndarray | np.array | None:
+) -> NDArray | ArrayLike | None:
     """Generate the best supercell from a unitcell.
 
     The CubicSupercellTransformation from PMG is much faster but don't iterate over as
@@ -89,7 +92,7 @@ def _cubic_cell(
     max_atoms: int = 240,
     min_length: float = 10.0,
     force_diagonal: bool = False,
-) -> np.ndarray | None:
+) -> NDArray | None:
     """Generate the best supercell from a unit cell.
 
     This is done using the pymatgen CubicSupercellTransformation class.
@@ -122,23 +125,35 @@ def _cubic_cell(
     return cst.transformation_matrix
 
 
-def _ase_cubic(base_struture, min_atoms: int = 80, max_atoms: int = 240):
+def _ase_cubic(base_structure, min_atoms: int = 80, max_atoms: int = 240):
+    """Generate the best supercell from a unit cell.
+
+    Use ASE's find_optimal_cell_shape function to find the best supercell.
+
+    Args:
+        base_structure: structure of the unit cell
+        max_atoms: Maximum number of atoms allowed in the supercell.
+        min_atoms: Minimum number of atoms allowed in the supercell.
+
+    Returns:
+        3x3 matrix: supercell matrix
+    """
     from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape
     from pymatgen.io.ase import AseAtomsAdaptor
 
     _logger.warn("ASE cubic supercell generation.")
 
     aaa = AseAtomsAdaptor()
-    ase_atoms = aaa.get_atoms(base_struture)
-    lower = math.ceil(min_atoms / base_struture.num_sites)
-    upper = math.floor(max_atoms / base_struture.num_sites)
+    ase_atoms = aaa.get_atoms(base_structure)
+    lower = math.ceil(min_atoms / base_structure.num_sites)
+    upper = math.floor(max_atoms / base_structure.num_sites)
     min_dev = (float("inf"), None)
     for size in range(lower, upper + 1):
         _logger.warn(f"Trying size {size} out of {upper}.")
         sc = find_optimal_cell_shape(
             ase_atoms.cell, target_size=size, target_shape="sc"
         )
-        sc_cell = aaa.get_atoms(base_struture * sc).cell
+        sc_cell = aaa.get_atoms(base_structure * sc).cell
         deviation = get_deviation_from_optimal_cell_shape(sc_cell, target_shape="sc")
         min_dev = min(min_dev, (deviation, sc))
     if min_dev[1] is None:

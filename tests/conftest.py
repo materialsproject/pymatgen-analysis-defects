@@ -3,12 +3,11 @@ from pathlib import Path
 
 import pytest
 from monty.serialization import loadfn
+from pymatgen.analysis.defects.core import PeriodicSite, Substitution
+from pymatgen.analysis.defects.thermo import DefectEntry
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Specie
 from pymatgen.io.vasp.outputs import WSWQ, Chgcar, Locpot, Procar, Vasprun
-
-from pymatgen.analysis.defects.core import PeriodicSite, Substitution
-from pymatgen.analysis.defects.thermo import DefectEntry
 
 
 @pytest.fixture(scope="session")
@@ -37,8 +36,7 @@ def defect_Mg_Ga(gan_struct):
 
 @pytest.fixture(scope="session")
 def data_Mg_Ga(test_dir):
-    """
-    Get the data in the following format:
+    """Get the data in the following format:
     {
         "bulk_sc": {
             "vasp_run": Vasprun,

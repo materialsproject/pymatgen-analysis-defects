@@ -7,19 +7,22 @@ import itertools
 import logging
 from abc import ABCMeta
 from itertools import combinations
-from typing import Generator
+from typing import TYPE_CHECKING, Generator
 
 from monty.json import MSONable
-from pymatgen.core import Element, PeriodicSite, Species, Structure
-from pymatgen.io.vasp import Chgcar
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-
-from pymatgen.analysis.defects.core import Defect, Interstitial, Substitution, Vacancy
+from pymatgen.analysis.defects.core import Interstitial, Substitution, Vacancy
 from pymatgen.analysis.defects.utils import (
     ChargeInsertionAnalyzer,
     TopographyAnalyzer,
     remove_collisions,
 )
+from pymatgen.core import Element, PeriodicSite, Species, Structure
+from pymatgen.io.vasp import Chgcar
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+
+if TYPE_CHECKING:
+    from pymatgen.analysis.defects.core import Defect
+    from pymatgen.io.vasp import VolumetricData
 
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -46,8 +49,20 @@ class DefectGenerator(MSONable, metaclass=ABCMeta):
                 "This generator is using the `SpaceGroupAnalyzer` and requires `symprec` and `angle_tolerance` to be set."
             )
 
+    def generate(self, *args, **kwargs) -> Generator[Defect, None, None]:
+        """Generate a defect.
+
+        Args:
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            Generator[Defect, None, None]: Generator that yields a list of ``Defect`` objects.
+        """
+        raise NotImplementedError
+
     def get_defects(self, *args, **kwargs) -> list[Defect]:
-        """Call the generator and convert the results into a list."""
+        """Alias for self.generate."""
         return list(self.generate(*args, **kwargs))
 
 
@@ -66,6 +81,7 @@ class VacancyGenerator(DefectGenerator):
         symprec: float = 0.01,
         angle_tolerance: float = 5,
     ):
+        """Initialize the vacancy generator."""
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
 
@@ -116,6 +132,7 @@ class SubstitutionGenerator(DefectGenerator):
     """
 
     def __init__(self, symprec: float = 0.01, angle_tolerance: float = 5):
+        """Initialize the substitution generator."""
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
 
@@ -196,6 +213,7 @@ class AntiSiteGenerator(DefectGenerator):
     """
 
     def __init__(self, symprec: float = 0.01, angle_tolerance: float = 5):
+        """Initialize the anti-site generator."""
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
         self._sub_gen = SubstitutionGenerator(symprec, angle_tolerance)
@@ -230,6 +248,7 @@ class InterstitialGenerator(DefectGenerator):
     """
 
     def __init__(self, min_dist: float = 0.5) -> None:
+        """Initialize the interstitial generator."""
         self.min_dist = min_dist
 
     def generate(
@@ -246,6 +265,8 @@ class InterstitialGenerator(DefectGenerator):
             structure: The bulk structure the interstitials are generated from.
             insertions: The insertions to be made given as a dictionary {"Mg": [[0.0, 0.0, 0.0], [0.5, 0.5, 0.5]]}.
             multiplicities: The multiplicities of the insertions to be made given as a dictionary {"Mg": [1, 2]}.
+            equivalent_positions: The equivalent positions of the each inserted species given as a dictionary.
+                Note that they should typically be the same but we allow for more flexibility here.
             **kwargs: Additional keyword arguments for the ``Interstitial`` constructor.
 
         Returns:
@@ -325,6 +346,7 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
         angle_tol: float = 5,
         **kwargs,
     ) -> None:
+        """Initialize the Voronoi interstitial generator."""
         self.clustering_tol = clustering_tol
         self.min_dist = min_dist
         self.ltol = ltol
@@ -334,7 +356,10 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
         super().__init__(min_dist=min_dist)
 
     def generate(  # type: ignore[override]
-        self, structure: Structure, insert_species: set[str] | list[str], **kwargs
+        self,
+        structure: Structure | VolumetricData,
+        insert_species: set[str] | list[str],
+        **kwargs,
     ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
 
@@ -405,6 +430,8 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         min_dist: Minimum to atoms in the host structure
         avg_radius: The radius around each local minima used to evaluate the average charge.
         max_avg_charge: The maximum average charge to accept.
+        max_insertions: The maximum number of insertion sites to consider.
+            Will choose the sites with the lowest average charge.
     """
 
     def __init__(
@@ -418,6 +445,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         max_avg_charge: float = 0.9,
         max_insertions: int | None = None,
     ) -> None:
+        """Initialize the charge interstitial generator."""
         self.clustering_tol = clustering_tol
         self.ltol = ltol
         self.stol = stol
@@ -427,7 +455,9 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         self.max_insertions = max_insertions
         super().__init__(min_dist=min_dist)
 
-    def generate(self, chgcar: Chgcar, insert_species: set[str] | list[str], **kwargs) -> Generator[Interstitial, None, None]:  # type: ignore[override]
+    def generate(  # type: ignore[override]
+        self, chgcar: VolumetricData, insert_species: set[str] | list[str], **kwargs
+    ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
 
         Args:

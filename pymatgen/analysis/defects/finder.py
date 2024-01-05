@@ -1,15 +1,19 @@
 """Defect position identification without prior knowledge."""
+from __future__ import annotations
+
 import logging
 import warnings
 from collections import namedtuple
-from typing import List, Tuple
+from typing import TYPE_CHECKING, List, Tuple
 
 import numpy as np
 from monty.json import MSONable
-from numpy.typing import ArrayLike, NDArray
-from pymatgen.core.structure import Structure
 from pymatgen.io.ase import AseAtomsAdaptor
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+
+if TYPE_CHECKING:
+    from numpy.typing import ArrayLike, NDArray
+    from pymatgen.core.structure import Lattice, Structure
 
 # Optional imports
 try:
@@ -49,10 +53,10 @@ class DefectSiteFinder(MSONable):
 
     def get_defect_fpos(
         self,
-        defect_structure: Structure,
-        base_structure: Structure,
+        defect_structure: "Structure",
+        base_structure: "Structure",
         remove_oxi: bool = True,
-    ) -> ArrayLike:
+    ) -> "ArrayLike":
         """Get the position of a defect in the pristine structure.
 
         Args:
@@ -74,7 +78,7 @@ class DefectSiteFinder(MSONable):
             return self.get_native_defect_position(defect_structure, base_structure)
 
     def _is_impurity(
-        self, defect_structure: Structure, base_structure: Structure
+        self, defect_structure: "Structure", base_structure: "Structure"
     ) -> bool:
         """Check if the defect structure is an impurity.
 
@@ -91,8 +95,8 @@ class DefectSiteFinder(MSONable):
         return len(defect_species - base_species) > 0
 
     def get_native_defect_position(
-        self, defect_structure: Structure, base_structure: Structure
-    ) -> ArrayLike:
+        self, defect_structure: "Structure", base_structure: "Structure"
+    ) -> "ArrayLike":
         """Get the position of a native defect in the defect structure.
 
         Args:
@@ -112,7 +116,7 @@ class DefectSiteFinder(MSONable):
         )
 
     def get_impurity_position(
-        self, defect_structure: Structure, base_structure: Structure
+        self, defect_structure: "Structure", base_structure: "Structure"
     ):
         """Get the position of an impurity defect.
 
@@ -136,7 +140,7 @@ class DefectSiteFinder(MSONable):
         )
 
     def get_most_distorted_sites(
-        self, defect_structure: Structure, base_structure: Structure
+        self, defect_structure: "Structure", base_structure: "Structure"
     ) -> List[Tuple[int, float]]:
         """Identify the set of sites with the most deviation from the pristine.
 
@@ -213,7 +217,7 @@ def get_site_groups(struct, symprec=0.01, angle_tolerance=5.0) -> List[SiteGroup
     return site_groups
 
 
-def get_soap_vec(struct: Structure) -> NDArray:
+def get_soap_vec(struct: "Structure") -> NDArray:
     """Get the SOAP vector for each site in the structure.
 
     Args:
@@ -233,17 +237,32 @@ def get_soap_vec(struct: Structure) -> NDArray:
     return vecs
 
 
-def get_site_vecs(struct: Structure):
-    """Get the SiteVec representation of each site in the structure."""
+def get_site_vecs(struct: Structure) -> List[SiteVec]:
+    """Get the SiteVec representation of each site in the structure.
+
+    Args:
+        struct: Structure object to compute the site vectors (SOAP).
+
+    Returns:
+        List[SiteVec]: List of SiteVec representing each site in the structure.
+    """
     vecs = get_soap_vec(struct)
-    site_vecs = []
-    for i, site in enumerate(struct):
-        site_vecs.append(SiteVec(species=site.species_string, site=site, vec=vecs[i]))
-    return site_vecs
+    return [
+        SiteVec(species=site.species_string, site=site, vec=vecs[i])
+        for i, site in enumerate(struct)
+    ]
 
 
 def cosine_similarity(vec1, vec2) -> float:
-    """Cosine similarity between two vectors."""
+    """Cosine similarity between two vectors.
+
+    Args:
+        vec1: First vector
+        vec2: Second vector
+
+    Returns:
+        float: Cosine similarity between the two vectors
+    """
     return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
 
 
@@ -274,18 +293,28 @@ def best_match(sv: SiteVec, sgs: List[SiteGroup]) -> Tuple[SiteGroup, float]:
     return best_match, best_similarity
 
 
-def _get_broundary(arr, n_max=16, n_skip=3):
+def _get_broundary(arr, n_max=16, n_skip=3) -> int:
     """Get the boundary index for the high-distortion indices.
 
     Assuming arr is sorted in reverse order,
     find the biggest value drop in arr[n_skip:n_max].
+
+    Args:
+        arr: List of numbers
+        n_max: Maximum index to consider
+        n_skip: Number of indices to skip
+
+    Returns:
+        int: The boundary index
     """
     sub_arr = np.array(arr[n_skip:n_max])
     diffs = sub_arr[1:] - sub_arr[:-1]
     return np.argmin(diffs) + n_skip + 1
 
 
-def get_weighted_average_position(lattice, frac_positions, weights=None) -> NDArray:
+def get_weighted_average_position(
+    lattice: Lattice, frac_positions: ArrayLike, weights: ArrayLike | None = None
+) -> NDArray:
     """Get the weighted average position of a set of positions in frac coordinates.
 
     The algorithm starts at position with the highest weight, and gradually moves
@@ -296,10 +325,12 @@ def get_weighted_average_position(lattice, frac_positions, weights=None) -> NDAr
     smaller than the unit cell.)
 
     Args:
+    -------
+        lattice (Lattice): The lattice of the structure.
         frac_positions (3xN array-like): The positions to average.
         weights (1xN array-like): The weights of the positions.
 
-    Returns
+    Returns:
     -------
         NDArray: (3x1 array): The weighted average position in fractional coordinates.
     """

@@ -1,9 +1,5 @@
 import numpy as np
 import pytest
-from pymatgen.analysis.structure_matcher import StructureMatcher
-from pymatgen.core.periodic_table import Specie
-from pymatgen.io.vasp.outputs import Chgcar
-
 from pymatgen.analysis.defects.core import Interstitial, PeriodicSite, Vacancy
 from pymatgen.analysis.defects.utils import (
     ChargeInsertionAnalyzer,
@@ -15,6 +11,9 @@ from pymatgen.analysis.defects.utils import (
     get_plane_spacing,
     group_docs,
 )
+from pymatgen.analysis.structure_matcher import StructureMatcher
+from pymatgen.core.periodic_table import Specie
+from pymatgen.io.vasp.outputs import Chgcar
 
 
 def test_get_local_extrema(gan_struct):

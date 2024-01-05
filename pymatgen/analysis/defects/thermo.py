@@ -6,27 +6,32 @@ import logging
 from dataclasses import dataclass, field
 from itertools import chain, groupby
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 import numpy as np
 from matplotlib import pyplot as plt
 from monty.json import MSONable
-from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
+from pymatgen.analysis.defects.core import Defect, NamedDefect
+from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
+from pymatgen.analysis.defects.finder import DefectSiteFinder
+from pymatgen.analysis.defects.utils import get_zfile, group_docs
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
-from pymatgen.core import Composition, Element, Structure
-from pymatgen.electronic_structure.dos import Dos, FermiDos
-from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
+from pymatgen.core import Composition, Element
+from pymatgen.electronic_structure.dos import FermiDos
+from pymatgen.entries.computed_entries import ComputedEntry
 from pymatgen.io.vasp import Locpot, Vasprun
 from scipy.constants import value as _cd
 from scipy.optimize import bisect
 from scipy.spatial import ConvexHull
 
-from pymatgen.analysis.defects.core import Defect, NamedDefect
-from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
-from pymatgen.analysis.defects.finder import DefectSiteFinder
-from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile, group_docs
+if TYPE_CHECKING:
+    from numpy.typing import ArrayLike, NDArray
+    from pymatgen.analysis.defects.utils import CorrectionResult
+    from pymatgen.core import Structure
+    from pymatgen.electronic_structure.dos import Dos
+    from pymatgen.entries.computed_entries import ComputedStructureEntry
 
 __author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -64,7 +69,9 @@ class DefectEntry(MSONable):
             about how the corrections were calculated.  These should are only used
             for debugging and plotting purposes.
             PLEASE DO NOT USE THIS AS A CONTAINER FOR IMPORTANT DATA.
-
+        entry_id:
+            The entry_id for the defect entry. Usually the same as the entry_id of the
+            defect supercell entry.
     """
 
     defect: Defect
@@ -326,7 +333,8 @@ class FormationEnergyDiagram(MSONable):
             bulk_entry:
                 The bulk computed entry to get the total energy of the bulk supercell.
             band_gap:
-                The band gap of the bulk crystal.
+                The band gap of the bulk crystal. Passed directly to the \
+                FormationEnergyDiagram constructor.
             inc_inf_values:
                 If False these boundary points at infinity are ignored when we look at
                 the chemical potential limits.
@@ -441,7 +449,7 @@ class FormationEnergyDiagram(MSONable):
         Args:
             defect_entry:
                 The defect entry for which the formation energy is computed.
-            chem_pots:
+            chempots:
                 A dictionary of chemical potentials for each element.
 
         Returns:
@@ -505,7 +513,7 @@ class FormationEnergyDiagram(MSONable):
         """Get the lines for the formation energy diagram.
 
         Args:
-            chempot_dict:
+            chempots:
                 A dictionary of the chemical potentials (referenced to the elements)
                 representations a vertex of the stability region of the chemical
                 potential diagram.
@@ -524,7 +532,7 @@ class FormationEnergyDiagram(MSONable):
         return lines
 
     def get_transitions(
-        self, chempots: dict, x_min: float = 0, x_max: float = 10
+        self, chempots: dict, x_min: float = 0, x_max: float | None = None
     ) -> list[tuple[float, float]]:
         """Get the transition levels for the formation energy diagram.
 
@@ -533,10 +541,14 @@ class FormationEnergyDiagram(MSONable):
         point respectively.
 
         Args:
-            chempot_dict:
+            chempots:
                 A dictionary of the chemical potentials (referenced to the elements)
                 representations a vertex of the stability region of the chemical
                 potential diagram.
+            x_min:
+                The minimum x value (Energy) for the transition levels.
+            x_max:
+                The maximum x value (Energy) for the transition levels. If None, the band gap is used.
 
         Returns:
             Transition levels and the formation energy at each transition level.
@@ -559,6 +571,8 @@ class FormationEnergyDiagram(MSONable):
         Args:
             fermi_level:
                 The Fermi level at which the formation energy is computed.
+            chempot_dict:
+                A dictionary of the chemical potentials (referenced to the elemental energies).
 
         Returns:
             The formation energy at the given Fermi level.
@@ -686,6 +700,14 @@ class MultiFormationEnergyDiagram(MSONable):
 
         Initializes by grouping defect types, and creating a list of single
         FormationEnergyDiagram using the with_atomic_entries method (see above)
+
+        Args:
+            bulk_entry: bulk entry
+            defect_entries: list of defect entries
+            atomic_entries: list of atomic entries
+            phase_diagram: phase diagram
+            vbm: valence band maximum for the bulk phase
+            **kwargs: additional kwargs for FormationEnergyDiagram
         """
         single_form_en_diagrams = []
         for _, defect_group in group_defect_entries(defect_entries=defect_entries):
@@ -1019,7 +1041,11 @@ def fermi_dirac(energy: float, temperature: int | float) -> float:
 
     Gets the defects equilibrium concentration (up to the multiplicity factor)
     at a particular fermi level, chemical potential, and temperature (in Kelvin),
-    assuming dilue limit thermodynamics (non-interacting defects) using FD statistics.
+    assuming dilute limit thermodynamics (non-interacting defects) using FD statistics.
+
+    Args:
+        energy: Energy of the defect with respect to the VBM.
+        temperature: Temperature in Kelvin.
     """
     return 1.0 / (1.0 + np.exp((energy) / (boltzman_eV_K * temperature)))
 
@@ -1080,8 +1106,10 @@ def plot_formation_energy_diagrams(
         envelope_alpha: Alpha for the envelope
         line_alpha: Alpha for the lines (if the are shown)
         band_edge_color: Color for VBM/CBM vertical lines
-        filterfunction: A callable that filters formation energy diagram objects to clean up the plot
-        axis: Previous axis to amend
+        filterfunction: A callable that filters formation energy diagram objects to clean up the plot.
+        legend_loc: Location of the legend, default is "lower center".
+        show_legend: Whether to show the legend.
+        axis: Axis to plot on. If None, a new axis will be created.
 
     Returns:
         Axis subplot
@@ -1103,8 +1131,9 @@ def plot_formation_energy_diagrams(
     axis.axvline(band_gap, color=band_edge_color, linestyle="--", linewidth=1)
     axis.axvline(0, color=band_edge_color, linestyle="--", linewidth=1)
     if not xlim:
-        xmin, xmax = np.subtract(-0.2, alignment), np.subtract(
-            band_gap + 0.2, alignment
+        xmin, xmax = (
+            np.subtract(-0.2, alignment),
+            np.subtract(band_gap + 0.2, alignment),
         )
     else:
         xmin, xmax = xlim
@@ -1146,7 +1175,7 @@ def plot_formation_energy_diagrams(
         if ":" in fed_name:
             latexname += f" ({fed_name.split(':')[1]})"
 
-        (l,) = axis.plot(
+        (_l,) = axis.plot(
             np.subtract(trans[:, 0], alignment),
             trans_y,
             color=cur_color,
@@ -1158,7 +1187,7 @@ def plot_formation_energy_diagrams(
             markersize=transition_markersize,
         )
         if not only_lower_envelope:
-            cur_color = l.get_color()
+            cur_color = _l.get_color()
             for line in lines:
                 x = np.linspace(xmin, xmax)
                 y = line[0] * x + line[1]
@@ -1230,6 +1259,17 @@ def plot_formation_energy_diagrams(
 
 
 def _get_line_color_and_style(colors=None, styles=None):
+    """Get a generator for colors and styles.
+
+    Create an iterator that will cycle through the colors and styles.
+
+    Args:
+        colors: List of colors to use, if None, use the default matplotlib colors.
+        styles: List of styles to use, if None, will use ["-", "--", "-.", ":"]
+
+    Returns:
+        Generator of (color, style) tuples
+    """
     if colors is None:
         colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
     if styles is None:
