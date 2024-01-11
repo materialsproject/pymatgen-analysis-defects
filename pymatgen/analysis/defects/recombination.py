@@ -6,6 +6,7 @@ The the SRH recombination code is taken from the NonRad code (www.github.com/mtu
 from __future__ import annotations
 
 import itertools
+import logging
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -13,9 +14,12 @@ from scipy.interpolate import PchipInterpolator
 
 from .constants import AMU2KG, ANGS2M, EV2J, HBAR_EV, HBAR_J, KB, LOOKUP_TABLE
 
+_logger = logging.getLogger(__name__)
+
 try:
     from numba import njit
 except ImportError:
+    _logger.warning("Numba not installed. Install Numba for better performance.")
 
     def njit(*args, **kwargs):
         """Dummy decorator for njit."""
