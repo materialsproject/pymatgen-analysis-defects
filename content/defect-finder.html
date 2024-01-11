@@ -414,10 +414,10 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="defect-finder">
 <h1>Defect Finder<a class="headerlink" href="#defect-finder" title="Permalink to this heading">#</a></h1>
-<p>As you introduced a defect into a crystalline system, all of the atoms in the system will be subject to displacements
+<p>As you introduce a defect into a crystalline system, all of the atoms in the system will be subject to displacements
 during the atomic relaxation process. This can be especially problematic for native point defects, since the similar atoms in the simulation cell are technically fungible so split-vacancies and split-interstitials can be created with ill-defined positions.
-The <code class="docutils literal notranslate"><span class="pre">DefectSiteFinder</span></code> can be used to identify the location of the defect in a simulation cell without any prior knowledge of the how the defect is created.
-This is especially useful during database building since the location of the defect is now provence agnostic which means that the database requires less context information during the build process.</p>
+The <code class="docutils literal notranslate"><span class="pre">DefectSiteFinder</span></code> can be used to identify the location of the defect in a simulation cell without any prior knowledge of how the defect is created.
+This is especially useful during database building since the location of the defect is now provenance agnostic which means that the database requires less context information during the build process.</p>
 <p>To use the <code class="docutils literal notranslate"><span class="pre">DefectSiteFinder</span></code>, simply instantiate the class and call the <code class="docutils literal notranslate"><span class="pre">find_defect_fpos</span></code> method with the defective and pristine structures as arguments.  We show that the <code class="docutils literal notranslate"><span class="pre">DefectSiteFinder</span></code> can be used to identify the location of nitrogen vacancies in wz-GaN structure blow.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -453,19 +453,19 @@ This is especially useful during database building since the location of the def
 </div>
 </div>
 </div>
-<p>The last for <code class="docutils literal notranslate"><span class="pre">q=3</span></code> demonstrates that doing this in a smaller simulation cell with large distortions can be problematic so always double check your results.</p>
+<p>The last structure (for <code class="docutils literal notranslate"><span class="pre">q=2</span></code>) demonstrates that doing this in a smaller simulation cell with large distortions can be problematic so always double-check your results.</p>
 <p>On a larger ZrO2 cell, the identified vacancy is shown</p>
 <img src="https://raw.githubusercontent.com/materialsproject/pymatgen-analysis-defects/main/docs/source/_static/img/v_O_ZrO2_defect_finder.png" width="800"/><section id="how-does-it-work">
 <h2>How does it work?<a class="headerlink" href="#how-does-it-work" title="Permalink to this heading">#</a></h2>
-<p>Structure matching procedure is as follows:</p>
+<p>The steps of the structure analysis and comparison procedure are as follows:</p>
 <ol class="arabic simple">
-<li><p>Caclulate the anonymized SOAP vector for each symmetry distinct site in the pristine structure.</p></li>
+<li><p>Calculate the anonymized SOAP vector for each symmetry distinct site in the pristine structure.</p></li>
 <li><p>Calculate the SOAP vector for each site in the defective structure.</p></li>
 <li><p>For each site in the defective structure, find the closest match in the pristine structure using the cosine similarity of the SOAP vectors. This cosine similarity becomes a measure of how defective the site is (how different from a bulk site).</p></li>
-<li><p>Rank the sites by the their defectiveness as defined above.</p></li>
+<li><p>Rank the sites by their defectiveness as defined above.</p></li>
 <li><p>Compute the periodic average of a subset of the most defective sites.</p></li>
 </ol>
-<p>So in a sense we are using SOAP to arrive at a distortion field for the defect structure and calculating the center of that distortion field.  This is a fairly straight-forward approach, but it seems to work well in practice.</p>
+<p>So in a sense, we are using SOAP to arrive at a distortion field for the defect structure and calculating the center of that distortion field.  This is a fairly straightforward approach, but it seems to work well in practice.</p>
 </section>
 </section>
 
