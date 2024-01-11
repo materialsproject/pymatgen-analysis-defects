@@ -9,10 +9,18 @@ import itertools
 from typing import TYPE_CHECKING
 
 import numpy as np
-from numba import njit
 from scipy.interpolate import PchipInterpolator
 
 from .constants import AMU2KG, ANGS2M, EV2J, HBAR_EV, HBAR_J, KB, LOOKUP_TABLE
+
+try:
+    from numba import njit
+except ImportError:
+
+    def njit(*args, **kwargs):
+        """Dummy decorator for njit."""
+        return lambda func: func
+
 
 if TYPE_CHECKING:
     from numpy import typing as npt
