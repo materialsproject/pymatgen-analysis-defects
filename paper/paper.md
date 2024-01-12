@@ -11,7 +11,7 @@ authors:
   - name: Jimmy-Xuan Shen
     orcid: 0000-0002-2743-7531
     affiliation: "1" # (Multiple affiliations must be quoted)
-  - name: Joel B. Varley
+  - name: Joel Varley
     orcid: 0000-0002-5384-5248
     affiliation: "1"
 affiliations:
