@@ -23,25 +23,25 @@ bibliography: paper.bib
 # Summary
 
 Point defects can often determine the properties of semiconductor and optoelectronic materials.
-Simulation of point defects is one of the most complex workflows in computational materials science, involving extensive pre- and post-processing of the structural and electronic structure data[@CGWalle_defects_RMP].
-Multiple software packages exist to automate the simulation of point defects including work from [@Broberg2018], [@Kumagai2021], [@Huang2022], [@Arrigoni2021Jul], [@Goyal2017Apr], and [@Smtg-Bham2023Dec]however, there is a lack of a code that focuses on:
+Simulation of point defects is one of the most complex workflows in computational materials science, involving extensive pre- and post-processing of the structural and electronic structure data [@CGWalle_defects_RMP].
+Multiple software packages exist to automate the simulation of point defects including work from [@Broberg2018], [@Kumagai2021], [@Huang2022], [@Arrigoni2021Jul], [@Goyal2017Apr], and [@Smtg-Bham2023Dec] however, there is a lack of a code that focuses on:
 
-1. Integration but not insistence on standardized high-throughput workflow frameworks.
-2. Building large, persistent databases of point defects that are extensible to new calculations over time.
+1. Integration of but not insistence on standardized high-throughput workflow frameworks
+2. Building large, persistent databases of point defects that are extensible to new calculations over time
 
-Since the combinatorics of point defects in crystalline materials can be extremely large, it is important to have a software package that can be easily integrated into high-throughput workflows to manage these complex calculations.
-However, most users of defect analysis packages will not need to run thousands of calculations so it is important to have code focused purely on the defect analysis and relegate the high-throughput workflow aspect to a separate package.
+Since the combinatorics of point defects in crystalline materials can be daunting, it is important to have a software package that can be easily integrated into high-throughput workflows to manage these complex calculations.
+However, most users of defect analysis packages will not need to run thousands of calculations, so it is important to have code focused purely on the defect analysis and relegate the high-throughput workflow aspect to a separate package.
 Additionally, a well-known problem in the simulation of point defects is the fact that current structure optimization techniques can miss the ground state structure based on the initial guess in a sizable minority of cases, so the ability to easily re-visit and re-optimize structures is crucial to building a reliable database of point defects.
 Towards that end, we have developed a Python package, `pymatgen-analysis-defects`, and integrated it with the popular `atomate2` workflow framework to provide a complete set of tools for simulating, analyzing, and managing the results of point defect calculations.
 
 Since the ability to revisit calculations is crucial to building a reliable database, but user tagging of calculations is inconsistent, especially in a high-throughput context, we have codified a structure-only definition of point defects that can be used to aggregate the results of multiple calculations of the same defect.
 This allows for the creation of a database of point defects that can be easily extended to new calculations over time.
-In addition to the focus on database building, we have also implemented several tools for analyzing quantum recombination in defects, these include:
+In addition to the focus on database building, we have also implemented several tools for analyzing carrier recombination in defects, these include:
 
-1. Obtaining the chemical potential contribution to the defect formation energy without explicit calculations of the competing phases.
-2. Obtaining the Freysoldt finite-size correction without user intervention.
-3. Calculation of the optical transition between states under the independent-particle approximation.
-4. Calculation of the non-radiative recombination using the `nonrad` code [@turiansky_nonrad_2021].
+1. Obtaining the chemical potential contribution to the defect formation energy without explicit calculations of the competing phases
+2. Obtaining the Freysoldt finite-size correction without user intervention
+3. Calculation of the optical transition between states under the independent-particle approximation
+4. Calculation of the non-radiative recombination using the `nonrad` code [@turiansky_nonrad_2021]
 
 Details of the implementation and tutorials for using the different parts of the package are provided at:
 
@@ -77,7 +77,7 @@ N intersitial site at [0.00,0.00,0.20]
 N intersitial site at [0.35,0.65,0.69]
 ```
 
-In the code above, we query the materials project database for the charge density object which contains the information about the bulk structure as well as the electronic charge density.
+In the code above, we query the Materials Project database for the charge density object, which contains information about the bulk structure, as well as the electronic charge density.
 Using the `generate_all_native_defects` function, we can generate a list of all of the native point defects for this structure.
 
 ![Defect generation.](fig1.png){ width=35% }
@@ -103,7 +103,7 @@ for defect in generate_all_native_defects(chgcar):
 flow = Flow(jobs)
 ```
 
-The code above will generate a `Flow` object that contains all of the instructions to dynamically create all of the required defect calculations, which can be sent to the job manager on HPC to be executed.
+The code above will generate a `Flow` object that contains all of the instructions to dynamically create all of the required defect calculations, which can be sent to the job manager on an HPC system.
 
 
 # Statement of need
