@@ -29,7 +29,7 @@ As such, managing and curating the results of the defect calculations generated 
 Moreover, eventually building a high-quality, persistent defects database will significantly reduce the computational cost of defect calculations for the entire community.
 
 Simulation of point defects is one of the most complex workflows in computational materials science, involving extensive pre- and post-processing of the structural and electronic structure data [@CGWalle_defects_RMP].
-Multiple software packages exist to automate the simulation of point defects including work from [@Broberg2018], [@Kumagai2021], [@Huang2022], [@Arrigoni2021Jul], [@Goyal2017Apr], and [@Smtg-Bham2023Dec] however, there is a lack of a code that focuses on:
+Multiple software packages exist to automate the simulation of point defects including work from @Broberg2018, @Kumagai2021, @Huang2022, @Arrigoni2021Jul, @Goyal2017Apr, and @Smtg-Bham2023Dec; however, no available code focuses on:
 
 1. Integration of but not insistence on standardized high-throughput workflow frameworks
 2. Building large, persistent databases of point defects that are extensible to new calculations over time
@@ -53,9 +53,7 @@ In addition to the focus on database building, we have also implemented several 
 3. Calculation of the optical transition between states under the independent-particle approximation
 4. Calculation of the non-radiative recombination using the `nonrad` code [@turiansky_nonrad_2021]
 
-Details of the implementation and tutorials for using the different parts of the package are provided at:
-
-https://materialsproject.github.io/pymatgen-analysis-defects/intro.html
+Details of the implementation and tutorials for using the different parts of the package are provided at <https://materialsproject.github.io/pymatgen-analysis-defects/intro.html>.
 
 ## Defect Definition
 
