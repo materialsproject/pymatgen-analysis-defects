@@ -1,13 +1,12 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Defining Defects &#8212; pymatgen-analysis-defects</title>
   
@@ -29,39 +28,35 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/clipboard.min.js"></script>
-    <script src="../_static/copybutton.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script src="../_static/design-tabs.js"></script>
-    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
-const thebe_selector = ".thebe,.cell"
-const thebe_selector_input = "pre"
-const thebe_selector_output = ".output, .cell_output"
-</script>
-    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'content/defining-defects';</script>
     <link rel="canonical" href="https://materialsproject.github.io/pymatgen-analysis-defects/content/defining-defects.html" />
     <link rel="index" title="Index" href="../genindex.html" />
@@ -155,7 +150,18 @@ const thebe_selector_output = ".output, .cell_output"
     <p class="title logo__title">pymatgen-analysis-defects</p>
   
 </a></div>
-        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Documentation</span></p>
 <ul class="current nav bd-sidenav">
@@ -397,6 +403,7 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-example-using-gan">Basic Example Using GaN</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-defect-complexes">Defining Defect Complexes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#obtaining-the-simulation-supercell">Obtaining the Simulation Supercell</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generating-defects">Generating Defects</a></li>
 </ul>
             </nav>
         </div>
@@ -409,7 +416,7 @@ document.write(`
                 <article class="bd-article">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="defining-defects">
-<h1>Defining Defects<a class="headerlink" href="#defining-defects" title="Permalink to this heading">#</a></h1>
+<h1>Defining Defects<a class="headerlink" href="#defining-defects" title="Link to this heading">#</a></h1>
 <p>A persistent challenge with organizing computational defect data is the ambiguity with which a defect simulation is defined.
 The standard practice is to simulate the isolated defects by using a larger simulation to create an isolated defect and then using charge-state corrections to approximate the properties of a defect in the dilute limit.
 This means that the same defect can be simulated with different simulation cells.
@@ -423,7 +430,7 @@ A point defect is defined by the Wigner-Seitz unit cell representation of the bu
 Different kinds of point defects all subclass the <code class="docutils literal notranslate"><span class="pre">Defect</span></code> objects which gives easy access to functions such as generating a cubic simulation supercell.
 As along as the database or any algorithm keeps track of this <code class="docutils literal notranslate"><span class="pre">Defect</span></code> object, you can just use simple structure matching to find out if two simulations represent the same defect.</p>
 <section id="basic-example-using-gan">
-<h2>Basic Example Using GaN<a class="headerlink" href="#basic-example-using-gan" title="Permalink to this heading">#</a></h2>
+<h2>Basic Example Using GaN<a class="headerlink" href="#basic-example-using-gan" title="Link to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
@@ -518,7 +525,7 @@ The two vacancies v_N and v_N are equivalent.
 </div>
 </section>
 <section id="defining-defect-complexes">
-<h2>Defining Defect Complexes<a class="headerlink" href="#defining-defect-complexes" title="Permalink to this heading">#</a></h2>
+<h2>Defining Defect Complexes<a class="headerlink" href="#defining-defect-complexes" title="Link to this heading">#</a></h2>
 <p>Defining defect complexes can be done by providing a list of defect objects generated using the same pristine structure.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -549,7 +556,7 @@ For complexes, we recommend checking the structure with the center of mass (<cod
 </div>
 </section>
 <section id="obtaining-the-simulation-supercell">
-<h2>Obtaining the Simulation Supercell<a class="headerlink" href="#obtaining-the-simulation-supercell" title="Permalink to this heading">#</a></h2>
+<h2>Obtaining the Simulation Supercell<a class="headerlink" href="#obtaining-the-simulation-supercell" title="Link to this heading">#</a></h2>
 <p>The simplest way to generate a supercell for simulating the defect is to just call the <code class="docutils literal notranslate"><span class="pre">get_supercell_structure</span></code> method for the defect.</p>
 <p>Note that, under the hood, the <code class="docutils literal notranslate"><span class="pre">get_supercell_structure</span></code> method first attempts a “quick and dirty” inversion of a large cube in the bases of the lattice parameters.
 If a valid supercell is not discovered this way, ASE’s <code class="docutils literal notranslate"><span class="pre">find_optimal_cell_shape</span></code> will be called to exhaustively search for the best supercell structure.</p>
@@ -577,6 +584,72 @@ Note that in this case, the conditions for the for cubic cell cannot be satisfie
 </pre></div>
 </div>
 </div>
+</div>
+</section>
+<section id="generating-defects">
+<h2>Generating Defects<a class="headerlink" href="#generating-defects" title="Link to this heading">#</a></h2>
+<p>Intersitial defects are usually hard to define due to a lack of reference points for the site.
+Extensive symmetry can be done to identifiy highly symmetric sites in the structure for interstitial insertion.
+However, the recommended method to create interstitial defects is to use the <code class="docutils literal notranslate"><span class="pre">ChargeInterstitialGenerator</span></code> which analyzes the charge density to identify interstitial sites.  The code snippet to generate the interstitial sites are given below.</p>
+<p>For more details, check out this [paper].(<a class="reference external" href="https://www.nature.com/articles/s41524-020-00422-3">https://www.nature.com/articles/s41524-020-00422-3</a>)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">Chgcar</span>
+<span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.generators</span> <span class="kn">import</span> <span class="n">ChargeInterstitialGenerator</span><span class="p">,</span> <span class="n">generate_all_native_defects</span>
+
+<span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;CHGCAR.Fe3O4.vasp&quot;</span><span class="p">)</span>
+<span class="n">cig</span> <span class="o">=</span> <span class="n">ChargeInterstitialGenerator</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="n">cig</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">chgcar</span><span class="p">,</span> <span class="n">insert_species</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">]):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">defect</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H intersitial site at [0.00,0.00,0.00]
+H intersitial site at [0.38,0.38,0.38]
+</pre></div>
+</div>
+</div>
+</div>
+<p>You can geneate all native defects in an atomic structure using the <code class="docutils literal notranslate"><span class="pre">generate_all_native_defects</span></code> function.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="n">generate_all_native_defects</span><span class="p">(</span><span class="n">chgcar</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">defect</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fe Vacancy defect at site #0
+Fe Vacancy defect at site #1
+Fe Vacancy defect at site #3
+O Vacancy defect at site #6
+O Vacancy defect at site #7
+Fe subsitituted on the O site at at site #6
+Fe subsitituted on the O site at at site #7
+O subsitituted on the Fe site at at site #0
+O subsitituted on the Fe site at at site #1
+O subsitituted on the Fe site at at site #3
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>O intersitial site at [0.00,0.00,0.00]
+O intersitial site at [0.38,0.38,0.38]
+Fe intersitial site at [0.00,0.00,0.00]
+Fe intersitial site at [0.38,0.38,0.38]
+</pre></div>
+</div>
+</div>
+</div>
+<p>If you have access the to materials project charge density API,
+you can obtain the data from the API directly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<span class="kn">from</span> <span class="nn">pymatgen.ext.matproj</span> <span class="kn">import</span> <span class="n">MPRester</span>
+<span class="k">with</span> <span class="n">MPRester</span><span class="p">()</span> <span class="k">as</span> <span class="n">mpr</span><span class="p">:</span>
+    <span class="n">chgcar</span> <span class="o">=</span> <span class="n">mpr</span><span class="o">.</span><span class="n">get_charge_density_from_material_id</span><span class="p">(</span><span class="s2">&quot;mp-804&quot;</span><span class="p">)</span>
+    
+<span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="n">generate_all_native_defects</span><span class="p">(</span><span class="n">chgcar</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">defect</span><span class="p">)</span>
+</pre></div>
 </div>
 </section>
 </section>
@@ -648,6 +721,7 @@ Note that in this case, the conditions for the for cubic cell cannot be satisfie
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-example-using-gan">Basic Example Using GaN</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#defining-defect-complexes">Defining Defect Complexes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#obtaining-the-simulation-supercell">Obtaining the Simulation Supercell</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generating-defects">Generating Defects</a></li>
 </ul>
   </nav></div>
 
@@ -672,7 +746,7 @@ By Jimmy-Xuan Shen
 
   <p class="copyright">
     
-      © Copyright 2022.
+      © Copyright 2023.
       <br/>
     
   </p>

@@ -1,13 +1,12 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-content_root="" >
+<html lang="en" data-content_root="../" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Shockley-Read-Hall Recombination &#8212; pymatgen-analysis-defects</title>
   
@@ -29,39 +28,35 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/clipboard.min.js"></script>
-    <script src="../_static/copybutton.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
-    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
-    <script src="../_static/design-tabs.js"></script>
-    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
-const thebe_selector = ".thebe,.cell"
-const thebe_selector_input = "pre"
-const thebe_selector_output = ".output, .cell_output"
-</script>
-    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'content/nonradiative';</script>
@@ -157,7 +152,18 @@ const thebe_selector_output = ".output, .cell_output"
     <p class="title logo__title">pymatgen-analysis-defects</p>
   
 </a></div>
-        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Documentation</span></p>
 <ul class="current nav bd-sidenav">
@@ -414,7 +420,7 @@ document.write(`
                 <article class="bd-article">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="shockley-read-hall-recombination">
-<h1>Shockley-Read-Hall Recombination<a class="headerlink" href="#shockley-read-hall-recombination" title="Permalink to this heading">#</a></h1>
+<h1>Shockley-Read-Hall Recombination<a class="headerlink" href="#shockley-read-hall-recombination" title="Link to this heading">#</a></h1>
 <p>Shockley-Read-Hall (SRH) recombination is the dominant recombination mechanism at lower carrier concentrations.
 First-principles calculations of the SRH recombination rate were pioneered in the Van de Walle group at the University of California, Santa Barbara by Prof. Audrius Alisauskas <span id="id1">[<a class="reference internal" href="references.html#id3" title="Audrius Alkauskas, Qimin Yan, and Chris G. Van de Walle. First-principles theory of nonradiative carrier capture via multiphonon emission. Phys. Rev. B, 90(7):075202, August 2014. doi:10.1103/PhysRevB.90.075202.">Alkauskas <em>et al.</em>, 2014</a>]</span>.
 Additional developments have been made to better integrate the methodology with existing projector-augmented wave methods in <code class="docutils literal notranslate"><span class="pre">VASP</span></code> to enable much faster calculations of the SRH recombination rate. For a more detailed account of the methodology, please see the following reference: <span id="id2">[<a class="reference internal" href="references.html#id2" title="Jimmy-Xuan Shen. Nonradiative Recombination in Semiconductor Alloys. 2018. [Online; accessed 19. Dec. 2022]. URL: https://escholarship.org/uc/item/1c126345.">Shen, 2018</a>]</span>.</p>
@@ -439,7 +445,7 @@ Additional developments have been made to better integrate the methodology with 
 </div>
 </div>
 <section id="read-a-single-harmonic-defect">
-<h2>Read a single Harmonic Defect<a class="headerlink" href="#read-a-single-harmonic-defect" title="Permalink to this heading">#</a></h2>
+<h2>Read a single Harmonic Defect<a class="headerlink" href="#read-a-single-harmonic-defect" title="Link to this heading">#</a></h2>
 <p>We can parse an sorted list of directories with <code class="docutils literal notranslate"><span class="pre">HarmonicDefect.from_directories</span></code>.
 This will look into each directory for a <code class="docutils literal notranslate"><span class="pre">vasprun.xml</span></code> file from which the structures and energies will be extracted.</p>
 <p>The different constructors for <code class="docutils literal notranslate"><span class="pre">HarmonicDefect</span></code> all accept a list of sources where the energies and structures come from.
@@ -475,7 +481,7 @@ Note that the defect state reports the “most-localized” bands at each k-poin
 Please report any issues you encounter to the github issue tracker.
 </div>
 <section id="potential-energy-surface">
-<h3>Potential energy surface<a class="headerlink" href="#potential-energy-surface" title="Permalink to this heading">#</a></h3>
+<h3>Potential energy surface<a class="headerlink" href="#potential-energy-surface" title="Link to this heading">#</a></h3>
 <p>Under the harmonic approximation, the potential energy surface of the defect in a particular charge state is given by:</p>
 <div class="math notranslate nohighlight">
 \[\frac{1}{2} \omega^2 Q^2\]</div>
@@ -521,7 +527,7 @@ Please report any issues you encounter to the github issue tracker.
 </section>
 </section>
 <section id="evaluating-the-electron-phonon-matrix-element-with-paws">
-<h2>Evaluating the Electron-Phonon Matrix Element with PAWs<a class="headerlink" href="#evaluating-the-electron-phonon-matrix-element-with-paws" title="Permalink to this heading">#</a></h2>
+<h2>Evaluating the Electron-Phonon Matrix Element with PAWs<a class="headerlink" href="#evaluating-the-electron-phonon-matrix-element-with-paws" title="Link to this heading">#</a></h2>
 <p>Methods for evaluating electron-phonon interactions in solids from ab initio calculations are well established.
 We use the frozen-phonon method, whereby all the atoms in a supercell are displaced according to the eigenmode of the special phonon.
 The coupling between the atomic displacements and the electronic properties of the system is represented by the electron-phonon matrix element (epME).
@@ -550,7 +556,7 @@ As an example, we will use the three <code class="docutils literal notranslate">
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The parsed WSWQ files are: [&#39;WSWQ.2&#39;, &#39;WSWQ.1&#39;, &#39;WSWQ.0&#39;]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The parsed WSWQ files are: [&#39;WSWQ.1&#39;, &#39;WSWQ.0&#39;, &#39;WSWQ.2&#39;]
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Parsed 3 WSWQ files.
@@ -579,7 +585,7 @@ The resulting array of shape (216,) contains the matrix elements from the defect
 </div>
 </section>
 <section id="calculating-the-srh-capture-coefficient">
-<h2>Calculating the SRH Capture Coefficient<a class="headerlink" href="#calculating-the-srh-capture-coefficient" title="Permalink to this heading">#</a></h2>
+<h2>Calculating the SRH Capture Coefficient<a class="headerlink" href="#calculating-the-srh-capture-coefficient" title="Link to this heading">#</a></h2>
 <p>To calculate the Shockley-Read-Hall (SRH) capture coefficient, we also need the potential energy surface of the final state.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -704,7 +710,7 @@ By Jimmy-Xuan Shen
 
   <p class="copyright">
     
-      © Copyright 2022.
+      © Copyright 2023.
       <br/>
     
   </p>
