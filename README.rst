@@ -15,6 +15,17 @@ While the ``atomate2`` automation framework is not required for this code to be 
 to adopt the ``atomate2`` framework as it contains codified "best practices" for running defect calculations
 as well as orchestrating the running of calculations and storing the results.
 
+The package serves as an object-oriented interface to defect physics and is capable of generating a list of 
+non-equivalent defect objects directly from the Materials Project API.
+
+.. code-block:: python
+    from pymatgen.analysis.defects.generators import ChargeInterstitialGenerator, generate_all_native_defects
+    from pymatgen.ext.matproj import MPRester
+    with MPRester() as mpr:
+        chgcar = mpr.get_charge_density_from_material_id("mp-804")
+        
+    for defect in generate_all_native_defects(chgcar):
+        print(defect)
 
 Non-exhaustive list of features:
 --------------------------------
