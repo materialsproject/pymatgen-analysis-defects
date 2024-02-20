@@ -6,7 +6,10 @@ import logging
 import math
 from typing import TYPE_CHECKING
 
+import numpy as np
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
+from pymatgen.core import Lattice
+from pymatgen.util.coord_cython import is_coord_subset_pbc, pbc_shortest_vectors
 
 # from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape
 # from pymatgen.io.ase import AseAtomsAdaptor
@@ -63,7 +66,8 @@ def get_matched_structure_mapping(
 ):
     """Get the mapping of the supercell to the unit cell.
 
-    Get the mapping from the supercell defect structure onto the base structure,
+    Get the mapping from the supercell structure onto the base structure,
+    Note: this only works for structures that are exactly matched.
 
     Args:
         uc_struct: host structure, smaller cell
@@ -159,3 +163,65 @@ def _ase_cubic(base_structure, min_atoms: int = 80, max_atoms: int = 240):
     if min_dev[1] is None:
         raise RuntimeError("Could not find a cubic supercell")
     return min_dev[1]
+
+
+def _avg_lat(l1, l2):
+    """Get the average lattice from two lattices."""
+    params = (np.array(l1.parameters) + np.array(l2.parameters)) / 2
+    return Lattice.from_parameters(*params)
+
+
+def _lowest_dist(struct, ref_struct):
+    """For each site, return the lowest distance to any site in the reference structure."""
+    avg_lat = _avg_lat(struct.lattice, ref_struct.lattice)
+    _, d_2 = pbc_shortest_vectors(
+        avg_lat, struct.frac_coords, ref_struct.frac_coords, return_d2=True
+    )
+    return np.min(d_2, axis=1)
+
+
+def get_closest_sc_mat(
+    uc_struct: Structure,
+    sc_struct: Structure,
+    sm: StructureMatcher | None = None,
+    debug: bool = False,
+):
+    """Get the best guess for the supercell matrix that created this defect cell.
+
+    Args:
+        uc_struct: unit cell structure, should be the host structure
+        sc_struct: supercell structure, should be the defect structure
+        sm: StructureMatcher instance, if None, one will be created with default settings
+        debug: bool, if True, return the full list of matrices and distances will be returned
+
+    Returns:
+        sc_mat: supercell matrix to apply to s1 to get s2
+        dist: mean distance between the two structures
+    """
+    if sm is None:
+        sm = StructureMatcher(primitive_cell=False, comparator=ElementComparator())
+
+    fu = int(np.round(sc_struct.lattice.volume / uc_struct.lattice.volume))
+    candidate_lattices = tuple(
+        sm._get_lattices(sc_struct.lattice, uc_struct, supercell_size=fu)
+    )
+
+    def _get_mean_dist(lattice, sc_mat):
+        if (
+            np.dot(np.cross(lattice.matrix[0], lattice.matrix[1]), lattice.matrix[2])
+            < 0
+        ):
+            return float("inf")
+        sc2 = uc_struct * sc_mat
+        return np.mean(_lowest_dist(sc2, sc_struct))
+
+    _, best_sc_mat = min(candidate_lattices, key=lambda x: _get_mean_dist(x[0], x[1]))
+    if debug:
+        return sorted(
+            [
+                (_get_mean_dist(lat_, smat_), lat_, smat_)
+                for lat_, smat_ in candidate_lattices
+            ],
+            key=lambda x: x[0],
+        )
+    return best_sc_mat
