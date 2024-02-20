@@ -192,7 +192,8 @@ def get_closest_sc_mat(
         uc_struct: unit cell structure, should be the host structure
         sc_struct: supercell structure, should be the defect structure
         sm: StructureMatcher instance, if None, one will be created with default settings
-        debug: bool, if True, return the full list of matrices and distances will be returned
+        debug: bool, if True, return the full list of (distances, lattice, sc_mat) will
+            be returned
 
     Returns:
         sc_mat: supercell matrix to apply to s1 to get s2
