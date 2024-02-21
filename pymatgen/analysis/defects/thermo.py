@@ -886,7 +886,7 @@ def ensure_stable_bulk(
 
 
 def get_sc_locpot(
-    uc_locpot: Locpot, defect_locpot: Structure, sm: StructureMatcher = None
+    uc_locpot: Locpot, defect_locpot: Locpot, sm: StructureMatcher = None
 ):
     """Transform a unit cell locpot to be like a supercell locpot.
 
@@ -902,7 +902,7 @@ def get_sc_locpot(
     Returns:
         Locpot: Locpot object for the unit cell transformed to be like the supercell.
     """
-    sc_mat = get_closest_sc_mat(uc_locpot.structure, defect_locpot)
+    sc_mat = get_closest_sc_mat(uc_locpot.structure, defect_locpot.structure)
     bulk_sc = uc_locpot.structure * sc_mat
     sc_locpot = get_volumetric_like_sc(
         uc_locpot,
