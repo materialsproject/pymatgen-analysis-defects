@@ -154,7 +154,7 @@ def get_volumetric_like_sc(
     cden_transformed = cden.get_transformed(
         sc_mat=sc_mat, origin=-orig, grid_out=grid_out
     )
-    locpot = cden_transformed.get_VolumetricData(
+    locpot = cden_transformed.to_VolumetricData(
         cls=vd.__class__, normalization=normalization
     )
     return locpot
