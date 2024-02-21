@@ -7,16 +7,20 @@ import math
 from typing import TYPE_CHECKING
 
 import numpy as np
+from monty.dev import deprecated
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.core import Lattice
 from pymatgen.util.coord_cython import is_coord_subset_pbc, pbc_shortest_vectors
+from pyrho.charge_density import ChargeDensity
 
 # from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape
 # from pymatgen.io.ase import AseAtomsAdaptor
 
 if TYPE_CHECKING:
+    import numpy.typing as npt
     from numpy.typing import ArrayLike, NDArray
     from pymatgen.core import Structure
+    from pymatgen.io.vasp.outputs import VolumetricData
 
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -61,7 +65,7 @@ def get_sc_fromstruct(
     return sc_mat
 
 
-def get_matched_structure_mapping(
+def get_matched_structure_mapping_old(
     uc_struct: Structure, sc_struct: Structure, sm: StructureMatcher | None = None
 ):
     """Get the mapping of the supercell to the unit cell.
@@ -88,6 +92,72 @@ def get_matched_structure_mapping(
     except TypeError:
         return None
     return sc_m, total_t
+
+
+@deprecated(message="This function was reworked in Feb 2024")
+def get_matched_structure_mapping(
+    uc_struct: Structure, sc_struct: Structure, sm: StructureMatcher | None = None
+):
+    """Get the mapping of the supercell to the unit cell.
+
+    Get the mapping from the supercell structure onto the base structure,
+    Note: this only works for structures that are exactly matched.
+
+    Args:
+        uc_struct: host structure, smaller cell
+        sc_struct: bigger cell
+        sm: StructureMatcher instance
+    Returns:
+        sc_m : supercell matrix to apply to s1 to get s2
+        total_t : translation to apply on s1 * sc_m to get s2
+    """
+    if sm is None:
+        sm = StructureMatcher(
+            primitive_cell=False, comparator=ElementComparator(), attempt_supercell=True
+        )
+    s1, s2 = sm._process_species([sc_struct.copy(), uc_struct.copy()])
+    trans = sm.get_transformation(s1, s2)
+    if trans is None:
+        return None
+    sc, t, mapping = trans
+    temp = s2.copy().make_supercell(sc)
+    ii, jj = 0, mapping[0]
+    vec = np.round(sc_struct[ii].frac_coords - temp[jj].frac_coords)
+    return sc, t + vec
+
+
+def get_volumetric_like_sc(
+    vd: VolumetricData,
+    sc_struct: Structure,
+    grid_out: npt.ArrayLike,
+    sm: StructureMatcher | None = None,
+    normalization: str | None = "vasp",
+):
+    """Get the volumetric data in the supercell.
+
+    Args:
+        vd: VolumeData instance
+        sc_struct: supercell structure
+        grid_out: grid size to output the volumetric data
+        sm: StructureMatcher instance
+        normalization: normalization method for the volumetric data
+
+    Returns:
+        VolumetricData: volumetric data in the supercell
+    """
+    trans = get_matched_structure_mapping(vd.structure, sc_struct=sc_struct, sm=sm)
+    if trans is None:
+        raise ValueError("Could not find a supercell mapping")
+    sc_mat, total_t = trans
+    cden = ChargeDensity.from_pmg(vd, normalization=normalization)
+    orig = np.dot(total_t, sc_mat)
+    cden_transformed = cden.get_transformed(
+        sc_mat=sc_mat, origin=-orig, grid_out=grid_out
+    )
+    locpot = cden_transformed.get_VolumetricData(
+        cls=vd.__class__, normalization=normalization
+    )
+    return locpot
 
 
 def _cubic_cell(
