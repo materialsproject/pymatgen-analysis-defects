@@ -15,9 +15,7 @@ from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
 from pymatgen.analysis.defects.core import Defect, NamedDefect
 from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
 from pymatgen.analysis.defects.finder import DefectSiteFinder
-from pymatgen.analysis.defects.supercells import (
-    get_closest_sc_mat,
-)
+from pymatgen.analysis.defects.supercells import get_closest_sc_mat
 from pymatgen.analysis.defects.utils import get_zfile, group_docs
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
