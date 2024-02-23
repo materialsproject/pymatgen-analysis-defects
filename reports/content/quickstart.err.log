@@ -1,0 +1,43 @@
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+  File "/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/nbclient/client.py", line 1314, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+  File "/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/jupyter_core/utils/__init__.py", line 165, in wrapped
+    return loop.run_until_complete(inner)
+  File "/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+  File "/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+from pymatgen.analysis.defects.core import __file__
+------------------
+
+
+[0;31m---------------------------------------------------------------------------[0m
+[0;31mModuleNotFoundError[0m                       Traceback (most recent call last)
+Cell [0;32mIn[1], line 1[0m
+[0;32m----> 1[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01manalysis[39;00m[38;5;21;01m.[39;00m[38;5;21;01mdefects[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m [38;5;28;01mimport[39;00m [38;5;18m__file__[39m
+
+File [0;32m~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/core.py:12[0m
+[1;32m     10[0m [38;5;28;01mimport[39;00m [38;5;21;01mnumpy[39;00m [38;5;28;01mas[39;00m [38;5;21;01mnp[39;00m
+[1;32m     11[0m [38;5;28;01mfrom[39;00m [38;5;21;01mmonty[39;00m[38;5;21;01m.[39;00m[38;5;21;01mjson[39;00m [38;5;28;01mimport[39;00m MSONable
+[0;32m---> 12[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01manalysis[39;00m[38;5;21;01m.[39;00m[38;5;21;01mdefects[39;00m[38;5;21;01m.[39;00m[38;5;21;01msupercells[39;00m [38;5;28;01mimport[39;00m get_sc_fromstruct
+[1;32m     13[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01manalysis[39;00m[38;5;21;01m.[39;00m[38;5;21;01mstructure_matcher[39;00m [38;5;28;01mimport[39;00m ElementComparator, StructureMatcher
+[1;32m     14[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m [38;5;28;01mimport[39;00m Element, PeriodicSite, Species
+
+File [0;32m~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/supercells.py:14[0m
+[1;32m     12[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m [38;5;28;01mimport[39;00m Lattice
+[1;32m     13[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mutil[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcoord_cython[39;00m [38;5;28;01mimport[39;00m is_coord_subset_pbc, pbc_shortest_vectors
+[0;32m---> 14[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpyrho[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcharge_density[39;00m [38;5;28;01mimport[39;00m ChargeDensity
+[1;32m     16[0m [38;5;66;03m# from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape[39;00m
+[1;32m     17[0m [38;5;66;03m# from pymatgen.io.ase import AseAtomsAdaptor[39;00m
+[1;32m     19[0m [38;5;28;01mif[39;00m TYPE_CHECKING:
+
+[0;31mModuleNotFoundError[0m: No module named 'pyrho'
+
