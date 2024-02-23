@@ -904,7 +904,7 @@ def get_localized_states(
 
 def sort_positive_definite(
     list_in: list, ref1: Any, ref2: Any, dist: Callable
-) -> tuple[list, list[float]]:
+) -> tuple[tuple, tuple[float]]:
     """Sort a list where we can only compute a positive-definite distance.
 
     Sometimes, we can only compute a positive-definite distance between two objects.
