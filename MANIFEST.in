@@ -1,5 +1,6 @@
 include README.md
 include LICENSE
+include pymatgen
 prune test*
 prune doc*
 prune tutorial
