@@ -1,6 +1,7 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools >= 42", "versioningit ~= 1.0", "wheel"]
+requires = ["setuptools >= 60", "setuptools-scm>=8.0", "wheel"]
+
 
 [project]
 authors = [{ name = "Jimmy-Xuan Shen", email = "jmmshn@gmail.com" }]
@@ -19,7 +20,7 @@ dependencies = [
   "pymatgen",
   "scikit-image>=0.19.3",
   "numpy",
-  "mp-pyrho>=0.4.0",
+  "mp-pyrho>=0.4.4",
 ]
 description = "Pymatgen extension for defects analysis"
 dynamic = ["version"]
