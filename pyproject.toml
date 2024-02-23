@@ -1,12 +1,6 @@
 [build-system]
-requires = ["setuptools >= 61", "setuptools-scm>=8.0", "wheel"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-where = ["pymatgen"]  # ["."] by default
-exclude = ["test*"]  # empty by default
-namespaces = true  # true by default
-
+requires = ["setuptools >= 42", "versioningit ~= 1.0", "wheel"]
 
 [project]
 authors = [{ name = "Jimmy-Xuan Shen", email = "jmmshn@gmail.com" }]
@@ -24,8 +18,7 @@ classifiers = [
 dependencies = [
   "pymatgen",
   "scikit-image>=0.19.3",
-  "numpy",
-  "mp-pyrho>=0.4.4",
+  "numpy"
 ]
 description = "Pymatgen extension for defects analysis"
 dynamic = ["version"]
@@ -34,9 +27,6 @@ license = { text = "modified BSD" }
 name = "pymatgen-analysis-defects"
 readme = "README.md"
 requires-python = '>=3.9'
-
-[tool.setuptools_scm]
-
 
 [project.optional-dependencies]
 finder = ["dscribe>=2.0.0"]
@@ -47,13 +37,13 @@ docs = [
 optional = ["pydefect>=0.6.2", "dscribe>=2.0.0", "numba"]
 
 strict = [
-  "pymatgen==2024.2.20",
+  "pymatgen==2023.10.11",
   "dscribe==2.1.0",
-  "scikit-image==0.22.0",
-  "mp-pyrho==0.4.4",
+  "scikit-image==0.21.0",
 ]
 
-tests = ["pytest==7.4.4", "pytest-cov==4.1.0", "nbmake==1.4.6"]
+tests = ["pytest==7.4.2", "pytest-cov==4.1.0", "nbmake==1.4.6"]
+
 
 [tool.setuptools.dynamic]
 readme = { file = ["README.md"] }
@@ -62,6 +52,14 @@ readme = { file = ["README.md"] }
 documentation = "https://materialsproject.github.io/pymatgen-analysis-defects/"
 homepage = "https://materialsproject.github.io/pymatgen-analysis-defects/"
 repository = "https://github.com/materialsproject/pymatgen-analysis-defects"
+
+[tool.setuptools.packages.find]
+exclude = ["tests"]
+where = ["./"]
+
+[tool.versioningit.vcs]
+default-tag = "0.0.1"
+method = "git"
 
 [tool.mypy]
 ignore_missing_imports = true
@@ -105,9 +103,6 @@ line-length = 88
 indent-width = 4
 
 
-
-[tool.ruff.lint]
-# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`).
 # By default, ruff only uses all "E" (pycodestyle) and "F" (pyflakes) rules.
 # Here we append to the defaults.
 select = [
@@ -135,6 +130,9 @@ select = [
   # (ruff-specific) Enable all ruff-specific checks (i.e. not ports of
   # functionality from an existing linter).
   "RUF",
+  # (private member access) Flag access to `_`-prefixed symbols. By default the various special
+  # methods on `NamedTuple` are ignored (e.g. `_replace`).
+  "SLF001",
   # (flake8-type-checking) Auto-sort imports into TYPE_CHECKING blocks depending on whether
   # they are runtime or type-only imports.
   "TCH",
@@ -147,10 +145,14 @@ select = [
   # (invalid escape sequence) flag errant backslashes
   "W605",
 ]
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`).
+select = ["E4", "E7", "E9", "F", "D", "I001", "TCH"]
 ignore = ["E203", "E501", "F401"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
-fixable = ["ALL"]
+fixable = ["ALL", "TCH"]
 unfixable = []
 
 # Allow unused variables when underscore-prefixed.
