@@ -19,7 +19,7 @@ dependencies = [
   "pymatgen",
   "scikit-image>=0.19.3",
   "numpy",
-  "pyrho>=0.4.0",
+  "mp-pyrho>=0.4.0",
 ]
 description = "Pymatgen extension for defects analysis"
 dynamic = ["version"]
