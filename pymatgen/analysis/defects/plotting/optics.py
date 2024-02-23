@@ -27,9 +27,9 @@ def plot_optical_transitions(
     kpt_index: int = 0,
     band_window: int = 5,
     user_defect_band: tuple = tuple(),
-    other_defect_bands: list[int] = None,
-    ijdirs: list[tuple] = None,
-    shift_eig: dict[tuple, float] = None,
+    other_defect_bands: list[int] | None = None,
+    ijdirs: list[tuple] | None = None,
+    shift_eig: dict[tuple, float] | None = None,
     x0: float = 0,
     x_width: float = 2,
     ax=None,
@@ -118,9 +118,9 @@ def get_bs_eigenvalues(
     defect: HarmonicDefect,
     kpt_index: int = 0,
     band_window: int = 5,
-    user_defect_band: tuple = None,
-    other_defect_bands: list[int] = None,
-    shift_eig: dict[tuple, float] = None,
+    user_defect_band: tuple | None = None,
+    other_defect_bands: list[int] | None = None,
+    shift_eig: dict[tuple, float] | None = None,
 ) -> dict[tuple, float]:
     """Read the eigenvalues from `HarmonicDefect.relaxed_bandstructure`.
 

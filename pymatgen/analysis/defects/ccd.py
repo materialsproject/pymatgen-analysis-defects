@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from itertools import groupby
-from typing import TYPE_CHECKING, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING
 
 import numpy as np
 from monty.json import MSONable
@@ -20,6 +20,7 @@ from .utils import get_localized_states, get_zfile, sort_positive_definite
 if TYPE_CHECKING:
     from ctypes import Structure
     from pathlib import Path
+    from typing import Optional, Sequence, Tuple
 
     import numpy.typing as npt
     from matplotlib.axes import Axes
@@ -65,9 +66,9 @@ class HarmonicDefect(MSONable):
     charge_state: int
     ispin: int
     vrun: Optional[Vasprun] = None
-    distortions: Optional[list[float]] = None
-    structures: Optional[list[Structure]] = None
-    energies: Optional[list[float]] = None
+    distortions: Optional[Sequence[float]] = None
+    structures: Optional[Sequence[Structure]] = None
+    energies: Optional[Sequence[float]] = None
     defect_band: Optional[Sequence[tuple]] = None
     relaxed_index: Optional[int] = None
     relaxed_bandstructure: Optional[BandStructure] = None
@@ -234,7 +235,7 @@ class HarmonicDefect(MSONable):
             omega=omega,
             charge_state=charge_state,
             ispin=ispin,
-            structures=structures,
+            structures=list(structures),
             distortions=distortions,
             energies=energies,
             defect_band=defect_band,
@@ -313,7 +314,7 @@ class HarmonicDefect(MSONable):
         return 1.0 / (1 - np.exp(-self.omega_eV / KB * t))
 
     def read_wswqs(
-        self, directory: Path, distortions: list[float] | None = None
+        self, directory: Path, distortions: Sequence[float] | None = None
     ) -> None:
         """Read the WSWQ files from a directory.
 

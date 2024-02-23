@@ -90,8 +90,8 @@ def plot_chempot_2d(
     )
     ax.add_patch(patch)
 
-    ax.set_xlabel(f"$\Delta\mu_{{{x_element}}}$ (eV)")
-    ax.set_ylabel(f"$\Delta\mu_{{{y_element}}}$ (eV)")
+    ax.set_xlabel(rf"$\Delta\mu_{{{x_element}}}$ (eV)")
+    ax.set_ylabel(rf"$\Delta\mu_{{{y_element}}}$ (eV)")
     ax.set_xlim(x_min - PLOT_PADDING, 0 + PLOT_PADDING)
     ax.set_ylim(y_min - PLOT_PADDING, 0 + PLOT_PADDING)
     if label_lines:
@@ -102,7 +102,7 @@ def _convex_hull_2d(
     points: list[dict],
     x_element: Element,
     y_element: Element,
-    competing_phases: list = None,
+    competing_phases: list | None = None,
 ) -> list[dict]:
     """Compute the convex hull of a set of points in 2D.
 

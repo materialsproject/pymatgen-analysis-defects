@@ -15,6 +15,7 @@ from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
 from pymatgen.analysis.defects.core import Defect, NamedDefect
 from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
 from pymatgen.analysis.defects.finder import DefectSiteFinder
+from pymatgen.analysis.defects.supercells import get_closest_sc_mat
 from pymatgen.analysis.defects.utils import get_zfile, group_docs
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
@@ -22,6 +23,7 @@ from pymatgen.core import Composition, Element
 from pymatgen.electronic_structure.dos import FermiDos
 from pymatgen.entries.computed_entries import ComputedEntry
 from pymatgen.io.vasp import Locpot, Vasprun
+from pyrho.charge_density import get_volumetric_like_sc
 from scipy.constants import value as _cd
 from scipy.optimize import bisect
 from scipy.spatial import ConvexHull
@@ -877,8 +879,42 @@ def ensure_stable_bulk(
     stable_entry = ComputedEntry(
         entry.composition, pd.get_hull_energy(entry.composition) - threshold
     )
-    pd = PhaseDiagram(pd.all_entries + [stable_entry])
+    pd = PhaseDiagram([*pd.all_entries, stable_entry])
     return pd
+
+
+def get_sc_locpot(
+    uc_locpot: Locpot,
+    defect_locpot: Locpot,
+    up_sample: int = 2,
+    sm: StructureMatcher = None,
+):
+    """Transform a unit cell locpot to be like a supercell locpot.
+
+    This is useful in situations where the supercell bulk locpot is not available.
+    In these cases, we will have a bulk supercell structure that is most closely
+    related to the defect cell.
+
+    Args:
+        uc_locpot: Locpot object for the unit cell.
+        defect_locpot: Locpot object for the defect supercell.
+        up_sample: upsample factor for the supercell locpot
+        sm: StructureMatcher to use for finding the transformation for UC to SC.
+
+    Returns:
+        Locpot: Locpot object for the unit cell transformed to be like the supercell.
+    """
+    sc_mat = get_closest_sc_mat(uc_locpot.structure, defect_locpot.structure)
+    bulk_sc = uc_locpot.structure * sc_mat
+    sc_locpot = get_volumetric_like_sc(
+        uc_locpot,
+        bulk_sc,
+        grid_out=defect_locpot.dim,
+        up_sample=up_sample,
+        sm=sm,
+        normalization=None,
+    )
+    return sc_locpot
 
 
 def get_transitions(
@@ -1164,8 +1200,8 @@ def plot_formation_energy_diagrams(
             )
         )
         trans_y = trans[:, 1]
-        ymin = min(ymin, min(trans_y))
-        ymax = max(ymax, max(trans_y))
+        ymin = min(ymin, *trans_y)
+        ymax = max(ymax, *trans_y)
 
         dfct: Defect = single_fed.defect_entries[0].defect
         latexname = dfct.latex_name

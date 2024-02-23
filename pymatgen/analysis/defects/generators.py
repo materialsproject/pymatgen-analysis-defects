@@ -21,6 +21,8 @@ from pymatgen.io.vasp import Chgcar
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
 if TYPE_CHECKING:
+    from typing import Sequence
+
     from pymatgen.analysis.defects.core import Defect
     from pymatgen.io.vasp import VolumetricData
 
@@ -86,7 +88,10 @@ class VacancyGenerator(DefectGenerator):
         self.angle_tolerance = angle_tolerance
 
     def generate(
-        self, structure: Structure, rm_species: list[str | Species] = None, **kwargs
+        self,
+        structure: Structure,
+        rm_species: list[str | Species] | None = None,
+        **kwargs,
     ) -> Generator[Vacancy, None, None]:
         """Generate a vacancy defects.
 
@@ -254,9 +259,10 @@ class InterstitialGenerator(DefectGenerator):
     def generate(
         self,
         structure: Structure,
-        insertions: dict[str, list[list[float]]],
-        multiplicities: dict[str, list[int]] | None = None,
-        equivalent_positions: dict[str, list[list[list[float]]]] | None = None,
+        insertions: dict[str, Sequence[Sequence[float]]],
+        multiplicities: dict[str, Sequence[int]] | None = None,
+        equivalent_positions: dict[str, Sequence[Sequence[Sequence[float]]]]
+        | None = None,
         **kwargs,
     ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
@@ -306,8 +312,8 @@ class InterstitialGenerator(DefectGenerator):
                 )
 
     def _filter_colliding(
-        self, fcoords: list[list[float]], structure: Structure
-    ) -> Generator[tuple[int, list[float]], None, None]:
+        self, fcoords: Sequence[Sequence[float]], structure: Structure
+    ) -> Generator[tuple[int, Sequence[float]], None, None]:
         """Check the sites for collisions.
 
         Args:

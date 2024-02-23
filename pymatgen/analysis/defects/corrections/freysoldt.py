@@ -412,8 +412,8 @@ def plot_plnr_avg(plot_data, title=None, saved=False, ax=None):
     )
 
     ax.set_xlim(round(x[0]), round(x[-1]))
-    ymin = min(min(v_R), min(dft_diff), min(short_range))
-    ymax = max(max(v_R), max(dft_diff), max(short_range))
+    ymin = min(v_R + dft_diff + short_range)
+    ymax = max(v_R + dft_diff + short_range)
     ax.set_ylim(-0.2 + ymin, 0.2 + ymax)
     ax.set_xlabel(r"distance along axis ($\AA$)", fontsize=15)
     ax.set_ylabel("Potential (V)", fontsize=15)
