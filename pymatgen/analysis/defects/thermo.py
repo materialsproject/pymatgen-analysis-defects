@@ -879,7 +879,7 @@ def ensure_stable_bulk(
     stable_entry = ComputedEntry(
         entry.composition, pd.get_hull_energy(entry.composition) - threshold
     )
-    pd = PhaseDiagram(pd.all_entries + [stable_entry])
+    pd = PhaseDiagram([*pd.all_entries, stable_entry])
     return pd
 
 
@@ -1200,8 +1200,8 @@ def plot_formation_energy_diagrams(
             )
         )
         trans_y = trans[:, 1]
-        ymin = min(ymin, min(trans_y))
-        ymax = max(ymax, max(trans_y))
+        ymin = min(ymin, *trans_y)
+        ymax = max(ymax, *trans_y)
 
         dfct: Defect = single_fed.defect_entries[0].defect
         latexname = dfct.latex_name
