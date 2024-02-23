@@ -16,6 +16,7 @@
       ensure_stable_bulk
       fermi_dirac
       get_lower_envelope
+      get_sc_locpot
       get_transitions
       get_upper_hull
       group_defect_entries
