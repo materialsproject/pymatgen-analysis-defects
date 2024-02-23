@@ -18,7 +18,8 @@ classifiers = [
 dependencies = [
   "pymatgen",
   "scikit-image>=0.19.3",
-  "numpy"
+  "numpy",
+  "mp-pyrho>=0.4.4",
 ]
 description = "Pymatgen extension for defects analysis"
 dynamic = ["version"]
@@ -40,6 +41,7 @@ strict = [
   "pymatgen==2023.10.11",
   "dscribe==2.1.0",
   "scikit-image==0.21.0",
+  "mp-pyrho==0.4.4",
 ]
 
 tests = ["pytest==7.4.2", "pytest-cov==4.1.0", "nbmake==1.4.6"]
