@@ -1,6 +1,11 @@
 [build-system]
+requires = ["setuptools >= 61", "setuptools-scm>=8.0", "wheel"]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools >= 60", "setuptools-scm>=8.0", "wheel"]
+
+[tool.setuptools.packages.find]
+where = ["pymatgen"]  # ["."] by default
+exclude = ["test*"]  # empty by default
+namespaces = true  # true by default
 
 
 [project]
@@ -30,6 +35,9 @@ name = "pymatgen-analysis-defects"
 readme = "README.md"
 requires-python = '>=3.9'
 
+[tool.setuptools_scm]
+
+
 [project.optional-dependencies]
 finder = ["dscribe>=2.0.0"]
 dev = ["pre-commit>=2.12.1"]
@@ -47,7 +55,6 @@ strict = [
 
 tests = ["pytest==7.4.4", "pytest-cov==4.1.0", "nbmake==1.4.6"]
 
-
 [tool.setuptools.dynamic]
 readme = { file = ["README.md"] }
 
@@ -55,10 +62,6 @@ readme = { file = ["README.md"] }
 documentation = "https://materialsproject.github.io/pymatgen-analysis-defects/"
 homepage = "https://materialsproject.github.io/pymatgen-analysis-defects/"
 repository = "https://github.com/materialsproject/pymatgen-analysis-defects"
-
-[tool.setuptools.packages.find]
-exclude = ["tests"]
-where = ["./"]
 
 [tool.mypy]
 ignore_missing_imports = true
