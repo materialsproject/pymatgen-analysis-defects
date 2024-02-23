@@ -17,7 +17,6 @@ from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correc
 from pymatgen.analysis.defects.finder import DefectSiteFinder
 from pymatgen.analysis.defects.supercells import (
     get_closest_sc_mat,
-    get_volumetric_like_sc,
 )
 from pymatgen.analysis.defects.utils import get_zfile, group_docs
 from pymatgen.analysis.phase_diagram import PhaseDiagram
@@ -26,6 +25,7 @@ from pymatgen.core import Composition, Element
 from pymatgen.electronic_structure.dos import FermiDos
 from pymatgen.entries.computed_entries import ComputedEntry
 from pymatgen.io.vasp import Locpot, Vasprun
+from pyrho.charge_density import get_volumetric_like_sc
 from scipy.constants import value as _cd
 from scipy.optimize import bisect
 from scipy.spatial import ConvexHull
@@ -886,7 +886,10 @@ def ensure_stable_bulk(
 
 
 def get_sc_locpot(
-    uc_locpot: Locpot, defect_locpot: Locpot, sm: StructureMatcher = None
+    uc_locpot: Locpot,
+    defect_locpot: Locpot,
+    up_sample: int = 1,
+    sm: StructureMatcher = None,
 ):
     """Transform a unit cell locpot to be like a supercell locpot.
 
@@ -897,6 +900,7 @@ def get_sc_locpot(
     Args:
         uc_locpot: Locpot object for the unit cell.
         defect_locpot: Locpot object for the defect supercell.
+        up_sample: upsample factor for the supercell locpot
         sm: StructureMatcher to use for finding the transformation for UC to SC.
 
     Returns:
@@ -908,6 +912,7 @@ def get_sc_locpot(
         uc_locpot,
         bulk_sc,
         grid_out=defect_locpot.dim,
+        up_sample=up_sample,
         sm=sm,
         normalization=None,
     )

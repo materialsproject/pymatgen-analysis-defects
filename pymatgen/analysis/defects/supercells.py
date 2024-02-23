@@ -126,40 +126,6 @@ def get_matched_structure_mapping(
     return sc, t + vec
 
 
-def get_volumetric_like_sc(
-    vd: VolumetricData,
-    sc_struct: Structure,
-    grid_out: npt.ArrayLike,
-    sm: StructureMatcher | None = None,
-    normalization: str | None = "vasp",
-):
-    """Get the volumetric data in the supercell.
-
-    Args:
-        vd: VolumeData instance
-        sc_struct: supercell structure
-        grid_out: grid size to output the volumetric data
-        sm: StructureMatcher instance
-        normalization: normalization method for the volumetric data
-
-    Returns:
-        VolumetricData: volumetric data in the supercell
-    """
-    trans = get_matched_structure_mapping(vd.structure, sc_struct=sc_struct, sm=sm)
-    if trans is None:
-        raise ValueError("Could not find a supercell mapping")
-    sc_mat, total_t = trans
-    cden = ChargeDensity.from_pmg(vd, normalization=normalization)
-    orig = np.dot(total_t, sc_mat)
-    cden_transformed = cden.get_transformed(
-        sc_mat=sc_mat, origin=-orig, grid_out=grid_out
-    )
-    locpot = cden_transformed.to_VolumetricData(
-        cls=vd.__class__, normalization=normalization
-    )
-    return locpot
-
-
 def _cubic_cell(
     base_struct: Structure,
     min_atoms: int = 80,
