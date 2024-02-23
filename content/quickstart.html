@@ -178,9 +178,13 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">API References</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api_ref/index.html">Overview of the API.</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.core.html">pymatgen.analysis.defects.core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.generators.html">pymatgen.analysis.defects.generators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.thermo.html">pymatgen.analysis.defects.thermo</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.ccd.html">pymatgen.analysis.defects.ccd</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.finder.html">pymatgen.analysis.defects.finder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.recombination.html">pymatgen.analysis.defects.recombination</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.supercells.html">pymatgen.analysis.defects.supercells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.utils.html">pymatgen.analysis.defects.utils</a></li>
 </ul>
 </li>
@@ -427,31 +431,6 @@ document.write(`
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ModuleNotFoundError</span><span class="g g-Whitespace">                       </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.core</span> <span class="kn">import</span> <span class="vm">__file__</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">defects</span><span class="o">/</span><span class="n">core</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">12</span>
-<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MSONable</span>
-<span class="ne">---&gt; </span><span class="mi">12</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.supercells</span> <span class="kn">import</span> <span class="n">get_sc_fromstruct</span>
-<span class="g g-Whitespace">     </span><span class="mi">13</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.structure_matcher</span> <span class="kn">import</span> <span class="n">ElementComparator</span><span class="p">,</span> <span class="n">StructureMatcher</span>
-<span class="g g-Whitespace">     </span><span class="mi">14</span> <span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">Element</span><span class="p">,</span> <span class="n">PeriodicSite</span><span class="p">,</span> <span class="n">Species</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">defects</span><span class="o">/</span><span class="n">supercells</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">14</span>
-<span class="g g-Whitespace">     </span><span class="mi">12</span> <span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">Lattice</span>
-<span class="g g-Whitespace">     </span><span class="mi">13</span> <span class="kn">from</span> <span class="nn">pymatgen.util.coord_cython</span> <span class="kn">import</span> <span class="n">is_coord_subset_pbc</span><span class="p">,</span> <span class="n">pbc_shortest_vectors</span>
-<span class="ne">---&gt; </span><span class="mi">14</span> <span class="kn">from</span> <span class="nn">pyrho.charge_density</span> <span class="kn">import</span> <span class="n">ChargeDensity</span>
-<span class="g g-Whitespace">     </span><span class="mi">16</span> <span class="c1"># from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape</span>
-<span class="g g-Whitespace">     </span><span class="mi">17</span> <span class="c1"># from pymatgen.io.ase import AseAtomsAdaptor</span>
-<span class="g g-Whitespace">     </span><span class="mi">19</span> <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-
-<span class="ne">ModuleNotFoundError</span>: No module named &#39;pyrho&#39;
-</pre></div>
-</div>
-</div>
 </div>
 <p>and look at the <code class="docutils literal notranslate"><span class="pre">__file__</span></code> variable to make sure that it is accessing the code from <code class="docutils literal notranslate"><span class="pre">pymatgen-analysis-defect</span></code> and not <code class="docutils literal notranslate"><span class="pre">pymatgen</span></code>.</p>
 </section>
@@ -487,10 +466,32 @@ Since the bulk primitive structure is, in principle, unique up to arbitrary tran
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Mg subsitituted on the Ga site at at site #0
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mg_ga</span><span class="o">.</span><span class="n">defect_structure</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Structure Summary
+Lattice
+    abc : 3.2162901334217344 3.2162901334217344 5.239962
+ angles : 90.0 90.0 120.00000274450079
+ volume : 46.9428220153705
+      A : 1.608145 -2.785389 0.0
+      B : 1.608145 2.785389 0.0
+      C : 0.0 0.0 5.239962
+    pbc : True True True
+PeriodicSite: Mg (1.608, -0.9285, 2.615) [0.6667, 0.3333, 0.4991]
+PeriodicSite: Ga (Ga3+) (1.608, 0.9285, 5.235) [0.3333, 0.6667, 0.9991]
+PeriodicSite: N (N3-) (1.608, -0.9285, 4.59) [0.6667, 0.3333, 0.8759]
+PeriodicSite: N (N3-) (1.608, 0.9285, 1.97) [0.3333, 0.6667, 0.3759]
 </pre></div>
 </div>
 </div>
@@ -551,6 +552,19 @@ As long as the <code class="docutils literal notranslate"><span class="pre">vasp
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[{Element Mg: -1.4925347345833444,
+  Element Ga: -1.7477270981249973,
+  Element N: 7.105427357601002e-15},
+ {Element Mg: -0.3500507727631543,
+  Element Ga: -0.03400115539472637,
+  Element N: -1.7137259427302567},
+ {Element Mg: -0.4350536612500093,
+  Element Ga: 0.0,
+  Element N: -1.7477270981250044}]
+</pre></div>
+</div>
+</div>
 </div>
 <p>If you have <code class="docutils literal notranslate"><span class="pre">crystal_toolkit</span></code> and the its jupyter lab extensions installed you can view the chemical potential diagram by importing <code class="docutils literal notranslate"><span class="pre">crystal_toolkit</span></code> and running a cell with the the <code class="docutils literal notranslate"><span class="pre">chempot_diagram</span></code> on the last line.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">crystal_toolkit</span>
@@ -571,6 +585,12 @@ As long as the <code class="docutils literal notranslate"><span class="pre">vasp
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Formation Energy(eV)&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, &#39;Formation Energy(eV)&#39;)
+</pre></div>
+</div>
+<img alt="../_images/9a1e88cdf841b05bcfe480f41acaa06bdc7afd20e8525d1c44544b87a00d63ad.png" src="../_images/9a1e88cdf841b05bcfe480f41acaa06bdc7afd20e8525d1c44544b87a00d63ad.png" />
 </div>
 </div>
 </section>

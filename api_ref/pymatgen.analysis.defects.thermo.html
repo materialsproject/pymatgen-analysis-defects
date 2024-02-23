@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pymatgen.analysis.defects.utils &#8212; pymatgen-analysis-defects</title>
+    <title>pymatgen.analysis.defects.thermo &#8212; pymatgen-analysis-defects</title>
   
   
   
@@ -57,11 +57,12 @@
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'api_ref/pymatgen.analysis.defects.utils';</script>
-    <link rel="canonical" href="https://materialsproject.github.io/pymatgen-analysis-defects/api_ref/pymatgen.analysis.defects.utils.html" />
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api_ref/pymatgen.analysis.defects.thermo';</script>
+    <link rel="canonical" href="https://materialsproject.github.io/pymatgen-analysis-defects/api_ref/pymatgen.analysis.defects.thermo.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="pymatgen.analysis.defects.supercells" href="pymatgen.analysis.defects.supercells.html" />
+    <link rel="next" title="pymatgen.analysis.defects.ccd" href="pymatgen.analysis.defects.ccd.html" />
+    <link rel="prev" title="pymatgen.analysis.defects.generators" href="pymatgen.analysis.defects.generators.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -179,12 +180,12 @@
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Overview of the API.</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.core.html">pymatgen.analysis.defects.core</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.generators.html">pymatgen.analysis.defects.generators</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.thermo.html">pymatgen.analysis.defects.thermo</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">pymatgen.analysis.defects.thermo</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.ccd.html">pymatgen.analysis.defects.ccd</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.finder.html">pymatgen.analysis.defects.finder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.recombination.html">pymatgen.analysis.defects.recombination</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.supercells.html">pymatgen.analysis.defects.supercells</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">pymatgen.analysis.defects.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.utils.html">pymatgen.analysis.defects.utils</a></li>
 </ul>
 </li>
 </ul>
@@ -258,7 +259,7 @@
       
       
       
-      <li><a href="https://github.com/materialsproject/pymatgen-analysis-defects/edit/main/docs/api_ref/pymatgen.analysis.defects.utils.rst" target="_blank"
+      <li><a href="https://github.com/materialsproject/pymatgen-analysis-defects/edit/main/docs/api_ref/pymatgen.analysis.defects.thermo.rst" target="_blank"
    class="btn btn-sm btn-source-edit-button dropdown-item"
    title="Suggest edit"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -275,7 +276,7 @@
       
       
       
-      <li><a href="https://github.com/materialsproject/pymatgen-analysis-defects/issues/new?title=Issue%20on%20page%20%2Fapi_ref/pymatgen.analysis.defects.utils.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/materialsproject/pymatgen-analysis-defects/issues/new?title=Issue%20on%20page%20%2Fapi_ref/pymatgen.analysis.defects.thermo.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -305,7 +306,7 @@
       
       
       
-      <li><a href="../_sources/api_ref/pymatgen.analysis.defects.utils.rst" target="_blank"
+      <li><a href="../_sources/api_ref/pymatgen.analysis.defects.thermo.rst" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -387,7 +388,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>pymatgen.analysis.defects.utils</h1>
+    <h1>pymatgen.analysis.defects.thermo</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -401,82 +402,52 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-pymatgen.analysis.defects.utils">
-<span id="pymatgen-analysis-defects-utils"></span><h1>pymatgen.analysis.defects.utils<a class="headerlink" href="#module-pymatgen.analysis.defects.utils" title="Link to this heading">#</a></h1>
-<p>Utilities for defects module.</p>
+  <section id="module-pymatgen.analysis.defects.thermo">
+<span id="pymatgen-analysis-defects-thermo"></span><h1>pymatgen.analysis.defects.thermo<a class="headerlink" href="#module-pymatgen.analysis.defects.thermo" title="Link to this heading">#</a></h1>
+<p>Classes and methods related to thermodynamics and energy.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_vol</span></code>(coords)</p></td>
-<td><p>Calculate volume given a set of points in 3D space.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ensure_stable_bulk</span></code>(pd, entry[, threshold])</p></td>
+<td><p>Added entry to phase diagram and ensure that it is stable.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_nodes</span></code>(fcoords, lattice[, tol])</p></td>
-<td><p>Cluster nodes that are too close together using hiercharcal clustering.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fermi_dirac</span></code>(energy, temperature)</p></td>
+<td><p>Get value of fermi dirac distribution.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">converge</span></code>(f, step, tol, max_h)</p></td>
-<td><p>Simple newton iteration based convergence function.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_lower_envelope</span></code>(lines)</p></td>
+<td><p>Get the lower envelope of the formation energy.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">eV_to_k</span></code>(energy)</p></td>
-<td><p>Convert energy to reciprocal vector magnitude k via hbar*k^2/2m.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_sc_locpot</span></code>(uc_locpot, defect_locpot[, ...])</p></td>
+<td><p>Transform a unit cell locpot to be like a supercell locpot.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_reciprocal_vectors_squared</span></code>(a1, a2, ...)</p></td>
-<td><p>Generate Reciprocal vectors squared.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_transitions</span></code>(lines, x_min, x_max)</p></td>
+<td><p>Get the &quot;transition&quot; points in a list of lines.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">generic_group_labels</span></code>(list_in[, comp])</p></td>
-<td><p>Group a list of unsortable objects.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_upper_hull</span></code>(points)</p></td>
+<td><p>Get the upper hull of a set of points in 2D.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">genrecip</span></code>(a1, a2, a3, encut)</p></td>
-<td><p>Generate reciprocal lattice vectors within the energy cutoff.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_defect_entries</span></code>(defect_entries[, sm])</p></td>
+<td><p>Group defect entries by their representation.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_avg_chg</span></code>(chgcar, fcoord[, radius])</p></td>
-<td><p>Get the average charge in a sphere.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_formation_energy_diagrams</span></code>(feds[, sm, ...])</p></td>
+<td><p>Group formation energy diagrams by their representation.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ipr_in_window</span></code>(bandstructure, procar[, ...])</p></td>
-<td><p>Get the inverse participation ratio (IPR) of the states in a given band window.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_labeled_inserted_structure</span></code>(sites, ...)</p></td>
-<td><p>Get a list of inserted structures and a list of structure matching labels.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_local_extrema</span></code>(chgcar[, find_min])</p></td>
-<td><p>Get all local extrema fractional coordinates in charge density.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_localized_states</span></code>(bandstructure, procar)</p></td>
-<td><p>Find the (band, kpt, spin) index of the most localized state.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_plane_spacing</span></code>(lattice)</p></td>
-<td><p>Compute the plane spacing of a lattice.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_zfile</span></code>(directory, base_name[, allow_missing])</p></td>
-<td><p>Find gzipped or non-gzipped versions of a file in a directory listing.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_docs</span></code>(docs, sm, get_structure[, get_hash])</p></td>
-<td><p>Group docs by a simple hash followed by structure.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_collisions</span></code>(fcoords, structure[, min_dist])</p></td>
-<td><p>Removed points that are too close to existing atoms in the structure.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_positive_definite</span></code>(list_in, ref1, ref2, dist)</p></td>
-<td><p>Sort a list where we can only compute a positive-definite distance.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_formation_energy_diagrams</span></code>(...[, ...])</p></td>
+<td><p>Plot the formation energy diagram.</p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ChargeInsertionAnalyzer</span></code>(chgcar[, ...])</p></td>
-<td><p>Object for insertions sites from charge density.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DefectEntry</span></code>(defect, charge_state, sc_entry, ...)</p></td>
+<td><p>Data for completed defect supercell calculation.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CorrectionResult</span></code>(correction_energy, metadata)</p></td>
-<td><p>A summary of the corrections applied to a structure.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FormationEnergyDiagram</span></code>(defect_entries, ...)</p></td>
+<td><p>Formation energy.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">QModel</span></code>([beta, expnorm, gamma])</p></td>
-<td><p>Model for the defect charge distribution.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">TopographyAnalyzer</span></code>(structure, ...[, ...])</p></td>
-<td><p>Topography Analyzer.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">VoronoiPolyhedron</span></code>(lattice, frac_coords, ...)</p></td>
-<td><p>Convenience container for a voronoi point in PBC and its associated polyhedron.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">MultiFormationEnergyDiagram</span></code>(...)</p></td>
+<td><p>Container for multiple formation energy diagrams.</p></td>
 </tr>
 </tbody>
 </table>
@@ -513,13 +484,22 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="pymatgen.analysis.defects.supercells.html"
+       href="pymatgen.analysis.defects.generators.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">pymatgen.analysis.defects.supercells</p>
+        <p class="prev-next-title">pymatgen.analysis.defects.generators</p>
       </div>
+    </a>
+    <a class="right-next"
+       href="pymatgen.analysis.defects.ccd.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">pymatgen.analysis.defects.ccd</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>
