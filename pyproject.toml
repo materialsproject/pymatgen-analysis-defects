@@ -27,7 +27,7 @@ dynamic = ["version"]
 keywords = ["high-throughput", "automated", "dft", "defects"]
 license = { text = "modified BSD" }
 name = "pymatgen-analysis-defects"
-readme = "README.rst"
+readme = "README.md"
 requires-python = '>=3.9'
 
 [project.optional-dependencies]
@@ -49,7 +49,7 @@ tests = ["pytest==7.4.4", "pytest-cov==4.1.0", "nbmake==1.4.6"]
 
 
 [tool.setuptools.dynamic]
-readme = { file = ["README.rst"] }
+readme = { file = ["README.md"] }
 
 [project.urls]
 documentation = "https://materialsproject.github.io/pymatgen-analysis-defects/"
