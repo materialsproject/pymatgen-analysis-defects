@@ -886,7 +886,7 @@ def ensure_stable_bulk(
 def get_sc_locpot(
     uc_locpot: Locpot,
     defect_locpot: Locpot,
-    up_sample: int = 1,
+    up_sample: int = 2,
     sm: StructureMatcher = None,
 ):
     """Transform a unit cell locpot to be like a supercell locpot.
