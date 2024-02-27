@@ -40,7 +40,7 @@ optional = ["pydefect>=0.6.2", "dscribe>=2.0.0", "numba"]
 strict = [
   "pymatgen==2023.10.11",
   "dscribe==2.1.0",
-  "scikit-image==0.21.0",
+  "scikit-image==0.22.0",
   "mp-pyrho==0.4.4",
 ]
 
