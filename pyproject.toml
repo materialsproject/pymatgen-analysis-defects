@@ -38,7 +38,7 @@ docs = [
 optional = ["pydefect>=0.6.2", "dscribe>=2.0.0", "numba"]
 
 strict = [
-  "pymatgen==2024.2.23",
+  "pymatgen==2024.3.1",
   "dscribe==2.1.0",
   "scikit-image==0.22.0",
   "mp-pyrho==0.4.4",
