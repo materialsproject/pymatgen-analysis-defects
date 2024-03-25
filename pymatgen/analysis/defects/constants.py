@@ -1,6 +1,5 @@
 """Constants used in the Defects module."""
 
-
 import numpy as np
 from scipy import constants
 

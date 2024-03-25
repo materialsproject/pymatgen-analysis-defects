@@ -1,4 +1,5 @@
 """Classes and methods related to thermodynamics and energy."""
+
 from __future__ import annotations
 
 import collections
