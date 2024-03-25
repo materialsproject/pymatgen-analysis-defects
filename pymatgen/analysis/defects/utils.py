@@ -1,4 +1,5 @@
 """Utilities for defects module."""
+
 from __future__ import annotations
 
 import bisect
