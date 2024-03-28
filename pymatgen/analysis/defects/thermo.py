@@ -147,11 +147,25 @@ class DefectEntry(MSONable):
         else:  # pragma: no cover
             defect_fpos = self.sc_defect_frac_coords
 
+        if isinstance(defect_locpot, Locpot):
+            defect_gn = defect_locpot.dim
+        elif isinstance(defect_locpot, dict):
+            defect_gn = tuple(map(len, (defect_locpot for k in ["0", "1", "2"])))
+
+        if isinstance(bulk_locpot, Locpot):
+            bulk_sc_locpot = get_sc_locpot(
+                uc_locpot=bulk_locpot,
+                defect_struct=defect_struct,
+                grid_out=defect_gn,
+                up_sample=2,
+            )
+            bulk_locpot = bulk_sc_locpot
+
         frey_corr = get_freysoldt_correction(
             q=self.charge_state,
             dielectric=dielectric,
             defect_locpot=defect_locpot,
-            bulk_locpot=bulk_locpot,
+            bulk_locpot=bulk_sc_locpot,
             defect_frac_coords=defect_fpos,
             lattice=defect_struct.lattice,
             **kwargs,
@@ -885,7 +899,8 @@ def ensure_stable_bulk(
 
 def get_sc_locpot(
     uc_locpot: Locpot,
-    defect_locpot: Locpot,
+    defect_struct: Structure,
+    grid_out: tuple,
     up_sample: int = 2,
     sm: StructureMatcher = None,
 ):
@@ -897,19 +912,20 @@ def get_sc_locpot(
 
     Args:
         uc_locpot: Locpot object for the unit cell.
-        defect_locpot: Locpot object for the defect supercell.
+        defect_struct: Defect structure to use for the transformation.
+        grid_out: grid dimensions for the supercell locpot
         up_sample: upsample factor for the supercell locpot
         sm: StructureMatcher to use for finding the transformation for UC to SC.
 
     Returns:
         Locpot: Locpot object for the unit cell transformed to be like the supercell.
     """
-    sc_mat = get_closest_sc_mat(uc_locpot.structure, defect_locpot.structure)
+    sc_mat = get_closest_sc_mat(uc_locpot.structure, sc_struct=defect_struct, sm=sm)
     bulk_sc = uc_locpot.structure * sc_mat
     sc_locpot = get_volumetric_like_sc(
         uc_locpot,
         bulk_sc,
-        grid_out=defect_locpot.dim,
+        grid_out=grid_out,
         up_sample=up_sample,
         sm=sm,
         normalization=None,

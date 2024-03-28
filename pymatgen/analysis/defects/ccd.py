@@ -286,8 +286,8 @@ class HarmonicDefect(MSONable):
                 )
             charge_state = vaspruns[0].final_structure.charge
 
-        if any(v.final_structure.charge != charge_state for v in vaspruns):
-            raise ValueError("All vaspruns must have the same charge state.")
+            if any(v.final_structure.charge != charge_state for v in vaspruns):
+                raise ValueError("All vaspruns must have the same charge state.")
 
         return cls.from_vaspruns(
             vaspruns=vaspruns,
