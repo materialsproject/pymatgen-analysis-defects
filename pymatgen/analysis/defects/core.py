@@ -163,7 +163,12 @@ class Defect(MSONable, metaclass=ABCMeta):
         if isinstance(self.oxi_state, int) or self.oxi_state.is_integer():
             oxi_state = int(self.oxi_state)
         else:  # pragma: no cover
-            raise ValueError("Oxidation state must be an integer")
+            sign = -1 if self.oxi_state < 0 else 1
+            oxi_state = sign * int(np.ceil(abs(self.oxi_state)))
+            _logger.warn(
+                "Non-integer oxidation state detected."
+                f"Rounding to integer with larger absolute value: {self.oxi_state} -> {oxi_state}"
+            )
 
         if oxi_state >= 0:
             charges = [*range(-padding, oxi_state + padding + 1)]

@@ -18,7 +18,7 @@ from pymatgen.analysis.defects.utils import (
     generate_reciprocal_vectors_squared,
     hart_to_ev,
 )
-from pymatgen.io.vasp.outputs import Locpot
+from pymatgen.io.vasp.outputs import Locpot, VolumetricData
 from scipy import stats
 
 if TYPE_CHECKING:
@@ -104,7 +104,7 @@ def get_freysoldt_correction(
 
     q_model = QModel() if q_model is None else q_model
 
-    if isinstance(defect_locpot, Locpot):
+    if isinstance(defect_locpot, VolumetricData):
         list_axis_grid = [*map(defect_locpot.get_axis_grid, [0, 1, 2])]
         list_defect_plnr_avg_esp = [
             *map(defect_locpot.get_average_along_axis, [0, 1, 2])
@@ -130,7 +130,7 @@ def get_freysoldt_correction(
         raise ValueError("defect_locpot must be of type Locpot or dict")
 
     # TODO this can be done with regridding later
-    if isinstance(bulk_locpot, Locpot):
+    if isinstance(bulk_locpot, VolumetricData):
         list_bulk_plnr_avg_esp = [*map(bulk_locpot.get_average_along_axis, [0, 1, 2])]
     elif isinstance(bulk_locpot, dict):
         bulk_locpot_ = {int(k): v for k, v in bulk_locpot.items()}

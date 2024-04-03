@@ -22,7 +22,7 @@ from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatc
 from pymatgen.core import Composition, Element
 from pymatgen.electronic_structure.dos import FermiDos
 from pymatgen.entries.computed_entries import ComputedEntry
-from pymatgen.io.vasp import Locpot, Vasprun
+from pymatgen.io.vasp import Chgcar, Locpot, Vasprun, VolumetricData
 from pyrho.charge_density import get_volumetric_like_sc
 from scipy.constants import value as _cd
 from scipy.optimize import bisect
@@ -147,12 +147,12 @@ class DefectEntry(MSONable):
         else:  # pragma: no cover
             defect_fpos = self.sc_defect_frac_coords
 
-        if isinstance(defect_locpot, Locpot):
+        if isinstance(defect_locpot, VolumetricData):
             defect_gn = defect_locpot.dim
         elif isinstance(defect_locpot, dict):
             defect_gn = tuple(map(len, (defect_locpot for k in ["0", "1", "2"])))
 
-        if isinstance(bulk_locpot, Locpot):
+        if isinstance(bulk_locpot, VolumetricData):
             bulk_sc_locpot = get_sc_locpot(
                 uc_locpot=bulk_locpot,
                 defect_struct=defect_struct,
@@ -165,7 +165,7 @@ class DefectEntry(MSONable):
             q=self.charge_state,
             dielectric=dielectric,
             defect_locpot=defect_locpot,
-            bulk_locpot=bulk_sc_locpot,
+            bulk_locpot=bulk_locpot,
             defect_frac_coords=defect_fpos,
             lattice=defect_struct.lattice,
             **kwargs,

@@ -161,11 +161,15 @@ def _cubic_cell(
     try:
         cst.apply_transformation(base_struct)
     except BaseException:
-        return _ase_cubic(base_struct, min_atoms, max_atoms)
+        return _ase_cubic(
+            base_struct, min_atoms=min_atoms, max_atoms=max_atoms, min_length=min_length
+        )
     return cst.transformation_matrix
 
 
-def _ase_cubic(base_structure, min_atoms: int = 80, max_atoms: int = 240):
+def _ase_cubic(
+    base_structure, min_atoms: int = 80, max_atoms: int = 240, min_length=10.0
+):
     """Generate the best supercell from a unit cell.
 
     Use ASE's find_optimal_cell_shape function to find the best supercell.
@@ -174,6 +178,7 @@ def _ase_cubic(base_structure, min_atoms: int = 80, max_atoms: int = 240):
         base_structure: structure of the unit cell
         max_atoms: Maximum number of atoms allowed in the supercell.
         min_atoms: Minimum number of atoms allowed in the supercell.
+        min_length: Minimum length of the smallest supercell lattice vector.
 
     Returns:
         3x3 matrix: supercell matrix
@@ -194,6 +199,10 @@ def _ase_cubic(base_structure, min_atoms: int = 80, max_atoms: int = 240):
             ase_atoms.cell, target_size=size, target_shape="sc"
         )
         sc_cell = aaa.get_atoms(base_structure * sc).cell
+        lattice_lens = np.linalg.norm(sc_cell, axis=1)
+        _logger.warn(f"{lattice_lens}, {min_length}, {min_dev}")
+        if min(lattice_lens) < min_length:
+            continue
         deviation = get_deviation_from_optimal_cell_shape(sc_cell, target_shape="sc")
         min_dev = min(min_dev, (deviation, sc))
     if min_dev[1] is None:
