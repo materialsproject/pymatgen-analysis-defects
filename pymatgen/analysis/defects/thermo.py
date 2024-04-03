@@ -165,7 +165,7 @@ class DefectEntry(MSONable):
             q=self.charge_state,
             dielectric=dielectric,
             defect_locpot=defect_locpot,
-            bulk_locpot=bulk_locpot,
+            bulk_locpot=bulk_sc_locpot,
             defect_frac_coords=defect_fpos,
             lattice=defect_struct.lattice,
             **kwargs,
