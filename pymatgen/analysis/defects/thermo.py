@@ -485,12 +485,7 @@ class FormationEnergyDiagram(MSONable):
         except RuntimeError:
             ediff = defect_entry.corrected_energy - self.bulk_entry.energy
 
-        return (
-            ediff
-            - self.bulk_entry.energy
-            - en_change
-            + self.vbm * defect_entry.charge_state
-        )
+        return ediff - en_change + self.vbm * defect_entry.charge_state
 
     @property
     def chempot_limits(self):
