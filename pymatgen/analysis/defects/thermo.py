@@ -480,21 +480,17 @@ class FormationEnergyDiagram(MSONable):
             ]
         )
 
-        if self.bulk_entry is not None:
-            formation_en = (
-                defect_entry.corrected_energy
-                - self.bulk_entry.energy
-                - en_change
-                + self.vbm * defect_entry.charge_state
-            )
-        else:
-            formation_en = (
-                defect_entry.get_ediff()
-                - en_change
-                + self.vbm * defect_entry.charge_state
-            )
+        try:
+            ediff = defect_entry.get_ediff()
+        except RuntimeError:
+            ediff = defect_entry.corrected_energy - self.bulk_entry.energy
 
-        return formation_en
+        return (
+            ediff
+            - self.bulk_entry.energy
+            - en_change
+            + self.vbm * defect_entry.charge_state
+        )
 
     @property
     def chempot_limits(self):
