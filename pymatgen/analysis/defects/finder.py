@@ -1,4 +1,5 @@
 """Defect position identification without prior knowledge."""
+
 from __future__ import annotations
 
 import logging
