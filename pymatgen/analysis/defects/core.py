@@ -7,7 +7,6 @@ import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 from enum import Enum
 from typing import TYPE_CHECKING
-from typing.extensions import Self
 
 import numpy as np
 from monty.json import MSONable
@@ -16,6 +15,7 @@ from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatc
 from pymatgen.core import Element, PeriodicSite, Species
 from pymatgen.core.periodic_table import DummySpecies
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+from typing_extensions import Self
 
 from .utils import get_plane_spacing
 
