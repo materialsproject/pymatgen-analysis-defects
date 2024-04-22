@@ -26,6 +26,7 @@ def test_vacancy(gan_struct):
     assert vac.name == "v_Ga"
     assert vac == vac
     assert vac.element_changes == {Element("Ga"): -1}
+    assert vac.latex_name == r"v$_{\rm Ga}$"
 
 
 def test_substitution(gan_struct):

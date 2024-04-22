@@ -95,7 +95,7 @@ class Defect(MSONable, metaclass=ABCMeta):
                 # check oxi_states assigned and not all zero
                 if all(specie.oxi_state == 0 for specie in self.structure.species):
                     self.structure.add_oxidation_state_by_guess()
-            except Exception:  # noqa: BLE001
+            except Exception:  # noqa: BLE001 # pragma: no cover
                 self.structure.add_oxidation_state_by_guess()
             self.oxi_state = self._guess_oxi_state()
         else:
@@ -607,7 +607,7 @@ class Substitution(Defect):
         ]
         if len(sub_elt_sites_in_struct) == 0:
             sub_states = self.site.specie.common_oxidation_states
-            if len(sub_states) == 0:
+            if len(sub_states) == 0:  # pragma: no cover
                 msg = (
                     f"No common oxidation states found for {self.site.specie}."
                     "Please specify the oxidation state manually."

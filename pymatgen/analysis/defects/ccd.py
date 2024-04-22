@@ -186,7 +186,7 @@ class HarmonicDefect(MSONable):
         )
         energies, structures = list(zip(*sorted_list))
 
-        if not np.allclose(unsorted_e, energies, atol=1e-99):
+        if not np.allclose(unsorted_e, energies, atol=1e-99):  # pragma: no cover
             msg = "The vaspruns should already be in order."
             raise ValueError(msg)
 
@@ -403,12 +403,12 @@ class HarmonicDefect(MSONable):
             The eigenvalue difference to the defect band in the order specified by output_order.
 
         """
-        if self.relaxed_bandstructure is None:
+        if self.relaxed_bandstructure is None:  # pragma: no cover
             msg = (
                 "The ``relaxed_bandstructure`` must be set before ``ediff`` can be computed. "
                 "Try setting ``store_bandstructure=True`` when initializing."
             )
-            raise ValueError(  # pragma: no cover
+            raise ValueError(
                 msg,
             )
 
