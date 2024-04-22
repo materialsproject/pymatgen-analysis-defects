@@ -1096,11 +1096,11 @@ def _get_adjusted_pd_entries(
         """Get the interpolated energy of an entry."""
         e_dict = {}
         for e in atomic_entries:
-            if len(e.composition.elements) != 1:
+            if len(e.composition.elements) != 1:  # pragma: no cover
                 msg = "Only single-element entries should be provided."
                 raise ValueError(
                     msg,
-                )  # pragma: no cover
+                )
             e_dict[e.composition.elements[0]] = e.energy_per_atom
 
         return sum(
