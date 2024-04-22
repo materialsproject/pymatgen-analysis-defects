@@ -1,4 +1,5 @@
 """Classes representing defects."""
+
 from __future__ import annotations
 
 import collections
