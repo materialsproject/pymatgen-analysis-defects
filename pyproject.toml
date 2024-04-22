@@ -105,12 +105,13 @@ line-length = 88
 indent-width = 4
 
 [tool.ruff.lint]
-# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`).
-select = ["E4", "E7", "E9", "F", "D", "I001", "TCH", "A", "U", "FBT"]
-ignore = ["E203", "E501", "F401"]
+select = ["ALL"]
+ignore = [
+  "E203", "E501", "N", "PLR", "SLF", "ANN101",  "ANN102",
+  "TRY", "COM812", "ISC001", "ERA001", "FBT", "C", "FIX", "TD", "ANN003"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
-fixable = ["ALL", "TCH"]
+fixable = ["ALL"]
 unfixable = []
 
 # Allow unused variables when underscore-prefixed.

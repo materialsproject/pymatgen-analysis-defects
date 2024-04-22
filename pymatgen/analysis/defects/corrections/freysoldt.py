@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,6 +22,7 @@ from pymatgen.io.vasp.outputs import Locpot, VolumetricData
 from scipy import stats
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
     from pymatgen.core import Lattice
 
@@ -44,11 +45,11 @@ def get_freysoldt_correction(
     dielectric: float,
     defect_locpot: Locpot,
     bulk_locpot: Locpot,
-    defect_frac_coords: Optional[ArrayLike] = None,
-    lattice: Optional[Lattice] = None,
+    defect_frac_coords: ArrayLike | None = None,
+    lattice: Lattice | None = None,
     energy_cutoff: float = 520,
     mad_tol: float = 1e-4,
-    q_model: Optional[QModel] = None,
+    q_model: QModel | None = None,
     step: float = 1e-4,
 ) -> CorrectionResult:
     """Gets the Freysoldt correction for a defect entry.
@@ -98,8 +99,9 @@ def get_freysoldt_correction(
     elif np.ndim(dielectric) == 2:  # pragma: no cover
         dielectric = float(np.mean(dielectric.diagonal()))
     else:
+        msg = f"Dielectric constant is cannot be converted into a scalar. Currently of type {type(dielectric)}"
         raise ValueError(
-            f"Dielectric constant is cannot be converted into a scalar. Currently of type {type(dielectric)}"
+            msg,
         )
 
     q_model = QModel() if q_model is None else q_model
@@ -107,12 +109,13 @@ def get_freysoldt_correction(
     if isinstance(defect_locpot, VolumetricData):
         list_axis_grid = [*map(defect_locpot.get_axis_grid, [0, 1, 2])]
         list_defect_plnr_avg_esp = [
-            *map(defect_locpot.get_average_along_axis, [0, 1, 2])
+            *map(defect_locpot.get_average_along_axis, [0, 1, 2]),
         ]
         lattice_ = defect_locpot.structure.lattice.copy()
         if lattice is not None and lattice != lattice_:
+            msg = "Lattice of defect_locpot and user provided lattice do not match."
             raise ValueError(
-                "Lattice of defect_locpot and user provided lattice do not match."
+                msg,
             )
         lattice = lattice_
     elif isinstance(defect_locpot, dict):
@@ -124,10 +127,11 @@ def get_freysoldt_correction(
                 [0, 0, 0],
                 lattice.abc,
                 [len(i) for i in list_defect_plnr_avg_esp],
-            )
+            ),
         ]
     else:
-        raise ValueError("defect_locpot must be of type Locpot or dict")
+        msg = "defect_locpot must be of type Locpot or dict"
+        raise ValueError(msg)
 
     # TODO this can be done with regridding later
     if isinstance(bulk_locpot, VolumetricData):
@@ -136,7 +140,8 @@ def get_freysoldt_correction(
         bulk_locpot_ = {int(k): v for k, v in bulk_locpot.items()}
         list_bulk_plnr_avg_esp = [bulk_locpot_[i] for i in range(3)]
     else:
-        raise ValueError("bulk_locpot must be of type Locpot or dict")
+        msg = "bulk_locpot must be of type Locpot or dict"
+        raise ValueError(msg)
 
     es_corr = perform_es_corr(
         lattice=lattice,
@@ -148,11 +153,14 @@ def get_freysoldt_correction(
         step=step,
     )
 
-    alignment_corrs = dict()
-    plot_data = dict()
+    alignment_corrs = {}
+    plot_data = {}
 
     for x, pureavg, defavg, axis in zip(
-        list_axis_grid, list_bulk_plnr_avg_esp, list_defect_plnr_avg_esp, [0, 1, 2]
+        list_axis_grid,
+        list_bulk_plnr_avg_esp,
+        list_defect_plnr_avg_esp,
+        [0, 1, 2],
     ):
         alignment_corr, md = perform_pot_corr(
             axis_grid=x,
@@ -186,7 +194,13 @@ def get_freysoldt_correction(
 
 
 def perform_es_corr(
-    lattice, q, dielectric, q_model, energy_cutoff=520, mad_tol=1e-4, step=1e-4
+    lattice: Lattice,
+    q: float,
+    dielectric: float,
+    q_model: QModel,
+    energy_cutoff: float = 520,
+    mad_tol: float = 1e-4,
+    step: float = 1e-4,
 ) -> float:
     """Perform Electrostatic Freysoldt Correction.
 
@@ -206,15 +220,15 @@ def perform_es_corr(
             Electrostatic Point Charge contribution to Freysoldt Correction (float)
     """
     _logger.info(
-        "Running Freysoldt 2011 PC calculation (should be equivalent to sxdefectalign)"
+        "Running Freysoldt 2011 PC calculation (should be equivalent to sxdefectalign)",
     )
-    _logger.debug("defect lattice constants are (in angstroms)" + str(lattice.abc))
+    _logger.debug("defect lattice constants are (in angstroms) %s", str(lattice.abc))
 
     [a1, a2, a3] = ang_to_bohr * np.array(lattice.get_cartesian_coords(1))
-    logging.debug("In atomic units, lat consts are (in bohr):" + str([a1, a2, a3]))
+    logging.debug("In atomic units, lat consts are (in bohr): %s", str([a1, a2, a3]))
     vol = np.dot(a1, np.cross(a2, a3))  # vol in bohr^3
 
-    def e_iso(encut):
+    def e_iso(encut: float) -> float:
         gcut = eV_to_k(encut)  # gcut is in units of 1/A
         return (
             scipy.integrate.quad(lambda g: q_model.rho_rec(g * g) ** 2, step, gcut)[0]
@@ -222,8 +236,8 @@ def perform_es_corr(
             / np.pi
         )
 
-    def e_per(encut):
-        eper = 0
+    def e_per(encut: float) -> float:
+        eper = 0.0
         for g2 in generate_reciprocal_vectors_squared(a1, a2, a3, encut):
             eper += (q_model.rho_rec(g2) ** 2) / g2
         eper *= (q**2) * 2 * round(np.pi, 6) / vol
@@ -245,18 +259,18 @@ def perform_es_corr(
 
 
 def perform_pot_corr(
-    axis_grid,
-    pureavg,
-    defavg,
-    lattice,
-    q,
-    defect_frac_coords,
-    axis,
-    dielectric,
-    q_model,
-    mad_tol=1e-4,
-    widthsample=1.0,
-):
+    axis_grid: ArrayLike,
+    pureavg: ArrayLike,
+    defavg: ArrayLike,
+    lattice: Lattice,
+    q: float,
+    defect_frac_coords: ArrayLike,
+    axis: Axes,
+    dielectric: float,
+    q_model: QModel,
+    mad_tol: float = 1e-4,
+    widthsample: float = 1.0,
+) -> tuple[float, dict]:
     """For performing planar averaging potential alignment.
 
     Args:
@@ -290,7 +304,7 @@ def perform_pot_corr(
         (float) Potential Alignment shift required to make the short range potential
         zero far from the defect.  (-C) in the Freysoldt paper.
     """
-    logging.debug("run Freysoldt potential alignment method for axis " + str(axis))
+    logging.debug("run Freysoldt potential alignment method for axis %s", str(axis))
     nx = len(axis_grid)
 
     # shift these planar averages to have defect at origin
@@ -327,7 +341,8 @@ def perform_pot_corr(
     v_R = np.fft.fft(v_G)
 
     if abs(np.imag(v_R).max()) > mad_tol:
-        raise Exception("imaginary part found to be %s", repr(np.imag(v_R).max()))
+        msg = "imaginary part found to be %s"
+        raise Exception(msg, repr(np.imag(v_R).max()))
     v_R /= lattice.volume * ang_to_bohr**3
     v_R = np.real(v_R) * hart_to_ev
 
@@ -351,13 +366,13 @@ def perform_pot_corr(
     C = np.mean(tmppot)
     _logger.debug("C = %f", C)
     short_range = short
-    v_R = [elmnt for elmnt in v_R]
+    v_R = list(v_R)
 
     _logger.info("C value is averaged to be %f eV ", C)
     _logger.info("Potentital alignment energy correction (q * Delta):  %f (eV)", q * C)
 
     # log plotting data:
-    metadata = dict()
+    metadata = {}
     metadata["pot_plot_data"] = {
         "Vr": v_R,
         "x": axis_grid,
@@ -374,7 +389,9 @@ def perform_pot_corr(
     return C, metadata
 
 
-def plot_plnr_avg(plot_data, title=None, saved=False, ax=None):
+def plot_plnr_avg(
+    plot_data: dict, title: str | None = None, saved: bool = False, ax: Axes = None
+) -> Axes:
     """Plot the planar average electrostatic potential.
 
     Plot the planar average electrostatic potential against the Long range and
@@ -389,7 +406,8 @@ def plot_plnr_avg(plot_data, title=None, saved=False, ax=None):
         ax (matplotlib.axes.Axes): Axes object to plot on. If None, makes new figure.
     """
     if not plot_data["pot_plot_data"]:
-        raise ValueError("Cannot plot potential alignment before running correction!")
+        msg = "Cannot plot potential alignment before running correction!"
+        raise ValueError(msg)
 
     x = plot_data["pot_plot_data"]["x"]
     v_R = plot_data["pot_plot_data"]["Vr"]
@@ -408,7 +426,12 @@ def plot_plnr_avg(plot_data, title=None, saved=False, ax=None):
 
     tmpx = [x[i] for i in range(check[0], check[1])]
     ax.fill_between(
-        tmpx, -100, 100, facecolor="red", alpha=0.15, label="sampling region"
+        tmpx,
+        -100,
+        100,
+        facecolor="red",
+        alpha=0.15,
+        label="sampling region",
     )
 
     ax.set_xlim(round(x[0]), round(x[-1]))

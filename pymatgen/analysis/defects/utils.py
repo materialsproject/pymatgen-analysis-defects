@@ -1,4 +1,5 @@
 """Utilities for defects module."""
+
 from __future__ import annotations
 
 import bisect
@@ -11,7 +12,7 @@ from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Generator
+from typing import TYPE_CHECKING, Any, Callable
 
 import numpy as np
 from monty.dev import deprecated
@@ -29,6 +30,7 @@ from scipy.spatial import ConvexHull, Voronoi
 from scipy.spatial.distance import squareform
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
     from pathlib import Path
 
     from numpy import typing as npt
@@ -77,7 +79,9 @@ class QModel(MSONable):
     If defect charge is more delocalized, exponential tail is suggested.
     """
 
-    def __init__(self, beta=1.0, expnorm=0.0, gamma=1.0):
+    def __init__(
+        self, beta: float = 1.0, expnorm: float = 0.0, gamma: float = 1.0
+    ) -> None:
         """Initialize the model.
 
         Args:
@@ -95,9 +99,10 @@ class QModel(MSONable):
         self.beta2 = beta * beta
         self.gamma2 = gamma * gamma
         if expnorm and not gamma:
-            raise ValueError("Please supply exponential decay constant.")
+            msg = "Please supply exponential decay constant."
+            raise ValueError(msg)
 
-    def rho_rec(self, g2):
+    def rho_rec(self, g2: float) -> float:
         """Reciprocal space model charge value.
 
         Reciprocal space model charge value, for input squared reciprocal vector.
@@ -113,7 +118,7 @@ class QModel(MSONable):
         ) * np.exp(-0.25 * self.beta2 * g2)
 
     @property
-    def rho_rec_limit0(self):
+    def rho_rec_limit0(self) -> float:
         """Reciprocal space model charge value.
 
         Close to reciprocal vector 0 .
@@ -122,7 +127,7 @@ class QModel(MSONable):
         return -2 * self.gamma2 * self.expnorm - 0.25 * self.beta2 * (1 - self.expnorm)
 
 
-def eV_to_k(energy):
+def eV_to_k(energy: float) -> float:
     """Convert energy to reciprocal vector magnitude k via hbar*k^2/2m.
 
     Args:
@@ -134,7 +139,9 @@ def eV_to_k(energy):
     return math.sqrt(energy / invang_to_ev) * ang_to_bohr
 
 
-def genrecip(a1, a2, a3, encut) -> Generator[npt.ArrayLike, None, None]:
+def genrecip(
+    a1: npt.ArrayLike, a2: npt.ArrayLike, a3: npt.ArrayLike, encut: float
+) -> Generator[npt.ArrayLike, None, None]:
     """Generate reciprocal lattice vectors within the energy cutoff.
 
     Args:
@@ -176,7 +183,9 @@ def genrecip(a1, a2, a3, encut) -> Generator[npt.ArrayLike, None, None]:
             yield vec
 
 
-def generate_reciprocal_vectors_squared(a1, a2, a3, encut):
+def generate_reciprocal_vectors_squared(
+    a1: npt.ArrayLike, a2: npt.ArrayLike, a3: npt.ArrayLike, encut: float
+) -> Generator[float, None, None]:
     """Generate Reciprocal vectors squared.
 
     Generate reciprocal vector magnitudes within the cutoff along the specified
@@ -196,7 +205,7 @@ def generate_reciprocal_vectors_squared(a1, a2, a3, encut):
         yield np.dot(vec, vec)
 
 
-def converge(f, step, tol, max_h) -> float:
+def converge(f: Callable, step: float, tol: float, max_h: float) -> float:
     """Simple newton iteration based convergence function.
 
     Args:
@@ -218,12 +227,15 @@ def converge(f, step, tol, max_h) -> float:
         h += step
 
         if h > max_h:
-            raise Exception(f"Did not converge before {h}")
+            msg = f"Did not converge before {h}"
+            raise Exception(msg)
     return g
 
 
 def get_zfile(
-    directory: Path, base_name: str, allow_missing: bool = False
+    directory: Path,
+    base_name: str,
+    allow_missing: bool = False,
 ) -> Path | None:
     """Find gzipped or non-gzipped versions of a file in a directory listing.
 
@@ -237,20 +249,21 @@ def get_zfile(
         and the file cannot be found, then ``None`` will be returned.
     """
     for file in directory.glob(f"{base_name}*"):
-        if base_name == file.name:
-            return file
-        elif base_name + ".gz" == file.name:
-            return file
-        elif base_name + ".GZ" == file.name:
+        if (
+            base_name == file.name
+            or base_name + ".gz" == file.name
+            or base_name + ".GZ" == file.name
+        ):
             return file
 
     if allow_missing:
         return None
 
-    raise FileNotFoundError(f"Could not find {base_name} or {base_name}.gz file.")
+    msg = f"Could not find {base_name} or {base_name}.gz file."
+    raise FileNotFoundError(msg)
 
 
-def generic_group_labels(list_in, comp=operator.eq):
+def generic_group_labels(list_in: list, comp: Callable = operator.eq) -> list[int]:
     """Group a list of unsortable objects.
 
     Args:
@@ -261,7 +274,7 @@ def generic_group_labels(list_in, comp=operator.eq):
         list[int]: list of labels for the input list
 
     """
-    list_out = [None] * len(list_in)
+    list_out: list[int | None] = [None] * len(list_in)
     label_num = 0
     for i1, ls1 in enumerate(list_out):
         if ls1 is not None:
@@ -293,10 +306,7 @@ def get_local_extrema(chgcar: VolumetricData, find_min: bool = True) -> npt.NDAr
         extrema_coords (list): list of fractional coordinates corresponding
             to local extrema.
     """
-    if find_min:
-        sign = -1
-    else:
-        sign = 1
+    sign = -1 if find_min else 1
 
     # Make 3x3x3 supercell
     # This is a trick to resolve the periodical boundary issue.
@@ -315,7 +325,9 @@ def get_local_extrema(chgcar: VolumetricData, find_min: bool = True) -> npt.NDAr
 
 
 def remove_collisions(
-    fcoords: npt.NDArray, structure: Structure, min_dist: float = 0.9
+    fcoords: npt.NDArray,
+    structure: Structure,
+    min_dist: float = 0.9,
 ) -> npt.NDArray:
     """Removed points that are too close to existing atoms in the structure.
 
@@ -333,12 +345,14 @@ def remove_collisions(
     dist_matrix = structure.lattice.get_all_distances(fcoords, s_fcoord)
     all_dist = np.min(dist_matrix, axis=1)
     return np.array(
-        [fcoords[i] for i in range(len(fcoords)) if all_dist[i] >= min_dist]
+        [fcoords[i] for i in range(len(fcoords)) if all_dist[i] >= min_dist],
     )
 
 
 def cluster_nodes(
-    fcoords: npt.ArrayLike, lattice: Lattice, tol: float = 0.2
+    fcoords: npt.ArrayLike,
+    lattice: Lattice,
+    tol: float = 0.2,
 ) -> npt.NDArray:
     """Cluster nodes that are too close together using hiercharcal clustering.
 
@@ -383,7 +397,9 @@ def cluster_nodes(
 
 
 def get_avg_chg(
-    chgcar: VolumetricData, fcoord: npt.ArrayLike, radius: float = 0.4
+    chgcar: VolumetricData,
+    fcoord: npt.ArrayLike,
+    radius: float = 0.4,
 ) -> float:
     """Get the average charge in a sphere.
 
@@ -400,7 +416,7 @@ def get_avg_chg(
     # makesure fcoord is an array
     fcoord = np.array(fcoord)
 
-    def _dist_mat(pos_frac):
+    def _dist_mat(pos_frac: npt.ArrayLike) -> npt.NDArray:
         # return a matrix that contains the distances
         aa = np.linspace(0, 1, len(chgcar.get_axis_grid(0)), endpoint=False)
         bb = np.linspace(0, 1, len(chgcar.get_axis_grid(1)), endpoint=False)
@@ -413,11 +429,11 @@ def get_avg_chg(
         return dist_from_pos.reshape(AA.shape)
 
     if np.any(fcoord < 0) or np.any(fcoord > 1):
-        raise ValueError("f_coords must be in [0,1)")
+        msg = "f_coords must be in [0,1)"
+        raise ValueError(msg)
     mask = _dist_mat(fcoord) < radius
     vol_sphere = chgcar.structure.volume * (mask.sum() / chgcar.ngridpts)
-    avg_chg = np.sum(chgcar.data["total"] * mask) / mask.size / vol_sphere
-    return avg_chg
+    return np.sum(chgcar.data["total"] * mask) / mask.size / vol_sphere
 
 
 class TopographyAnalyzer:
@@ -439,20 +455,20 @@ class TopographyAnalyzer:
 
     def __init__(
         self,
-        structure,
-        framework_ions,
-        cations,
-        image_tol=0.0001,
-        max_cell_range=1,
-        check_volume=True,
-        constrained_c_frac=0.5,
-        thickness=0.5,
+        structure: Structure,
+        framework_ions: list[str],
+        cations: list[str],
+        image_tol: float = 0.0001,
+        max_cell_range: int = 1,
+        check_volume: bool = True,
+        constrained_c_frac: float = 0.5,
+        thickness: float = 0.5,
         clustering_tol: float = 0.5,
         min_dist: float = 0.9,
         ltol: float = 0.2,
         stol: float = 0.3,
         angle_tol: float = 5,
-    ):
+    ) -> None:
         """Initialize the TopographyAnalyzer.
 
         Args:
@@ -509,6 +525,7 @@ class TopographyAnalyzer:
             max_cell_range = 2
 
         # Let us first map all sites to the standard unit cell, i.e.,
+
         # 0 ≤ coordinates < 1.
         # structure = Structure.from_sites(structure, to_unit_cell=True)
         # lattice = structure.lattice
@@ -518,12 +535,12 @@ class TopographyAnalyzer:
         # mapping all sites to the standard unit cell
 
         self.structure = structure.copy()
-        # TODO: Structure is still being mutated something weird is going on but the code works.
+        # NOTE: Structure is still being mutated something weird is going on but the code works.
         # remove oxidation state
         self.structure.remove_oxidation_states()
 
         constrained_sites = []
-        for i, site in enumerate(self.structure):
+        for _i, site in enumerate(self.structure):
             if (
                 site.frac_coords[2] >= constrained_c_frac - thickness
                 and site.frac_coords[2] <= constrained_c_frac + thickness
@@ -566,14 +583,14 @@ class TopographyAnalyzer:
             for v in vs:
                 node_points_map[v].update(pts)
 
-        _logger.debug(f"{len(voro.vertices)} total Voronoi vertices")
+        _logger.debug("Voronoi vertices in cell: %s", len(voro.vertices))
 
         # Vnodes store all the valid voronoi polyhedra. Cation vnodes store
         # the voronoi polyhedra that are already occupied by existing cations.
         vnodes: list[VoronoiPolyhedron] = []
         cation_vnodes = []
 
-        def get_mapping(poly):
+        def get_mapping(poly: VoronoiPolyhedron) -> VoronoiPolyhedron | None:
             """Helper function.
 
             Checks if a vornoi poly is a periodic image of
@@ -599,7 +616,7 @@ class TopographyAnalyzer:
                     if ref is None:
                         vnodes.append(poly)
 
-        _logger.debug(f"{len(vnodes)} voronoi vertices in cell.")
+        _logger.debug("%s - voronoi vertices in cell.", len(vnodes))
 
         # Eliminate all voronoi nodes which are closest to existing cations.
         if len(cations) > 0:
@@ -615,7 +632,7 @@ class TopographyAnalyzer:
             cation_vnodes = [v for i, v in enumerate(vnodes) if i in indices]
             vnodes = [v for i, v in enumerate(vnodes) if i not in indices]
 
-        _logger.debug(f"{len(vnodes)} vertices in cell not with cation.")
+        _logger.debug("%s - vertices in cell not with cation.", len(vnodes))
         self.coords = coords
         self.vnodes = vnodes
         self.cation_vnodes = cation_vnodes
@@ -644,7 +661,7 @@ class TopographyAnalyzer:
             sm=self.sm,
         )
 
-    def check_volume(self):
+    def check_volume(self) -> None:
         """Basic check for volume of all voronoi poly sum to unit cell volume.
 
         Note that this does not apply after poly combination.
@@ -653,14 +670,17 @@ class TopographyAnalyzer:
             v.volume for v in self.cation_vnodes
         )
         if abs(vol - self.structure.volume) > 1e-8:  # pragma: no cover
-            raise ValueError(
+            msg = (
                 "Sum of voronoi volumes is not equal to original volume of "
                 "structure! This may lead to inaccurate results. You need to "
                 "tweak the tolerance and max_cell_range until you get a "
                 "correct mapping."
             )
+            raise ValueError(
+                msg,
+            )
 
-    def get_structure_with_nodes(self):
+    def get_structure_with_nodes(self) -> Structure:
         """Get the modified structure with the voronoi nodes inserted.
 
         The species is set as a DummySpecies X.
@@ -674,7 +694,14 @@ class TopographyAnalyzer:
 class VoronoiPolyhedron:
     """Convenience container for a voronoi point in PBC and its associated polyhedron."""
 
-    def __init__(self, lattice, frac_coords, polyhedron_indices, all_coords, name=None):
+    def __init__(
+        self,
+        lattice: Lattice,
+        frac_coords: npt.ArrayLike,
+        polyhedron_indices: list | set,
+        all_coords: list,
+        name: str | int | None = None,
+    ) -> None:
         """Initialize a VoronoiPolyhedron.
 
         Args:
@@ -716,16 +743,16 @@ class VoronoiPolyhedron:
         return True
 
     @property
-    def coordination(self):
+    def coordination(self) -> int:
         """Coordination number."""
         return len(self.polyhedron_indices)
 
     @property
-    def volume(self):
+    def volume(self) -> float:
         """Volume of the polyhedron."""
         return calculate_vol(self.polyhedron_coords)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation."""
         return f"Voronoi polyhedron {self.name}"
 
@@ -768,7 +795,7 @@ class ChargeInsertionAnalyzer(MSONable):
         stol: float = 0.3,
         angle_tol: float = 5,
         min_dist: float = 0.9,
-    ):
+    ) -> None:
         """Initialize the ChargeInsertionAnalyzer."""
         self.chgcar = chgcar
         self.working_ion = working_ion
@@ -802,7 +829,9 @@ class ChargeInsertionAnalyzer(MSONable):
         return [s for s, _ in self.labeled_sites]
 
     def filter_and_group(
-        self, avg_radius: float = 0.4, max_avg_charge: float = 1.0
+        self,
+        avg_radius: float = 0.4,
+        max_avg_charge: float = 1.0,
     ) -> list[tuple[float, list[list[float]]]]:
         """Filter and group the insertion sites by average charge.
 
@@ -822,7 +851,9 @@ class ChargeInsertionAnalyzer(MSONable):
         avg_chg_first_member = {}
         for lab, g in lab_groups.items():
             avg_chg_first_member[lab] = get_avg_chg(
-                self.chgcar, fcoord=self.local_minima[g[0]], radius=avg_radius
+                self.chgcar,
+                fcoord=self.local_minima[g[0]],
+                radius=avg_radius,
             )
 
         res = []
@@ -834,7 +865,7 @@ class ChargeInsertionAnalyzer(MSONable):
         return res
 
 
-def _get_ipr(spin, k_index, procar):
+def _get_ipr(spin: int, k_index: int, procar: Procar) -> npt.NDArray:
     states = procar.data[spin][k_index, ...]
     flat_states = states.reshape(states.shape[0], -1)
     return 1 / np.sum(flat_states**2, axis=1)
@@ -858,19 +889,20 @@ def get_ipr_in_window(
     Returns:
         dict[(int, int), npt.NDArray]: The IPR of the states in the band window keyed for each k-point and spin.
     """
-    res = dict()
-    for spin in bandstructure.bands.keys():
+    res = {}
+    for spin in bandstructure.bands:
         s_index = 0 if spin == Spin.up else 1
         # last band that is fully below the fermi level
         last_occ_idx = bisect.bisect_left(
-            bandstructure.bands[spin].max(1), bandstructure.efermi
+            bandstructure.bands[spin].max(1),
+            bandstructure.efermi,
         )
         lbound = max(last_occ_idx - band_window, 0)
         ubound = min(last_occ_idx + band_window, bandstructure.nb_bands)
         for k_idx, _ in enumerate(bandstructure.kpoints):
             ipr = _get_ipr(spin, k_idx, procar)
             res[(k_idx, s_index)] = np.stack(
-                (np.arange(lbound, ubound), ipr[lbound:ubound])
+                (np.arange(lbound, ubound), ipr[lbound:ubound]),
             ).T
     return res
 
@@ -903,7 +935,10 @@ def get_localized_states(
 
 
 def sort_positive_definite(
-    list_in: list, ref1: Any, ref2: Any, dist: Callable
+    list_in: list,
+    ref1: object,
+    ref2: object,
+    dist: Callable,
 ) -> tuple[tuple, tuple[float]]:
     """Sort a list where we can only compute a positive-definite distance.
 
@@ -938,7 +973,7 @@ def sort_positive_definite(
     return sorted_list, distances
 
 
-def calculate_vol(coords: npt.NDArray):
+def calculate_vol(coords: npt.NDArray) -> float:
     """Calculate volume given a set of points in 3D space.
 
     Args:
@@ -950,10 +985,9 @@ def calculate_vol(coords: npt.NDArray):
     return ConvexHull(coords).volume
 
 
-@deprecated("Name changed")
-def get_symmetry_labeled_structures():
+@deprecated("Name changed to get_labeled_inserted_structure.")
+def get_symmetry_labeled_structures() -> None:
     """Deprecated."""
-    pass
 
 
 def get_labeled_inserted_structure(
@@ -1018,7 +1052,9 @@ class CorrectionResult(MSONable):
     metadata: dict[Any, Any]
 
 
-def _group_docs_by_structure(docs: list, sm: StructureMatcher, get_structure: Callable):
+def _group_docs_by_structure(
+    docs: list, sm: StructureMatcher, get_structure: Callable
+) -> Generator[list, None, None]:
     """Group docs by structure.
 
     Args:
@@ -1034,8 +1070,7 @@ def _group_docs_by_structure(docs: list, sm: StructureMatcher, get_structure: Ca
         comp=lambda x, y: sm.fit(get_structure(x), get_structure(y), symmetric=True),
     )
     for ilab in set(labs):
-        sub_g = [docs[itr] for itr, jlab in enumerate(labs) if jlab == ilab]
-        yield [el for el in sub_g]
+        yield [docs[itr] for itr, jlab in enumerate(labs) if jlab == ilab]
 
 
 def group_docs(
@@ -1043,7 +1078,7 @@ def group_docs(
     sm: StructureMatcher,
     get_structure: Callable,
     get_hash: Callable | None = None,
-):
+) -> Generator[tuple[str | None, list], None, None]:
     """Group docs by a simple hash followed by structure.
 
     Assuming that you have a basic representation of the defect, like `name`.
@@ -1061,8 +1096,8 @@ def group_docs(
         Generator of (name, group)
     """
     if get_hash is None:
-        for g in _group_docs_by_structure(docs, sm, get_structure):
-            yield None, g
+        for g_ in _group_docs_by_structure(docs, sm, get_structure):
+            yield None, g_
     else:
         s_docs = sorted(docs, key=get_hash)
         for h, g in itertools.groupby(s_docs, key=get_hash):
@@ -1106,7 +1141,7 @@ def get_plane_spacing(lattice: npt.NDArray) -> list[float]:
     spacing = []
     for idir in range(ndim):
         idir_proj = [
-            np.array(lattice[j]) * pproj[tuple(sorted([idir, j]))]  # type: ignore
+            np.array(lattice[j]) * pproj[tuple(sorted([idir, j]))]  # type: ignore[index]
             for j in range(ndim)
             if j != idir
         ]
