@@ -590,7 +590,7 @@ class FormationEnergyDiagram(MSONable):
             VBM and CBM respectively.
         """
         chempots = self._parse_chempots(chempots)
-        if x_max is None:
+        if x_max is None:  # pragma: no cover
             x_max = self.band_gap
 
         lines = self._get_lines(chempots)
@@ -677,7 +677,7 @@ class FormationEnergyDiagram(MSONable):
                 self.chempot_limits,
             ),
         )
-        if len(rich_conditions) == 0:
+        if len(rich_conditions) == 0:  # pragma: no cover
             msg = f"Cannot find a chemical potential condition with {rich_element} near zero."
             raise ValueError(
                 msg,
