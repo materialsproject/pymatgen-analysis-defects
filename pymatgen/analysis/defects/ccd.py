@@ -19,9 +19,9 @@ from .recombination import get_SRH_coef
 from .utils import get_localized_states, get_zfile, sort_positive_definite
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
     from ctypes import Structure
     from pathlib import Path
-    from typing import Optional, Sequence, Tuple
 
     import numpy.typing as npt
     from matplotlib.axes import Axes
@@ -66,15 +66,15 @@ class HarmonicDefect(MSONable):
     omega: float
     charge_state: int
     ispin: int
-    vrun: Optional[Vasprun] = None
-    distortions: Optional[Sequence[float]] = None
-    structures: Optional[Sequence[Structure]] = None
-    energies: Optional[Sequence[float]] = None
-    defect_band: Optional[Sequence[tuple]] = None
-    relaxed_index: Optional[int] = None
-    relaxed_bandstructure: Optional[BandStructure] = None
-    wswqs: Optional[list[dict]] = None
-    waveder: Optional[Waveder] = None
+    vrun: Vasprun | None = None
+    distortions: Sequence[float] | None = None
+    structures: Sequence[Structure] | None = None
+    energies: Sequence[float] | None = None
+    defect_band: Sequence[tuple] | None = None
+    relaxed_index: int | None = None
+    relaxed_bandstructure: BandStructure | None = None
+    wswqs: list[dict] | None = None
+    waveder: Waveder | None = None
 
     def __repr__(self) -> str:
         """String representation of the harmonic defect."""
@@ -93,7 +93,8 @@ class HarmonicDefect(MSONable):
         """The index of the defect band."""
         bands = {band for band, _, _ in self.defect_band}
         if len(bands) != 1:
-            raise ValueError("Defect band index is not unique.")
+            msg = "Defect band index is not unique."
+            raise ValueError(msg)
         return bands.pop()
 
     @property
@@ -105,7 +106,8 @@ class HarmonicDefect(MSONable):
         """
         spins = {spin for _, _, spin in self.defect_band}
         if len(spins) != 1:
-            raise ValueError("Spin index is not unique.")
+            msg = "Spin index is not unique."
+            raise ValueError(msg)
         return spins.pop()
 
     @property
@@ -113,10 +115,10 @@ class HarmonicDefect(MSONable):
         """The spin of the defect returned as an Spin Enum."""
         if self.spin_index == 0:
             return Spin.up
-        elif self.spin_index == 1:
+        if self.spin_index == 1:
             return Spin.down
-        else:
-            raise ValueError(f"Invalid spin index: {self.spin_index}")
+        msg = f"Invalid spin index: {self.spin_index}"
+        raise ValueError(msg)
 
     @property
     def relaxed_structure(self) -> Structure:
@@ -164,7 +166,7 @@ class HarmonicDefect(MSONable):
             A HarmonicDefect object.
         """
 
-        def _parse_vasprun(vasprun: Vasprun):
+        def _parse_vasprun(vasprun: Vasprun) -> tuple[float, Structure]:
             energy = vasprun.final_energy
             struct = vasprun.final_structure
             return (energy, struct)
@@ -184,8 +186,9 @@ class HarmonicDefect(MSONable):
         )
         energies, structures = list(zip(*sorted_list))
 
-        if not np.allclose(unsorted_e, energies, atol=1e-99):
-            raise ValueError("The vaspruns should already be in order.")
+        if not np.allclose(unsorted_e, energies, atol=1e-99):  # pragma: no cover
+            msg = "The vaspruns should already be in order."
+            raise ValueError(msg)
 
         omega = _get_omega(
             Q=distortions,
@@ -196,25 +199,25 @@ class HarmonicDefect(MSONable):
 
         get_band_structure_kwargs = get_band_structure_kwargs or {}
         bandstructure = vaspruns[relaxed_index].get_band_structure(
-            **get_band_structure_kwargs
+            **get_band_structure_kwargs,
         )
         ispin = vaspruns[relaxed_index].parameters["ISPIN"]
 
-        if store_bandstructure:
-            bs = bandstructure
-        else:
-            bs = None
+        bs = bandstructure if store_bandstructure else None
 
         if defect_band is None:
             if procar is None:  # pragma: no cover
+                msg = "If defect_band_index is not provided, you must provide a Procar object."
                 raise ValueError(
-                    "If defect_band_index is not provided, you must provide a Procar object."
+                    msg,
                 )
             # Get the defect bands
             defect_band_2s = list(
                 get_localized_states(
-                    bandstructure=bandstructure, procar=procar, band_window=band_window
-                )
+                    bandstructure=bandstructure,
+                    procar=procar,
+                    band_window=band_window,
+                ),
             )
             defect_band_2s.sort(key=lambda x: (x[2], x[1]))
             # group by the spin index
@@ -282,13 +285,17 @@ class HarmonicDefect(MSONable):
 
         if charge_state is None:
             if vaspruns[min_idx].final_structure._charge is None:
-                raise ValueError(
+                msg = (
                     "Charge state is not provided and cannot be parsed from the POTCAR."
+                )
+                raise ValueError(
+                    msg,
                 )
             charge_state = vaspruns[0].final_structure.charge
 
         if any(v.final_structure.charge != charge_state for v in vaspruns):
-            raise ValueError("All vaspruns must have the same charge state.")
+            msg = "All vaspruns must have the same charge state."
+            raise ValueError(msg)
 
         return cls.from_vaspruns(
             vaspruns=vaspruns,
@@ -315,7 +322,9 @@ class HarmonicDefect(MSONable):
         return 1.0 / (1 - np.exp(-self.omega_eV / KB * t))
 
     def read_wswqs(
-        self, directory: Path, distortions: Sequence[float] | None = None
+        self,
+        directory: Path,
+        distortions: Sequence[float] | None = None,
     ) -> None:
         """Read the WSWQ files from a directory.
 
@@ -327,14 +336,15 @@ class HarmonicDefect(MSONable):
             distortions: The distortions used to generate the WSWQ files,
                 if different from self.distortions
         """
-        wswq_files = [f for f in directory.glob("WSWQ*")]
+        wswq_files = list(directory.glob("WSWQ*"))
         wswq_files.sort(key=lambda x: int(x.name.split(".")[1]))
         if distortions is None:
             distortions = self.distortions
 
         if len(wswq_files) != len(distortions):
+            msg = f"Number of WSWQ files ({len(wswq_files)}) does not match number of distortions ({len(distortions)})."
             raise ValueError(
-                f"Number of WSWQ files ({len(wswq_files)}) does not match number of distortions ({len(distortions)})."
+                msg,
             )
         self.wswqs = [
             {"Q": d, "wswq": WSWQ.from_file(f)} for d, f in zip(distortions, wswq_files)
@@ -361,19 +371,23 @@ class HarmonicDefect(MSONable):
                 The indices are [band_j,]
         """
         if self.wswqs is None:
-            raise RuntimeError("WSWQs have not been read. Use `read_wswqs` first.")
+            msg = "WSWQs have not been read. Use `read_wswqs` first."
+            raise RuntimeError(msg)
         distortions = [wswq["Q"] for wswq in self.wswqs]
         wswqs = [wswq["wswq"] for wswq in self.wswqs]
         band_index, kpoint_index, spin_index = defect_state
         # The second band index is associated with the defect state
         # since we are usually interested in capture
         slopes = _get_wswq_slope(distortions, wswqs)[
-            spin_index, kpoint_index, :, band_index
+            spin_index,
+            kpoint_index,
+            :,
+            band_index,
         ]
         ediffs = self._get_ediff(output_order="skb")[spin_index, kpoint_index, :]
         return np.multiply(slopes, ediffs)
 
-    def _get_ediff(self, output_order="skb") -> npt.NDArray:
+    def _get_ediff(self, output_order: str = "skb") -> npt.NDArray:
         """Compute the eigenvalue difference to the defect band.
 
         .. note::
@@ -389,10 +403,13 @@ class HarmonicDefect(MSONable):
             The eigenvalue difference to the defect band in the order specified by output_order.
 
         """
-        if self.relaxed_bandstructure is None:
-            raise ValueError(  # pragma: no cover
+        if self.relaxed_bandstructure is None:  # pragma: no cover
+            msg = (
                 "The ``relaxed_bandstructure`` must be set before ``ediff`` can be computed. "
                 "Try setting ``store_bandstructure=True`` when initializing."
+            )
+            raise ValueError(
+                msg,
             )
 
         ediffs_ = _get_ks_ediff(
@@ -402,21 +419,23 @@ class HarmonicDefect(MSONable):
         ediffs_stack = [
             ediffs_[Spin.up].T,
         ]
-        if Spin.down in ediffs_.keys():
+        if Spin.down in ediffs_:
             ediffs_stack.append(ediffs_[Spin.down].T)
         ediffs = np.stack(ediffs_stack)
 
         if output_order == "skb":
             return ediffs
-        elif output_order == "bks":
+        if output_order == "bks":
             return ediffs.transpose((2, 1, 0))
-        else:
-            raise ValueError(
-                "Invalid output_order, choose from 'skb' or 'bks'."
-            )  # pragma: no cover
+        msg = "Invalid output_order, choose from 'skb' or 'bks'."
+        raise ValueError(
+            msg,
+        )
 
     def get_dielectric_function(
-        self, idir: int, jdir: int
+        self,
+        idir: int,
+        jdir: int,
     ) -> tuple[npt.ArrayLike, npt.ArrayLike, npt.ArrayLike]:
         """Calculate the dielectric function.
 
@@ -430,7 +449,8 @@ class HarmonicDefect(MSONable):
             eps_cbm: The dielectric function from the defect state to the CBM.
         """
         dfc = DielectricFunctionCalculator.from_vasp_objects(
-            vrun=self.vrun, waveder=self.waveder
+            vrun=self.vrun,
+            waveder=self.waveder,
         )
 
         # two masks to select for VBM -> Defect and Defect -> CBM
@@ -521,7 +541,8 @@ def get_SRH_coefficient(
     elif initial_state.charge_state == final_state.charge_state - 1:
         band_slice = slice(defect_band - n_band_edge, defect_band)
     else:
-        raise ValueError("SRH capture event must involve a charge state change of 1.")
+        msg = "SRH capture event must involve a charge state change of 1."
+        raise ValueError(msg)
 
     me_band_edge = me_all[band_slice]
     dQ = get_dQ(initial_state.relaxed_structure, final_state.relaxed_structure)
@@ -539,137 +560,6 @@ def get_SRH_coefficient(
     )
 
 
-# @dataclass
-# class RadiativeCatpture(MSONable):
-#     """Representation of a radiative capture event.
-
-#     Attributes:
-#         initial_state: The initial state of the radiative capture event.
-#         final_state: The final state of the radiative capture event.
-#         dQ: The configuration coordinate change between the relaxed initial state and the final state.
-#         waveder: The data from the WAVEDER file obtained with ``LOPTICS=.True.``.
-
-#     """
-
-#     initial_state: HarmonicDefect
-#     final_state: HarmonicDefect
-#     dQ: float
-#     waveder: Waveder
-
-#     def get_coeff(
-#         self,
-#         T: float | npt.ArrayLike,
-#         dE: float,
-#         omega_photon: float,
-#         volume: float | None = None,
-#         g: int = 1,
-#         occ_tol: float = 1e-3,
-#         n_band_edge: int = 1,
-#     ):
-#         """Calculate the SRH recombination coefficient."""
-#         if volume is None:
-#             volume = self.initial_state.relaxed_structure.volume
-
-#         me_all = self.get_dipoles()  # indices: [band, kpoint, spin, coord]
-
-#         istate = self.initial_state
-
-#         if self.initial_state.charge_state == self.final_state.charge_state + 1:
-#             band_slice = slice(
-#                 istate.defect_band_index + 1, istate.defect_band_index + 1 + n_band_edge
-#             )
-#         elif self.initial_state.charge_state == self.final_state.charge_state - 1:
-#             band_slice = slice(
-#                 istate.defect_band_index - n_band_edge, istate.defect_band_index
-#             )
-#         else:
-#             raise ValueError(
-#                 "SRH capture event must involve a charge state change of 1."
-#             )
-
-#         me_band_edge = me_all[band_slice, istate.kpt_index, istate.spin_index]
-
-#         return get_Rad_coef(
-#             T,
-#             dQ=self.dQ,
-#             dE=dE,
-#             omega_i=self.initial_state.omega_eV,
-#             omega_f=self.final_state.omega_eV,
-#             omega_photon=omega_photon,
-#             dipole_me=np.average(me_band_edge),
-#             volume=volume,
-#             g=g,
-#             occ_tol=occ_tol,
-#         )
-
-#     @classmethod
-#     def from_directories(
-#         cls,
-#         initial_dirs: list[Path],
-#         final_dirs: list[Path],
-#         waveder_dir: Path,
-#         kpt_index: int,
-#         initial_charge_state: int | None = None,
-#         final_charge_state: int | None = None,
-#         spin_index: int | None = None,
-#         defect_band_index: int | None = None,
-#         store_bandstructure: bool = False,
-#         get_band_structure_kwargs: dict | None = None,
-#         **kwargs,
-#     ) -> RadiativeCatpture:
-#         """Create a RadiativeCapture object from a list of directories.
-
-#         Args:
-#             initial_dirs: A list of directories for the initial state.
-#             final_dirs: A list of directories for the final state.
-#             waveder_dir: The directory containing the WAVEDER file.
-#             kpt_index: The index of the k-point to use.
-#             initial_charge_state: The charge state of the initial state.
-#                 If None, the charge state is determined from the vasprun.xml and POTCAR files.
-#             final_charge_state: The charge state of the final state.
-#                 If None, the charge state is determined from the vasprun.xml and POTCAR files.
-#             spin_index: The index of the spin channel to use.
-#                 If None, the spin channel is determined by the channel with the most localized state.
-#             defect_band_index: The index of the defect band (0-indexed).
-#                 If None, the defect band is determined by the band with the most localized state.
-#             store_bandstructure: Whether to store the band structure.
-#             get_band_structure_kwargs: Keyword arguments to pass to get_band_structure.
-#             **kwargs: Keyword arguments to pass to the HarmonicDefect constructor.
-
-#         Returns:
-#             A SRHCapture object.
-#         """
-#         initial_defect = HarmonicDefect.from_directories(
-#             directories=initial_dirs,
-#             charge_state=initial_charge_state,
-#             spin_index=spin_index,
-#             relaxed_index=None,
-#             defect_band_index=defect_band_index,
-#             store_bandstructure=store_bandstructure,
-#             get_band_structure_kwargs=get_band_structure_kwargs,
-#             **kwargs,
-#         )
-
-#         # the final state does not need the additional
-#         # information about the electronic states
-#         final_defect = HarmonicDefect.from_directories(
-#             directories=final_dirs,
-#             kpt_index=kpt_index,
-#             charge_state=final_charge_state,
-#             spin_index=spin_index,
-#             relaxed_index=None,
-#             defect_band_index=None,
-#             store_bandstructure=None,
-#             get_band_structure_kwargs=None,
-#             **kwargs,
-#         )
-
-#         waveder_file = get_zfile(waveder_dir, "WAVEDER")
-#         waveder = Waveder(waveder_file)
-#         dQ = get_dQ(initial_defect.relaxed_structure, final_defect.relaxed_structure)
-#         return cls(initial_defect, final_defect, dQ=dQ, waveder=waveder)
-
-
 def get_dQ(ground: Structure, excited: Structure) -> float:
     """Calculate configuration coordinate difference.
 
@@ -682,13 +572,11 @@ def get_dQ(ground: Structure, excited: Structure) -> float:
     """
     return np.sqrt(
         np.sum(
-            list(
-                map(
-                    lambda x: x[0].distance(x[1]) ** 2 * x[0].specie.atomic_mass,
-                    zip(ground, excited),
-                )
-            )
-        )
+            [
+                x[0].distance(x[1]) ** 2 * x[0].specie.atomic_mass
+                for x in zip(ground, excited)
+            ],
+        ),
     )
 
 
@@ -716,11 +604,14 @@ def _get_omega(
 
 
 def _fit_parabola(
-    Q: npt.ArrayLike, energy: npt.ArrayLike, Q0: float, E0: float
-) -> Tuple[float, float, float]:
+    Q: npt.ArrayLike,
+    energy: npt.ArrayLike,
+    Q0: float,
+    E0: float,
+) -> tuple[float, float, float]:
     """Fit the parabola to the data."""
 
-    def f(Q, omega):
+    def f(Q: float, omega: float) -> float:
         """Get the parabola function."""
         return 0.5 * omega**2 * (Q - Q0) ** 2 + E0
 
@@ -743,7 +634,7 @@ def _get_wswq_slope(distortions: list[float], wswqs: list[WSWQ]) -> npt.NDArray:
     yy = np.stack([np.abs(ww.data) * np.sign(qq) for qq, ww in zip(distortions, wswqs)])
     _, *oldshape = yy.shape
     return np.polyfit(distortions, yy.reshape(yy.shape[0], -1), deg=1)[0].reshape(
-        *oldshape
+        *oldshape,
     )
 
 
@@ -764,7 +655,7 @@ def _get_ks_ediff(
         npt.NDArray: The Kohn-Sham energy difference between the defect state and other states.
         Indexed the same way as ``bandstructure.bands``.
     """
-    res = dict()
+    res = {}
     b_at_kpt_and_spin = {(k, s): b for b, k, s in defect_band}
     for ispin, eigs in bandstructure.bands.items():
         spin_index = 0 if ispin == Spin.up else 1
@@ -780,7 +671,11 @@ def _get_ks_ediff(
 
 
 def plot_pes(
-    hd: HarmonicDefect, x_shift=0, y_shift=0, width: float = 1.0, ax: Axes = None
+    hd: HarmonicDefect,
+    x_shift: float = 0,
+    y_shift: float = 0,
+    width: float = 1.0,
+    ax: Axes = None,
 ) -> None:
     """Plot the Potential Energy Surface of a HarmonicDefect.
 

@@ -21,9 +21,8 @@ try:
     from labellines import labelLines
 except ImportError:
 
-    def labelLines(*args, **kwargs):
+    def labelLines(*args, **kwargs) -> None:  # noqa: ARG001, ANN002
         """Dummy function if labellines is not installed."""
-        pass
 
 
 __author__ = "Jimmy Shen"
@@ -43,7 +42,7 @@ def plot_chempot_2d(
     label_lines: bool = False,
     x_vals: list[float] | None = None,
     label_fontsize: int = 12,
-):
+) -> None:
     """Plot the chemical potential diagram for two elements.
 
     Args:
@@ -104,7 +103,7 @@ def _convex_hull_2d(
     x_element: Element,
     y_element: Element,
     competing_phases: list | None = None,
-) -> list[dict]:
+) -> list:
     """Compute the convex hull of a set of points in 2D.
 
     Args:
@@ -128,9 +127,8 @@ def _convex_hull_2d(
     xy_points = [(pt[x_element], pt[y_element]) for pt in points]
     hull = ConvexHull(xy_points)
     xy_hull = [xy_points[i] for i in hull.vertices]
-    pt_and_phase = []
 
-    def _get_line_data(i1, i2):
+    def _get_line_data(i1: int, i2: int) -> tuple:
         cp1 = competing_phases[hull.vertices[i1]]
         cp2 = competing_phases[hull.vertices[i2]]
         shared_keys = cp1.keys() & cp2.keys()
@@ -138,7 +136,8 @@ def _convex_hull_2d(
         return xy_hull[i1], xy_hull[i2], shared_phase
 
     # return all pairs of points:
-    for itr in range(1, len(hull.vertices)):
-        pt_and_phase.append(_get_line_data(itr - 1, itr))
+    pt_and_phase = [
+        _get_line_data(itr - 1, itr) for itr in range(1, len(hull.vertices))
+    ]
     pt_and_phase.append(_get_line_data(len(hull.vertices) - 1, 0))
     return pt_and_phase

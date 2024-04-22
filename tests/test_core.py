@@ -26,6 +26,7 @@ def test_vacancy(gan_struct):
     assert vac.name == "v_Ga"
     assert vac == vac
     assert vac.element_changes == {Element("Ga"): -1}
+    assert vac.latex_name == r"v$_{\rm Ga}$"
 
 
 def test_substitution(gan_struct):
@@ -48,6 +49,7 @@ def test_substitution(gan_struct):
     assert sub.latex_name == r"O$_{\rm N}$"
     assert sub == sub
     assert sub.element_changes == {Element("N"): -1, Element("O"): 1}
+    assert sub.latex_name == r"O$_{\rm N}$"
 
     # test supercell with locking
     sc_locked = sub.get_supercell_structure(relax_radius=5.0)
@@ -122,6 +124,7 @@ def test_interstitial(gan_struct):
     assert inter.name == "N_i"
     assert str(inter) == "N intersitial site at [0.00,0.00,0.75]"
     assert inter.element_changes == {Element("N"): 1}
+    assert inter.latex_name == r"N$_{\rm i}$"
 
     # test target_frac_coords with get_supercell_structure
     finder = DefectSiteFinder()
