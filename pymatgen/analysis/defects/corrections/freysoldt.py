@@ -98,8 +98,8 @@ def get_freysoldt_correction(
         dielectric = float(np.mean(dielectric))
     elif np.ndim(dielectric) == 2:  # pragma: no cover
         dielectric = float(np.mean(dielectric.diagonal()))
-    else:
-        msg = f"Dielectric constant is cannot be converted into a scalar. Currently of type {type(dielectric)}"
+    else:  # pragma: no cover
+        msg = f"Dielectric constant cannot be converted into a scalar. Currently of type {type(dielectric)}"
         raise ValueError(
             msg,
         )
@@ -133,13 +133,12 @@ def get_freysoldt_correction(
         msg = "defect_locpot must be of type Locpot or dict"
         raise ValueError(msg)
 
-    # TODO this can be done with regridding later
     if isinstance(bulk_locpot, VolumetricData):
         list_bulk_plnr_avg_esp = [*map(bulk_locpot.get_average_along_axis, [0, 1, 2])]
     elif isinstance(bulk_locpot, dict):
         bulk_locpot_ = {int(k): v for k, v in bulk_locpot.items()}
         list_bulk_plnr_avg_esp = [bulk_locpot_[i] for i in range(3)]
-    else:
+    else:  # pragma: no cover
         msg = "bulk_locpot must be of type Locpot or dict"
         raise ValueError(msg)
 
@@ -405,7 +404,7 @@ def plot_plnr_avg(
             If True then saves plot as   str(title) + "FreyplnravgPlot.pdf"
         ax (matplotlib.axes.Axes): Axes object to plot on. If None, makes new figure.
     """
-    if not plot_data["pot_plot_data"]:
+    if not plot_data["pot_plot_data"]:  # pragma: no cover
         msg = "Cannot plot potential alignment before running correction!"
         raise ValueError(msg)
 
@@ -442,9 +441,9 @@ def plot_plnr_avg(
     ax.set_ylabel("Potential (V)", fontsize=15)
     ax.legend(loc=9)
     ax.axhline(y=0, linewidth=0.2, color="black")
-    if title is not None:
+    if title is not None:  # pragma: no cover
         ax.set_title(str(title), fontsize=18)
     ax.set_xlim(0, max(x))
-    if saved:
+    if saved:  # pragma: no cover
         fig.savefig(str(title) + "FreyplnravgPlot.pdf")
     return ax
