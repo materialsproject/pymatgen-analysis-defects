@@ -7,6 +7,7 @@ from pymatgen.analysis.defects.supercells import (
     get_sc_fromstruct,
     get_closest_sc_mat
 )
+import pytest
 
 
 def test_supercells(gan_struct):
@@ -28,6 +29,9 @@ def test_ase_supercells(gan_struct):
     sc = gan_struct * sc_mat
     assert 4 <= sc.num_sites <= 8
 
+    # check raise
+    with pytest.raises(RuntimeError):
+        _ase_cubic(gan_struct, min_atoms=4, max_atoms=8, min_length=10)
 
 
 def test_closest_sc_mat(test_dir):

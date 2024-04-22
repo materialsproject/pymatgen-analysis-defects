@@ -65,7 +65,7 @@ def get_matched_structure_mapping_old(
     uc_struct: Structure,
     sc_struct: Structure,
     sm: StructureMatcher | None = None,
-) -> tuple[NDArray, ArrayLike] | None:
+) -> tuple[NDArray, ArrayLike] | None:  # pragma: no cover
     """Get the mapping of the supercell to the unit cell.
 
     Get the mapping from the supercell structure onto the base structure,
