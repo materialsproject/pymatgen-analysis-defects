@@ -1028,7 +1028,7 @@ def get_lower_envelope(lines: list[tuple[float, float]]) -> list[tuple[float, fl
         lines_dd[_hash_float(m)] = min(lines_dd[_hash_float(m)], b)
     lines = list(lines_dd.items())
 
-    if len(lines) < 1:
+    if len(lines) < 1:  # pragma: no cover
         msg = "Need at least one line to get lower envelope."
         raise ValueError(msg)
     if len(lines) == 1:
