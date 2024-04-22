@@ -6,7 +6,8 @@ import collections
 import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 from enum import Enum
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING
+from typing.extensions import Self
 
 import numpy as np
 from monty.json import MSONable
