@@ -512,7 +512,10 @@ class Substitution(Defect):
         site: PeriodicSite,
         multiplicity: int | None = None,
         oxi_state: float | None = None,
-        **kwargs,
+        equivalent_sites: list[PeriodicSite] | None = None,
+        symprec: float = 0.01,
+        angle_tolerance: float = 5,
+        user_charges: list[int] | None = None,
     ) -> None:
         """Initialize a substitutional defect object.
 
@@ -525,9 +528,23 @@ class Substitution(Defect):
             multiplicity: The multiplicity of the defect.
             oxi_state: The oxidation state of the defect, if not specified,
                 this will be determined automatically.
-            **kwargs: Additional kwargs to pass to the Defect constructor.
+            equivalent_sites: A list of equivalent sites for the defect in the structure.
+            symprec: Tolerance for symmetry finding.
+            angle_tolerance: Angle tolerance for symmetry finding.
+            user_charges: User specified charge states. If specified,
+                ``get_charge_states`` will return this list. If ``None`` or empty list
+                the charge states will be determined automatically.
         """
-        super().__init__(structure, site, multiplicity, oxi_state, **kwargs)
+        super().__init__(
+            structure=structure,
+            site=site,
+            multiplicity=multiplicity,
+            oxi_state=oxi_state,
+            equivalent_sites=equivalent_sites,
+            symprec=symprec,
+            angle_tolerance=angle_tolerance,
+            user_charges=user_charges,
+        )
 
     def get_multiplicity(self) -> int:
         """Returns the multiplicity of a defect site within the structure.
@@ -643,7 +660,9 @@ class Interstitial(Defect):
         multiplicity: int = 1,
         oxi_state: float | None = None,
         equivalent_sites: list[PeriodicSite] | None = None,
-        **kwargs,
+        symprec: float = 0.01,
+        angle_tolerance: float = 5,
+        user_charges: list[int] | None = None,
     ) -> None:
         """Initialize an interstitial defect object.
 
@@ -656,15 +675,19 @@ class Interstitial(Defect):
             oxi_state: The oxidation state of the defect, if not specified,
                 this will be determined automatically.
             equivalent_sites: A list of equivalent sites for the defect in the structure.
-            **kwargs: Additional kwargs to pass to the Defect constructor.
+            symprec: Tolerance for symmetry finding.
+            angle_tolerance: Angle tolerance for symmetry finding.
+            user_charges: User specified charge states. If specified,
         """
         super().__init__(
-            structure,
-            site,
-            multiplicity,
-            oxi_state,
-            equivalent_sites,
-            **kwargs,
+            structure=structure,
+            site=site,
+            multiplicity=multiplicity,
+            oxi_state=oxi_state,
+            equivalent_sites=equivalent_sites,
+            symprec=symprec,
+            angle_tolerance=angle_tolerance,
+            user_charges=user_charges,
         )
 
     def get_multiplicity(self) -> int:
