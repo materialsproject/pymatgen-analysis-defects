@@ -110,6 +110,9 @@ def test_substitution(gan_struct):
     n_ga = Substitution(s, n_site)
     assert n_ga.get_charge_states() == [-7, -6, -5, -4, -3, -2, -1, 0, 1]
 
+    n_ga.user_charges = [-100, 102]
+    assert n_ga.get_charge_states() == [-100, 102]
+
 
 def test_interstitial(gan_struct):
     s = gan_struct.copy()
@@ -134,6 +137,10 @@ def test_interstitial(gan_struct):
     inter_sc_struct = inter.get_supercell_structure(target_frac_coords=[0.3, 0.5, 0.9])
     fpos = finder.get_defect_fpos(inter_sc_struct, inter.structure)
     assert np.allclose(fpos, [0.25, 0.5, 0.89809658])  # closest equivalent site
+
+    inter2 = Interstitial(s, n_site)
+    inter2.user_charges = [-100, 102]
+    assert inter2.get_charge_states() == [-100, 102]
 
 
 def test_adsorbate(gan_struct):

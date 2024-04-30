@@ -1,6 +1,5 @@
 """Plotting functions for competing phases."""
 
-# %%
 from __future__ import annotations
 
 import logging
