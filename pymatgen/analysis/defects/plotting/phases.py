@@ -1,4 +1,4 @@
-"""Moved to thermo.py."""
+"""Plotting functions for competing phases."""
 
 from __future__ import annotations
 
