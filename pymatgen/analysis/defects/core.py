@@ -22,7 +22,6 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
     from pymatgen.core import Structure
     from pymatgen.symmetry.structure import SymmetrizedStructure
-
     from typing_extensions import Self
 
 # TODO Possible redesign idea: ``DefectSite`` class defined with a defect object.
