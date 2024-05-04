@@ -6,9 +6,9 @@ requires = ["setuptools >= 42", "versioningit ~= 1.0", "wheel"]
 authors = [{ name = "Jimmy-Xuan Shen", email = "jmmshn@gmail.com" }]
 classifiers = [
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Science/Research",
   "Operating System :: OS Independent",
@@ -16,17 +16,18 @@ classifiers = [
   "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-  "pymatgen>=2023.5.8",
+  "pymatgen",
   "scikit-image>=0.19.3",
-  "numpy"
+  "numpy",
+  "mp-pyrho>=0.4.4",
 ]
 description = "Pymatgen extension for defects analysis"
 dynamic = ["version"]
 keywords = ["high-throughput", "automated", "dft", "defects"]
 license = { text = "modified BSD" }
 name = "pymatgen-analysis-defects"
-readme = "README.rst"
-requires-python = '>=3.8'
+readme = "README.md"
+requires-python = '>=3.9'
 
 [project.optional-dependencies]
 finder = ["dscribe>=2.0.0"]
@@ -34,19 +35,19 @@ dev = ["pre-commit>=2.12.1"]
 docs = [
   "jupyter-book>=0.13.1",
 ]
-pydefect = ["pydefect>=0.6.2"]
+optional = ["pydefect>=0.6.2", "dscribe>=2.0.0", "numba"]
 
 strict = [
-  "pymatgen==2023.7.20",
-  "dscribe==2.0.0",
-  "scikit-image==0.21.0",
-  "numpy==1.24.4",
+  "pymatgen==2024.3.1",
+  "dscribe==2.1.0",
+  "scikit-image==0.22.0",
+  "mp-pyrho==0.4.4",
 ]
 
-tests = ["pytest==7.2.2", "pytest-cov==4.0.0"]
+tests = ["pytest==8.1.1", "pytest-cov==4.1.0", "nbmake==1.5.3"]
 
 [tool.setuptools.dynamic]
-readme = { file = ["README.rst"] }
+readme = { file = ["README.md"] }
 
 [project.urls]
 documentation = "https://materialsproject.github.io/pymatgen-analysis-defects/"
@@ -60,23 +61,6 @@ where = ["./"]
 [tool.versioningit.vcs]
 default-tag = "0.0.1"
 method = "git"
-
-[tool.isort]
-profile = "black"
-
-[tool.black]
-line-length = 88
-
-[tool.blacken-docs]
-line-length = 88
-
-[tool.flake8]
-extend-ignore = "E203, W503, E501, F401, RST21"
-max-line-length = 120
-max-doc-length = 120
-min-python-version = "3.8.0"
-rst-roles = "class, func, ref, obj"
-select = "C, E, F, W, B, B950"
 
 [tool.mypy]
 ignore_missing_imports = true
@@ -93,12 +77,18 @@ source = ["pymatgen/"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-
-[tool.pydocstyle]
-convention = 'google'
-match = '^pymatgen/(?!_).*\.py'
-inherit = false
-add-ignore = "D107, "
+exclude_also = [
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    ]
 
 [tool.autoflake]
 in-place = true
@@ -106,3 +96,38 @@ remove-unused-variables = true
 remove-all-unused-imports = true
 expand-star-imports = true
 ignore-init-module-imports = true
+
+[tool.ruff]
+src = ["pymatgen", "tests"]
+
+line-length = 88
+indent-width = 4
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "E203", "E501", "N", "PLR", "SLF", "ANN101",  "ANN102",
+  "TRY", "COM812", "ISC001", "ERA001", "FBT", "C", "FIX", "TD", "ANN003"]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

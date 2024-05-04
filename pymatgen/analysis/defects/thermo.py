@@ -1,31 +1,44 @@
 """Classes and methods related to thermodynamics and energy."""
+
 from __future__ import annotations
 
+import collections
 import logging
 from dataclasses import dataclass, field
-from itertools import chain
+from itertools import chain, groupby
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Callable
 
 import numpy as np
 from matplotlib import pyplot as plt
 from monty.json import MSONable
-from numpy.typing import ArrayLike, NDArray
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
+from pymatgen.analysis.defects.core import Defect, NamedDefect
+from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
+from pymatgen.analysis.defects.finder import DefectSiteFinder
+from pymatgen.analysis.defects.supercells import get_closest_sc_mat
+from pymatgen.analysis.defects.utils import get_zfile, group_docs
 from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
-from pymatgen.core import Composition, Element, Structure
-from pymatgen.electronic_structure.dos import Dos, FermiDos
-from pymatgen.entries.computed_entries import ComputedEntry, ComputedStructureEntry
-from pymatgen.io.vasp import Locpot, Vasprun
+from pymatgen.core import Composition, Element
+from pymatgen.electronic_structure.dos import FermiDos
+from pymatgen.entries.computed_entries import ComputedEntry
+from pymatgen.io.vasp import Locpot, Vasprun, VolumetricData
+from pyrho.charge_density import get_volumetric_like_sc
 from scipy.constants import value as _cd
 from scipy.optimize import bisect
 from scipy.spatial import ConvexHull
 
-from pymatgen.analysis.defects.core import Defect
-from pymatgen.analysis.defects.corrections.freysoldt import get_freysoldt_correction
-from pymatgen.analysis.defects.finder import DefectSiteFinder
-from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile, group_docs
+if TYPE_CHECKING:
+    from collections.abc import Generator, Sequence
+
+    from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike, NDArray
+    from pandas import DataFrame
+    from pymatgen.analysis.defects.utils import CorrectionResult
+    from pymatgen.core import Structure
+    from pymatgen.electronic_structure.dos import Dos
+    from pymatgen.entries.computed_entries import ComputedStructureEntry
 
 __author__ = "Jimmy-Xuan Shen, Danny Broberg, Shyam Dwaraknath"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -52,8 +65,10 @@ class DefectEntry(MSONable):
             If None, structures attributes of the locpot file will be used to
             automatically determine the defect location.
         bulk_entry:
-            The ComputedEntry for the bulk. If this is provided, the energy difference
-            can be calculated from this automatically.
+            The ComputedEntry for the bulk material. If this is provided, the energy difference
+            can be calculated from this automatically. The `bulk_entry` can also be provided as
+            an attribute of the `DefectEntry` object. If both are provided, the one for
+            `FormationEnergyDiagram` has precedence.
         corrections:
             A dictionary of corrections to the energy.
         corrections_metadata:
@@ -61,7 +76,9 @@ class DefectEntry(MSONable):
             about how the corrections were calculated.  These should are only used
             for debugging and plotting purposes.
             PLEASE DO NOT USE THIS AS A CONTAINER FOR IMPORTANT DATA.
-
+        entry_id:
+            The entry_id for the defect entry. Usually the same as the entry_id of the
+            defect supercell entry.
     """
 
     defect: Defect
@@ -83,8 +100,8 @@ class DefectEntry(MSONable):
         defect_locpot: Locpot | dict,
         bulk_locpot: Locpot | dict,
         dielectric: float | NDArray,
-        defect_struct: Optional[Structure] = None,
-        bulk_struct: Optional[Structure] = None,
+        defect_struct: Structure | None = None,
+        bulk_struct: Structure | None = None,
         **kwargs,
     ) -> CorrectionResult:
         """Calculate the Freysoldt correction.
@@ -107,7 +124,7 @@ class DefectEntry(MSONable):
             bulk_struct:
                 The bulk structure. If None, the structure of the bulk_locpot
                 will be used.
-            kwargs:
+            **kwargs:
                 Additional keyword arguments for the get_correction method.
 
         Returns:
@@ -120,9 +137,10 @@ class DefectEntry(MSONable):
         if bulk_struct is None:
             bulk_struct = getattr(bulk_locpot, "structure", None)
 
-        if defect_struct is None or bulk_struct is None:
+        if defect_struct is None or bulk_struct is None:  # pragma: no cover
+            msg = "defect_struct and/or bulk_struct is missing either provide the structure or provide the complete locpot."
             raise ValueError(
-                "defect_struct and/or bulk_struct is missing either provide the structure or provide the complete locpot."
+                msg,
             )
 
         if self.sc_defect_frac_coords is None:
@@ -132,14 +150,28 @@ class DefectEntry(MSONable):
                 base_structure=bulk_struct,
             )
             self.sc_defect_frac_coords = defect_fpos
-        else:
+        else:  # pragma: no cover
             defect_fpos = self.sc_defect_frac_coords
+
+        if isinstance(defect_locpot, VolumetricData):
+            defect_gn = defect_locpot.dim
+        elif isinstance(defect_locpot, dict):
+            defect_gn = tuple(map(len, (defect_locpot for k in ["0", "1", "2"])))
+
+        if isinstance(bulk_locpot, VolumetricData):
+            bulk_sc_locpot = get_sc_locpot(
+                uc_locpot=bulk_locpot,
+                defect_struct=defect_struct,
+                grid_out=defect_gn,
+                up_sample=2,
+            )
+            bulk_locpot = bulk_sc_locpot
 
         frey_corr = get_freysoldt_correction(
             q=self.charge_state,
             dielectric=dielectric,
             defect_locpot=defect_locpot,
-            bulk_locpot=bulk_locpot,
+            bulk_locpot=bulk_sc_locpot,
             defect_frac_coords=defect_fpos,
             lattice=defect_struct.lattice,
             **kwargs,
@@ -147,7 +179,7 @@ class DefectEntry(MSONable):
         self.corrections.update(
             {
                 "freysoldt": frey_corr.correction_energy,
-            }
+            },
         )
         self.corrections_metadata.update({"freysoldt": frey_corr.metadata.copy()})
         return frey_corr
@@ -159,10 +191,14 @@ class DefectEntry(MSONable):
 
     def get_ediff(self) -> float | None:
         """Get the energy difference between the defect and the bulk (including finite-size correction)."""
-        if self.bulk_entry:
-            return self.corrected_energy - self.bulk_entry.energy
-        else:
-            return None
+        if self.bulk_entry is None:
+            msg = (
+                "Attempting to compute the energy difference without a bulk entry data."
+            )
+            raise RuntimeError(
+                msg,
+            )
+        return self.corrected_energy - self.bulk_entry.energy
 
     def get_summary_dict(self) -> dict:
         """Get a summary dictionary for the defect entry."""
@@ -199,7 +235,7 @@ class FormationEnergyDiagram(MSONable):
             This is only used in case where the bulk entry data is not provided by
             the individual defect entries themselves. Default is None.
             The data from the `bulk_entry` attached to each `defect_entry` will be
-            preferrentially used if it is available.
+            preferentially used if it is available.
         inc_inf_values:
             If False these boundary points at infinity are ignored when we look at the
             chemical potential limits.
@@ -209,17 +245,20 @@ class FormationEnergyDiagram(MSONable):
             A artificial value is needed to help the half-space intersection algorithm.
             This can be justified since these tend to be the substitutional elements
             which should not have very negative chemical potential.
-
+        bulk_stability:
+            If the bulk energy is above the convex hull, lower it to this value below
+            the convex hull.
     """
 
-    defect_entries: List[DefectEntry]
+    defect_entries: list[DefectEntry]
     pd_entries: list[ComputedEntry]
     vbm: float
-    band_gap: Optional[float] = None
-    bulk_entry: Optional[ComputedStructureEntry] = None
+    band_gap: float | None = None
+    bulk_entry: ComputedStructureEntry | None = None
     inc_inf_values: bool = False
+    bulk_stability: float = 0.001
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization.
 
         - Reconstruct the phase diagram with the bulk entry
@@ -228,34 +267,51 @@ class FormationEnergyDiagram(MSONable):
         """
         g = group_defect_entries(self.defect_entries)
         if next(g, True) and next(g, False):
-            raise ValueError(
+            msg = (
                 "Defects are not of same type! "
                 "Use MultiFormationEnergyDiagram for multiple defect types"
             )
+            raise ValueError(
+                msg,
+            )
         # if all of the `DefectEntry` objects have the same `bulk_entry` then `self.bulk_entry` is not needed
-        if any(d.bulk_entry is None for d in self.defect_entries):
-            if self.bulk_entry is None:
-                raise RuntimeError(
-                    "Not all of the `DefectEntry` objects have a `bulk_entry` attribute, you need to provide `bulk_entry` to `FormationEnergyDiagram`"
-                )
+        if self.bulk_entry is None and any(
+            x.bulk_entry is None for x in self.defect_entries
+        ):
+            msg = "The bulk entry must be provided."
+            raise RuntimeError(
+                msg,
+            )
 
-        bulk_entry = self.bulk_entry or self.defect_entries[0].bulk_entry
+        bulk_entry = self.bulk_entry or min(
+            [x.bulk_entry for x in self.defect_entries],
+            key=lambda x: x.energy_per_atom,
+        )
         pd_ = PhaseDiagram(self.pd_entries)
         entries = pd_.stable_entries | {bulk_entry}
         pd_ = PhaseDiagram(entries)
-        self.phase_diagram = ensure_stable_bulk(pd_, bulk_entry)
+        self.phase_diagram = ensure_stable_bulk(pd_, bulk_entry, self.bulk_stability)
         entries = []
         for entry in self.phase_diagram.stable_entries:
-            d_ = dict(
-                energy=self.phase_diagram.get_form_energy(entry),
-                composition=entry.composition,
-                entry_id=entry.entry_id,
-                correction=0.0,
-            )
+            d_ = {
+                "energy": self.phase_diagram.get_form_energy(entry),
+                "composition": entry.composition,
+                "entry_id": entry.entry_id,
+                "correction": 0.0,
+            }
             entries.append(ComputedEntry.from_dict(d_))
             entries.append(ComputedEntry.from_dict(d_))
-
         self.chempot_diagram = ChemicalPotentialDiagram(entries)
+        if (
+            bulk_entry.composition.reduced_formula not in self.chempot_diagram.domains
+        ):  # pragma: no cover
+            msg = (
+                "Bulk entry is not stable in the chemical potential diagram."
+                "Consider increasing the `bulk_stability` to make it more stable."
+            )
+            raise ValueError(
+                msg,
+            )
         chempot_limits = self.chempot_diagram.domains[
             bulk_entry.composition.reduced_formula
         ]
@@ -282,7 +338,7 @@ class FormationEnergyDiagram(MSONable):
         vbm: float,
         bulk_entry: ComputedEntry | None = None,
         **kwargs,
-    ):
+    ) -> FormationEnergyDiagram:
         """Create a FormationEnergyDiagram object using an existing phase diagram.
 
         Since the Formation energy usually looks like:
@@ -312,7 +368,8 @@ class FormationEnergyDiagram(MSONable):
             bulk_entry:
                 The bulk computed entry to get the total energy of the bulk supercell.
             band_gap:
-                The band gap of the bulk crystal.
+                The band gap of the bulk crystal. Passed directly to the \
+                FormationEnergyDiagram constructor.
             inc_inf_values:
                 If False these boundary points at infinity are ignored when we look at
                 the chemical potential limits.
@@ -324,7 +381,8 @@ class FormationEnergyDiagram(MSONable):
                 The FormationEnergyDiagram object.
         """
         adjusted_entries = _get_adjusted_pd_entries(
-            phase_diagram=phase_diagram, atomic_entries=atomic_entries
+            phase_diagram=phase_diagram,
+            atomic_entries=atomic_entries,
         )
         return cls(
             bulk_entry=bulk_entry,
@@ -337,13 +395,13 @@ class FormationEnergyDiagram(MSONable):
     @classmethod
     def with_directories(
         cls,
-        directory_map: Dict[str, str],
+        directory_map: dict[str, str | Path],
         defect: Defect,
         pd_entries: list[ComputedEntry],
         dielectric: float | NDArray,
         vbm: float | None = None,
         **kwargs,
-    ):
+    ) -> FormationEnergyDiagram:
         """Create a FormationEnergyDiagram from VASP directories.
 
         Args:
@@ -358,14 +416,16 @@ class FormationEnergyDiagram(MSONable):
             **kwargs: Additional keyword arguments for the constructor.
         """
 
-        def _read_dir(directory):
+        def _read_dir(directory: str | Path) -> tuple[ComputedEntry, Locpot]:
+            directory = Path(directory)
             vr = Vasprun(get_zfile(Path(directory), "vasprun.xml"))
             ent = vr.get_computed_entry()
             locpot = Locpot.from_file(get_zfile(directory, "LOCPOT"))
             return ent, locpot
 
         if "bulk" not in directory_map:
-            raise ValueError("The bulk directory must be provided.")
+            msg = "The bulk directory must be provided."
+            raise ValueError(msg)
         bulk_entry, bulk_locpot = _read_dir(directory_map["bulk"])
 
         def_entries = []
@@ -380,7 +440,9 @@ class FormationEnergyDiagram(MSONable):
             )
 
             q_d_entry.get_freysoldt_correction(
-                defect_locpot=q_locpot, bulk_locpot=bulk_locpot, dielectric=dielectric
+                defect_locpot=q_locpot,
+                bulk_locpot=bulk_locpot,
+                dielectric=dielectric,
             )
             def_entries.append(q_d_entry)
         if vbm is None:
@@ -421,11 +483,13 @@ class FormationEnergyDiagram(MSONable):
 
         Compute the formation energy at the VBM (essentially the y-intercept)
         for a given defect entry and set of chemical potentials.
+        If the `bulk_entry` attribute is set, this will be used
+        difference will be computed using that value.
 
         Args:
             defect_entry:
                 The defect entry for which the formation energy is computed.
-            chem_pots:
+            chempots:
                 A dictionary of chemical potentials for each element.
 
         Returns:
@@ -435,40 +499,52 @@ class FormationEnergyDiagram(MSONable):
         chempots = self._parse_chempots(chempots)
         en_change = sum(
             [
-                (self.dft_energies[el] + chempots[el]) * fac
+                (self.dft_energies[Element(el)] + chempots[Element(el)]) * fac
                 for el, fac in defect_entry.defect.element_changes.items()
-            ]
+            ],
         )
-        ediff = defect_entry.get_ediff()
-        if ediff is not None:
-            formation_en = ediff - en_change + self.vbm * defect_entry.charge_state
-        else:
-            formation_en = (
-                defect_entry.corrected_energy
-                - self.bulk_entry.energy
-                - en_change
-                + self.vbm * defect_entry.charge_state
-            )
-        return formation_en
+
+        try:
+            ediff = defect_entry.get_ediff()
+        except RuntimeError:
+            ediff = defect_entry.corrected_energy - self.bulk_entry.energy
+
+        return ediff - en_change + self.vbm * defect_entry.charge_state
 
     @property
-    def chempot_limits(self):
+    def chempot_limits(self) -> list[dict[Element, float]]:
         """Return the chemical potential limits in dictionary format."""
+        return [
+            dict(zip(self.chempot_diagram.elements, vertex))
+            for vertex in self._chempot_limits_arr
+        ]
+
+    @property
+    def competing_phases(self) -> list[dict[str, ComputedEntry]]:
+        """Return the competing phases."""
+        bulk_formula = self.bulk_entry.composition.reduced_formula
+        cd = self.chempot_diagram
         res = []
-        for vertex in self._chempot_limits_arr:
-            res.append(dict(zip(self.chempot_diagram.elements, vertex)))
+        for pt in self._chempot_limits_arr:
+            competing_phases = {}
+            for hp_ent, hp in zip(cd._hyperplane_entries, cd._hyperplanes):
+                if hp_ent.composition.reduced_formula == bulk_formula:
+                    continue
+                if _is_on_hyperplane(pt, hp):
+                    competing_phases[hp_ent.composition.reduced_formula] = hp_ent
+            res.append(competing_phases)
         return res
 
     @property
-    def defect(self):
+    def defect(self) -> Defect:
         """Get the defect that this FormationEnergyDiagram represents."""
         return self.defect_entries[0].defect
 
-    def _get_lines(self, chempots: Dict) -> list[tuple[float, float]]:
+    def _get_lines(self, chempots: dict) -> list[tuple[float, float]]:
         """Get the lines for the formation energy diagram.
 
         Args:
-            chempot_dict:
+            chempots:
                 A dictionary of the chemical potentials (referenced to the elements)
                 representations a vertex of the stability region of the chemical
                 potential diagram.
@@ -487,7 +563,10 @@ class FormationEnergyDiagram(MSONable):
         return lines
 
     def get_transitions(
-        self, chempots: dict, x_min: float = 0, x_max: float = 10
+        self,
+        chempots: dict,
+        x_min: float = 0,
+        x_max: float | None = None,
     ) -> list[tuple[float, float]]:
         """Get the transition levels for the formation energy diagram.
 
@@ -496,10 +575,14 @@ class FormationEnergyDiagram(MSONable):
         point respectively.
 
         Args:
-            chempot_dict:
+            chempots:
                 A dictionary of the chemical potentials (referenced to the elements)
                 representations a vertex of the stability region of the chemical
                 potential diagram.
+            x_min:
+                The minimum x value (Energy) for the transition levels.
+            x_max:
+                The maximum x value (Energy) for the transition levels. If None, the band gap is used.
 
         Returns:
             Transition levels and the formation energy at each transition level.
@@ -507,14 +590,14 @@ class FormationEnergyDiagram(MSONable):
             VBM and CBM respectively.
         """
         chempots = self._parse_chempots(chempots)
-        if x_max is None:
+        if x_max is None:  # pragma: no cover
             x_max = self.band_gap
 
         lines = self._get_lines(chempots)
         lines = get_lower_envelope(lines)
         return get_transitions(lines, x_min, x_max)
 
-    def get_formation_energy(self, fermi_level: float, chempot_dict: dict):
+    def get_formation_energy(self, fermi_level: float, chempot_dict: dict) -> float:
         """Get the formation energy at a given Fermi level.
 
         Linearly interpolate between the transition levels.
@@ -522,18 +605,23 @@ class FormationEnergyDiagram(MSONable):
         Args:
             fermi_level:
                 The Fermi level at which the formation energy is computed.
+            chempot_dict:
+                A dictionary of the chemical potentials (referenced to the elemental energies).
 
         Returns:
             The formation energy at the given Fermi level.
         """
         transitions = np.array(
-            self.get_transitions(chempot_dict, x_min=-100, x_max=100)
+            self.get_transitions(chempot_dict, x_min=-100, x_max=100),
         )
         # linearly interpolate between the set of points
         return np.interp(fermi_level, transitions[:, 0], transitions[:, 1])
 
     def get_concentration(
-        self, fermi_level: float, chempots: dict, temperature: int | float
+        self,
+        fermi_level: float,
+        chempots: dict,
+        temperature: float,
     ) -> float:
         """Get equilibrium defect concentration assuming the dilute limit.
 
@@ -545,23 +633,24 @@ class FormationEnergyDiagram(MSONable):
         chempots = self._parse_chempots(chempots=chempots)
         fe = self.get_formation_energy(fermi_level, chempots)
         return self.defect_entries[0].defect.multiplicity * fermi_dirac(
-            energy=fe, temperature=temperature
+            energy=fe,
+            temperature=temperature,
         )
 
-    def as_dataframe(self):
+    def as_dataframe(self) -> DataFrame:
         """Return the formation energy diagram as a pandas dataframe."""
         from pandas import DataFrame
 
         defect_entries = self.defect_entries
-        l_ = map(lambda x: x.get_summary_dict(), defect_entries)
-        df = DataFrame(l_)
-        return df
+        l_ = (x.get_summary_dict() for x in defect_entries)
+        return DataFrame(l_)
 
-    def get_chempots(self, rich_element: Element | str, en_tol: float = 0.01):
+    def get_chempots(self, rich_element: Element | str, en_tol: float = 0.01) -> dict:
         """Get the chemical potential for a desired growth condition.
 
         Choose an element to be rich in, require the chemical potential of that element
-        to be near zero (en_tol, 0), then sort the remaining elements by:
+        to be near the MAX energy among the points (MAX_EN - en_tol, MAX_EN), then sort
+        the remaining elements by:
             1. Are they in the bulk structure:
                 elements in the bulk structure are prioritized.
             2. how similar they in electron affinity to the rich element:
@@ -581,38 +670,57 @@ class FormationEnergyDiagram(MSONable):
             A dictionary of the chemical potentials for the growth condition.
         """
         rich_element = Element(rich_element)
+        max_val = max(self.chempot_limits, key=lambda x: x[rich_element])[rich_element]
         rich_conditions = list(
-            filter(lambda cp: abs(cp[rich_element]) < en_tol, self.chempot_limits)
+            filter(
+                lambda cp: abs(cp[rich_element] - max_val) < en_tol,
+                self.chempot_limits,
+            ),
         )
-        if len(rich_conditions) == 0:
+        if len(rich_conditions) == 0:  # pragma: no cover
+            msg = f"Cannot find a chemical potential condition with {rich_element} near zero."
             raise ValueError(
-                f"Cannot find a chemical potential condition with {rich_element} near zero."
+                msg,
             )
-        defect = self.defect_entries[0].defect
-        in_bulk = defect.structure.composition.elements
+        # defect = self.defect_entries[0].defect
+        in_bulk = self.defect_entries[0].sc_entry.composition.elements
         # make sure they are of type Element
-        in_bulk = list(map(lambda x: Element(x.symbol), in_bulk))
+        in_bulk = [Element(x.symbol) for x in in_bulk]
         not_in_bulk = list(set(self.chempot_limits[0].keys()) - set(in_bulk))
         in_bulk = list(filter(lambda x: x != rich_element, in_bulk))
 
-        def el_sorter(element):
+        def el_sorter(element: Element) -> float:
             return -abs(element.electron_affinity - rich_element.electron_affinity)
 
         el_list = sorted(in_bulk, key=el_sorter) + sorted(not_in_bulk, key=el_sorter)
 
-        def chempot_sorter(chempot_dict):
-            return (chempot_dict[el] for el in el_list)
+        def chempot_sorter(chempot_dict: dict) -> tuple[float, ...]:
+            return tuple(chempot_dict[el] for el in el_list)
 
         return min(rich_conditions, key=chempot_sorter)
+
+    def __repr__(self) -> str:
+        """Representation."""
+        defect_entry_summary = [
+            f"\t{dent.defect.name} {dent.charge_state} {dent.corrected_energy}"
+            for dent in self.defect_entries
+        ]
+
+        txt = (
+            f"{self.__class__.__name__} for {self.defect.name}",
+            "Defect Entries:",
+            "\n".join(defect_entry_summary),
+        )
+        return "\n".join(txt)
 
 
 @dataclass
 class MultiFormationEnergyDiagram(MSONable):
     """Container for multiple formation energy diagrams."""
 
-    formation_energy_diagrams: List[FormationEnergyDiagram]
+    formation_energy_diagrams: list[FormationEnergyDiagram]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Set some attributes after initialization."""
         self.band_gap = self.formation_energy_diagrams[0].band_gap
         self.vbm = self.formation_energy_diagrams[0].vbm
@@ -631,6 +739,14 @@ class MultiFormationEnergyDiagram(MSONable):
 
         Initializes by grouping defect types, and creating a list of single
         FormationEnergyDiagram using the with_atomic_entries method (see above)
+
+        Args:
+            bulk_entry: bulk entry
+            defect_entries: list of defect entries
+            atomic_entries: list of atomic entries
+            phase_diagram: phase diagram
+            vbm: valence band maximum for the bulk phase
+            **kwargs: additional kwargs for FormationEnergyDiagram
         """
         single_form_en_diagrams = []
         for _, defect_group in group_defect_entries(defect_entries=defect_entries):
@@ -647,7 +763,10 @@ class MultiFormationEnergyDiagram(MSONable):
         return cls(formation_energy_diagrams=single_form_en_diagrams)
 
     def solve_for_fermi_level(
-        self, chempots: dict, temperature: int | float, dos: Dos
+        self,
+        chempots: dict,
+        temperature: float,
+        dos: Dos,
     ) -> float:
         """Solves for the equilibrium fermi level at a given chempot, temperature, density of states.
 
@@ -668,7 +787,7 @@ class MultiFormationEnergyDiagram(MSONable):
         fdos_multiplicity = fdos_factor / bulk_factor
         fdos_cbm, fdos_vbm = fdos.get_cbm_vbm()
 
-        def _get_chg(fd: FormationEnergyDiagram, ef):
+        def _get_chg(fd: FormationEnergyDiagram, ef: float) -> float:
             lines = fd._get_lines(chempots=chempots)
             return sum(
                 fd.defect.multiplicity
@@ -677,12 +796,13 @@ class MultiFormationEnergyDiagram(MSONable):
                 for charge, vbm_fe in lines
             )
 
-        def _get_total_q(ef):
+        def _get_total_q(ef: float) -> float:
             qd_tot = sum(
                 _get_chg(fd=fd, ef=ef) for fd in self.formation_energy_diagrams
             )
             qd_tot += fdos_multiplicity * fdos.get_doping(
-                fermi_level=ef + fdos_vbm, temperature=temperature
+                fermi_level=ef + fdos_vbm,
+                temperature=temperature,
             )
             return qd_tot
 
@@ -690,8 +810,9 @@ class MultiFormationEnergyDiagram(MSONable):
 
 
 def group_defect_entries(
-    defect_entries: list[DefectEntry], sm: StructureMatcher = None
-):
+    defect_entries: list[DefectEntry],
+    sm: StructureMatcher = None,
+) -> Generator[tuple[str, list[DefectEntry]], None, None]:
     """Group defect entries by their representation.
 
     First by name then by structure.
@@ -706,24 +827,34 @@ def group_defect_entries(
     if sm is None:
         sm = StructureMatcher(comparator=ElementComparator())
 
-    def _get_structure(entry):
+    def _get_structure(entry: DefectEntry) -> Structure:
         return entry.defect.defect_structure
 
-    def _get_name(entry):
+    def _get_name(entry: DefectEntry) -> str:
         return entry.defect.name
 
-    ent_groups = group_docs(
-        defect_entries, sm=sm, get_structure=_get_structure, get_hash=_get_name
-    )
-    for g_name, g_entries in ent_groups:
-        yield g_name, g_entries
+    def _get_hash_no_structure(entry: DefectEntry) -> tuple[str, str]:
+        return entry.defect.bulk_formula, entry.defect.name
+
+    if all(isinstance(entry.defect, Defect) for entry in defect_entries):
+        ent_groups = group_docs(
+            defect_entries,
+            sm=sm,
+            get_structure=_get_structure,
+            get_hash=_get_name,
+        )
+        yield from ent_groups
+    elif all(isinstance(entry.defect, NamedDefect) for entry in defect_entries):
+        l_ = sorted(defect_entries, key=_get_hash_no_structure)
+        for _, g_entries_no_struct in groupby(l_, key=_get_hash_no_structure):
+            similar_ents = list(g_entries_no_struct)
+            yield similar_ents[0].defect.name, similar_ents
 
 
 def group_formation_energy_diagrams(
     feds: list[FormationEnergyDiagram],
     sm: StructureMatcher = None,
-    combine_diagrams: bool = True,
-):
+) -> Generator[tuple[str | None, FormationEnergyDiagram], None, None]:
     """Group formation energy diagrams by their representation.
 
     First by name then by structure.
@@ -731,7 +862,6 @@ def group_formation_energy_diagrams(
     Args:
         feds: list of formation energy diagrams
         sm: StructureMatcher to use for grouping
-        combine_diagrams: whether to combine matching diagrams into a single diagram
 
     Returns:
         If combine_diagrams is True, generator of (name, combined formation energy diagram) tuples.
@@ -741,29 +871,30 @@ def group_formation_energy_diagrams(
     if sm is None:
         sm = StructureMatcher(comparator=ElementComparator())
 
-    def _get_structure(fed):
+    def _get_structure(fed: FormationEnergyDiagram) -> Structure:
         return fed.defect.defect_structure
 
-    def _get_name(fed):
+    def _get_name(fed: FormationEnergyDiagram) -> str:
         return fed.defect.name
 
     fed_groups = group_docs(
-        feds, sm=sm, get_structure=_get_structure, get_hash=_get_name
+        feds,
+        sm=sm,
+        get_structure=_get_structure,
+        get_hash=_get_name,
     )
     for g_name, f_group in fed_groups:
-        if combine_diagrams:
-            fed = f_group[0]
-            fed_d = fed.as_dict()
-            dents = [dfed.defect_entries for dfed in f_group]
-            fed_d["defect_entries"] = list(chain.from_iterable(dents))
-            yield g_name, FormationEnergyDiagram.from_dict(fed_d)
-        else:
-            yield g_name, f_group
+        fed = f_group[0]
+        fed_d = fed.as_dict()
+        dents = [dfed.defect_entries for dfed in f_group]
+        fed_d["defect_entries"] = list(chain.from_iterable(dents))
+        yield g_name, FormationEnergyDiagram.from_dict(fed_d)
 
 
 def ensure_stable_bulk(
     pd: PhaseDiagram,
     entry: ComputedEntry,
+    threshold: float = 0.001,
 ) -> PhaseDiagram:
     """Added entry to phase diagram and ensure that it is stable.
 
@@ -779,21 +910,60 @@ def ensure_stable_bulk(
             Phase diagram.
         entry:
             entry to be added
+        threshold:
+            If the bulk energy is above the convex hull, lower it to this value below
+            the convex hull.
 
     Returns:
         PhaseDiagram:
             Modified Phase diagram.
     """
-    SMALL_NUM = 1e-8
     stable_entry = ComputedEntry(
-        entry.composition, pd.get_hull_energy(entry.composition) - SMALL_NUM
+        entry.composition,
+        pd.get_hull_energy(entry.composition) - threshold,
     )
-    pd = PhaseDiagram(pd.all_entries + [stable_entry])
-    return pd
+    return PhaseDiagram([*pd.all_entries, stable_entry])
+
+
+def get_sc_locpot(
+    uc_locpot: Locpot,
+    defect_struct: Structure,
+    grid_out: tuple,
+    up_sample: int = 2,
+    sm: StructureMatcher = None,
+) -> Locpot:
+    """Transform a unit cell locpot to be like a supercell locpot.
+
+    This is useful in situations where the supercell bulk locpot is not available.
+    In these cases, we will have a bulk supercell structure that is most closely
+    related to the defect cell.
+
+    Args:
+        uc_locpot: Locpot object for the unit cell.
+        defect_struct: Defect structure to use for the transformation.
+        grid_out: grid dimensions for the supercell locpot
+        up_sample: upsample factor for the supercell locpot
+        sm: StructureMatcher to use for finding the transformation for UC to SC.
+
+    Returns:
+        Locpot: Locpot object for the unit cell transformed to be like the supercell.
+    """
+    sc_mat = get_closest_sc_mat(uc_locpot.structure, sc_struct=defect_struct, sm=sm)
+    bulk_sc = uc_locpot.structure * sc_mat
+    return get_volumetric_like_sc(
+        uc_locpot,
+        bulk_sc,
+        grid_out=grid_out,
+        up_sample=up_sample,
+        sm=sm,
+        normalization=None,
+    )
 
 
 def get_transitions(
-    lines: list[tuple[float, float]], x_min: float, x_max: float
+    lines: list[tuple[float, float]],
+    x_min: float,
+    x_max: float,
 ) -> list[tuple[float, float]]:
     """Get the "transition" points in a list of lines.
 
@@ -817,8 +987,9 @@ def get_transitions(
     for i, (m1, b1) in enumerate(lines[:-1]):
         m2, b2 = lines[i + 1]
         if m1 == m2:
+            msg = "The slopes (charge states) of the set of lines should be distinct."
             raise ValueError(
-                "The slopes (charge states) of the set of lines should be distinct."
+                msg,
             )  # pragma: no cover
         nx, ny = ((b2 - b1) / (m1 - m2), (m1 * b2 - m2 * b1) / (m1 - m2))
         if nx < x_min:
@@ -833,7 +1004,7 @@ def get_transitions(
     return transitions
 
 
-def get_lower_envelope(lines):
+def get_lower_envelope(lines: list[tuple[float, float]]) -> list[tuple[float, float]]:
     """Get the lower envelope of the formation energy.
 
     Based on the fact that the lower envelope of the lines is
@@ -848,20 +1019,29 @@ def get_lower_envelope(lines):
         List[List[float]]:
             List lines that make up the lower envelope.
     """
-    if len(lines) < 1:
-        raise ValueError("Need at least one line to get lower envelope.")
-    elif len(lines) == 1:
+
+    def _hash_float(x: float) -> float:
+        return round(x, 10)
+
+    lines_dd: dict = collections.defaultdict(lambda: float("inf"))
+    for m, b in lines:
+        lines_dd[_hash_float(m)] = min(lines_dd[_hash_float(m)], b)
+    lines = list(lines_dd.items())
+
+    if len(lines) < 1:  # pragma: no cover
+        msg = "Need at least one line to get lower envelope."
+        raise ValueError(msg)
+    if len(lines) == 1:
         return lines
-    elif len(lines) == 2:
+    if len(lines) == 2:
         return sorted(lines)
 
     dual_points = [(m, -b) for m, b in lines]
     upper_hull = get_upper_hull(dual_points)
-    lower_envelope = [(m, -b) for m, b in upper_hull]
-    return lower_envelope
+    return [(m, -b) for m, b in upper_hull]
 
 
-def get_upper_hull(points: ArrayLike) -> List[ArrayLike]:
+def get_upper_hull(points: ArrayLike) -> list[ArrayLike]:
     """Get the upper hull of a set of points in 2D.
 
     Args:
@@ -896,7 +1076,9 @@ def get_upper_hull(points: ArrayLike) -> List[ArrayLike]:
     return upper_hull
 
 
-def _get_adjusted_pd_entries(phase_diagram, atomic_entries) -> list[ComputedEntry]:
+def _get_adjusted_pd_entries(
+    phase_diagram: PhaseDiagram, atomic_entries: Sequence[ComputedEntry]
+) -> list[ComputedEntry]:
     """Get the adjusted entries for the phase diagram.
 
     Combine the terminal energies from ``atomic_entries`` with the enthalpies of formation
@@ -910,14 +1092,15 @@ def _get_adjusted_pd_entries(phase_diagram, atomic_entries) -> list[ComputedEntr
         List[ComputedEntry]: Entries for the new phase diagram.
     """
 
-    def get_interp_en(entry: ComputedEntry):
+    def get_interp_en(entry: ComputedEntry) -> float:
         """Get the interpolated energy of an entry."""
-        e_dict = dict()
+        e_dict = {}
         for e in atomic_entries:
-            if len(e.composition.elements) != 1:
+            if len(e.composition.elements) != 1:  # pragma: no cover
+                msg = "Only single-element entries should be provided."
                 raise ValueError(
-                    "Only single-element entries should be provided."
-                )  # pragma: no cover
+                    msg,
+                )
             e_dict[e.composition.elements[0]] = e.energy_per_atom
 
         return sum(
@@ -927,33 +1110,37 @@ def _get_adjusted_pd_entries(phase_diagram, atomic_entries) -> list[ComputedEntr
     adjusted_entries = []
 
     for entry in phase_diagram.stable_entries:
-        d_ = dict(
-            energy=get_interp_en(entry) + phase_diagram.get_form_energy(entry),
-            composition=entry.composition,
-            entry_id=entry.entry_id,
-            correction=0,
-        )
+        d_ = {
+            "energy": get_interp_en(entry) + phase_diagram.get_form_energy(entry),
+            "composition": entry.composition,
+            "entry_id": entry.entry_id,
+            "correction": 0,
+        }
         adjusted_entries.append(ComputedEntry.from_dict(d_))
 
     return adjusted_entries
 
 
-def fermi_dirac(energy: float, temperature: int | float) -> float:
+def fermi_dirac(energy: float, temperature: float) -> float:
     """Get value of fermi dirac distribution.
 
     Gets the defects equilibrium concentration (up to the multiplicity factor)
     at a particular fermi level, chemical potential, and temperature (in Kelvin),
-    assuming dilue limit thermodynamics (non-interacting defects) using FD statistics.
+    assuming dilute limit thermodynamics (non-interacting defects) using FD statistics.
+
+    Args:
+        energy: Energy of the defect with respect to the VBM.
+        temperature: Temperature in Kelvin.
     """
     return 1.0 / (1.0 + np.exp((energy) / (boltzman_eV_K * temperature)))
 
 
 def plot_formation_energy_diagrams(
     formation_energy_diagrams: FormationEnergyDiagram
-    | List[FormationEnergyDiagram]
+    | list[FormationEnergyDiagram]
     | MultiFormationEnergyDiagram,
     rich_element: Element | None = None,
-    chempots: Dict | None = None,
+    chempots: dict | None = None,
     alignment: float = 0.0,
     xlim: list | None = None,
     ylim: list | None = None,
@@ -968,12 +1155,12 @@ def plot_formation_energy_diagrams(
     linewidth: int = 4,
     envelope_alpha: float = 0.8,
     line_alpha: float = 0.5,
-    band_edge_color="k",
+    band_edge_color: str = "k",
     filterfunction: Callable | None = None,
     legend_loc: str = "lower center",
     show_legend: bool = True,
-    axis=None,
-):
+    axis: Axes = None,
+) -> Axes:
     """Plot the formation energy diagram.
 
     Args:
@@ -1004,8 +1191,10 @@ def plot_formation_energy_diagrams(
         envelope_alpha: Alpha for the envelope
         line_alpha: Alpha for the lines (if the are shown)
         band_edge_color: Color for VBM/CBM vertical lines
-        filterfunction: A callable that filters formation energy diagram objects to clean up the plot
-        axis: Previous axis to amend
+        filterfunction: A callable that filters formation energy diagram objects to clean up the plot.
+        legend_loc: Location of the legend, default is "lower center".
+        show_legend: Whether to show the legend.
+        axis: Axis to plot on. If None, a new axis will be created.
 
     Returns:
         Axis subplot
@@ -1015,20 +1204,22 @@ def plot_formation_energy_diagrams(
     elif isinstance(formation_energy_diagrams, FormationEnergyDiagram):
         formation_energy_diagrams = [formation_energy_diagrams]
 
-    filterfunction = filterfunction if filterfunction else lambda x: True
+    filterfunction = filterfunction if filterfunction else lambda _x: True
     formation_energy_diagrams = list(filter(filterfunction, formation_energy_diagrams))
 
     band_gap = formation_energy_diagrams[0].band_gap
     if not xlim and band_gap is None:
-        raise ValueError("Must specify xlim or set band_gap attribute")
+        msg = "Must specify xlim or set band_gap attribute"
+        raise ValueError(msg)
 
     if axis is None:
         _, axis = plt.subplots()
     axis.axvline(band_gap, color=band_edge_color, linestyle="--", linewidth=1)
     axis.axvline(0, color=band_edge_color, linestyle="--", linewidth=1)
     if not xlim:
-        xmin, xmax = np.subtract(-0.2, alignment), np.subtract(
-            band_gap + 0.2, alignment
+        xmin, xmax = (
+            np.subtract(-0.2, alignment),
+            np.subtract(band_gap + 0.2, alignment),
         )
     else:
         xmin, xmax = xlim
@@ -1044,7 +1235,7 @@ def plot_formation_energy_diagrams(
         named_feds.append((name_, fed_))
 
     color_line_gen = _get_line_color_and_style(colors, linestyle)
-    for fid, (fed_name, single_fed) in enumerate(named_feds):
+    for _fid, (fed_name, single_fed) in enumerate(named_feds):
         cur_color, cur_style = next(color_line_gen)
         chempots_ = (
             chempots
@@ -1055,12 +1246,14 @@ def plot_formation_energy_diagrams(
         lowerlines = get_lower_envelope(lines)
         trans = np.array(
             get_transitions(
-                lowerlines, np.add(xmin, alignment), np.add(xmax, alignment)
-            )
+                lowerlines,
+                np.add(xmin, alignment),
+                np.add(xmax, alignment),
+            ),
         )
         trans_y = trans[:, 1]
-        ymin = min(ymin, min(trans_y))
-        ymax = max(ymax, max(trans_y))
+        ymin = min(ymin, *trans_y)
+        ymax = max(ymax, *trans_y)
 
         dfct: Defect = single_fed.defect_entries[0].defect
         latexname = dfct.latex_name
@@ -1070,7 +1263,7 @@ def plot_formation_energy_diagrams(
         if ":" in fed_name:
             latexname += f" ({fed_name.split(':')[1]})"
 
-        (l,) = axis.plot(
+        (_l,) = axis.plot(
             np.subtract(trans[:, 0], alignment),
             trans_y,
             color=cur_color,
@@ -1082,12 +1275,15 @@ def plot_formation_energy_diagrams(
             markersize=transition_markersize,
         )
         if not only_lower_envelope:
-            cur_color = l.get_color()
+            cur_color = _l.get_color()
             for line in lines:
                 x = np.linspace(xmin, xmax)
                 y = line[0] * x + line[1]
                 axis.plot(
-                    np.subtract(x, alignment), y, color=cur_color, alpha=line_alpha
+                    np.subtract(x, alignment),
+                    y,
+                    color=cur_color,
+                    alpha=line_alpha,
                 )
 
     axis.set_xlim(xmin, xmax)
@@ -1118,7 +1314,11 @@ def plot_formation_energy_diagrams(
 
     axis.axvline(0, ls="--", color="k", lw=2, alpha=0.2)
     axis.axvline(
-        np.subtract(0, alignment), ls="--", color=band_edge_color, lw=2, alpha=0.8
+        np.subtract(0, alignment),
+        ls="--",
+        color=band_edge_color,
+        lw=2,
+        alpha=0.8,
     )
     if band_gap:
         axis.axvline(
@@ -1153,7 +1353,20 @@ def plot_formation_energy_diagrams(
     return axis
 
 
-def _get_line_color_and_style(colors=None, styles=None):
+def _get_line_color_and_style(
+    colors: Sequence | None = None, styles: Sequence | None = None
+) -> Generator[tuple[str, str], None, None]:
+    """Get a generator for colors and styles.
+
+    Create an iterator that will cycle through the colors and styles.
+
+    Args:
+        colors: List of colors to use, if None, use the default matplotlib colors.
+        styles: List of styles to use, if None, will use ["-", "--", "-.", ":"]
+
+    Returns:
+        Generator of (color, style) tuples
+    """
     if colors is None:
         colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
     if styles is None:
@@ -1164,3 +1377,17 @@ def _get_line_color_and_style(colors=None, styles=None):
     for style in styles:
         for color in colors:
             yield color, style
+
+
+def _is_on_hyperplane(pt: np.array, hp: np.array, tol: float = 1e-8) -> bool:
+    """Check if a point lies on a hyperplane.
+
+    Args:
+        pt: point to check
+        hp: hyperplane ((a, b, c, d) such that ax + by + cz + d = 0)
+        tol: tolerance for checking if the point lies on the hyperplane
+
+    Returns:
+        bool: True if the point lies on the hyperplane
+    """
+    return abs(np.dot(pt, hp[:-1]) + hp[-1]) < tol

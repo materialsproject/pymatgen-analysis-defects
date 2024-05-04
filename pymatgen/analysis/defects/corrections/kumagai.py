@@ -9,11 +9,13 @@ from __future__ import annotations
 import logging
 import math
 from pathlib import Path
-
-from pymatgen.core import Structure
-from pymatgen.io.vasp import Outcar, Vasprun
+from typing import TYPE_CHECKING
 
 from pymatgen.analysis.defects.utils import CorrectionResult, get_zfile
+from pymatgen.io.vasp import Outcar, Vasprun
+
+if TYPE_CHECKING:
+    from pymatgen.core import Structure
 
 try:
     from vise import user_settings
@@ -36,11 +38,12 @@ _logger = logging.getLogger(__name__)
 logging.getLogger("pydefect").setLevel(logging.WARNING)
 
 
-def _check_import_pydefect():
+def _check_import_pydefect() -> None:
     """Import pydefect if it is installed."""
     if __has_pydefect__:
+        msg = "vise/pydefect is not installed. Please install it first."
         raise ModuleNotFoundError(
-            "vise/pydefect is not installed. Please install it first."
+            msg,
         )
 
 
@@ -69,8 +72,7 @@ def get_structure_with_pot(directory: Path) -> Structure:
         ionic_conv=vasprun.converged_ionic,
     )
 
-    struct = calc.structure.copy(site_properties={"potential": calc.potentials})
-    return struct
+    return calc.structure.copy(site_properties={"potential": calc.potentials})
 
 
 def get_efnv_correction(
@@ -116,5 +118,6 @@ def get_efnv_correction(
     )
 
     return CorrectionResult(
-        correction_energy=efnv_corr.correction_energy, metadata={"efnv_corr": efnv_corr}
+        correction_energy=efnv_corr.correction_energy,
+        metadata={"efnv_corr": efnv_corr},
     )

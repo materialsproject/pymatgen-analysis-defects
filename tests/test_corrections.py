@@ -1,5 +1,4 @@
 import pytest
-
 from pymatgen.analysis.defects.corrections.freysoldt import (
     get_freysoldt_correction,
     plot_plnr_avg,
@@ -9,7 +8,7 @@ from pymatgen.analysis.defects.corrections.freysoldt import (
 def test_freysoldt(data_Mg_Ga):
     """Older basic test for Freysoldt correction."""
     bulk_locpot = data_Mg_Ga["bulk_sc"]["locpot"]
-    defect_locpot = data_Mg_Ga[f"q=0"]["locpot"]
+    defect_locpot = data_Mg_Ga["q=0"]["locpot"]
 
     freysoldt_summary = get_freysoldt_correction(
         q=0,

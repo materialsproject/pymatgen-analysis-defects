@@ -1,23 +1,28 @@
 """Classes representing defects."""
+
 from __future__ import annotations
 
 import collections
 import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 from enum import Enum
-from typing import Dict
+from typing import TYPE_CHECKING
 
 import numpy as np
 from monty.json import MSONable
+from pymatgen.analysis.defects.supercells import get_sc_fromstruct
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
-from pymatgen.core import Element, PeriodicSite, Species, Structure
+from pymatgen.core import Element, PeriodicSite, Species
 from pymatgen.core.periodic_table import DummySpecies
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-from pymatgen.symmetry.structure import SymmetrizedStructure
-
-from pymatgen.analysis.defects.supercells import get_sc_fromstruct
+from typing_extensions import Self
 
 from .utils import get_plane_spacing
+
+if TYPE_CHECKING:
+    from numpy.typing import ArrayLike
+    from pymatgen.core import Structure
+    from pymatgen.symmetry.structure import SymmetrizedStructure
 
 # TODO Possible redesign idea: ``DefectSite`` class defined with a defect object.
 # This makes some of the accounting logic a bit harder since we will probably
@@ -31,6 +36,8 @@ __maintainer__ = "Jimmy-Xuan Shen @jmmshn"
 __date__ = "Mar 15, 2022"
 
 _logger = logging.getLogger(__name__)
+
+RNG = np.random.default_rng(42)
 
 
 class DefectType(Enum):
@@ -88,7 +95,7 @@ class Defect(MSONable, metaclass=ABCMeta):
                 # check oxi_states assigned and not all zero
                 if all(specie.oxi_state == 0 for specie in self.structure.species):
                     self.structure.add_oxidation_state_by_guess()
-            except:  # pragma: no cover
+            except Exception:  # noqa: BLE001 # pragma: no cover
                 self.structure.add_oxidation_state_by_guess()
             self.oxi_state = self._guess_oxi_state()
         else:
@@ -123,7 +130,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         """Get the unit-cell structure representing the defect."""
 
     @abstractproperty
-    def element_changes(self) -> Dict[Element, int]:
+    def element_changes(self) -> dict[Element, int]:
         """Get the species changes of the defect.
 
         Returns:
@@ -159,8 +166,15 @@ class Defect(MSONable, metaclass=ABCMeta):
 
         if isinstance(self.oxi_state, int) or self.oxi_state.is_integer():
             oxi_state = int(self.oxi_state)
-        else:
-            raise ValueError("Oxidation state must be an integer")
+        else:  # pragma: no cover
+            sign = -1 if self.oxi_state < 0 else 1
+            oxi_state = sign * int(np.ceil(abs(self.oxi_state)))
+            _logger.warning(
+                "Non-integer oxidation state detected."
+                "Round to integer with larger absolute value: %s -> %s",
+                self.oxi_state,
+                oxi_state,
+            )
 
         if oxi_state >= 0:
             charges = [*range(-padding, oxi_state + padding + 1)]
@@ -223,8 +237,8 @@ class Defect(MSONable, metaclass=ABCMeta):
             PeriodicSite (optional): The position of the defect site in the supercell.
         """
 
-        def _has_oxi(struct):
-            return all([hasattr(site.specie, "oxi_state") for site in struct])
+        def _has_oxi(struct: Structure) -> bool:
+            return all(hasattr(site.specie, "oxi_state") for site in struct)
 
         if defect_structure is None:
             defect_structure = self.centered_defect_structure
@@ -269,7 +283,7 @@ class Defect(MSONable, metaclass=ABCMeta):
 
         # interstitials
         int_uc_indices = set(range(len(defect_structure))) - set(
-            defect_site_mapping.keys()
+            defect_site_mapping.keys(),
         )
         for i in int_uc_indices:
             int_sc_pos = np.dot(defect_structure[i].frac_coords, sc_mat_inv)
@@ -310,25 +324,24 @@ class Defect(MSONable, metaclass=ABCMeta):
 
     @property
     def symmetrized_structure(self) -> SymmetrizedStructure:
-        """Returns the multiplicity of a defect site within the structure.
-
-        This is required for concentration analysis and confirms that defect_site is a
-        site in bulk_structure.
-        """
+        """Get the symmetrized version of the bulk structure."""
         sga = SpacegroupAnalyzer(
-            self.structure, symprec=self.symprec, angle_tolerance=self.angle_tolerance
+            self.structure,
+            symprec=self.symprec,
+            angle_tolerance=self.angle_tolerance,
         )
         return sga.get_symmetrized_structure()
 
     def __eq__(self, __o: object) -> bool:
         """Equality operator."""
-        if not isinstance(__o, Defect):
-            raise TypeError("Can only compare Defects to Defects")
+        if not isinstance(__o, Defect):  # pragma: no cover
+            msg = "Can only compare Defects to Defects"
+            raise TypeError(msg)
         sm = StructureMatcher(comparator=ElementComparator())
         return sm.fit(self.defect_structure, __o.defect_structure)
 
     @property
-    def defect_type(self) -> int:
+    def defect_type(self) -> DefectType:
         """Get the defect type.
 
         Returns:
@@ -345,6 +358,77 @@ class Defect(MSONable, metaclass=ABCMeta):
         """
         root, suffix = self.name.split("_")
         return rf"{root}$_{{\rm {suffix}}}$"
+
+
+class NamedDefect(MSONable):
+    """Class for defect definition without the UC structure.
+
+    The defect is defined only by its name. For complexes the name
+    should be created with "+" between the individual defects.
+
+    .. note::
+        This class is only used to help aggregate defects calculated
+        outside of our framework so a ``Defect`` object is missing.
+        The object will not have any mechanism for generating supercells
+        or guessing oxidation states.  It is simply a placeholder to help
+        with the grouping logic of the Formation Energy diagram analysis.
+
+    """
+
+    def __init__(self, name: str, bulk_formula: str, element_changes: dict) -> None:
+        """Initialize a NamedDefect object.
+
+        Args:
+            name: The name of the defect.
+            bulk_formula: The formula of the bulk structure.
+            element_changes: The species changes of the defect.
+        """
+        self.name = name
+        self.bulk_formula = bulk_formula
+        self.element_changes = element_changes
+
+    @classmethod
+    def from_structures(
+        cls, defect_structure: Structure, bulk_structure: Structure
+    ) -> Self:
+        """Initialize a NameDefect object from structures.
+
+        Args:
+            defect_structure: The structure of the defect.
+            bulk_structure: The structure of the bulk.
+
+        Returns:
+            NamedDefect: The defect object.
+        """
+        el_diff = _get_el_changes_from_structures(defect_structure, bulk_structure)
+        name_ = _get_defect_name(el_diff)
+        bulk_formula = bulk_structure.composition.reduced_formula
+        return cls(name=name_, bulk_formula=bulk_formula, element_changes=el_diff)
+
+    @property
+    def latex_name(self) -> str:
+        """Get the latex name of the defect.
+
+        Returns:
+            str: The latex name of the defect.
+        """
+        single_names = self.name.split("+")
+        l_names = []
+        for n in single_names:
+            root, suffix = n.split("_")
+            l_names.append(rf"{root}$_{{\rm {suffix}}}$")
+        return " + ".join(l_names)
+
+    def __eq__(self, __value: object) -> bool:
+        """Only need to compare names."""
+        if not isinstance(__value, NamedDefect):  # pragma: no cover
+            msg = "Can only compare NamedDefects to NamedDefects"
+            raise TypeError(msg)
+        return self.__repr__() == __value.__repr__()
+
+    def __repr__(self) -> str:
+        """String representation of the NamedDefect."""
+        return f'{self.bulk_formula}:{"+".join(sorted(self.name.split("+")))}'
 
 
 class Vacancy(Defect):
@@ -370,15 +454,16 @@ class Vacancy(Defect):
         return f"v_{get_element(self.defect_site.specie)}"
 
     @property
-    def defect_site(self):
+    def defect_site(self) -> PeriodicSite:
         """Returns the site in the structure that corresponds to the defect site."""
-        res = min(
+        return min(
             self.structure.get_sites_in_sphere(
-                self.site.coords, 0.1, include_index=True
+                self.site.coords,
+                0.1,
+                include_index=True,
             ),
             key=lambda x: x[1],
         )
-        return res
 
     @property
     def defect_site_index(self) -> int:
@@ -386,14 +471,14 @@ class Vacancy(Defect):
         return self.defect_site.index
 
     @property
-    def defect_structure(self):
+    def defect_structure(self) -> Structure:
         """Returns the defect structure with the proper oxidation state."""
         struct = self.structure.copy()
         struct.remove_sites([self.defect_site_index])
         return struct
 
     @property
-    def element_changes(self) -> Dict[Element, int]:
+    def element_changes(self) -> dict[Element, int]:
         """Get the species changes of the vacancy defect.
 
         Returns:
@@ -427,7 +512,10 @@ class Substitution(Defect):
         site: PeriodicSite,
         multiplicity: int | None = None,
         oxi_state: float | None = None,
-        **kwargs,
+        equivalent_sites: list[PeriodicSite] | None = None,
+        symprec: float = 0.01,
+        angle_tolerance: float = 5,
+        user_charges: list[int] | None = None,
     ) -> None:
         """Initialize a substitutional defect object.
 
@@ -439,9 +527,24 @@ class Substitution(Defect):
             site: Replace the nearest site with this one.
             multiplicity: The multiplicity of the defect.
             oxi_state: The oxidation state of the defect, if not specified,
-            this will be determined automatically.
+                this will be determined automatically.
+            equivalent_sites: A list of equivalent sites for the defect in the structure.
+            symprec: Tolerance for symmetry finding.
+            angle_tolerance: Angle tolerance for symmetry finding.
+            user_charges: User specified charge states. If specified,
+                ``get_charge_states`` will return this list. If ``None`` or empty list
+                the charge states will be determined automatically.
         """
-        super().__init__(structure, site, multiplicity, oxi_state, **kwargs)
+        super().__init__(
+            structure=structure,
+            site=site,
+            multiplicity=multiplicity,
+            oxi_state=oxi_state,
+            equivalent_sites=equivalent_sites,
+            symprec=symprec,
+            angle_tolerance=angle_tolerance,
+            user_charges=user_charges,
+        )
 
     def get_multiplicity(self) -> int:
         """Returns the multiplicity of a defect site within the structure.
@@ -473,11 +576,13 @@ class Substitution(Defect):
         return struct
 
     @property
-    def defect_site(self):
+    def defect_site(self) -> PeriodicSite:
         """Returns the site in the structure that corresponds to the defect site."""
         return min(
             self.structure.get_sites_in_sphere(
-                self.site.coords, 0.1, include_index=True
+                self.site.coords,
+                0.1,
+                include_index=True,
             ),
             key=lambda x: x[1],
         )
@@ -488,7 +593,7 @@ class Substitution(Defect):
         return self.defect_site.index
 
     @property
-    def element_changes(self) -> Dict[Element, int]:
+    def element_changes(self) -> dict[Element, int]:
         """Get the species changes of the substitution defect.
 
         Returns:
@@ -519,15 +624,18 @@ class Substitution(Defect):
         ]
         if len(sub_elt_sites_in_struct) == 0:
             sub_states = self.site.specie.common_oxidation_states
-            if len(sub_states) == 0:
-                raise ValueError(
+            if len(sub_states) == 0:  # pragma: no cover
+                msg = (
                     f"No common oxidation states found for {self.site.specie}."
                     "Please specify the oxidation state manually."
+                )
+                raise ValueError(
+                    msg,
                 )
             sub_oxi = min(sub_states, key=lambda x: abs(x - rm_oxi))
         else:
             sub_oxi = int(
-                np.mean([site.specie.oxi_state for site in sub_elt_sites_in_struct])
+                np.mean([site.specie.oxi_state for site in sub_elt_sites_in_struct]),
             )
 
         return sub_oxi - rm_oxi
@@ -552,7 +660,9 @@ class Interstitial(Defect):
         multiplicity: int = 1,
         oxi_state: float | None = None,
         equivalent_sites: list[PeriodicSite] | None = None,
-        **kwargs,
+        symprec: float = 0.01,
+        angle_tolerance: float = 5,
+        user_charges: list[int] | None = None,
     ) -> None:
         """Initialize an interstitial defect object.
 
@@ -564,15 +674,27 @@ class Interstitial(Defect):
             multiplicity: The multiplicity of the defect.
             oxi_state: The oxidation state of the defect, if not specified,
                 this will be determined automatically.
+            equivalent_sites: A list of equivalent sites for the defect in the structure.
+            symprec: Tolerance for symmetry finding.
+            angle_tolerance: Angle tolerance for symmetry finding.
+            user_charges: User specified charge states. If specified,
         """
         super().__init__(
-            structure, site, multiplicity, oxi_state, equivalent_sites, **kwargs
+            structure=structure,
+            site=site,
+            multiplicity=multiplicity,
+            oxi_state=oxi_state,
+            equivalent_sites=equivalent_sites,
+            symprec=symprec,
+            angle_tolerance=angle_tolerance,
+            user_charges=user_charges,
         )
 
     def get_multiplicity(self) -> int:
         """Determine the multiplicity of the defect site within the structure."""
+        msg = "Interstitial multiplicity should be determined by the generator."
         raise NotImplementedError(
-            "Interstitial multiplicity should be determined by the generator."
+            msg,
         )
 
     @property
@@ -589,8 +711,9 @@ class Interstitial(Defect):
         inter_states = self.site.specie.icsd_oxidation_states[:2]
         if len(inter_states) == 0:
             _logger.warning(
-                f"No oxidation states found for {self.site.specie.symbol}. "
-                "in ICSD using `oxidation_states` without frequency ranking."
+                "No oxidation states found for %s. "
+                "in ICSD using `oxidation_states` without frequency ranking.",
+                self.site.specie.symbol,
             )
             inter_states = self.site.specie.oxidation_states
         inter_oxi = max(inter_states, key=abs)
@@ -608,7 +731,7 @@ class Interstitial(Defect):
         return 0
 
     @property
-    def element_changes(self) -> Dict[Element, int]:
+    def element_changes(self) -> dict[Element, int]:
         """Get the species changes of the intersitial defect.
 
         Returns:
@@ -672,7 +795,8 @@ class DefectComplex(Defect):
     def __eq__(self, __o: object) -> bool:
         """Check if  are equal."""
         if not isinstance(__o, Defect):
-            raise TypeError("Can only compare Defects to Defects")
+            msg = "Can only compare Defects to Defects"
+            raise TypeError(msg)
         sm = StructureMatcher(comparator=ElementComparator())
         this_structure = self.defect_structure_with_com
         if isinstance(__o, DefectComplex):
@@ -690,10 +814,13 @@ class DefectComplex(Defect):
 
     def get_multiplicity(self) -> int:
         """Determine the multiplicity of the defect site within the structure."""
-        raise NotImplementedError("Not implemented for defect complexes")
+        msg = "Not implemented for defect complexes"
+        raise NotImplementedError(
+            msg,
+        )  # pragma: no cover
 
     @property
-    def element_changes(self) -> Dict[Element, int]:
+    def element_changes(self) -> dict[Element, int]:
         """Determine the species changes of the complex defect."""
         cnt: dict[Element, int] = collections.defaultdict(int)
         for defect in self.defects:
@@ -718,12 +845,22 @@ class DefectComplex(Defect):
         defect_structure = self.structure.copy()
         for defect in self.defects:
             update_structure(
-                defect_structure, defect.site, defect_type=defect.defect_type
+                defect_structure,
+                defect.site,
+                defect_type=defect.defect_type,
             )
         return defect_structure
 
+    @property
+    def latex_name(self) -> str:
+        """Get the latex name of the defect."""
+        single_names = [d.latex_name for d in self.defects]
+        return "$+$".join(single_names)
 
-def update_structure(structure, site, defect_type):
+
+def update_structure(
+    structure: Structure, site: PeriodicSite, defect_type: DefectType
+) -> None:
     """Update the structure with the defect site.
 
     Types of operations:
@@ -740,11 +877,14 @@ def update_structure(structure, site, defect_type):
         Structure: The updated structure.
     """
 
-    def _update(structure, site, rm: bool, replace: bool):
+    def _update(
+        structure: Structure, site: PeriodicSite, rm: bool, replace: bool
+    ) -> None:
         in_sphere = structure.get_sites_in_sphere(site.coords, 0.1, include_index=True)
 
         if len(in_sphere) == 0 and rm:  # pragma: no cover
-            raise ValueError("No site found to remove.")
+            msg = "No site found to remove."
+            raise ValueError(msg)
 
         if rm or replace:
             rm_site = min(
@@ -771,7 +911,8 @@ def update_structure(structure, site, defect_type):
     elif defect_type == DefectType.Interstitial:
         _update(structure, site, rm=False, replace=False)
     else:
-        raise ValueError("Unknown point defect type.")
+        msg = "Unknown point defect type."
+        raise ValueError(msg)  # pragma: no cover
 
 
 class Adsorbate(Interstitial):
@@ -814,16 +955,33 @@ def get_vacancy(structure: Structure, isite: int, **kwargs) -> Vacancy:
     return Vacancy(structure=structure, site=site, **kwargs)
 
 
-def _set_selective_dynamics(structure, site_pos, relax_radius):
+def _set_selective_dynamics(
+    structure: Structure,
+    site_pos: ArrayLike,
+    relax_radius: float | str | None,
+) -> None:
+    """Set the selective dynamics behavior.
+
+    Allow atoms to move for sites within a given radius of a given site,
+    all other atoms are fixed.  Modify the structure in place.
+
+    Args:
+        structure: The structure to set the selective dynamics.
+        site_pos: The center of the relaxation sphere.
+        relax_radius: The radius of the relaxation sphere.
+    """
     if relax_radius is None:
         return
     if relax_radius == "auto":
         relax_radius = min(get_plane_spacing(structure.lattice.matrix)) / 2.0
     if not isinstance(relax_radius, float):
-        raise ValueError("relax_radius must be a float or 'auto' or None")
+        msg = "relax_radius must be a float or 'auto' or None"
+        raise ValueError(msg)
     structure.get_sites_in_sphere(site_pos, relax_radius)
     relax_sites = structure.get_sites_in_sphere(
-        site_pos, relax_radius, include_index=True
+        site_pos,
+        relax_radius,
+        include_index=True,
     )
     relax_indices = [site.index for site in relax_sites]
     relax_mask = [[False, False, False]] * len(structure)
@@ -833,14 +991,15 @@ def _set_selective_dynamics(structure, site_pos, relax_radius):
 
 
 def perturb_sites(
-    structure,
+    structure: Structure,
     distance: float,
     min_distance: float | None = None,
     site_indices: list | None = None,
 ) -> None:
-    """
-    Performs a random perturbation of the sites in a structure to break
-    symmetries.
+    """Performs a random perturbation.
+
+    Perturb the sites in a structure to break symmetry.  This is useful for
+    finding energy minimum configurations.
 
     Args:
         structure (Structure): Input structure.
@@ -855,13 +1014,13 @@ def perturb_sites(
 
     """
 
-    def get_rand_vec():
+    def get_rand_vec() -> ArrayLike:
         # deals with zero vectors.
-        vector = np.random.randn(3)
+        vector = RNG.normal(size=3)
         vnorm = np.linalg.norm(vector)
         dist = distance
         if isinstance(min_distance, (float, int)):
-            dist = np.random.uniform(min_distance, dist)
+            dist = RNG.uniform(min_distance, dist)
         return vector / vnorm * dist if vnorm != 0 else get_rand_vec()
 
     if site_indices is None:
@@ -873,7 +1032,7 @@ def perturb_sites(
         structure.translate_sites([i], get_rand_vec(), frac_coords=False)
 
 
-def _perturb_dynamic_sites(structure, distance):
+def _perturb_dynamic_sites(structure: Structure, distance: float) -> None:
     free_indices = [
         i
         for i, site in enumerate(structure)
@@ -882,7 +1041,9 @@ def _perturb_dynamic_sites(structure, distance):
     perturb_sites(structure=structure, distance=distance, site_indices=free_indices)
 
 
-def _get_mapped_sites(uc_structure: Structure, sc_structure: Structure, r=0.001):
+def _get_mapped_sites(
+    uc_structure: Structure, sc_structure: Structure, r: float = 0.001
+) -> dict:
     """Get the list of sites indices in the supercell corresponding to the unit cell."""
     mapped_site_indices = {}
     for isite, uc_site in enumerate(uc_structure):
@@ -892,14 +1053,98 @@ def _get_mapped_sites(uc_structure: Structure, sc_structure: Structure, r=0.001)
     return mapped_site_indices
 
 
-def center_structure(structure, ref_fpos) -> Structure:
+def center_structure(structure: Structure, ref_fpos: ArrayLike) -> Structure:
     """Shift the sites around a center.
 
     Move all the sites in the structure so that they
     are in the periodic image closest to the reference fractional position.
+
+    Args:
+        structure: The structure to be centered.
+        ref_fpos: The reference fractional position that will be set to the center.
     """
     struct = structure.copy()
     for idx, d_site in enumerate(struct):
         _, jiimage = struct.lattice.get_distance_and_image(ref_fpos, d_site.frac_coords)
         struct.translate_sites([idx], jiimage, to_unit_cell=False)
     return struct
+
+
+def _get_el_changes_from_structures(defect_sc: Structure, bulk_sc: Structure) -> dict:
+    """Get the name of the defect.
+
+    Parse the defect structure and bulk structure to get the name of the defect.
+
+    Args:
+        defect_sc: The defect structure.
+        bulk_sc: The bulk structure.
+
+    Returns:
+        dict: A dictionary representing the species changes in creating the defect.
+    """
+
+    def _check_int(n: float) -> bool:
+        return isinstance(n, int) or n.is_integer()
+
+    comp_defect = defect_sc.composition.element_composition
+    comp_bulk = bulk_sc.composition.element_composition
+
+    # get the element changes
+    el_diff = {}
+    for el, cnt in comp_defect.items():
+        # has to be integer
+        if not (_check_int(comp_bulk[el]) and _check_int(cnt)):
+            msg = "Defect structure and bulk structure must have integer compositions."
+            raise ValueError(
+                msg,
+            )
+        tmp_ = int(cnt) - int(comp_bulk[el])
+        if tmp_ != 0:
+            el_diff[el] = tmp_
+    return el_diff
+
+
+def _get_defect_name(element_diff: dict) -> str:
+    """Get the name of the defect.
+
+    Parse the change in different elements to get the name of the defect.
+
+    Args:
+        element_diff: A dictionary representing the species changes of the defect.
+
+    Returns:
+        str: The name of the defect, if the defect is a complex, the names of the
+            individual defects are separated by "+".
+    """
+    added_list = [(el, int(cnt)) for el, cnt in element_diff.items() if cnt > 0]
+    removed_list = [(el, int(cnt)) for el, cnt in element_diff.items() if cnt < 0]
+
+    # rank the elements by electronegativity
+    added_list.sort(reverse=True)
+    removed_list.sort(reverse=True)
+
+    # get the different substitution names
+    sub_names = []
+    while added_list and removed_list:
+        add_el, add_cnt = added_list.pop()
+        rm_el, rm_cnt = removed_list.pop()
+        sub_names.append(f"{add_el}_{rm_el}")
+        add_cnt -= 1
+        rm_cnt += 1
+        if add_cnt != 0:
+            added_list.append((add_el, add_cnt))
+        if rm_cnt != 0:
+            removed_list.append((rm_el, rm_cnt))
+
+    # get the different vacancy names
+    vac_names = []
+    for el, _cnt in removed_list:
+        vac_names.append(f"v_{el}")
+
+    # get the different interstitial names
+    int_names = []
+    for el, _cnt in added_list:
+        int_names.append(f"{el}_i")
+
+    # combine the names
+    return "+".join(sub_names + vac_names + int_names)

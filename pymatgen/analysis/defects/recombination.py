@@ -6,13 +6,28 @@ The the SRH recombination code is taken from the NonRad code (www.github.com/mtu
 from __future__ import annotations
 
 import itertools
+import logging
+from typing import TYPE_CHECKING, Callable
 
 import numpy as np
-from numba import njit
-from numpy import typing as npt
 from scipy.interpolate import PchipInterpolator
 
 from .constants import AMU2KG, ANGS2M, EV2J, HBAR_EV, HBAR_J, KB, LOOKUP_TABLE
+
+_logger = logging.getLogger(__name__)
+
+try:
+    from numba import njit
+except ImportError:
+    _logger.warning("Numba not installed. Install Numba for better performance.")
+
+    def njit(*args, **kwargs) -> Callable:  # noqa: ARG001, ANN002
+        """Dummy decorator for njit."""
+        return lambda func: func
+
+
+if TYPE_CHECKING:
+    from numpy import typing as npt
 
 __author__ = "Jimmy Shen"
 __copyright__ = "The Materials Project"
@@ -27,17 +42,32 @@ Factor3 = 1 / HBAR_EV
 
 @njit(cache=True)
 def fact(n: int) -> float:  # pragma: no cover
-    """Compute the factorial of n."""
+    """Compute the factorial of n.
+
+    Args:
+        n: The number to compute the factorial of.
+
+    Returns:
+        The factorial of n.
+    """
     if n > 20:
         return LOOKUP_TABLE[-1] * np.prod(
-            np.array(list(range(21, n + 1)), dtype=np.double)
+            np.array(list(range(21, n + 1)), dtype=np.double),
         )
     return LOOKUP_TABLE[n]
 
 
 @njit(cache=True)
 def herm(x: float, n: int) -> float:  # pragma: no cover
-    """Recursive definition of hermite polynomial."""
+    """Recursive definition of hermite polynomial.
+
+    Args:
+        x: The value to evaluate the hermite polynomial at.
+        n: The order of the hermite polynomial.
+
+    Returns:
+        The value of the hermite polynomial at x.
+    """
     if n == 0:
         return 1.0
     if n == 1:
@@ -55,7 +85,11 @@ def herm(x: float, n: int) -> float:  # pragma: no cover
 
 @njit(cache=True)
 def analytic_overlap_NM(
-    dQ: float, omega1: float, omega2: float, n1: int, n2: int
+    dQ: float,
+    omega1: float,
+    omega2: float,
+    n1: int,
+    n2: int,
 ) -> float:  # pragma: no cover
     """Compute the overlap between two displaced harmonic oscillators.
 
@@ -68,7 +102,7 @@ def analytic_overlap_NM(
     [Taken from NONRAD.]
 
     Args:
-        DQ: Displacement between harmonic oscillators in amu^{1/2} Angstrom
+        dQ: Displacement between harmonic oscillators in amu^{1/2} Angstrom
         omega1: Frequency of oscillator 1 in eV
         omega2: Frequency of oscillator 2 in eV
         n1: Quantum number of oscillator 1
@@ -135,7 +169,7 @@ def get_mQn(
     m_init: int,
     Nf: int,
     ovl: npt.NDArray,
-):
+) -> tuple[npt.ArrayLike, npt.ArrayLike]:
     """Get the matrix element values for the position operator.
 
         <m_i|Q|n_f>
@@ -175,7 +209,7 @@ def get_mn(
     m_init: int,
     en_final: float,
     en_pad: float = 0.5,
-):
+) -> tuple[npt.ArrayLike, npt.ArrayLike]:
     """Get the matrix element values for the position operator.
 
         <m_i|n_f>
@@ -183,6 +217,7 @@ def get_mn(
     ``en_final - en_pad`` and ``en_final + en_pad`` reference to the bottom of the final state parabola.
 
     Args:
+        dQ: The displacement between the initial and final phonon states.
         omega_i: The initial phonon frequency in eV.
         omega_f: The final phonon frequency in eV.
         m_init: The initial phonon quantum number.
@@ -201,7 +236,11 @@ def get_mn(
     matels = np.zeros_like(E)
     for n in range(n_min, n_max):
         matels[n - n_min] = analytic_overlap_NM(
-            dQ=dQ, omega1=omega_i, omega2=omega_f, n1=m_init, n2=n
+            dQ=dQ,
+            omega1=omega_i,
+            omega2=omega_f,
+            n1=m_init,
+            n2=n,
         )
     return E, matels
 
@@ -212,7 +251,7 @@ def pchip_eval(
     y_coarse: npt.ArrayLike,
     pad_frac: float = 0.2,
     n_points: int = 5000,
-):
+) -> npt.ArrayLike:
     """Evaluate a piecewise cubic Hermite interpolant.
 
     Assuming a function is evenly sampleded on (``x_coarse``, ``y_coarse``),
@@ -287,10 +326,19 @@ def get_SRH_coef(
     rate = np.zeros_like(T, dtype=np.longdouble)
     for m in range(Ni):
         E, me = get_mQn(
-            dQ=dQ, omega_i=omega_i, omega_f=omega_f, m_init=m, Nf=Nf, ovl=ovl
+            dQ=dQ,
+            omega_i=omega_i,
+            omega_f=omega_f,
+            m_init=m,
+            Nf=Nf,
+            ovl=ovl,
         )
         interp_me = pchip_eval(
-            dE, E, np.abs(np.conj(me) * me), pad_frac=0.2, n_points=5000
+            dE,
+            E,
+            np.abs(np.conj(me) * me),
+            pad_frac=0.2,
+            n_points=5000,
         )
         rate += weights[m, :] * interp_me
     return 2 * np.pi * g * elph_me**2 * volume * rate

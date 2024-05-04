@@ -1,16 +1,22 @@
 """Plotting functions."""
+
 from __future__ import annotations
 
 import collections
 import logging
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-from matplotlib.colors import Normalize
+from matplotlib.colors import Colormap, Normalize
 from pymatgen.electronic_structure.core import Spin
 
-from pymatgen.analysis.defects.ccd import HarmonicDefect
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from matplotlib.axes import Axes
+    from pymatgen.analysis.defects.ccd import HarmonicDefect
 
 __author__ = "Jimmy Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -24,16 +30,16 @@ def plot_optical_transitions(
     defect: HarmonicDefect,
     kpt_index: int = 0,
     band_window: int = 5,
-    user_defect_band: tuple = tuple(),
-    other_defect_bands: list[int] = None,
-    ijdirs: list[tuple] = None,
-    shift_eig: dict[tuple, float] = None,
+    user_defect_band: tuple = (),
+    other_defect_bands: list[int] | None = None,
+    ijdirs: Sequence[tuple] | None = None,
+    shift_eig: dict[tuple, float] | None = None,
     x0: float = 0,
     x_width: float = 2,
-    ax=None,
-    cmap=None,
-    norm=None,
-):
+    ax: Axes = None,
+    cmap: Colormap = None,
+    norm: Normalize = None,
+) -> tuple[pd.DataFrame, Colormap, Normalize]:
     """Plot the optical transitions from the defect state to all other states.
 
     Only plot the transitions for a specific kpoint index. The arrows present the transitions
@@ -75,6 +81,18 @@ def plot_optical_transitions(
         norm:
             The matplotlib normalization to use for the color map of the arrows.
 
+    Returns:
+        A pandas dataframe with the following columns:
+            ib: The band index of the state the arrow is pointing to.
+            jb: The band index of the defect state.
+            kpt: The kpoint index of the state the arrow is pointing to.
+            spin: The spin index of the state the arrow is pointing to.
+            eig: The eigenvalue of the state the arrow is pointing to.
+            M.E.: The matrix element of the transition.
+        cmap:
+            The matplotlib color map used.
+        norm:
+            The matplotlib normalization used.
     """
     d_eigs = get_bs_eigenvalues(
         defect=defect,
@@ -88,16 +106,17 @@ def plot_optical_transitions(
         defect_band_index = user_defect_band[0]
     else:
         defect_band_index = next(
-            filter(lambda x: x[1] == kpt_index, defect.defect_band)
+            filter(lambda x: x[1] == kpt_index, defect.defect_band),
         )[0]
-    if ax is None:
-        ax_ = plt.gca()
-    else:  # pragma: no cover
-        ax_ = ax
+    ax_ = plt.gca() if ax is None else ax
     _plot_eigs(
-        d_eigs, defect.relaxed_bandstructure.efermi, ax=ax_, x0=x0, x_width=x_width
+        d_eigs,
+        defect.relaxed_bandstructure.efermi,
+        ax=ax_,
+        x0=x0,
+        x_width=x_width,
     )
-    ijdirs = ijdirs or [(0, 0), (1, 1), (2, 2)]
+    ijdirs = ijdirs or ((0, 0), (1, 1), (2, 2))
     me_plot_data, cmap, norm = _plot_matrix_elements(
         defect.waveder.cder,
         d_eigs,
@@ -116,9 +135,9 @@ def get_bs_eigenvalues(
     defect: HarmonicDefect,
     kpt_index: int = 0,
     band_window: int = 5,
-    user_defect_band: tuple = None,
-    other_defect_bands: list[int] = None,
-    shift_eig: dict[tuple, float] = None,
+    user_defect_band: tuple | None = None,
+    other_defect_bands: list[int] | None = None,
+    shift_eig: dict[tuple, float] | None = None,
 ) -> dict[tuple, float]:
     """Read the eigenvalues from `HarmonicDefect.relaxed_bandstructure`.
 
@@ -136,13 +155,20 @@ def get_bs_eigenvalues(
             the defect state will be determined automatically using the inverse
             participation ratio.
             The user provided kpoint index here will overwrite the kpt_index argument.
+        other_defect_bands:
+            A list of band indices to exclude from the plot.
+        shift_eig:
+            A dictionary of the format `(band, kpt, spin) -> float` to apply to the
+            eigenvalues. This is useful for aligning the defect state with the
+            valence or conduction band for plotting and schematic purposes.
+
 
     Returns:
         Dictionary of the format: (iband, ikpt, ispin) -> eigenvalue
     """
-
     if defect.relaxed_bandstructure is None:  # pragma: no cover
-        raise ValueError("The defect object does not have a band structure.")
+        msg = "The defect object does not have a band structure."
+        raise ValueError(msg)
 
     other_defect_bands = other_defect_bands or []
 
@@ -153,7 +179,7 @@ def get_bs_eigenvalues(
 
     band_index, kpt_index, spin_index = def_indices
     spin_key = Spin.up if spin_index == 0 else Spin.down
-    output: dict[tuple, float] = dict()
+    output: dict[tuple, float] = {}
     shift_dict: dict = collections.defaultdict(lambda: 0.0)
     if shift_eig is not None:
         shift_dict.update(shift_eig)
@@ -169,13 +195,31 @@ def get_bs_eigenvalues(
 
 def _plot_eigs(
     d_eigs: dict[tuple, float],
-    e_fermi=None,
-    ax=None,
+    e_fermi: float | None = None,
+    ax: Axes = None,
     x0: float = 0.0,
     x_width: float = 0.3,
     **kwargs,
 ) -> None:
-    """Plot the eigenvalues."""
+    """Plot the eigenvalues.
+
+    Args:
+        d_eigs:
+            The dictionary of eigenvalues for the defect state. In the format of
+            (iband, ikpt, ispin) -> eigenvalue
+        e_fermi:
+            The bands above and below the Fermi level will be colored differently.
+            If not provided, they will all be colored the same.
+        ax:
+            The matplotlib axis object to plot on.
+        x0:
+            The x coordinate of the center of the set of lines representing the eigenvalues.
+        x_width:
+            The width of the set of lines representing the eigenvalues.
+        **kwargs:
+            Keyword arguments to pass to `matplotlib.pyplot.hlines`.
+            For example, `linestyles`, `alpha`, etc.
+    """
     if ax is None:  # pragma: no cover
         ax = plt.gca()
 
@@ -188,26 +232,34 @@ def _plot_eigs(
 
     eigs_ = eigenvalues[eigenvalues <= e_fermi]
     ax.hlines(
-        eigs_, x0 - (x_width / 2.0), x0 + (x_width / 2.0), color=colors[0], **kwargs
+        eigs_,
+        x0 - (x_width / 2.0),
+        x0 + (x_width / 2.0),
+        color=colors[0],
+        **kwargs,
     )
     eigs_ = eigenvalues[eigenvalues > e_fermi]
     ax.hlines(
-        eigs_, x0 - (x_width / 2.0), x0 + (x_width / 2.0), color=colors[1], **kwargs
+        eigs_,
+        x0 - (x_width / 2.0),
+        x0 + (x_width / 2.0),
+        color=colors[1],
+        **kwargs,
     )
 
 
 def _plot_matrix_elements(
-    cder,
-    d_eig,
-    defect_band_index,
-    ijdirs=((0, 0), (1, 1), (2, 2)),
-    ax=None,
-    x0=0,
-    x_width=0.6,
-    arrow_width=0.1,
-    cmap=None,
-    norm=None,
-):
+    cder: dict[tuple, float],
+    d_eig: dict[tuple, float],
+    defect_band_index: int,
+    ijdirs: Sequence[tuple] = ((0, 0), (1, 1), (2, 2)),
+    ax: Axes = None,
+    x0: float = 0.0,
+    x_width: float = 0.6,
+    arrow_width: float = 0.1,
+    cmap: Colormap = None,
+    norm: Normalize = None,
+) -> tuple[list[tuple], Colormap, Normalize]:
     """Plot arrow for the transition from the defect state to all other states.
 
     Args:
@@ -234,19 +286,27 @@ def _plot_matrix_elements(
             The cartesian direction of the WAVDER tensor to sum over for the plot.
             If not provided, all the absolute values of the matrix for all
             three diagonal entries will be summed.
+
+    Returns:
+        plot_data:
+            A list of tuples in the format of (iband, ikpt, ispin, eigenvalue, matrix element)
+        cmap:
+            The matplotlib color map used.
+        norm:
+            The matplotlib normalization used.
     """
     if ax is None:  # pragma: no cover
         ax = plt.gca()
     ax.set_aspect("equal")
     jb, jkpt, jspin = next(filter(lambda x: x[0] == defect_band_index, d_eig.keys()))
     y0 = d_eig[jb, jkpt, jspin]
-    plot_data = []
+    plot_data: list[tuple] = []
     for (ib, ik, ispin), eig in d_eig.items():
         A = 0
         for idir, jdir in ijdirs:
             A += np.abs(
                 cder[ib, jb, ik, ispin, idir]
-                * np.conjugate(cder[ib, jb, ik, ispin, jdir])
+                * np.conjugate(cder[ib, jb, ik, ispin, jdir]),
             )
         plot_data.append((jb, ib, eig, A))
 
@@ -264,7 +324,7 @@ def _plot_matrix_elements(
     n_arrows = len(plot_data)
     x_step = x_width / n_arrows
     x = x0 - x_width / 2 + x_step / 2
-    for ib, jb, eig, A in plot_data:
+    for _ib, _jb, eig, A in plot_data:
         ax.arrow(
             x=x,
             y=y0,
@@ -281,13 +341,30 @@ def _plot_matrix_elements(
     return plot_data, cmap, norm
 
 
-def _get_dataframe(d_eigs, me_plot_data) -> pd.DataFrame:
-    """Convert the eigenvalue and matrix element data into a pandas dataframe."""
+def _get_dataframe(d_eigs: dict, me_plot_data: list[tuple]) -> pd.DataFrame:
+    """Convert the eigenvalue and matrix element data into a pandas dataframe.
+
+    Args:
+        d_eigs:
+            The dictionary of eigenvalues for the defect state. In the format of
+            (iband, ikpt, ispin) -> eigenvalue
+        me_plot_data:
+            A list of tuples in the format of (iband, ikpt, ispin, eigenvalue, matrix element)
+
+    Returns:
+        A pandas dataframe with the following columns:
+            ib: The band index of the state the arrow is pointing to.
+            jb: The band index of the defect state.
+            kpt: The kpoint index of the state the arrow is pointing to.
+            spin: The spin index of the state the arrow is pointing to.
+            eig: The eigenvalue of the state the arrow is pointing to.
+            M.E.: The matrix element of the transition.
+    """
     _, ikpt, ispin = next(iter(d_eigs.keys()))
-    df = pd.DataFrame(
+    output_dataframe = pd.DataFrame(
         me_plot_data,
         columns=["ib", "jb", "eig", "M.E."],
     )
-    df["kpt"] = ikpt
-    df["spin"] = ispin
-    return df
+    output_dataframe["kpt"] = ikpt
+    output_dataframe["spin"] = ispin
+    return output_dataframe

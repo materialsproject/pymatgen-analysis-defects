@@ -3,14 +3,13 @@ from collections import namedtuple
 import numpy as np
 import pandas as pd
 import pytest
-
 from pymatgen.analysis.defects.ccd import (
     HarmonicDefect,
-    Waveder,
     _get_wswq_slope,
     plot_pes,
 )
 from pymatgen.analysis.defects.plotting.optics import plot_optical_transitions
+from pymatgen.io.vasp.outputs import Waveder
 
 
 @pytest.fixture(scope="session")
@@ -27,6 +26,8 @@ def hd0(v_ga):
     assert pytest.approx(hd0.distortions[1]) == 0.0
     assert pytest.approx(hd0.omega_eV) == 0.03268045792725
     assert hd0.defect_band == [(138, 0, 1), (138, 1, 1)]
+    assert hd0._get_ediff(output_order="bks").shape == (216, 2, 2)
+    assert hd0._get_ediff(output_order="skb").shape == (2, 2, 216)
     return hd0
 
 
@@ -43,6 +44,24 @@ def hd1(v_ga):
     assert pytest.approx(hd1.omega_eV) == 0.03341323356861477
     return hd1
 
+def test_defect_band_raises(v_ga):
+    vaspruns = v_ga[(0, -1)]["vaspruns"]
+    procar = v_ga[(0, -1)]["procar"]
+    hd0 = HarmonicDefect.from_vaspruns(
+        vaspruns,
+        charge_state=0,
+        procar=procar,
+        store_bandstructure=True,
+    )
+    # mis-matched defect band
+    hd0.defect_band = [(138, 0, 1), (139, 1, 1)]
+    with pytest.raises(ValueError) as e:
+        assert hd0.defect_band_index
+    
+    # mis-matched defect spin
+    hd0.defect_band = [(138, 0, 1), (138, 1, 0)]
+    with pytest.raises(ValueError) as e:
+        assert hd0.spin_index == 1
 
 def test_HarmonicDefect(hd0, v_ga, test_dir):
     # test other basic reading functions for HarmonicDefect

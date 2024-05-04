@@ -1,15 +1,16 @@
 import numpy as np
-from pymatgen.core.periodic_table import Element, Specie
-
 from pymatgen.analysis.defects.core import (
     Adsorbate,
     DefectComplex,
     Interstitial,
+    NamedDefect,
     PeriodicSite,
     Substitution,
     Vacancy,
 )
 from pymatgen.analysis.defects.finder import DefectSiteFinder
+from pymatgen.core import Structure
+from pymatgen.core.periodic_table import Element, Specie
 
 
 def test_vacancy(gan_struct):
@@ -25,6 +26,7 @@ def test_vacancy(gan_struct):
     assert vac.name == "v_Ga"
     assert vac == vac
     assert vac.element_changes == {Element("Ga"): -1}
+    assert vac.latex_name == r"v$_{\rm Ga}$"
 
 
 def test_substitution(gan_struct):
@@ -40,12 +42,14 @@ def test_substitution(gan_struct):
     assert sub.oxi_state == 1
     assert sub.get_charge_states() == [-1, 0, 1, 2]
     assert sub.get_multiplicity() == 2
-    sc = sub.get_supercell_structure()
+    sc, site_ = sub.get_supercell_structure(return_site=True)
+    assert site_.specie.symbol == "O"
     assert sc.formula == "Ga64 N63 O1"
     assert sub.name == "O_N"
     assert sub.latex_name == r"O$_{\rm N}$"
     assert sub == sub
     assert sub.element_changes == {Element("N"): -1, Element("O"): 1}
+    assert sub.latex_name == r"O$_{\rm N}$"
 
     # test supercell with locking
     sc_locked = sub.get_supercell_structure(relax_radius=5.0)
@@ -106,6 +110,9 @@ def test_substitution(gan_struct):
     n_ga = Substitution(s, n_site)
     assert n_ga.get_charge_states() == [-7, -6, -5, -4, -3, -2, -1, 0, 1]
 
+    n_ga.user_charges = [-100, 102]
+    assert n_ga.get_charge_states() == [-100, 102]
+
 
 def test_interstitial(gan_struct):
     s = gan_struct.copy()
@@ -120,6 +127,7 @@ def test_interstitial(gan_struct):
     assert inter.name == "N_i"
     assert str(inter) == "N intersitial site at [0.00,0.00,0.75]"
     assert inter.element_changes == {Element("N"): 1}
+    assert inter.latex_name == r"N$_{\rm i}$"
 
     # test target_frac_coords with get_supercell_structure
     finder = DefectSiteFinder()
@@ -129,6 +137,10 @@ def test_interstitial(gan_struct):
     inter_sc_struct = inter.get_supercell_structure(target_frac_coords=[0.3, 0.5, 0.9])
     fpos = finder.get_defect_fpos(inter_sc_struct, inter.structure)
     assert np.allclose(fpos, [0.25, 0.5, 0.89809658])  # closest equivalent site
+
+    inter2 = Interstitial(s, n_site)
+    inter2.user_charges = [-100, 102]
+    assert inter2.get_charge_states() == [-100, 102]
 
 
 def test_adsorbate(gan_struct):
@@ -163,3 +175,23 @@ def test_complex(gan_struct):
 
     assert dc2 == dc2
     assert dc2 != dc
+
+
+def test_parsing_and_grouping_NamedDefects(test_dir):
+    bulk_dir = test_dir / "Mg_Ga" / "bulk_sc"
+    defect_dir = test_dir / "Mg_Ga" / "q=0"
+    bulk_struct = Structure.from_file(bulk_dir / "CONTCAR.gz")
+    defect_struct = Structure.from_file(defect_dir / "CONTCAR.gz")
+
+    nd0 = NamedDefect.from_structures(
+        defect_structure=defect_struct, bulk_structure=bulk_struct
+    )
+
+    assert nd0.element_changes == {Element("Mg"): 1, Element("Ga"): -1}
+    nd1 = NamedDefect(name="v_Ga", bulk_formula="GaN", element_changes={"Ga": -1})
+    nd2 = NamedDefect(
+        name="Mg_Ga", bulk_formula="GaN", element_changes={"Mg": 1, "Ga": -1}
+    )
+    assert str(nd0) == "GaN:Mg_Ga"
+    assert nd0 != nd1
+    assert nd0 == nd2

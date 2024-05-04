@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.11"
           cache: pip
           cache-dependency-path: pyproject.toml
 
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11"]
 
     env:
       PMG_MAPI_KEY: ${{ secrets.PMG_MAPI_KEY }}
@@ -54,8 +54,11 @@ jobs:
           pip install -e .[strict]
           pip install -e .[tests]
 
-      - name: Test
+      - name: Test Modules
         run: pytest --cov=pymatgen --cov-report=xml
+
+      - name: Test Notebooks
+        run: pytest --nbmake ./docs/source/content
 
       - uses: codecov/codecov-action@v1
         if: matrix.python-version == 3.10
@@ -63,26 +66,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml
 
-  # figure out if it is possible to upload to testpypi
-  # deploy-test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v3
-  #   - name: Set up Python
-  #     uses: actions/setup-python@v4
-  #     with:
-  #       python-version: '3.x'
-  #   - name: Install dependencies
-  #     run: |
-  #       python -m pip install --upgrade pip
-  #       pip install build
-  #   - name: Build package
-  #     run: python -m build
-  #   - name: Publish package to TestPyPI
-  #     uses: pypa/gh-action-pypi-publish@release/v1
-  #     with:
-  #       password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-  #       repository-url: https://test.pypi.org/legacy/
 
   docs:
     runs-on: ubuntu-latest
@@ -104,6 +87,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -e .[strict]
           pip install -e .[docs]
       - name: Build

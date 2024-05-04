@@ -7,19 +7,24 @@ import itertools
 import logging
 from abc import ABCMeta
 from itertools import combinations
-from typing import Generator
+from typing import TYPE_CHECKING
 
 from monty.json import MSONable
-from pymatgen.core import Element, PeriodicSite, Species, Structure
-from pymatgen.io.vasp import Chgcar
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-
-from pymatgen.analysis.defects.core import Defect, Interstitial, Substitution, Vacancy
+from pymatgen.analysis.defects.core import Interstitial, Substitution, Vacancy
 from pymatgen.analysis.defects.utils import (
     ChargeInsertionAnalyzer,
     TopographyAnalyzer,
     remove_collisions,
 )
+from pymatgen.core import Element, PeriodicSite, Species, Structure
+from pymatgen.io.vasp import Chgcar
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+
+if TYPE_CHECKING:
+    from collections.abc import Generator, Sequence
+
+    from pymatgen.analysis.defects.core import Defect
+    from pymatgen.io.vasp import VolumetricData
 
 __author__ = "Jimmy-Xuan Shen"
 __copyright__ = "Copyright 2022, The Materials Project"
@@ -41,13 +46,25 @@ class DefectGenerator(MSONable, metaclass=ABCMeta):
                 symprec=self.symprec,
                 angle_tolerance=self.angle_tolerance,
             )
-        else:  # pragma: no cover
-            raise ValueError(
-                "This generator is using the `SpaceGroupAnalyzer` and requires `symprec` and `angle_tolerance` to be set."
-            )
+        msg = "This generator is using the `SpaceGroupAnalyzer` and requires `symprec` and `angle_tolerance` to be set."
+        raise ValueError(
+            msg,
+        )
 
-    def get_defects(self, *args, **kwargs) -> list[Defect]:
-        """Call the generator and convert the results into a list."""
+    def generate(self, *args, **kwargs) -> Generator[Defect, None, None]:  # noqa: ANN002
+        """Generate a defect.
+
+        Args:
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            Generator[Defect, None, None]: Generator that yields a list of ``Defect`` objects.
+        """
+        raise NotImplementedError
+
+    def get_defects(self, *args, **kwargs) -> list[Defect]:  # noqa: ANN002
+        """Alias for self.generate."""
         return list(self.generate(*args, **kwargs))
 
 
@@ -65,12 +82,16 @@ class VacancyGenerator(DefectGenerator):
         self,
         symprec: float = 0.01,
         angle_tolerance: float = 5,
-    ):
+    ) -> None:
+        """Initialize the vacancy generator."""
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
 
     def generate(
-        self, structure: Structure, rm_species: list[str | Species] = None, **kwargs
+        self,
+        structure: Structure,
+        rm_species: list[str | Species] | None = None,
+        **kwargs,
     ) -> Generator[Vacancy, None, None]:
         """Generate a vacancy defects.
 
@@ -83,14 +104,12 @@ class VacancyGenerator(DefectGenerator):
             Generator[Vacancy, None, None]: Generator that yields a list of ``Vacancy`` objects.
         """
         all_species = [*map(_element_str, structure.composition.elements)]
-        if rm_species is None:
-            rm_species = all_species
-        else:
-            rm_species = [*map(str, rm_species)]
+        rm_species = all_species if rm_species is None else [*map(str, rm_species)]
 
         if not set(rm_species).issubset(all_species):
+            msg = f"rm_species({rm_species}) must be a subset of the structure's species ({all_species})."
             raise ValueError(
-                f"rm_species({rm_species}) must be a subset of the structure's species ({all_species})."
+                msg,
             )
 
         sga = self._space_group_analyzer(structure)
@@ -115,12 +134,16 @@ class SubstitutionGenerator(DefectGenerator):
 
     """
 
-    def __init__(self, symprec: float = 0.01, angle_tolerance: float = 5):
+    def __init__(self, symprec: float = 0.01, angle_tolerance: float = 5) -> None:
+        """Initialize the substitution generator."""
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
 
     def generate(
-        self, structure: Structure, substitution: dict[str, str | list], **kwargs
+        self,
+        structure: Structure,
+        substitution: dict[str, str | list],
+        **kwargs,
     ) -> Generator[Substitution, None, None]:
         """Generate subsitutional defects.
 
@@ -139,7 +162,7 @@ class SubstitutionGenerator(DefectGenerator):
         for site_group in sym_struct.equivalent_sites:
             site = site_group[0]
             el_str = _element_str(site.specie)
-            if el_str not in substitution.keys():
+            if el_str not in substitution:
                 continue
             sub_el = substitution[el_str]
             if isinstance(sub_el, str):
@@ -195,7 +218,8 @@ class AntiSiteGenerator(DefectGenerator):
         angle_tolerance: Angle tolerance for symmetry finding (parameter for ``SpacegroupAnalyzer``).
     """
 
-    def __init__(self, symprec: float = 0.01, angle_tolerance: float = 5):
+    def __init__(self, symprec: float = 0.01, angle_tolerance: float = 5) -> None:
+        """Initialize the anti-site generator."""
         self.symprec = symprec
         self.angle_tolerance = angle_tolerance
         self._sub_gen = SubstitutionGenerator(symprec, angle_tolerance)
@@ -216,7 +240,7 @@ class AntiSiteGenerator(DefectGenerator):
         for u, v in combinations(all_species, 2):
             subs[u].append(v)
             subs[v].append(u)
-        _logger.debug(f"All anti-site pairings: {subs}")
+        _logger.debug("All anti-site pairings: %s", subs)
         for site, species in subs.items():
             for sub in species:
                 yield from self._sub_gen.generate(structure, {site: sub}, **kwargs)
@@ -230,14 +254,16 @@ class InterstitialGenerator(DefectGenerator):
     """
 
     def __init__(self, min_dist: float = 0.5) -> None:
+        """Initialize the interstitial generator."""
         self.min_dist = min_dist
 
     def generate(
         self,
         structure: Structure,
-        insertions: dict[str, list[list[float]]],
-        multiplicities: dict[str, list[int]] | None = None,
-        equivalent_positions: dict[str, list[list[list[float]]]] | None = None,
+        insertions: dict[str, Sequence[Sequence[float]]],
+        multiplicities: dict[str, Sequence[int]] | None = None,
+        equivalent_positions: dict[str, Sequence[Sequence[Sequence[float]]]]
+        | None = None,
         **kwargs,
     ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
@@ -246,6 +272,8 @@ class InterstitialGenerator(DefectGenerator):
             structure: The bulk structure the interstitials are generated from.
             insertions: The insertions to be made given as a dictionary {"Mg": [[0.0, 0.0, 0.0], [0.5, 0.5, 0.5]]}.
             multiplicities: The multiplicities of the insertions to be made given as a dictionary {"Mg": [1, 2]}.
+            equivalent_positions: The equivalent positions of the each inserted species given as a dictionary.
+                Note that they should typically be the same but we allow for more flexibility here.
             **kwargs: Additional keyword arguments for the ``Interstitial`` constructor.
 
         Returns:
@@ -260,7 +288,7 @@ class InterstitialGenerator(DefectGenerator):
                 el_str: [
                     [insertions[el_str][i]] for i in range(len(insertions[el_str]))
                 ]
-                for el_str in insertions.keys()
+                for el_str in insertions
             }
 
         for el_str, coords in insertions.items():
@@ -268,11 +296,15 @@ class InterstitialGenerator(DefectGenerator):
                 mul = multiplicities[el_str][i]
                 equiv_positions = equivalent_positions[el_str][i]
                 isite = PeriodicSite(
-                    species=Species(el_str), coords=coord, lattice=structure.lattice
+                    species=Species(el_str),
+                    coords=coord,
+                    lattice=structure.lattice,
                 )
                 equiv_sites = [
                     PeriodicSite(
-                        species=Species(el_str), coords=coord, lattice=structure.lattice
+                        species=Species(el_str),
+                        coords=coord,
+                        lattice=structure.lattice,
                     )
                     for coord in equiv_positions
                 ]
@@ -285,19 +317,23 @@ class InterstitialGenerator(DefectGenerator):
                 )
 
     def _filter_colliding(
-        self, fcoords: list[list[float]], structure: Structure
-    ) -> Generator[tuple[int, list[float]], None, None]:
+        self,
+        fcoords: Sequence[Sequence[float]],
+        structure: Structure,
+    ) -> Generator[tuple[int, Sequence[float]], None, None]:
         """Check the sites for collisions.
 
         Args:
             fcoords: List of fractional coordinates of the sites.
             structure: The bulk structure the interstitials placed in.
         """
-        unique_fcoords = set(tuple(f) for f in fcoords)
+        unique_fcoords = {tuple(f) for f in fcoords}
         cleaned_fcoords = remove_collisions(
-            fcoords=list(unique_fcoords), structure=structure, min_dist=self.min_dist
+            fcoords=list(unique_fcoords),
+            structure=structure,
+            min_dist=self.min_dist,
         )
-        cleaned_fcoords = set(tuple(f) for f in cleaned_fcoords)
+        cleaned_fcoords = {tuple(f) for f in cleaned_fcoords}
         for i, fc in enumerate(fcoords):
             if tuple(fc) not in cleaned_fcoords:
                 continue
@@ -325,6 +361,7 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
         angle_tol: float = 5,
         **kwargs,
     ) -> None:
+        """Initialize the Voronoi interstitial generator."""
         self.clustering_tol = clustering_tol
         self.min_dist = min_dist
         self.ltol = ltol
@@ -334,7 +371,10 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
         super().__init__(min_dist=min_dist)
 
     def generate(  # type: ignore[override]
-        self, structure: Structure, insert_species: set[str] | list[str], **kwargs
+        self,
+        structure: Structure | VolumetricData,
+        insert_species: set[str] | list[str],
+        **kwargs,
     ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
 
@@ -344,7 +384,8 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
             **kwargs: Additional keyword arguments for the ``Interstitial`` constructor.
         """
         if len(set(insert_species)) != len(insert_species):  # pragma: no cover
-            raise ValueError("Insert species must be unique.")
+            msg = "Insert species must be unique."
+            raise ValueError(msg)
         cand_sites_mul_and_equiv_fpos = [*self._get_candidate_sites(structure)]
         for species in insert_species:
             cand_sites, multiplicity, equiv_fpos = zip(*cand_sites_mul_and_equiv_fpos)
@@ -358,7 +399,8 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
             )
 
     def _get_candidate_sites(
-        self, structure: Structure
+        self,
+        structure: Structure,
     ) -> Generator[tuple[list[float], int, list[list[float]]], None, None]:
         """Get the candidate sites for interstitials.
 
@@ -378,9 +420,9 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
             angle_tol=self.angle_tol,
             **self.top_kwargs,
         )
-        insert_sites = dict()
-        multiplicity: dict[int, int] = dict()
-        equiv_fpos: dict[int, list[list[float]]] = dict()
+        insert_sites = {}
+        multiplicity: dict[int, int] = {}
+        equiv_fpos: dict[int, list[list[float]]] = {}
         for fpos, lab in top.labeled_sites:
             if lab in insert_sites:
                 multiplicity[lab] += 1
@@ -390,7 +432,7 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
             multiplicity[lab] = 1
             equiv_fpos[lab] = [fpos]
 
-        for key in insert_sites.keys():
+        for key in insert_sites:
             yield insert_sites[key], multiplicity[key], equiv_fpos[key]
 
 
@@ -405,6 +447,8 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         min_dist: Minimum to atoms in the host structure
         avg_radius: The radius around each local minima used to evaluate the average charge.
         max_avg_charge: The maximum average charge to accept.
+        max_insertions: The maximum number of insertion sites to consider.
+            Will choose the sites with the lowest average charge.
     """
 
     def __init__(
@@ -418,6 +462,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         max_avg_charge: float = 0.9,
         max_insertions: int | None = None,
     ) -> None:
+        """Initialize the charge interstitial generator."""
         self.clustering_tol = clustering_tol
         self.ltol = ltol
         self.stol = stol
@@ -427,7 +472,12 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
         self.max_insertions = max_insertions
         super().__init__(min_dist=min_dist)
 
-    def generate(self, chgcar: Chgcar, insert_species: set[str] | list[str], **kwargs) -> Generator[Interstitial, None, None]:  # type: ignore[override]
+    def generate(  # type: ignore[override]
+        self,
+        chgcar: VolumetricData,
+        insert_species: set[str] | list[str],
+        **kwargs,
+    ) -> Generator[Interstitial, None, None]:
         """Generate interstitials.
 
         Args:
@@ -436,7 +486,8 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
             **kwargs: Additional keyword arguments for the ``Interstitial`` constructor.
         """
         if len(set(insert_species)) != len(insert_species):  # pragma: no cover
-            raise ValueError("Insert species must be unique.")
+            msg = "Insert species must be unique."
+            raise ValueError(msg)
         cand_sites_mul_and_equiv_fpos = [*self._get_candidate_sites(chgcar)]
         for species in insert_species:
             cand_sites, multiplicity, equiv_fpos = zip(*cand_sites_mul_and_equiv_fpos)
@@ -453,7 +504,7 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
                 **kwargs,
             )
 
-    def _get_candidate_sites(self, chgcar: Chgcar):
+    def _get_candidate_sites(self, chgcar: Chgcar) -> Generator[tuple, None, None]:
         cia = ChargeInsertionAnalyzer(
             chgcar,
             clustering_tol=self.clustering_tol,
@@ -463,7 +514,8 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
             min_dist=self.min_dist,
         )
         avg_chg_groups = cia.filter_and_group(
-            avg_radius=self.avg_radius, max_avg_charge=self.max_avg_charge
+            avg_radius=self.avg_radius,
+            max_avg_charge=self.max_avg_charge,
         )
         for _, g in avg_chg_groups:
             yield min(g), len(g), g
@@ -475,7 +527,7 @@ def generate_all_native_defects(
     vac_generator: VacancyGenerator | None = None,
     int_generator: ChargeInterstitialGenerator | None = None,
     max_insertions: int | None = None,
-):
+) -> Generator[Defect, None, None]:
     """Generate all native defects.
 
     Convenience function to generate all native defects for a host structure or chgcar object.
@@ -495,7 +547,8 @@ def generate_all_native_defects(
         struct = host
         chgcar = None
     else:
-        raise ValueError("Host must be a Structure or Chgcar object.")
+        msg = "Host must be a Structure or Chgcar object."
+        raise ValueError(msg)
 
     species = set(map(_element_str, struct.species))
     sub_generator = sub_generator or SubstitutionGenerator()
@@ -509,7 +562,7 @@ def generate_all_native_defects(
     # generate interstitials if a chgcar is provided
     if chgcar is not None:
         int_generator = int_generator or ChargeInterstitialGenerator(
-            max_insertions=max_insertions
+            max_insertions=max_insertions,
         )
         yield from int_generator.generate(chgcar, insert_species=species)
 
@@ -518,10 +571,10 @@ def _element_str(sp_or_el: Species | Element) -> str:
     """Convert a species or element to a string."""
     if isinstance(sp_or_el, Species):
         return str(sp_or_el.element)
-    elif isinstance(sp_or_el, Element):
+    if isinstance(sp_or_el, Element):
         return str(sp_or_el)
-    else:
-        raise ValueError(f"{sp_or_el} is not a species or element")  # pragma: no cover
+    msg = f"{sp_or_el} is not a species or element"
+    raise ValueError(msg)
 
 
 def _remove_oxidation_states(structure: Structure) -> Structure:
