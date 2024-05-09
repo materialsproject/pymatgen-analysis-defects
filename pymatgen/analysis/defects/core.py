@@ -15,7 +15,6 @@ from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatc
 from pymatgen.core import Element, PeriodicSite, Species
 from pymatgen.core.periodic_table import DummySpecies
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-from typing_extensions import Self
 
 from .utils import get_plane_spacing
 
@@ -23,6 +22,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
     from pymatgen.core import Structure
     from pymatgen.symmetry.structure import SymmetrizedStructure
+    from typing_extensions import Self
 
 # TODO Possible redesign idea: ``DefectSite`` class defined with a defect object.
 # This makes some of the accounting logic a bit harder since we will probably
