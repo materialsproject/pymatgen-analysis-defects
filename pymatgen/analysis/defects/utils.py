@@ -423,8 +423,8 @@ def get_avg_chg(
         cc = np.linspace(0, 1, len(chgcar.get_axis_grid(2)), endpoint=False)
         AA, BB, CC = np.meshgrid(aa, bb, cc, indexing="ij")
         dist_from_pos = chgcar.structure.lattice.get_all_distances(
-            fcoords1=np.vstack([AA.flatten(), BB.flatten(), CC.flatten()]).T,
-            fcoords2=pos_frac,
+            frac_coords1=np.vstack([AA.flatten(), BB.flatten(), CC.flatten()]).T,
+            frac_coords2=pos_frac,
         )
         return dist_from_pos.reshape(AA.shape)
 
