@@ -852,21 +852,20 @@ def group_defect_entries(
 
 
 def group_formation_energy_diagrams(
-    feds: list[FormationEnergyDiagram],
+    feds: Sequence[FormationEnergyDiagram],
     sm: StructureMatcher = None,
 ) -> Generator[tuple[str | None, FormationEnergyDiagram], None, None]:
     """Group formation energy diagrams by their representation.
 
-    First by name then by structure.
+    First by name then by structure.  Note, this function assumes that the defects
+    are for the same host structure.
 
     Args:
         feds: list of formation energy diagrams
         sm: StructureMatcher to use for grouping
 
     Returns:
-        If combine_diagrams is True, generator of (name, combined formation energy diagram) tuples.
-        If combine_diagrams is False, generator of (name, list of formation energy diagrams) tuples.
-
+        Generator of (name, combined formation energy diagram) tuples.
     """
     if sm is None:
         sm = StructureMatcher(comparator=ElementComparator())

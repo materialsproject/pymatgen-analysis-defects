@@ -30,7 +30,7 @@ from scipy.spatial import ConvexHull, Voronoi
 from scipy.spatial.distance import squareform
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Generator, Sequence
     from pathlib import Path
 
     from numpy import typing as npt
@@ -263,7 +263,7 @@ def get_zfile(
     raise FileNotFoundError(msg)
 
 
-def generic_group_labels(list_in: list, comp: Callable = operator.eq) -> list[int]:
+def generic_group_labels(list_in: Sequence, comp: Callable = operator.eq) -> list[int]:
     """Group a list of unsortable objects.
 
     Args:
@@ -1053,7 +1053,7 @@ class CorrectionResult(MSONable):
 
 
 def _group_docs_by_structure(
-    docs: list, sm: StructureMatcher, get_structure: Callable
+    docs: Sequence, sm: StructureMatcher, get_structure: Callable
 ) -> Generator[list, None, None]:
     """Group docs by structure.
 
@@ -1074,7 +1074,7 @@ def _group_docs_by_structure(
 
 
 def group_docs(
-    docs: list,
+    docs: Sequence,
     sm: StructureMatcher,
     get_structure: Callable,
     get_hash: Callable | None = None,
