@@ -9,7 +9,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from pymatgen.analysis.defects.thermo import group_formation_energy_diagrams
 
-from .utils import get_line_color_and_style_sequence
+from .utils import get_line_style_and_color_sequence
 
 PLOTLY_COLORS = px.colors.qualitative.T10
 PLOTLY_STYLES = ["solid", "dot", "dash", "longdash", "dashdot", "longdashdot"]
@@ -190,7 +190,7 @@ def get_plot_data(
     num_feds = len(grouped_feds)
     for (uid, fed), color, x_anno in zip(
         grouped_feds,
-        get_line_color_and_style_sequence(PLOTLY_COLORS, PLOTLY_STYLES),
+        get_line_style_and_color_sequence(PLOTLY_COLORS, PLOTLY_STYLES),
         x_annos_,
     ):
         if chempot is None:

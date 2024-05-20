@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, Callable
 
 import numpy as np
 from matplotlib import pyplot as plt
+from monty.dev import deprecated
 from monty.json import MSONable
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
 from pymatgen.analysis.defects.core import Defect, NamedDefect
@@ -1146,6 +1147,10 @@ def fermi_dirac(energy: float, temperature: float) -> float:
     return 1.0 / (1.0 + np.exp((energy) / (boltzman_eV_K * temperature)))
 
 
+@deprecated(
+    message="Plotting functions will be moved to the the plotting module. "
+    "To integrate better with MP website, we will use the Plotly library for plotting."
+)
 def plot_formation_energy_diagrams(
     formation_energy_diagrams: FormationEnergyDiagram
     | list[FormationEnergyDiagram]

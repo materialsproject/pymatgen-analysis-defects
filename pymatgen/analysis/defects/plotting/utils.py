@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from collections.abc import Generator, Sequence
 
 
-def get_line_color_and_style_sequence(
+def get_line_style_and_color_sequence(
     colors: Sequence, styles: Sequence
 ) -> Generator[tuple[str, str], None, None]:
     """Get a generator for colors and styles.
@@ -21,7 +21,7 @@ def get_line_color_and_style_sequence(
         styles: List of styles to use.
 
     Returns:
-        Generator of (color, style) tuples
+        Generator of (style, color) tuples
     """
     for style in itertools.cycle(styles):
         for color in itertools.cycle(colors):
