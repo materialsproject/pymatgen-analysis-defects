@@ -217,7 +217,7 @@ class DefectEntry(MSONable):
     def defect_chemsys(self) -> str:
         """Get the chemical system of the defect."""
         return "-".join(
-            sorted([el.symbol for el in self.defect.defect_structure.elements])
+            sorted({el.symbol for el in self.defect.defect_structure.elements})
         )
 
 
@@ -542,6 +542,11 @@ class FormationEnergyDiagram(MSONable):
                     competing_phases[hp_ent.composition.reduced_formula] = hp_ent
             res.append(competing_phases)
         return res
+
+    @property
+    def bulk_formula(self) -> str:
+        """Get the bulk formula."""
+        return self.defect_entries[0].defect.structure.composition.reduced_formula
 
     @property
     def defect(self) -> Defect:
