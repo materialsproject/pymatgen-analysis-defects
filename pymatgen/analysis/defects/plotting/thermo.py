@@ -1,4 +1,4 @@
-"""Plotting functions for competing phases."""
+"""Plotting functions for defect thermo properties."""
 
 from __future__ import annotations
 
