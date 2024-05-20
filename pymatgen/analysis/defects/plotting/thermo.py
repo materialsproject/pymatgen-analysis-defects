@@ -26,8 +26,8 @@ def _plot_line(
     color: str,
     style: str,
     name: str,
+    meta: dict,
     uid: str,
-    x_anno: float,
 ) -> None:
     """Plot a sequence of x, y points as a line.
 
@@ -37,8 +37,8 @@ def _plot_line(
         color: The color of the line.
         style: The style of the line.
         name: The name of the line.
+        meta: A dictionary of metadata.
         uid: The unique identifier of the line.
-        x_anno: The x-coordinate of the annotation.
 
     Returns:
         None, modifies the fig object in place.
@@ -48,27 +48,40 @@ def _plot_line(
         x=x_pos,
         y=y_pos,
         mode="lines+markers",
-        name=name,
         textposition="top right",
         line=dict(color=color, dash=style),
         hoverinfo="x",
-        meta="formation_energy",
+        meta=meta,
         uid=uid,
-    )
-    y_anno = np.interp(x=x_anno, xp=x_pos, fp=y_pos)
-    fig.add_annotation(
-        x=x_anno,
-        y=y_anno,
-        text=name,
-        font=dict(color=color),
-        arrowcolor=color,
-        bgcolor="white",
-        bordercolor=color,
+        name=name,
     )
     fig.add_trace(trace_)
 
 
-def _lable_slopes(fig: go.Figure) -> None:
+def _label_lines(fig: go.Figure, uid: str, x_anno: float, color: str) -> None:
+    """Label the lines in the figure.
+
+    Args:
+        fig: A plotly figure object.
+        uid: The unique identifier of the line.
+        x_anno: The x-coordinate of the annotation.
+        color: The color of the annotation.
+    """
+    for trace_ in fig.select_traces(selector={"uid": uid}):
+        x_pos, y_pos = trace_.x, trace_.y
+        y_anno = np.interp(x=x_anno, xp=x_pos, fp=y_pos)
+        fig.add_annotation(
+            x=x_anno,
+            y=y_anno,
+            text=trace_.name,
+            font=dict(color=color),
+            arrowcolor=color,
+            bgcolor="white",
+            bordercolor=color,
+        )
+
+
+def _label_slopes(fig: go.Figure) -> None:
     """Label the slopes of the lines in the figure.
 
     Only labels lines that have the meta attribute 'formation_energy'.
@@ -76,7 +89,7 @@ def _lable_slopes(fig: go.Figure) -> None:
     Args:
         fig: A plotly figure object.
     """
-    for data_ in filter(lambda x: x.meta == "formation_energy", fig.data):
+    for data_ in filter(lambda x: x.meta.get("formation_energy_plot", False), fig.data):
         transitions_arr_ = np.array(tuple(zip(data_.x, data_.y)))
         diff_arr = transitions_arr_[1:] - transitions_arr_[:-1]
         slopes = tuple(
@@ -112,32 +125,21 @@ def plot_formation_energy_diagrams(
         chempot: A dictionary of chemical potentials.
     """
     fig = go.Figure()
-    x_annos_ = np.linspace(0, feds[0].band_gap, len(feds) + 1, endpoint=True)
-    x_annos_ += (x_annos_[1] - x_annos_[0]) / 2
-    x_annos_ = x_annos_[:-1]
+    plot_data = get_plot_data(feds, chempot)
 
-    # use structure an defect name to get uid
-    grouped_feds = group_formation_energy_diagrams(feds)
-
-    for uid, fed, color, x_anno in zip(
-        *grouped_feds,
-        get_line_color_and_style_sequence(PLOTLY_COLORS, PLOTLY_STYLES),
-        x_annos_,
-    ):
-        if chempot is None:
-            cation_el_ = fed.chempot_diagram.elements[0]
-            chempot_ = fed.get_chempots(rich_element=cation_el_)
-
+    for uid, data in plot_data.items():
         _plot_line(
-            pts=fed.get_transitions(chempot_),
+            pts=data["fed"].get_transitions(data["chempot"]),
             fig=fig,
-            color=color[1],
-            style=color[0],
-            name=_get_name(fed),
-            x_anno=x_anno,
+            name=uid,
+            color=data["color"],
+            style=data["style"],
+            meta={"formation_energy_plot": True},
             uid=uid,
         )
-    _lable_slopes(fig)
+        _label_lines(fig=fig, uid=uid, x_anno=data["x_anno"], color=data["color"])
+
+    _label_slopes(fig)
 
     fig.update_layout(
         title="Formation Energy Diagrams",
@@ -150,3 +152,59 @@ def plot_formation_energy_diagrams(
         showlegend=False,
     )
     return fig
+
+
+def get_plot_data(
+    feds: Sequence[FormationEnergyDiagram], chempot: dict | None = None
+) -> dict:
+    """Get the plot data for a sequence of formation energy diagrams.
+
+    Args:
+        feds: A sequence of formation energy diagrams.
+        chempot: A dictionary of chemical potentials.
+
+    Returns:
+        A dictionary of plot data.
+            - key: The unique identifier (just the unique name from group_formation_energy_diagrams).
+            - value: A dictionary with the following keys:
+                - fed: The formation energy diagram.
+                - style: The style of the line.
+                - color: The color of the line.
+                - x_anno: The x-coordinate of the annotation.
+                - chempot: The chemical potentials used to generate the transitions.
+
+    """
+    x_annos_ = np.linspace(0, feds[0].band_gap, len(feds) + 1, endpoint=True)
+    x_annos_ += (x_annos_[1] - x_annos_[0]) / 2
+    x_annos_ = x_annos_[:-1]
+
+    # use structure an defect name to get uid
+    grouped_feds = list(group_formation_energy_diagrams(feds))
+    plot_data = dict()
+    num_feds = len(grouped_feds)
+    for (uid, fed), color, x_anno in zip(
+        grouped_feds,
+        get_line_color_and_style_sequence(PLOTLY_COLORS, PLOTLY_STYLES),
+        x_annos_,
+    ):
+        if chempot is None:
+            cation_el_ = fed.chempot_diagram.elements[0]
+            chempot_ = fed.get_chempots(rich_element=cation_el_)
+        else:
+            chempot_ = chempot
+        plot_data[uid] = dict(
+            fed=fed,
+            style=color[0],
+            color=color[1],
+            x_anno=x_anno,
+            chempot=chempot_,
+        )
+
+    if len(plot_data) != num_feds:
+        msg = "Duplicate UIDs found in formation energy diagrams. "
+        raise ValueError(
+            msg,
+            "This should not happen since each unique defect should have a unique UID.",
+        )
+
+    return plot_data

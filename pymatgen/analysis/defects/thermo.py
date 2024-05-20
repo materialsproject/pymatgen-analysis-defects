@@ -212,6 +212,13 @@ class DefectEntry(MSONable):
         res.update(corrections_d)
         return res
 
+    @property
+    def defect_chemsys(self) -> str:
+        """Get the chemical system of the defect."""
+        return "-".join(
+            sorted([el.symbol for el in self.defect.defect_structure.elements])
+        )
+
 
 @dataclass
 class FormationEnergyDiagram(MSONable):
@@ -539,6 +546,11 @@ class FormationEnergyDiagram(MSONable):
     def defect(self) -> Defect:
         """Get the defect that this FormationEnergyDiagram represents."""
         return self.defect_entries[0].defect
+
+    @property
+    def defect_chemsys(self) -> str:
+        """Get the chemical system of the defect."""
+        return self.defect_entries[0].defect_chemsys
 
     def _get_lines(self, chempots: dict) -> list[tuple[float, float]]:
         """Get the lines for the formation energy diagram.
