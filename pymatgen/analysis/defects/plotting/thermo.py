@@ -66,6 +66,9 @@ def _label_lines(fig: go.Figure, uid: str, x_anno: float, color: str) -> None:
         uid: The unique identifier of the line.
         x_anno: The x-coordinate of the annotation.
         color: The color of the annotation.
+
+    Returns:
+        None, modifies the fig object in place.
     """
     for trace_ in fig.select_traces(selector={"uid": uid}):
         x_pos, y_pos = trace_.x, trace_.y
@@ -123,6 +126,9 @@ def plot_formation_energy_diagrams(
     Args:
         feds: A sequence of formation energy diagrams.
         chempot: A dictionary of chemical potentials.
+
+    Returns:
+        A plotly figure object.
     """
     fig = go.Figure()
     plot_data = get_plot_data(feds, chempot)
