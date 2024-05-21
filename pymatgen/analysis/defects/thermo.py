@@ -1353,7 +1353,7 @@ def plot_formation_energy_diagrams(
     if show_legend:
         lg = axis.get_legend()
         if lg:
-            handle, leg = lg.legendHandles, [txt._text for txt in lg.texts]
+            handle, leg = lg.legend_handles, [txt._text for txt in lg.texts]
         else:
             handle, leg = [], []
 
