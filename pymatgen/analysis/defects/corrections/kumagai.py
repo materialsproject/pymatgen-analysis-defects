@@ -40,7 +40,7 @@ logging.getLogger("pydefect").setLevel(logging.WARNING)
 
 def _check_import_pydefect() -> None:
     """Import pydefect if it is installed."""
-    if __has_pydefect__:
+    if not __has_pydefect__:
         msg = "vise/pydefect is not installed. Please install it first."
         raise ModuleNotFoundError(
             msg,
