@@ -86,3 +86,9 @@ def test_kumagai(test_dir):
         1, sd1, sb, dielectric_tensor=[[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     )
     assert res1.correction_energy > 0
+
+def test_kumagai_missing():
+    from pymatgen.analysis.defects.corrections import kumagai
+    kumagai.__has_pydefect__ = False
+    with pytest.raises(ImportError):
+        kumagai._check_import_pydefect()
