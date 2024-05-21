@@ -4,7 +4,8 @@ from pathlib import Path
 import pytest
 from monty.serialization import loadfn
 from pymatgen.analysis.defects.core import PeriodicSite, Substitution
-from pymatgen.analysis.defects.thermo import DefectEntry, PhaseDiagram
+from pymatgen.analysis.defects.thermo import DefectEntry
+from pymatgen.analysis.phase_diagram import PhaseDiagram
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Specie
 from pymatgen.io.vasp.outputs import WSWQ, Chgcar, Locpot, Procar, Vasprun
