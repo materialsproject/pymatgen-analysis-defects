@@ -4,10 +4,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
 from matplotlib import pyplot as plt
 from matplotlib.patches import Polygon
+from pymatgen.analysis.defects.thermo import group_formation_energy_diagrams
 from pymatgen.util.string import latexify
 from scipy.spatial import ConvexHull
+
+from .utils import get_line_style_and_color_sequence
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -22,15 +28,6 @@ except ImportError:
     def labelLines(*args, **kwargs) -> None:  # noqa: ARG001, ANN002
         """Dummy function if labellines is not installed."""
 
-
-from typing import TYPE_CHECKING
-
-import numpy as np
-import plotly.express as px
-import plotly.graph_objects as go
-from pymatgen.analysis.defects.thermo import group_formation_energy_diagrams
-
-from .utils import get_line_style_and_color_sequence
 
 PLOTLY_COLORS = px.colors.qualitative.T10
 PLOTLY_STYLES = ["solid", "dot", "dash", "longdash", "dashdot", "longdashdot"]

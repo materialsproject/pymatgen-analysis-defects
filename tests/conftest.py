@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from monty.serialization import loadfn
 from pymatgen.analysis.defects.core import PeriodicSite, Substitution
-from pymatgen.analysis.defects.thermo import DefectEntry
+from pymatgen.analysis.defects.thermo import DefectEntry, PhaseDiagram
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Specie
 from pymatgen.io.vasp.outputs import WSWQ, Chgcar, Locpot, Procar, Vasprun
@@ -127,3 +127,42 @@ def v_N_GaN(test_dir):
             2: Locpot.from_file(test_dir / "v_N_GaN/q=2/LOCPOT.gz"),
         },
     }
+
+
+@pytest.fixture(scope="module")
+def formation_energy_diagram(
+    data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N
+):
+    bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
+    bulk_bs = bulk_vasprun.get_band_structure()
+    vbm = bulk_bs.get_vbm()["energy"]
+    bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
+    defect_entries, _ = defect_entries_and_plot_data_Mg_Ga
+
+    def_ent_list = list(defect_entries.values())
+    # test the constructor with materials project phase diagram
+    atomic_entries = list(
+        filter(lambda x: len(x.composition.elements) == 1, stable_entries_Mg_Ga_N)
+    )
+    pd = PhaseDiagram(stable_entries_Mg_Ga_N)
+    # test the constructor with atomic entries
+    # this is the one we will use for the rest of the tests
+    fed = FormationEnergyDiagram.with_atomic_entries(
+        defect_entries=def_ent_list,
+        atomic_entries=atomic_entries,
+        vbm=vbm,
+        inc_inf_values=False,
+        phase_diagram=pd,
+        bulk_entry=bulk_entry,
+    )
+    assert len(fed.chempot_limits) == 3
+
+    # dataframe conversion
+    df = fed.as_dataframe()
+    assert df.shape == (4, 5)
+
+    # test that you can get the Ga-rich chempot
+    cp = fed.get_chempots(rich_element=Element("Ga"))
+    assert cp[Element("Ga")] == pytest.approx(0, abs=1e-2)
+
+    return fed
