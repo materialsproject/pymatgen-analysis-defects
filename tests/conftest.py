@@ -2,14 +2,11 @@ from collections import defaultdict
 from pathlib import Path
 
 import pytest
-
-
-
 from monty.serialization import loadfn
 from pymatgen.analysis.defects.core import PeriodicSite, Substitution
-from pymatgen.analysis.defects.thermo import DefectEntry
+from pymatgen.analysis.defects.thermo import DefectEntry, FormationEnergyDiagram
 from pymatgen.analysis.phase_diagram import PhaseDiagram
-from pymatgen.core import Structure
+from pymatgen.core import Element, Structure
 from pymatgen.core.periodic_table import Specie
 from pymatgen.io.vasp.outputs import WSWQ, Chgcar, Locpot, Procar, Vasprun
 
@@ -51,7 +48,7 @@ def data_Mg_Ga(test_dir):
             "locpot": Locpot,
         },
         ...
-    }
+    }.
     """
     root_dir = test_dir / "Mg_Ga"
     data = defaultdict(dict)
