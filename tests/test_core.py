@@ -13,7 +13,7 @@ from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Element, Specie
 
 
-def test_vacancy(gan_struct):
+def test_vacancy(gan_struct) -> None:
     s = gan_struct.copy()
     vac = Vacancy(s, s.sites[0])
     vac2 = Vacancy(s, s.sites[1])
@@ -29,7 +29,7 @@ def test_vacancy(gan_struct):
     assert vac.latex_name == r"v$_{\rm Ga}$"
 
 
-def test_substitution(gan_struct):
+def test_substitution(gan_struct) -> None:
     s = gan_struct.copy()
     n_site = s.sites[3]
     assert n_site.specie.symbol == "N"
@@ -114,7 +114,7 @@ def test_substitution(gan_struct):
     assert n_ga.get_charge_states() == [-100, 102]
 
 
-def test_interstitial(gan_struct):
+def test_interstitial(gan_struct) -> None:
     s = gan_struct.copy()
     inter_fpos = [0, 0, 0.75]
     n_site = PeriodicSite(Specie("N"), inter_fpos, s.lattice)
@@ -143,7 +143,7 @@ def test_interstitial(gan_struct):
     assert inter2.get_charge_states() == [-100, 102]
 
 
-def test_adsorbate(gan_struct):
+def test_adsorbate(gan_struct) -> None:
     s = gan_struct.copy()
     ads_fpos = [0, 0, 0.75]
     n_site = PeriodicSite(Specie("N"), ads_fpos, s.lattice)
@@ -152,7 +152,7 @@ def test_adsorbate(gan_struct):
     assert str(ads) == "N adsorbate site at [0.00,0.00,0.75]"
 
 
-def test_complex(gan_struct):
+def test_complex(gan_struct) -> None:
     s = gan_struct.copy()
     o_site = PeriodicSite(Specie("O"), s[3].frac_coords, s.lattice)
     sub = Substitution(s, o_site)  # O substituted on N site
@@ -177,7 +177,7 @@ def test_complex(gan_struct):
     assert dc2 != dc
 
 
-def test_parsing_and_grouping_NamedDefects(test_dir):
+def test_parsing_and_grouping_NamedDefects(test_dir) -> None:
     bulk_dir = test_dir / "Mg_Ga" / "bulk_sc"
     defect_dir = test_dir / "Mg_Ga" / "q=0"
     bulk_struct = Structure.from_file(bulk_dir / "CONTCAR.gz")

@@ -5,7 +5,7 @@ from pymatgen.analysis.defects.corrections.freysoldt import (
 )
 
 
-def test_freysoldt(data_Mg_Ga):
+def test_freysoldt(data_Mg_Ga) -> None:
     """Older basic test for Freysoldt correction."""
     bulk_locpot = data_Mg_Ga["bulk_sc"]["locpot"]
     defect_locpot = data_Mg_Ga["q=0"]["locpot"]
@@ -44,7 +44,7 @@ def test_freysoldt(data_Mg_Ga):
     )
 
 
-def test_freysoldt_sxdefect_compare(v_N_GaN):
+def test_freysoldt_sxdefect_compare(v_N_GaN) -> None:
     """More detailed test for Freysoldt correction.
 
     Compare against results from the sxdefectalign tool from SPHInX.

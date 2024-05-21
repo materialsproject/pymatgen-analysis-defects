@@ -11,7 +11,7 @@ from pymatgen.analysis.defects.generators import (
 )
 
 
-def test_vacancy_generators(gan_struct):
+def test_vacancy_generators(gan_struct) -> None:
     vacancy_generator = VacancyGenerator().get_defects(gan_struct)
     for defect in vacancy_generator:
         assert isinstance(defect, Vacancy)
@@ -29,7 +29,7 @@ def test_vacancy_generators(gan_struct):
         )
 
 
-def test_substitution_generators(gan_struct):
+def test_substitution_generators(gan_struct) -> None:
     sub_generator = SubstitutionGenerator().get_defects(
         gan_struct, {"Ga": ["Mg", "Ca"]}
     )
@@ -49,13 +49,13 @@ def test_substitution_generators(gan_struct):
     }
 
 
-def test_antisite_generator(gan_struct):
+def test_antisite_generator(gan_struct) -> None:
     anti_gen = AntiSiteGenerator().get_defects(gan_struct)
     def_names = [defect.name for defect in anti_gen]
     assert sorted(def_names) == ["Ga_N", "N_Ga"]
 
 
-def test_interstitial_generator(gan_struct):
+def test_interstitial_generator(gan_struct) -> None:
     gen = InterstitialGenerator().get_defects(
         gan_struct, insertions={"Mg": [[0, 0, 0]]}
     )
@@ -71,7 +71,7 @@ def test_interstitial_generator(gan_struct):
     assert len(l_gen) == 1
 
 
-def test_charge_interstitial_generator(chgcar_fe3o4):
+def test_charge_interstitial_generator(chgcar_fe3o4) -> None:
     gen = ChargeInterstitialGenerator().get_defects(chgcar_fe3o4, {"Ga"})
     cnt = 0
     for defect in gen:
@@ -81,7 +81,7 @@ def test_charge_interstitial_generator(chgcar_fe3o4):
     assert cnt == 2
 
 
-def test_voronoi_interstitial_generator(chgcar_fe3o4):
+def test_voronoi_interstitial_generator(chgcar_fe3o4) -> None:
     gen = VoronoiInterstitialGenerator().get_defects(chgcar_fe3o4.structure, {"Li"})
     cnt = 0
     for defect in gen:
@@ -91,7 +91,7 @@ def test_voronoi_interstitial_generator(chgcar_fe3o4):
     assert cnt == 4
 
 
-def test_generate_all_native_defects(chgcar_fe3o4):
+def test_generate_all_native_defects(chgcar_fe3o4) -> None:
     gen = generate_all_native_defects(chgcar_fe3o4)
     assert len(list(gen)) == 14
 

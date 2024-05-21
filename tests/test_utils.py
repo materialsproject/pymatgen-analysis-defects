@@ -16,7 +16,7 @@ from pymatgen.core.periodic_table import Specie
 from pymatgen.io.vasp.outputs import Chgcar
 
 
-def test_get_local_extrema(gan_struct):
+def test_get_local_extrema(gan_struct) -> None:
     data = np.ones((48, 48, 48))
     chgcar = Chgcar(poscar=gan_struct, data={"total": data})
     frac_pos = [[0, 0, 0], [0.25, 0.25, 0.25], [0.5, 0.5, 0.5], [0.75, 0.75, 0.75]]
@@ -28,7 +28,7 @@ def test_get_local_extrema(gan_struct):
         assert np.allclose(a, b)
 
 
-def test_cluster_nodes(gan_struct):
+def test_cluster_nodes(gan_struct) -> None:
     frac_pos = [
         [0, 0, 0],
         [0.25, 0.25, 0.25],
@@ -47,7 +47,7 @@ def test_cluster_nodes(gan_struct):
         assert np.allclose(a, b, atol=0.001)
 
 
-def test_get_avg_chg(gan_struct):
+def test_get_avg_chg(gan_struct) -> None:
     data = np.ones((48, 48, 48))
     chgcar = Chgcar(poscar=gan_struct, data={"total": data})
     fpos = [0.1, 0.1, 0.1]
@@ -56,7 +56,7 @@ def test_get_avg_chg(gan_struct):
     pytest.approx(avg_chg_sphere, avg_chg)
 
 
-def test_chgcar_insertion(chgcar_fe3o4):
+def test_chgcar_insertion(chgcar_fe3o4) -> None:
     chgcar = chgcar_fe3o4
     insert_ref = [
         (
@@ -76,7 +76,7 @@ def test_chgcar_insertion(chgcar_fe3o4):
         assert np.allclose(fpos, ref_fpos)
 
 
-def test_topography_analyzer(chgcar_fe3o4):
+def test_topography_analyzer(chgcar_fe3o4) -> None:
     struct = chgcar_fe3o4.structure
     ta = TopographyAnalyzer(struct, ["Fe", "O"], [], check_volume=True)
     node_struct = ta.get_structure_with_nodes()
@@ -89,14 +89,14 @@ def test_topography_analyzer(chgcar_fe3o4):
         ta = TopographyAnalyzer(struct, ["O"], ["Fe"], check_volume=True)
 
 
-def test_get_localized_states(v_ga):
+def test_get_localized_states(v_ga) -> None:
     vaspruns = v_ga[(0, -1)]["vaspruns"]
     procar = v_ga[(0, -1)]["procar"]
     vr = vaspruns[1]
     bs = vr.get_band_structure()
-    res = get_localized_states(bs, procar=procar)
+    get_localized_states(bs, procar=procar)
     loc_bands = set()
-    for iband, ikpt, ispin, val in get_localized_states(bs, procar=procar):
+    for iband, _ikpt, _ispin, _val in get_localized_states(bs, procar=procar):
         loc_bands.add(iband)
     assert loc_bands == {
         138,
@@ -108,14 +108,14 @@ def test_get_localized_states(v_ga):
     bs = vr.get_band_structure()
 
     loc_bands = set()
-    for iband, ikpt, ispin, val in get_localized_states(
+    for iband, _ikpt, _ispin, _val in get_localized_states(
         bs, procar=procar, band_window=100
     ):
         loc_bands.add(iband)
     assert loc_bands == {75, 77}  # 75 and 77 are more localized core states
 
 
-def test_group_docs(gan_struct):
+def test_group_docs(gan_struct) -> None:
     s = gan_struct.copy()
     vac1 = Vacancy(s, s.sites[0])
     vac2 = Vacancy(s, s.sites[1])
@@ -160,6 +160,6 @@ def test_group_docs(gan_struct):
     assert "|".join(sorted(g_names)) == "N_i:0|N_i:1|v_Ga|v_N"
 
 
-def test_plane_spacing(gan_struct):
+def test_plane_spacing(gan_struct) -> None:
     lattice = gan_struct.lattice.matrix
     assert np.allclose(get_plane_spacing(lattice), [2.785, 2.785, 5.239], atol=0.001)

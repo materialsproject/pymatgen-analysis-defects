@@ -12,7 +12,7 @@ from pymatgen.analysis.defects.recombination import (
 )
 
 
-def test_boltzmann():
+def test_boltzmann() -> None:
     ref_results = [
         0.9791034813819097,
         0.020459854127734073,
@@ -27,7 +27,7 @@ def test_boltzmann():
     assert np.allclose(results2[:, 1], ref_results, rtol=1e-3)
 
 
-def test_get_vibronic_matrix_elements():
+def test_get_vibronic_matrix_elements() -> None:
     # precompute values of the overlap
     dQ, omega_i, omega_f = 0, 0.2, 0.2
     Ni, Nf = 5, 5
@@ -42,7 +42,7 @@ def test_get_vibronic_matrix_elements():
     assert np.allclose(matel, ref_result)
 
 
-def test_pchip_eval():
+def test_pchip_eval() -> None:
     x_c = np.linspace(0, 2, 5)
     y_c = np.sin(x_c) + 1
     xx = np.linspace(-3, 3, 1000)
@@ -52,7 +52,7 @@ def test_pchip_eval():
     assert int_val == pytest.approx(int_ref, rel=1e-3)
 
 
-def test_get_SRH_coef():
+def test_get_SRH_coef() -> None:
     ref_res = [4.64530153e-14, 4.64752885e-14, 4.75265302e-14]
     res = get_SRH_coef(
         T=[100, 200, 300],
@@ -67,8 +67,8 @@ def test_get_SRH_coef():
     assert np.allclose(res, ref_res)
 
 
-def test_get_Rad_coef():
-    res = get_Rad_coef(
+def test_get_Rad_coef() -> None:
+    get_Rad_coef(
         T=[100, 200, 300],
         dQ=1.0,
         dE=1.0,
