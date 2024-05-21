@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, Callable
 
 import numpy as np
 from matplotlib import pyplot as plt
+from monty.dev import deprecated
 from monty.json import MSONable
 from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
 from pymatgen.analysis.defects.core import Defect, NamedDefect
@@ -211,6 +212,13 @@ class DefectEntry(MSONable):
         }
         res.update(corrections_d)
         return res
+
+    @property
+    def defect_chemsys(self) -> str:
+        """Get the chemical system of the defect."""
+        return "-".join(
+            sorted({el.symbol for el in self.defect.defect_structure.elements})
+        )
 
 
 @dataclass
@@ -536,9 +544,19 @@ class FormationEnergyDiagram(MSONable):
         return res
 
     @property
+    def bulk_formula(self) -> str:
+        """Get the bulk formula."""
+        return self.defect_entries[0].defect.structure.composition.reduced_formula
+
+    @property
     def defect(self) -> Defect:
         """Get the defect that this FormationEnergyDiagram represents."""
         return self.defect_entries[0].defect
+
+    @property
+    def defect_chemsys(self) -> str:
+        """Get the chemical system of the defect."""
+        return self.defect_entries[0].defect_chemsys
 
     def _get_lines(self, chempots: dict) -> list[tuple[float, float]]:
         """Get the lines for the formation energy diagram.
@@ -852,21 +870,20 @@ def group_defect_entries(
 
 
 def group_formation_energy_diagrams(
-    feds: list[FormationEnergyDiagram],
+    feds: Sequence[FormationEnergyDiagram],
     sm: StructureMatcher = None,
 ) -> Generator[tuple[str | None, FormationEnergyDiagram], None, None]:
     """Group formation energy diagrams by their representation.
 
-    First by name then by structure.
+    First by name then by structure.  Note, this function assumes that the defects
+    are for the same host structure.
 
     Args:
         feds: list of formation energy diagrams
         sm: StructureMatcher to use for grouping
 
     Returns:
-        If combine_diagrams is True, generator of (name, combined formation energy diagram) tuples.
-        If combine_diagrams is False, generator of (name, list of formation energy diagrams) tuples.
-
+        Generator of (name, combined formation energy diagram) tuples.
     """
     if sm is None:
         sm = StructureMatcher(comparator=ElementComparator())
@@ -1135,6 +1152,10 @@ def fermi_dirac(energy: float, temperature: float) -> float:
     return 1.0 / (1.0 + np.exp((energy) / (boltzman_eV_K * temperature)))
 
 
+@deprecated(
+    message="Plotting functions will be moved to the the plotting module. "
+    "To integrate better with MP website, we will use the Plotly library for plotting."
+)
 def plot_formation_energy_diagrams(
     formation_energy_diagrams: FormationEnergyDiagram
     | list[FormationEnergyDiagram]
@@ -1332,7 +1353,7 @@ def plot_formation_energy_diagrams(
     if show_legend:
         lg = axis.get_legend()
         if lg:
-            handle, leg = lg.legendHandles, [txt._text for txt in lg.texts]
+            handle, leg = lg.legend_handles, [txt._text for txt in lg.texts]
         else:
             handle, leg = [], []
 
