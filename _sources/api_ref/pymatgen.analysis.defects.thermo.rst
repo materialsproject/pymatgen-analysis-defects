@@ -21,7 +21,6 @@
       get_upper_hull
       group_defect_entries
       group_formation_energy_diagrams
-      plot_formation_energy_diagrams
    
    
 
