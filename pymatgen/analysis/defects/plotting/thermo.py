@@ -130,11 +130,6 @@ def _label_slopes(fig: go.Figure) -> None:
         )
 
 
-def _get_name(fed: FormationEnergyDiagram) -> str:
-    root, suffix = fed.defect.name.split("_")
-    return rf"${{\rm {root}}}_{{\rm {suffix}}}$"
-
-
 def plot_formation_energy_diagrams(
     feds: Sequence[FormationEnergyDiagram], chempot: dict | None = None
 ) -> go.Figure:
