@@ -1,4 +1,4 @@
-def test_defect_finder(test_dir):
+def test_defect_finder(test_dir) -> None:
     from pymatgen.analysis.defects.finder import DefectSiteFinder
     from pymatgen.core import IStructure
 

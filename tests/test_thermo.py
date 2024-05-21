@@ -72,7 +72,7 @@ def formation_energy_diagram(
     return fed
 
 
-def test_lower_envelope():
+def test_lower_envelope() -> None:
     # Test the lower envelope and transition code with a simple example
     lines = [[4, 12], [-1, 3], [-5, 4], [-2, 1], [3, 8], [-4, 14], [2, 12], [3, 8]]
     lower_envelope_ref = [
@@ -84,12 +84,14 @@ def test_lower_envelope():
     transitions_ref = [(-4, -4), (-1.4, 3.8), (1, -1)]
     lower_envelope = get_lower_envelope(lines)
     assert lower_envelope == lower_envelope_ref
-    assert get_transitions(lower_envelope, -5, 2) == [(-5, -8)] + transitions_ref + [
-        (2, -6)
+    assert get_transitions(lower_envelope, -5, 2) == [
+        (-5, -8),
+        *transitions_ref,
+        (2, -6),
     ]
 
 
-def test_defect_entry(defect_entries_and_plot_data_Mg_Ga, data_Mg_Ga):
+def test_defect_entry(defect_entries_and_plot_data_Mg_Ga, data_Mg_Ga) -> None:
     defect_entries, plot_data = defect_entries_and_plot_data_Mg_Ga
 
     def_entry = defect_entries[0]
@@ -117,7 +119,7 @@ def test_defect_entry(defect_entries_and_plot_data_Mg_Ga, data_Mg_Ga):
     assert def_entry.get_ediff() == pytest.approx(ediff, abs=1e-4)
 
 
-def test_formation_energy_diagram_using_bulk_entry(formation_energy_diagram):
+def test_formation_energy_diagram_using_bulk_entry(formation_energy_diagram) -> None:
     fed = copy.deepcopy(formation_energy_diagram)
     def_ents_w_bulk = copy.deepcopy(fed.defect_entries)
 
@@ -154,7 +156,7 @@ def test_formation_energy_diagram_using_bulk_entry(formation_energy_diagram):
     assert fed.bulk_formula == "GaN"
 
 
-def test_formation_energy_diagram_shape_fixed(formation_energy_diagram):
+def test_formation_energy_diagram_shape_fixed(formation_energy_diagram) -> None:
     fed = copy.deepcopy(formation_energy_diagram)
 
     # check that the shape of the formation energy diagram does not change
@@ -173,7 +175,9 @@ def test_formation_energy_diagram_shape_fixed(formation_energy_diagram):
         assert np.allclose(y, y_ref)
 
 
-def test_formation_energy_diagram_using_atomic_entries(formation_energy_diagram):
+def test_formation_energy_diagram_using_atomic_entries(
+    formation_energy_diagram,
+) -> None:
     # test the constructor with materials project phase diagram
     fed = copy.deepcopy(formation_energy_diagram)
     atomic_entries = list(
@@ -191,7 +195,7 @@ def test_formation_energy_diagram_using_atomic_entries(formation_energy_diagram)
     assert len(fed.chempot_limits) == 3
 
 
-def test_formation_energy_diagram_numerical(formation_energy_diagram):
+def test_formation_energy_diagram_numerical(formation_energy_diagram) -> None:
     # Create a fake defect entry independent of the test data
     fed = copy.deepcopy(formation_energy_diagram)
     fake_defect_entry = fed.defect_entries[0]
@@ -220,7 +224,7 @@ def test_formation_energy_diagram_numerical(formation_energy_diagram):
     ) == pytest.approx(2 * 1.5875937551666035e-17)
 
 
-def test_competing_phases(formation_energy_diagram):
+def test_competing_phases(formation_energy_diagram) -> None:
     fed = copy.deepcopy(formation_energy_diagram)
     cp_at_point = dict()
     for chempot_, competing_phases_ in zip(fed.chempot_limits, fed.competing_phases):
@@ -236,7 +240,9 @@ def test_competing_phases(formation_energy_diagram):
     assert cp_at_point == ref_dict
 
 
-def test_multi(data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N):
+def test_multi(
+    data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N
+) -> None:
     bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
     bulk_dos = bulk_vasprun.complete_dos
     _, vbm = bulk_dos.get_cbm_vbm()
@@ -259,7 +265,7 @@ def test_multi(data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg
         )
         FormationEnergyDiagram(
             bulk_entry=bulk_entry,
-            defect_entries=def_ent_list + [fake_defect_entry],
+            defect_entries=[*def_ent_list, fake_defect_entry],
             vbm=vbm,
             pd_entries=stable_entries_Mg_Ga_N,
             inc_inf_values=False,
@@ -292,7 +298,9 @@ def test_multi(data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg
     assert len(mfed.formation_energy_diagrams) == 1
 
 
-def test_formation_from_directory(test_dir, stable_entries_Mg_Ga_N, defect_Mg_Ga):
+def test_formation_from_directory(
+    test_dir, stable_entries_Mg_Ga_N, defect_Mg_Ga
+) -> None:
     sc_dir = test_dir / "Mg_Ga"
     qq = []
     for q in [-1, 0, 1]:
@@ -310,7 +318,7 @@ def test_formation_from_directory(test_dir, stable_entries_Mg_Ga_N, defect_Mg_Ga
         assert len(trans) == 1 + len(qq)
 
 
-def test_ensure_stable_bulk(stable_entries_Mg_Ga_N):
+def test_ensure_stable_bulk(stable_entries_Mg_Ga_N) -> None:
     entries = stable_entries_Mg_Ga_N
     pd = PhaseDiagram(stable_entries_Mg_Ga_N)
     bulk_comp = Composition("GaN")
@@ -319,7 +327,7 @@ def test_ensure_stable_bulk(stable_entries_Mg_Ga_N):
     entries = list(
         filter(lambda x: x.composition.reduced_formula != "GaN", stable_entries_Mg_Ga_N)
     )
-    pd1 = PhaseDiagram(entries + [fake_bulk_ent])
+    pd1 = PhaseDiagram([*entries, fake_bulk_ent])
     assert "GaN" not in [e.composition.reduced_formula for e in pd1.stable_entries]
     pd2 = ensure_stable_bulk(pd, fake_bulk_ent)
     assert "GaN" in [e.composition.reduced_formula for e in pd2.stable_entries]
@@ -327,7 +335,7 @@ def test_ensure_stable_bulk(stable_entries_Mg_Ga_N):
 
 def test_plotter(
     data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N, plot_fn
-):
+) -> None:
     bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
     bulk_dos = bulk_vasprun.complete_dos
     _, vbm = bulk_dos.get_cbm_vbm()
@@ -374,7 +382,7 @@ def test_plotter(
     plot_fn(fed, fed.chempot_limits[0])
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def plot_fn():
     def _plot(*args):
         plot_formation_energy_diagrams(*args, save=True, show=True)
@@ -385,7 +393,7 @@ def plot_fn():
     return _plot
 
 
-def test_defect_entry_grouping(defect_entries_and_plot_data_Mg_Ga):
+def test_defect_entry_grouping(defect_entries_and_plot_data_Mg_Ga) -> None:
     defect_entries_dict, _ = defect_entries_and_plot_data_Mg_Ga
     defect_entries = list(defect_entries_dict.values())
     for g_name, g in group_defect_entries(defect_entries=defect_entries):

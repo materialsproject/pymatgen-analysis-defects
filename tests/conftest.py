@@ -131,9 +131,7 @@ def v_N_GaN(test_dir):
 
 
 @pytest.fixture(scope="session")
-def basic_fed(
-    data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N
-):
+def basic_fed(data_Mg_Ga, defect_entries_and_plot_data_Mg_Ga, stable_entries_Mg_Ga_N):
     bulk_vasprun = data_Mg_Ga["bulk_sc"]["vasprun"]
     bulk_bs = bulk_vasprun.get_band_structure()
     vbm = bulk_bs.get_vbm()["energy"]

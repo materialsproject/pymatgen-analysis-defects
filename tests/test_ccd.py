@@ -44,7 +44,8 @@ def hd1(v_ga):
     assert pytest.approx(hd1.omega_eV) == 0.03341323356861477
     return hd1
 
-def test_defect_band_raises(v_ga):
+
+def test_defect_band_raises(v_ga) -> None:
     vaspruns = v_ga[(0, -1)]["vaspruns"]
     procar = v_ga[(0, -1)]["procar"]
     hd0 = HarmonicDefect.from_vaspruns(
@@ -55,15 +56,16 @@ def test_defect_band_raises(v_ga):
     )
     # mis-matched defect band
     hd0.defect_band = [(138, 0, 1), (139, 1, 1)]
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError):
         assert hd0.defect_band_index
-    
+
     # mis-matched defect spin
     hd0.defect_band = [(138, 0, 1), (138, 1, 0)]
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError):
         assert hd0.spin_index == 1
 
-def test_HarmonicDefect(hd0, v_ga, test_dir):
+
+def test_HarmonicDefect(hd0, v_ga, test_dir) -> None:
     # test other basic reading functions for HarmonicDefect
     vaspruns = v_ga[(0, -1)]["vaspruns"]
     procar = v_ga[(0, -1)]["procar"]
@@ -100,7 +102,7 @@ def test_HarmonicDefect(hd0, v_ga, test_dir):
     assert "Spin index" in str(e.value)
 
 
-def test_wswq(hd0, test_dir):
+def test_wswq(hd0, test_dir) -> None:
     wswq_dir = test_dir / "v_Ga" / "ccd_0_-1" / "wswqs"
 
     # check for ValueError when you have mis-matched distortions and wswqs
@@ -119,7 +121,7 @@ def test_wswq(hd0, test_dir):
     assert np.linalg.norm(elph_me[..., 139]) > 0
 
 
-def test_wswq_slope():
+def test_wswq_slope() -> None:
     # Make sure the the slope is automatically defined as the sign of the distoration changes.
     mats = [np.ones((3, 5)), np.zeros((3, 5)), np.ones((3, 5))]
     FakeWSWQ = namedtuple("FakeWSWQ", ["data"])
@@ -132,7 +134,7 @@ def test_wswq_slope():
     assert np.allclose(res, np.ones((3, 5)) * 1)
 
 
-def test_SRHCapture(hd0, hd1, test_dir):
+def test_SRHCapture(hd0, hd1, test_dir) -> None:
     from pymatgen.analysis.defects.ccd import get_SRH_coefficient
 
     hd0.read_wswqs(test_dir / "v_Ga" / "ccd_0_-1" / "wswqs")
@@ -159,7 +161,7 @@ def test_SRHCapture(hd0, hd1, test_dir):
     assert "WSWQ" in str(e.value)
 
 
-def test_dielectric_func(test_dir):
+def test_dielectric_func(test_dir) -> None:
     dir0_opt = test_dir / "v_Ga" / "ccd_0_-1" / "optics"
     hd0 = HarmonicDefect.from_directories(
         directories=[dir0_opt],
@@ -187,5 +189,5 @@ def test_dielectric_func(test_dir):
     assert df.iloc[5]["jb"] == 100
 
 
-def test_plot_pes(hd0):
+def test_plot_pes(hd0) -> None:
     plot_pes(hd0)
