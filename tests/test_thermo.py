@@ -151,6 +151,7 @@ def test_formation_energy_diagram_using_bulk_entry(formation_energy_diagram):
     )
     assert len(fed.chempot_limits) == 3
     assert fed.defect_chemsys == "Ga-Mg-N"
+    assert fed.bulk_formula == "GaN"
 
 
 def test_formation_energy_diagram_shape_fixed(formation_energy_diagram):
