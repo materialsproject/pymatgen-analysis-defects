@@ -3,6 +3,7 @@ from pymatgen.analysis.defects.corrections.freysoldt import (
     get_freysoldt_correction,
     plot_plnr_avg,
 )
+from pymatgen.analysis.defects.corrections.kumagai import get_efnv_correction, get_structure_with_pot
 
 
 def test_freysoldt(data_Mg_Ga):
@@ -71,17 +72,17 @@ def test_freysoldt_sxdefect_compare(v_N_GaN):
         assert results[q] == pytest.approx(references[q], abs=1e-3)
 
 
-# def test_kumagai(test_dir):
-#     sb = get_structure_with_pot(test_dir / "Mg_Ga" / "bulk_sc")
-#     sd0 = get_structure_with_pot(test_dir / "Mg_Ga" / "q=0")
-#     sd1 = get_structure_with_pot(test_dir / "Mg_Ga" / "q=1")
+def test_kumagai(test_dir):
+    sb = get_structure_with_pot(test_dir / "Mg_Ga" / "bulk_sc")
+    sd0 = get_structure_with_pot(test_dir / "Mg_Ga" / "q=0")
+    sd1 = get_structure_with_pot(test_dir / "Mg_Ga" / "q=1")
 
-#     res0 = get_efnv_correction(
-#         0, sd0, sb, dielectric_tensor=[[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-#     )
-#     assert res0.correction_energy == pytest.approx(0, abs=1e-4)
+    res0 = get_efnv_correction(
+        0, sd0, sb, dielectric_tensor=[[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    )
+    assert res0.correction_energy == pytest.approx(0, abs=1e-4)
 
-#     res1 = get_efnv_correction(
-#         1, sd1, sb, dielectric_tensor=[[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-#     )
-#     assert res1.correction_energy > 0
+    res1 = get_efnv_correction(
+        1, sd1, sb, dielectric_tensor=[[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    )
+    assert res1.correction_energy > 0
