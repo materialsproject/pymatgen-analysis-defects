@@ -106,7 +106,7 @@ def _label_slopes(fig: go.Figure) -> None:
                 textposition="top center",
                 hoverinfo="skip",
                 textfont=dict(color=data_.line.color),
-                meta={"defect_id": f"{data_.name}:slope"},
+                name=f"{data_.name}:slope",
                 showlegend=False,
             )
         )
