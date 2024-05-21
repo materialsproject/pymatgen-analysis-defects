@@ -3,7 +3,10 @@ from pymatgen.analysis.defects.corrections.freysoldt import (
     get_freysoldt_correction,
     plot_plnr_avg,
 )
-from pymatgen.analysis.defects.corrections.kumagai import get_efnv_correction, get_structure_with_pot
+from pymatgen.analysis.defects.corrections.kumagai import (
+    get_efnv_correction,
+    get_structure_with_pot,
+)
 
 
 def test_freysoldt(data_Mg_Ga) -> None:
@@ -87,8 +90,10 @@ def test_kumagai(test_dir):
     )
     assert res1.correction_energy > 0
 
+
 def test_kumagai_missing():
     from pymatgen.analysis.defects.corrections import kumagai
+
     kumagai.__has_pydefect__ = False
     with pytest.raises(ImportError):
         kumagai._check_import_pydefect()
