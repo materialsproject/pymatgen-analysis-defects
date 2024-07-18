@@ -109,7 +109,7 @@ Traceback (most recent call last):  File "/opt/hostedtoolcache/Python/3.10.14/x6
     if await self.run_code(code, result, async_=asy):
   File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3577, in run_code
     exec(code_obj, self.user_global_ns, self.user_ns)
-  File "/tmp/ipykernel_2402/3410457764.py", line 3, in <module>
+  File "/tmp/ipykernel_2323/3410457764.py", line 3, in <module>
     from pymatgen.analysis.defects.thermo import FormationEnergyDiagram
   File "/home/runner/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/thermo.py", line 16, in <module>
     from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
