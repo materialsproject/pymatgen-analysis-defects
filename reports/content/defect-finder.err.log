@@ -1,0 +1,165 @@
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/nbclient/client.py", line 1314, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/jupyter_core/utils/__init__.py", line 165, in wrapped
+    return loop.run_until_complete(inner)
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+from pathlib import Path
+
+import numpy as np
+from pymatgen.io.vasp import Locpot
+
+TEST_FILES = Path("../../../tests/test_files")
+import glob
+
+from pymatgen.analysis.defects.finder import DefectSiteFinder
+from pymatgen.core.structure import Structure
+
+base_struct = Structure.from_file(TEST_FILES / "v_N_GaN/bulk/CONTCAR.gz")
+finder = DefectSiteFinder()
+
+for q in range(-1, 3):
+    fname = f"{str(TEST_FILES)}/v_N_GaN/q={q}/CONTCAR.gz"
+    struct = Structure.from_file(fname)
+    fpos = finder.get_defect_fpos(defect_structure=struct, base_structure=base_struct)
+    fpos -= np.round(fpos)
+    print(fpos)
+------------------
+
+----- stderr -----
+
+A module that was compiled using NumPy 1.x cannot be run in
+NumPy 2.0.0 as it may crash. To support both 1.x and 2.x
+versions of NumPy, modules must be compiled with NumPy 2.0.
+Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+
+If you are a user of the module, the easiest solution will be to
+downgrade to 'numpy<2' or try to upgrade the affected module.
+We expect that some modules will need time to support NumPy 2.
+
+Traceback (most recent call last):  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel_launcher.py", line 18, in <module>
+    app.launch_new_instance()
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/traitlets/config/application.py", line 1075, in launch_instance
+    app.start()
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelapp.py", line 739, in start
+    self.io_loop.start()
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/tornado/platform/asyncio.py", line 205, in start
+    self.asyncio_loop.run_forever()
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/asyncio/base_events.py", line 603, in run_forever
+    self._run_once()
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/asyncio/base_events.py", line 1909, in _run_once
+    handle._run()
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/asyncio/events.py", line 80, in _run
+    self._context.run(self._callback, *self._args)
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py", line 545, in dispatch_queue
+    await self.process_one()
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py", line 534, in process_one
+    await dispatch(*args)
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py", line 437, in dispatch_shell
+    await result
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/ipkernel.py", line 362, in execute_request
+    await super().execute_request(stream, ident, parent)
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py", line 778, in execute_request
+    reply_content = await reply_content
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/ipkernel.py", line 449, in do_execute
+    res = shell.run_cell(
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/zmqshell.py", line 549, in run_cell
+    return super().run_cell(*args, **kwargs)
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3075, in run_cell
+    result = self._run_cell(
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3130, in _run_cell
+    result = runner(coro)
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/async_helpers.py", line 128, in _pseudo_sync_runner
+    coro.send(None)
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3334, in run_cell_async
+    has_raised = await self.run_ast_nodes(code_ast.body, cell_name,
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3517, in run_ast_nodes
+    if await self.run_code(code, result, async_=asy):
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3577, in run_code
+    exec(code_obj, self.user_global_ns, self.user_ns)
+  File "/tmp/ipykernel_2350/4252216629.py", line 4, in <module>
+    from pymatgen.io.vasp import Locpot
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/io/vasp/__init__.py", line 10, in <module>
+    from .inputs import Incar, Kpoints, Poscar, Potcar, PotcarSingle, VaspInput
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/io/vasp/inputs.py", line 34, in <module>
+    from pymatgen.core import SETTINGS, Element, Lattice, Structure, get_el_sp
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/core/__init__.py", line 13, in <module>
+    from pymatgen.core.lattice import Lattice
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/core/lattice.py", line 21, in <module>
+    from pymatgen.util.coord import pbc_shortest_vectors
+  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/util/coord.py", line 15, in <module>
+    from pymatgen.util import coord_cython
+------------------
+
+[0;31m---------------------------------------------------------------------------[0m
+[0;31mImportError[0m                               Traceback (most recent call last)
+Cell [0;32mIn[1], line 4[0m
+[1;32m      1[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpathlib[39;00m [38;5;28;01mimport[39;00m Path
+[1;32m      3[0m [38;5;28;01mimport[39;00m [38;5;21;01mnumpy[39;00m [38;5;28;01mas[39;00m [38;5;21;01mnp[39;00m
+[0;32m----> 4[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mio[39;00m[38;5;21;01m.[39;00m[38;5;21;01mvasp[39;00m [38;5;28;01mimport[39;00m Locpot
+[1;32m      6[0m TEST_FILES [38;5;241m=[39m Path([38;5;124m"[39m[38;5;124m../../../tests/test_files[39m[38;5;124m"[39m)
+[1;32m      7[0m [38;5;28;01mimport[39;00m [38;5;21;01mglob[39;00m
+
+File [0;32m/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/io/vasp/__init__.py:10[0m
+[1;32m      1[0m [38;5;124;03m"""[39;00m
+[1;32m      2[0m [38;5;124;03mThis package implements modules for input and output to and from VASP. It[39;00m
+[1;32m      3[0m [38;5;124;03mimports the key classes form both vasp_input and vasp_output to allow most[39;00m
+[1;32m      4[0m [38;5;124;03mclasses to be simply called as pymatgen.io.vasp.Incar for example, to retain[39;00m
+[1;32m      5[0m [38;5;124;03mbackwards compatibility.[39;00m
+[1;32m      6[0m [38;5;124;03m"""[39;00m
+[1;32m      8[0m [38;5;28;01mfrom[39;00m [38;5;21;01m__future__[39;00m [38;5;28;01mimport[39;00m annotations
+[0;32m---> 10[0m [38;5;28;01mfrom[39;00m [38;5;21;01m.[39;00m[38;5;21;01minputs[39;00m [38;5;28;01mimport[39;00m Incar, Kpoints, Poscar, Potcar, PotcarSingle, VaspInput
+[1;32m     11[0m [38;5;28;01mfrom[39;00m [38;5;21;01m.[39;00m[38;5;21;01moutputs[39;00m [38;5;28;01mimport[39;00m (
+[1;32m     12[0m     BSVasprun,
+[1;32m     13[0m     Chgcar,
+[0;32m   (...)[0m
+[1;32m     24[0m     Xdatcar,
+[1;32m     25[0m )
+
+File [0;32m/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/io/vasp/inputs.py:34[0m
+[1;32m     31[0m [38;5;28;01mfrom[39;00m [38;5;21;01mmonty[39;00m[38;5;21;01m.[39;00m[38;5;21;01mserialization[39;00m [38;5;28;01mimport[39;00m dumpfn, loadfn
+[1;32m     32[0m [38;5;28;01mfrom[39;00m [38;5;21;01mtabulate[39;00m [38;5;28;01mimport[39;00m tabulate
+[0;32m---> 34[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m [38;5;28;01mimport[39;00m SETTINGS, Element, Lattice, Structure, get_el_sp
+[1;32m     35[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01melectronic_structure[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m [38;5;28;01mimport[39;00m Magmom
+[1;32m     36[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mutil[39;00m[38;5;21;01m.[39;00m[38;5;21;01mio_utils[39;00m [38;5;28;01mimport[39;00m clean_lines
+
+File [0;32m/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/core/__init__.py:13[0m
+[1;32m     10[0m [38;5;28;01mfrom[39;00m [38;5;21;01mruamel[39;00m[38;5;21;01m.[39;00m[38;5;21;01myaml[39;00m [38;5;28;01mimport[39;00m YAML
+[1;32m     12[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcomposition[39;00m [38;5;28;01mimport[39;00m Composition
+[0;32m---> 13[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m[38;5;21;01m.[39;00m[38;5;21;01mlattice[39;00m [38;5;28;01mimport[39;00m Lattice
+[1;32m     14[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m[38;5;21;01m.[39;00m[38;5;21;01moperations[39;00m [38;5;28;01mimport[39;00m SymmOp
+[1;32m     15[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m[38;5;21;01m.[39;00m[38;5;21;01mperiodic_table[39;00m [38;5;28;01mimport[39;00m DummySpecie, DummySpecies, Element, Species, get_el_sp
+
+File [0;32m/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/core/lattice.py:21[0m
+[1;32m     18[0m [38;5;28;01mfrom[39;00m [38;5;21;01mmonty[39;00m[38;5;21;01m.[39;00m[38;5;21;01mjson[39;00m [38;5;28;01mimport[39;00m MSONable
+[1;32m     19[0m [38;5;28;01mfrom[39;00m [38;5;21;01mscipy[39;00m[38;5;21;01m.[39;00m[38;5;21;01mspatial[39;00m [38;5;28;01mimport[39;00m Voronoi
+[0;32m---> 21[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mutil[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcoord[39;00m [38;5;28;01mimport[39;00m pbc_shortest_vectors
+[1;32m     22[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mutil[39;00m[38;5;21;01m.[39;00m[38;5;21;01mdue[39;00m [38;5;28;01mimport[39;00m Doi, due
+[1;32m     24[0m [38;5;28;01mif[39;00m TYPE_CHECKING:
+
+File [0;32m/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/util/coord.py:15[0m
+[1;32m     12[0m [38;5;28;01mimport[39;00m [38;5;21;01mnumpy[39;00m [38;5;28;01mas[39;00m [38;5;21;01mnp[39;00m
+[1;32m     13[0m [38;5;28;01mfrom[39;00m [38;5;21;01mmonty[39;00m[38;5;21;01m.[39;00m[38;5;21;01mjson[39;00m [38;5;28;01mimport[39;00m MSONable
+[0;32m---> 15[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mutil[39;00m [38;5;28;01mimport[39;00m coord_cython
+[1;32m     17[0m [38;5;28;01mif[39;00m TYPE_CHECKING:
+[1;32m     18[0m     [38;5;28;01mfrom[39;00m [38;5;21;01mcollections[39;00m[38;5;21;01m.[39;00m[38;5;21;01mabc[39;00m [38;5;28;01mimport[39;00m Sequence
+
+File [0;32mpymatgen/util/coord_cython.pyx:1[0m, in [0;36minit pymatgen.util.coord_cython[0;34m()[0m
+
+[0;31mImportError[0m: numpy.core.multiarray failed to import (auto-generated because you didn't call 'numpy.import_array()' after cimporting numpy; use '<void>numpy._import_array' to disable if you are certain you don't need it).
+

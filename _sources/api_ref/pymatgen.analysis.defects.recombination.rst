@@ -4,11 +4,6 @@
 .. automodule:: pymatgen.analysis.defects.recombination
 
    
-   
-   
-
-   
-   
    .. rubric:: Functions
 
    .. autosummary::
@@ -23,15 +18,3 @@
       herm
       pchip_eval
    
-   
-
-   
-   
-   
-
-   
-   
-   
-
-
-
