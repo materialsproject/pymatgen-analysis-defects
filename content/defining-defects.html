@@ -621,64 +621,8 @@ However, the recommended method to create interstitial defects is to use the <co
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">TypeError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">line</span> <span class="mi">9</span>
-<span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;CHGCAR.Fe3O4.vasp&quot;</span><span class="p">)</span>
-<span class="g g-Whitespace">      </span><span class="mi">8</span> <span class="n">cig</span> <span class="o">=</span> <span class="n">ChargeInterstitialGenerator</span><span class="p">()</span>
-<span class="ne">----&gt; </span><span class="mi">9</span> <span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="n">cig</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">chgcar</span><span class="p">,</span> <span class="n">insert_species</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">]):</span>
-<span class="g g-Whitespace">     </span><span class="mi">10</span>     <span class="nb">print</span><span class="p">(</span><span class="n">defect</span><span class="p">)</span>
-
-<span class="nn">File ~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/generators.py:491,</span> in <span class="ni">ChargeInterstitialGenerator.generate</span><span class="nt">(self, chgcar, insert_species, **kwargs)</span>
-<span class="g g-Whitespace">    </span><span class="mi">489</span>     <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Insert species must be unique.&quot;</span>
-<span class="g g-Whitespace">    </span><span class="mi">490</span>     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">491</span> <span class="n">cand_sites_mul_and_equiv_fpos</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_candidate_sites</span><span class="p">(</span><span class="n">chgcar</span><span class="p">)]</span>
-<span class="g g-Whitespace">    </span><span class="mi">492</span> <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="n">insert_species</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">493</span>     <span class="n">cand_sites</span><span class="p">,</span> <span class="n">multiplicity</span><span class="p">,</span> <span class="n">equiv_fpos</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">cand_sites_mul_and_equiv_fpos</span><span class="p">)</span>
-
-<span class="nn">File ~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/generators.py:516,</span> in <span class="ni">ChargeInterstitialGenerator._get_candidate_sites</span><span class="nt">(self, chgcar)</span>
-<span class="g g-Whitespace">    </span><span class="mi">507</span> <span class="k">def</span> <span class="nf">_get_candidate_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chgcar</span><span class="p">:</span> <span class="n">Chgcar</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-<span class="g g-Whitespace">    </span><span class="mi">508</span>     <span class="n">cia</span> <span class="o">=</span> <span class="n">ChargeInsertionAnalyzer</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">509</span>         <span class="n">chgcar</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">510</span>         <span class="n">clustering_tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clustering_tol</span><span class="p">,</span>
-   <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">514</span>         <span class="n">min_dist</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_dist</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">515</span>     <span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">516</span>     <span class="n">avg_chg_groups</span> <span class="o">=</span> <span class="n">cia</span><span class="o">.</span><span class="n">filter_and_group</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">517</span>         <span class="n">avg_radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">avg_radius</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">518</span>         <span class="n">max_avg_charge</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_avg_charge</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">519</span>     <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">520</span>     <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">avg_chg_groups</span><span class="p">:</span>
-<span class="g g-Whitespace">    </span><span class="mi">521</span>         <span class="k">yield</span> <span class="nb">min</span><span class="p">(</span><span class="n">g</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">),</span> <span class="n">g</span>
-
-<span class="nn">File ~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/utils.py:853,</span> in <span class="ni">ChargeInsertionAnalyzer.filter_and_group</span><span class="nt">(self, avg_radius, max_avg_charge)</span>
-<span class="g g-Whitespace">    </span><span class="mi">851</span> <span class="n">avg_chg_first_member</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="g g-Whitespace">    </span><span class="mi">852</span> <span class="k">for</span> <span class="n">lab</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">lab_groups</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<span class="ne">--&gt; </span><span class="mi">853</span>     <span class="n">avg_chg_first_member</span><span class="p">[</span><span class="n">lab</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_avg_chg</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">854</span>         <span class="bp">self</span><span class="o">.</span><span class="n">chgcar</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">855</span>         <span class="n">fcoord</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">local_minima</span><span class="p">[</span><span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
-<span class="g g-Whitespace">    </span><span class="mi">856</span>         <span class="n">radius</span><span class="o">=</span><span class="n">avg_radius</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">857</span>     <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">859</span> <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="g g-Whitespace">    </span><span class="mi">860</span> <span class="k">for</span> <span class="n">lab</span><span class="p">,</span> <span class="n">avg_chg</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">avg_chg_first_member</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-
-<span class="nn">File ~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/utils.py:434,</span> in <span class="ni">get_avg_chg</span><span class="nt">(chgcar, fcoord, radius)</span>
-<span class="g g-Whitespace">    </span><span class="mi">432</span>     <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;f_coords must be in [0,1)&quot;</span>
-<span class="g g-Whitespace">    </span><span class="mi">433</span>     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">434</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">_dist_mat</span><span class="p">(</span><span class="n">fcoord</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">radius</span>
-<span class="g g-Whitespace">    </span><span class="mi">435</span> <span class="n">vol_sphere</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">volume</span> <span class="o">*</span> <span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">ngridpts</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">436</span> <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">chgcar</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">mask</span><span class="p">)</span> <span class="o">/</span> <span class="n">mask</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="n">vol_sphere</span>
-
-<span class="nn">File ~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/utils.py:425,</span> in <span class="ni">get_avg_chg.&lt;locals&gt;._dist_mat</span><span class="nt">(pos_frac)</span>
-<span class="g g-Whitespace">    </span><span class="mi">423</span> <span class="n">cc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chgcar</span><span class="o">.</span><span class="n">get_axis_grid</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">424</span> <span class="n">AA</span><span class="p">,</span> <span class="n">BB</span><span class="p">,</span> <span class="n">CC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">aa</span><span class="p">,</span> <span class="n">bb</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
-<span class="ne">--&gt; </span><span class="mi">425</span> <span class="n">dist_from_pos</span> <span class="o">=</span> <span class="n">chgcar</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">lattice</span><span class="o">.</span><span class="n">get_all_distances</span><span class="p">(</span>
-<span class="g g-Whitespace">    </span><span class="mi">426</span>     <span class="n">fcoords1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">AA</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">BB</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">CC</span><span class="o">.</span><span class="n">flatten</span><span class="p">()])</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">427</span>     <span class="n">fcoords2</span><span class="o">=</span><span class="n">pos_frac</span><span class="p">,</span>
-<span class="g g-Whitespace">    </span><span class="mi">428</span> <span class="p">)</span>
-<span class="g g-Whitespace">    </span><span class="mi">429</span> <span class="k">return</span> <span class="n">dist_from_pos</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">AA</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-
-<span class="ne">TypeError</span>: Lattice.get_all_distances() got an unexpected keyword argument &#39;fcoords1&#39;
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H intersitial site at [0.00,0.00,0.00]
+H intersitial site at [0.38,0.38,0.38]
 </pre></div>
 </div>
 </div>
@@ -688,6 +632,36 @@ However, the recommended method to create interstitial defects is to use the <co
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="n">generate_all_native_defects</span><span class="p">(</span><span class="n">chgcar</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">defect</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fe Vacancy defect at site #0
+Fe Vacancy defect at site #1
+Fe Vacancy defect at site #3
+O Vacancy defect at site #6
+O Vacancy defect at site #7
+O subsitituted on the Fe site at at site #0
+O subsitituted on the Fe site at at site #1
+O subsitituted on the Fe site at at site #3
+Fe subsitituted on the O site at at site #6
+Fe subsitituted on the O site at at site #7
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/spglib/spglib.py:115: DeprecationWarning: dict interface (SpglibDataset[&#39;international&#39;]) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/spglib/spglib.py:115: DeprecationWarning: dict interface (SpglibDataset[&#39;number&#39;]) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/spglib/spglib.py:115: DeprecationWarning: dict interface (SpglibDataset[&#39;equivalent_atoms&#39;]) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+  warnings.warn(
+/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/spglib/spglib.py:115: DeprecationWarning: dict interface (SpglibDataset[&#39;wyckoffs&#39;]) is deprecated.Use attribute interface ({self.__class__.__name__}.{key}) instead
+  warnings.warn(
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fe intersitial site at [0.00,0.00,0.00]
+Fe intersitial site at [0.38,0.38,0.38]
+O intersitial site at [0.00,0.00,0.00]
+O intersitial site at [0.38,0.38,0.38]
 </pre></div>
 </div>
 </div>
