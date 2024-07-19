@@ -15,137 +15,75 @@ Traceback (most recent call last):
     raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
 nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
 ------------------
-from pymatgen.analysis.defects.core import DefectComplex, Substitution, Vacancy
-from pymatgen.core import PeriodicSite, Species, Structure
+from pymatgen.analysis.defects.generators import (
+    ChargeInterstitialGenerator,
+    generate_all_native_defects,
+)
+from pymatgen.io.vasp import Chgcar
 
-bulk = Structure.from_file(TEST_FILES / "GaN.vasp")
-if (
-    bulk.lattice == bulk.get_primitive_structure().lattice
-):  # check that you have the primitive structure
-    print("The bulk unit cell is the unique primitive WS cell")
+chgcar = Chgcar.from_file(TEST_FILES / "CHGCAR.Fe3O4.vasp")
+cig = ChargeInterstitialGenerator()
+for defect in cig.generate(chgcar, insert_species=["H"]):
+    print(defect)
 ------------------
 
------ stderr -----
-
-A module that was compiled using NumPy 1.x cannot be run in
-NumPy 2.0.0 as it may crash. To support both 1.x and 2.x
-versions of NumPy, modules must be compiled with NumPy 2.0.
-Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
-
-If you are a user of the module, the easiest solution will be to
-downgrade to 'numpy<2' or try to upgrade the affected module.
-We expect that some modules will need time to support NumPy 2.
-
-Traceback (most recent call last):  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/runpy.py", line 196, in _run_module_as_main
-    return _run_code(code, main_globals, None,
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/runpy.py", line 86, in _run_code
-    exec(code, run_globals)
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel_launcher.py", line 18, in <module>
-    app.launch_new_instance()
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/traitlets/config/application.py", line 1075, in launch_instance
-    app.start()
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelapp.py", line 739, in start
-    self.io_loop.start()
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/tornado/platform/asyncio.py", line 205, in start
-    self.asyncio_loop.run_forever()
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/asyncio/base_events.py", line 603, in run_forever
-    self._run_once()
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/asyncio/base_events.py", line 1909, in _run_once
-    handle._run()
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/asyncio/events.py", line 80, in _run
-    self._context.run(self._callback, *self._args)
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py", line 545, in dispatch_queue
-    await self.process_one()
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py", line 534, in process_one
-    await dispatch(*args)
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py", line 437, in dispatch_shell
-    await result
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/ipkernel.py", line 362, in execute_request
-    await super().execute_request(stream, ident, parent)
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py", line 778, in execute_request
-    reply_content = await reply_content
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/ipkernel.py", line 449, in do_execute
-    res = shell.run_cell(
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/zmqshell.py", line 549, in run_cell
-    return super().run_cell(*args, **kwargs)
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3075, in run_cell
-    result = self._run_cell(
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3130, in _run_cell
-    result = runner(coro)
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/async_helpers.py", line 128, in _pseudo_sync_runner
-    coro.send(None)
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3334, in run_cell_async
-    has_raised = await self.run_ast_nodes(code_ast.body, cell_name,
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3517, in run_ast_nodes
-    if await self.run_code(code, result, async_=asy):
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py", line 3577, in run_code
-    exec(code_obj, self.user_global_ns, self.user_ns)
-  File "/tmp/ipykernel_2297/1958153556.py", line 1, in <module>
-    from pymatgen.analysis.defects.core import DefectComplex, Substitution, Vacancy
-  File "/home/runner/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/core.py", line 13, in <module>
-    from pymatgen.analysis.defects.supercells import get_sc_fromstruct
-  File "/home/runner/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/supercells.py", line 11, in <module>
-    from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/analysis/structure_matcher.py", line 12, in <module>
-    from pymatgen.core import Composition, Lattice, Structure, get_el_sp
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/core/__init__.py", line 13, in <module>
-    from pymatgen.core.lattice import Lattice
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/core/lattice.py", line 21, in <module>
-    from pymatgen.util.coord import pbc_shortest_vectors
-  File "/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/util/coord.py", line 15, in <module>
-    from pymatgen.util import coord_cython
-------------------
 
 [0;31m---------------------------------------------------------------------------[0m
-[0;31mImportError[0m                               Traceback (most recent call last)
-Cell [0;32mIn[2], line 1[0m
-[0;32m----> 1[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01manalysis[39;00m[38;5;21;01m.[39;00m[38;5;21;01mdefects[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m [38;5;28;01mimport[39;00m DefectComplex, Substitution, Vacancy
-[1;32m      2[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m [38;5;28;01mimport[39;00m PeriodicSite, Species, Structure
-[1;32m      4[0m bulk [38;5;241m=[39m Structure[38;5;241m.[39mfrom_file(TEST_FILES [38;5;241m/[39m [38;5;124m"[39m[38;5;124mGaN.vasp[39m[38;5;124m"[39m)
+[0;31mTypeError[0m                                 Traceback (most recent call last)
+Cell [0;32mIn[10], line 9[0m
+[1;32m      7[0m chgcar [38;5;241m=[39m Chgcar[38;5;241m.[39mfrom_file(TEST_FILES [38;5;241m/[39m [38;5;124m"[39m[38;5;124mCHGCAR.Fe3O4.vasp[39m[38;5;124m"[39m)
+[1;32m      8[0m cig [38;5;241m=[39m ChargeInterstitialGenerator()
+[0;32m----> 9[0m [38;5;28;01mfor[39;00m defect [38;5;129;01min[39;00m cig[38;5;241m.[39mgenerate(chgcar, insert_species[38;5;241m=[39m[[38;5;124m"[39m[38;5;124mH[39m[38;5;124m"[39m]):
+[1;32m     10[0m     [38;5;28mprint[39m(defect)
 
-File [0;32m~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/core.py:13[0m
-[1;32m     11[0m [38;5;28;01mimport[39;00m [38;5;21;01mnumpy[39;00m [38;5;28;01mas[39;00m [38;5;21;01mnp[39;00m
-[1;32m     12[0m [38;5;28;01mfrom[39;00m [38;5;21;01mmonty[39;00m[38;5;21;01m.[39;00m[38;5;21;01mjson[39;00m [38;5;28;01mimport[39;00m MSONable
-[0;32m---> 13[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01manalysis[39;00m[38;5;21;01m.[39;00m[38;5;21;01mdefects[39;00m[38;5;21;01m.[39;00m[38;5;21;01msupercells[39;00m [38;5;28;01mimport[39;00m get_sc_fromstruct
-[1;32m     14[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01manalysis[39;00m[38;5;21;01m.[39;00m[38;5;21;01mstructure_matcher[39;00m [38;5;28;01mimport[39;00m ElementComparator, StructureMatcher
-[1;32m     15[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m [38;5;28;01mimport[39;00m Element, PeriodicSite, Species
+File [0;32m~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/generators.py:491[0m, in [0;36mChargeInterstitialGenerator.generate[0;34m(self, chgcar, insert_species, **kwargs)[0m
+[1;32m    489[0m     msg [38;5;241m=[39m [38;5;124m"[39m[38;5;124mInsert species must be unique.[39m[38;5;124m"[39m
+[1;32m    490[0m     [38;5;28;01mraise[39;00m [38;5;167;01mValueError[39;00m(msg)
+[0;32m--> 491[0m cand_sites_mul_and_equiv_fpos [38;5;241m=[39m [[38;5;241m*[39m[38;5;28mself[39m[38;5;241m.[39m_get_candidate_sites(chgcar)]
+[1;32m    492[0m [38;5;28;01mfor[39;00m species [38;5;129;01min[39;00m insert_species:
+[1;32m    493[0m     cand_sites, multiplicity, equiv_fpos [38;5;241m=[39m [38;5;28mzip[39m([38;5;241m*[39mcand_sites_mul_and_equiv_fpos)
 
-File [0;32m~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/supercells.py:11[0m
-[1;32m      9[0m [38;5;28;01mimport[39;00m [38;5;21;01mnumpy[39;00m [38;5;28;01mas[39;00m [38;5;21;01mnp[39;00m
-[1;32m     10[0m [38;5;28;01mfrom[39;00m [38;5;21;01mmonty[39;00m[38;5;21;01m.[39;00m[38;5;21;01mdev[39;00m [38;5;28;01mimport[39;00m deprecated
-[0;32m---> 11[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01manalysis[39;00m[38;5;21;01m.[39;00m[38;5;21;01mstructure_matcher[39;00m [38;5;28;01mimport[39;00m ElementComparator, StructureMatcher
-[1;32m     12[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m [38;5;28;01mimport[39;00m Lattice
-[1;32m     13[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mutil[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcoord_cython[39;00m [38;5;28;01mimport[39;00m pbc_shortest_vectors
+File [0;32m~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/generators.py:516[0m, in [0;36mChargeInterstitialGenerator._get_candidate_sites[0;34m(self, chgcar)[0m
+[1;32m    507[0m [38;5;28;01mdef[39;00m [38;5;21m_get_candidate_sites[39m([38;5;28mself[39m, chgcar: Chgcar) [38;5;241m-[39m[38;5;241m>[39m Generator[[38;5;28mtuple[39m, [38;5;28;01mNone[39;00m, [38;5;28;01mNone[39;00m]:
+[1;32m    508[0m     cia [38;5;241m=[39m ChargeInsertionAnalyzer(
+[1;32m    509[0m         chgcar,
+[1;32m    510[0m         clustering_tol[38;5;241m=[39m[38;5;28mself[39m[38;5;241m.[39mclustering_tol,
+[0;32m   (...)[0m
+[1;32m    514[0m         min_dist[38;5;241m=[39m[38;5;28mself[39m[38;5;241m.[39mmin_dist,
+[1;32m    515[0m     )
+[0;32m--> 516[0m     avg_chg_groups [38;5;241m=[39m [43mcia[49m[38;5;241;43m.[39;49m[43mfilter_and_group[49m[43m([49m
+[1;32m    517[0m [43m        [49m[43mavg_radius[49m[38;5;241;43m=[39;49m[38;5;28;43mself[39;49m[38;5;241;43m.[39;49m[43mavg_radius[49m[43m,[49m
+[1;32m    518[0m [43m        [49m[43mmax_avg_charge[49m[38;5;241;43m=[39;49m[38;5;28;43mself[39;49m[38;5;241;43m.[39;49m[43mmax_avg_charge[49m[43m,[49m
+[1;32m    519[0m [43m    [49m[43m)[49m
+[1;32m    520[0m     [38;5;28;01mfor[39;00m _, g [38;5;129;01min[39;00m avg_chg_groups:
+[1;32m    521[0m         [38;5;28;01myield[39;00m [38;5;28mmin[39m(g), [38;5;28mlen[39m(g), g
 
-File [0;32m/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/analysis/structure_matcher.py:12[0m
-[1;32m      9[0m [38;5;28;01mimport[39;00m [38;5;21;01mnumpy[39;00m [38;5;28;01mas[39;00m [38;5;21;01mnp[39;00m
-[1;32m     10[0m [38;5;28;01mfrom[39;00m [38;5;21;01mmonty[39;00m[38;5;21;01m.[39;00m[38;5;21;01mjson[39;00m [38;5;28;01mimport[39;00m MSONable
-[0;32m---> 12[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m [38;5;28;01mimport[39;00m Composition, Lattice, Structure, get_el_sp
-[1;32m     13[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01moptimization[39;00m[38;5;21;01m.[39;00m[38;5;21;01mlinear_assignment[39;00m [38;5;28;01mimport[39;00m LinearAssignment
-[1;32m     14[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mutil[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcoord[39;00m [38;5;28;01mimport[39;00m lattice_points_in_supercell
+File [0;32m~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/utils.py:853[0m, in [0;36mChargeInsertionAnalyzer.filter_and_group[0;34m(self, avg_radius, max_avg_charge)[0m
+[1;32m    851[0m avg_chg_first_member [38;5;241m=[39m {}
+[1;32m    852[0m [38;5;28;01mfor[39;00m lab, g [38;5;129;01min[39;00m lab_groups[38;5;241m.[39mitems():
+[0;32m--> 853[0m     avg_chg_first_member[lab] [38;5;241m=[39m [43mget_avg_chg[49m[43m([49m
+[1;32m    854[0m [43m        [49m[38;5;28;43mself[39;49m[38;5;241;43m.[39;49m[43mchgcar[49m[43m,[49m
+[1;32m    855[0m [43m        [49m[43mfcoord[49m[38;5;241;43m=[39;49m[38;5;28;43mself[39;49m[38;5;241;43m.[39;49m[43mlocal_minima[49m[43m[[49m[43mg[49m[43m[[49m[38;5;241;43m0[39;49m[43m][49m[43m][49m[43m,[49m
+[1;32m    856[0m [43m        [49m[43mradius[49m[38;5;241;43m=[39;49m[43mavg_radius[49m[43m,[49m
+[1;32m    857[0m [43m    [49m[43m)[49m
+[1;32m    859[0m res [38;5;241m=[39m []
+[1;32m    860[0m [38;5;28;01mfor[39;00m lab, avg_chg [38;5;129;01min[39;00m [38;5;28msorted[39m(avg_chg_first_member[38;5;241m.[39mitems(), key[38;5;241m=[39m[38;5;28;01mlambda[39;00m x: x[[38;5;241m1[39m]):
 
-File [0;32m/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/core/__init__.py:13[0m
-[1;32m     10[0m [38;5;28;01mfrom[39;00m [38;5;21;01mruamel[39;00m[38;5;21;01m.[39;00m[38;5;21;01myaml[39;00m [38;5;28;01mimport[39;00m YAML
-[1;32m     12[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcomposition[39;00m [38;5;28;01mimport[39;00m Composition
-[0;32m---> 13[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m[38;5;21;01m.[39;00m[38;5;21;01mlattice[39;00m [38;5;28;01mimport[39;00m Lattice
-[1;32m     14[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m[38;5;21;01m.[39;00m[38;5;21;01moperations[39;00m [38;5;28;01mimport[39;00m SymmOp
-[1;32m     15[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcore[39;00m[38;5;21;01m.[39;00m[38;5;21;01mperiodic_table[39;00m [38;5;28;01mimport[39;00m DummySpecie, DummySpecies, Element, Species, get_el_sp
+File [0;32m~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/utils.py:434[0m, in [0;36mget_avg_chg[0;34m(chgcar, fcoord, radius)[0m
+[1;32m    432[0m     msg [38;5;241m=[39m [38;5;124m"[39m[38;5;124mf_coords must be in [0,1)[39m[38;5;124m"[39m
+[1;32m    433[0m     [38;5;28;01mraise[39;00m [38;5;167;01mValueError[39;00m(msg)
+[0;32m--> 434[0m mask [38;5;241m=[39m [43m_dist_mat[49m[43m([49m[43mfcoord[49m[43m)[49m [38;5;241m<[39m radius
+[1;32m    435[0m vol_sphere [38;5;241m=[39m chgcar[38;5;241m.[39mstructure[38;5;241m.[39mvolume [38;5;241m*[39m (mask[38;5;241m.[39msum() [38;5;241m/[39m chgcar[38;5;241m.[39mngridpts)
+[1;32m    436[0m [38;5;28;01mreturn[39;00m np[38;5;241m.[39msum(chgcar[38;5;241m.[39mdata[[38;5;124m"[39m[38;5;124mtotal[39m[38;5;124m"[39m] [38;5;241m*[39m mask) [38;5;241m/[39m mask[38;5;241m.[39msize [38;5;241m/[39m vol_sphere
 
-File [0;32m/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/core/lattice.py:21[0m
-[1;32m     18[0m [38;5;28;01mfrom[39;00m [38;5;21;01mmonty[39;00m[38;5;21;01m.[39;00m[38;5;21;01mjson[39;00m [38;5;28;01mimport[39;00m MSONable
-[1;32m     19[0m [38;5;28;01mfrom[39;00m [38;5;21;01mscipy[39;00m[38;5;21;01m.[39;00m[38;5;21;01mspatial[39;00m [38;5;28;01mimport[39;00m Voronoi
-[0;32m---> 21[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mutil[39;00m[38;5;21;01m.[39;00m[38;5;21;01mcoord[39;00m [38;5;28;01mimport[39;00m pbc_shortest_vectors
-[1;32m     22[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mutil[39;00m[38;5;21;01m.[39;00m[38;5;21;01mdue[39;00m [38;5;28;01mimport[39;00m Doi, due
-[1;32m     24[0m [38;5;28;01mif[39;00m TYPE_CHECKING:
+File [0;32m~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/utils.py:425[0m, in [0;36mget_avg_chg.<locals>._dist_mat[0;34m(pos_frac)[0m
+[1;32m    423[0m cc [38;5;241m=[39m np[38;5;241m.[39mlinspace([38;5;241m0[39m, [38;5;241m1[39m, [38;5;28mlen[39m(chgcar[38;5;241m.[39mget_axis_grid([38;5;241m2[39m)), endpoint[38;5;241m=[39m[38;5;28;01mFalse[39;00m)
+[1;32m    424[0m AA, BB, CC [38;5;241m=[39m np[38;5;241m.[39mmeshgrid(aa, bb, cc, indexing[38;5;241m=[39m[38;5;124m"[39m[38;5;124mij[39m[38;5;124m"[39m)
+[0;32m--> 425[0m dist_from_pos [38;5;241m=[39m [43mchgcar[49m[38;5;241;43m.[39;49m[43mstructure[49m[38;5;241;43m.[39;49m[43mlattice[49m[38;5;241;43m.[39;49m[43mget_all_distances[49m[43m([49m
+[1;32m    426[0m [43m    [49m[43mfcoords1[49m[38;5;241;43m=[39;49m[43mnp[49m[38;5;241;43m.[39;49m[43mvstack[49m[43m([49m[43m[[49m[43mAA[49m[38;5;241;43m.[39;49m[43mflatten[49m[43m([49m[43m)[49m[43m,[49m[43m [49m[43mBB[49m[38;5;241;43m.[39;49m[43mflatten[49m[43m([49m[43m)[49m[43m,[49m[43m [49m[43mCC[49m[38;5;241;43m.[39;49m[43mflatten[49m[43m([49m[43m)[49m[43m][49m[43m)[49m[38;5;241;43m.[39;49m[43mT[49m[43m,[49m
+[1;32m    427[0m [43m    [49m[43mfcoords2[49m[38;5;241;43m=[39;49m[43mpos_frac[49m[43m,[49m
+[1;32m    428[0m [43m[49m[43m)[49m
+[1;32m    429[0m [38;5;28;01mreturn[39;00m dist_from_pos[38;5;241m.[39mreshape(AA[38;5;241m.[39mshape)
 
-File [0;32m/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/util/coord.py:15[0m
-[1;32m     12[0m [38;5;28;01mimport[39;00m [38;5;21;01mnumpy[39;00m [38;5;28;01mas[39;00m [38;5;21;01mnp[39;00m
-[1;32m     13[0m [38;5;28;01mfrom[39;00m [38;5;21;01mmonty[39;00m[38;5;21;01m.[39;00m[38;5;21;01mjson[39;00m [38;5;28;01mimport[39;00m MSONable
-[0;32m---> 15[0m [38;5;28;01mfrom[39;00m [38;5;21;01mpymatgen[39;00m[38;5;21;01m.[39;00m[38;5;21;01mutil[39;00m [38;5;28;01mimport[39;00m coord_cython
-[1;32m     17[0m [38;5;28;01mif[39;00m TYPE_CHECKING:
-[1;32m     18[0m     [38;5;28;01mfrom[39;00m [38;5;21;01mcollections[39;00m[38;5;21;01m.[39;00m[38;5;21;01mabc[39;00m [38;5;28;01mimport[39;00m Sequence
-
-File [0;32mpymatgen/util/coord_cython.pyx:1[0m, in [0;36minit pymatgen.util.coord_cython[0;34m()[0m
-
-[0;31mImportError[0m: numpy.core.multiarray failed to import (auto-generated because you didn't call 'numpy.import_array()' after cimporting numpy; use '<void>numpy._import_array' to disable if you are certain you don't need it).
+[0;31mTypeError[0m: Lattice.get_all_distances() got an unexpected keyword argument 'fcoords1'
 

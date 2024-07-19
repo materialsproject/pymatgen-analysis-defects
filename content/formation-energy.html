@@ -183,7 +183,14 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">API References</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api_ref/index.html">Overview of the API.</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.core.html">pymatgen.analysis.defects.core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.generators.html">pymatgen.analysis.defects.generators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.thermo.html">pymatgen.analysis.defects.thermo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.ccd.html">pymatgen.analysis.defects.ccd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.finder.html">pymatgen.analysis.defects.finder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.recombination.html">pymatgen.analysis.defects.recombination</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.supercells.html">pymatgen.analysis.defects.supercells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.utils.html">pymatgen.analysis.defects.utils</a></li>
 </ul>
 </details></li>
 </ul>
@@ -489,142 +496,6 @@ The chemical potentials of the different atoms added or removed to form the defe
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>A module that was compiled using NumPy 1.x cannot be run in
-NumPy 2.0.0 as it may crash. To support both 1.x and 2.x
-versions of NumPy, modules must be compiled with NumPy 2.0.
-Some module may need to rebuild instead e.g. with &#39;pybind11&gt;=2.12&#39;.
-
-If you are a user of the module, the easiest solution will be to
-downgrade to &#39;numpy&lt;2&#39; or try to upgrade the affected module.
-We expect that some modules will need time to support NumPy 2.
-
-Traceback (most recent call last):  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/runpy.py&quot;, line 196, in _run_module_as_main
-    return _run_code(code, main_globals, None,
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/runpy.py&quot;, line 86, in _run_code
-    exec(code, run_globals)
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel_launcher.py&quot;, line 18, in &lt;module&gt;
-    app.launch_new_instance()
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/traitlets/config/application.py&quot;, line 1075, in launch_instance
-    app.start()
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelapp.py&quot;, line 739, in start
-    self.io_loop.start()
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/tornado/platform/asyncio.py&quot;, line 205, in start
-    self.asyncio_loop.run_forever()
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/asyncio/base_events.py&quot;, line 603, in run_forever
-    self._run_once()
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/asyncio/base_events.py&quot;, line 1909, in _run_once
-    handle._run()
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/asyncio/events.py&quot;, line 80, in _run
-    self._context.run(self._callback, *self._args)
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py&quot;, line 545, in dispatch_queue
-    await self.process_one()
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py&quot;, line 534, in process_one
-    await dispatch(*args)
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py&quot;, line 437, in dispatch_shell
-    await result
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/ipkernel.py&quot;, line 362, in execute_request
-    await super().execute_request(stream, ident, parent)
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/kernelbase.py&quot;, line 778, in execute_request
-    reply_content = await reply_content
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/ipkernel.py&quot;, line 449, in do_execute
-    res = shell.run_cell(
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/ipykernel/zmqshell.py&quot;, line 549, in run_cell
-    return super().run_cell(*args, **kwargs)
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py&quot;, line 3075, in run_cell
-    result = self._run_cell(
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py&quot;, line 3130, in _run_cell
-    result = runner(coro)
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/async_helpers.py&quot;, line 128, in _pseudo_sync_runner
-    coro.send(None)
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py&quot;, line 3334, in run_cell_async
-    has_raised = await self.run_ast_nodes(code_ast.body, cell_name,
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py&quot;, line 3517, in run_ast_nodes
-    if await self.run_code(code, result, async_=asy):
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/IPython/core/interactiveshell.py&quot;, line 3577, in run_code
-    exec(code_obj, self.user_global_ns, self.user_ns)
-  File &quot;/tmp/ipykernel_2323/3410457764.py&quot;, line 3, in &lt;module&gt;
-    from pymatgen.analysis.defects.thermo import FormationEnergyDiagram
-  File &quot;/home/runner/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/thermo.py&quot;, line 16, in &lt;module&gt;
-    from pymatgen.analysis.chempot_diagram import ChemicalPotentialDiagram
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/analysis/chempot_diagram.py&quot;, line 38, in &lt;module&gt;
-    from pymatgen.analysis.phase_diagram import PDEntry, PhaseDiagram
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/analysis/phase_diagram.py&quot;, line 29, in &lt;module&gt;
-    from pymatgen.analysis.reaction_calculator import Reaction, ReactionError
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/analysis/reaction_calculator.py&quot;, line 15, in &lt;module&gt;
-    from pymatgen.core.composition import Composition
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/core/__init__.py&quot;, line 13, in &lt;module&gt;
-    from pymatgen.core.lattice import Lattice
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/core/lattice.py&quot;, line 21, in &lt;module&gt;
-    from pymatgen.util.coord import pbc_shortest_vectors
-  File &quot;/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/pymatgen/util/coord.py&quot;, line 15, in &lt;module&gt;
-    from pymatgen.util import coord_cython
-</pre></div>
-</div>
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">3</span>
-<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="kn">import</span> <span class="n">loadfn</span>
-<span class="ne">----&gt; </span><span class="mi">3</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.thermo</span> <span class="kn">import</span> <span class="n">FormationEnergyDiagram</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">Vasprun</span>
-<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">defects</span><span class="o">/</span><span class="n">thermo</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">16</span>
-<span class="g g-Whitespace">     </span><span class="mi">14</span> <span class="kn">from</span> <span class="nn">monty.dev</span> <span class="kn">import</span> <span class="n">deprecated</span>
-<span class="g g-Whitespace">     </span><span class="mi">15</span> <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MSONable</span>
-<span class="ne">---&gt; </span><span class="mi">16</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.chempot_diagram</span> <span class="kn">import</span> <span class="n">ChemicalPotentialDiagram</span>
-<span class="g g-Whitespace">     </span><span class="mi">17</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.core</span> <span class="kn">import</span> <span class="n">Defect</span><span class="p">,</span> <span class="n">NamedDefect</span>
-<span class="g g-Whitespace">     </span><span class="mi">18</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.corrections.freysoldt</span> <span class="kn">import</span> <span class="n">get_freysoldt_correction</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.10.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">chempot_diagram</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">38</span>
-<span class="g g-Whitespace">     </span><span class="mi">35</span> <span class="kn">from</span> <span class="nn">plotly.graph_objects</span> <span class="kn">import</span> <span class="n">Figure</span><span class="p">,</span> <span class="n">Mesh3d</span><span class="p">,</span> <span class="n">Scatter</span><span class="p">,</span> <span class="n">Scatter3d</span>
-<span class="g g-Whitespace">     </span><span class="mi">36</span> <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">ConvexHull</span><span class="p">,</span> <span class="n">HalfspaceIntersection</span>
-<span class="ne">---&gt; </span><span class="mi">38</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.phase_diagram</span> <span class="kn">import</span> <span class="n">PDEntry</span><span class="p">,</span> <span class="n">PhaseDiagram</span>
-<span class="g g-Whitespace">     </span><span class="mi">39</span> <span class="kn">from</span> <span class="nn">pymatgen.core.composition</span> <span class="kn">import</span> <span class="n">Composition</span><span class="p">,</span> <span class="n">Element</span>
-<span class="g g-Whitespace">     </span><span class="mi">40</span> <span class="kn">from</span> <span class="nn">pymatgen.util.coord</span> <span class="kn">import</span> <span class="n">Simplex</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.10.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">phase_diagram</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">29</span>
-<span class="g g-Whitespace">     </span><span class="mi">26</span> <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">ConvexHull</span>
-<span class="g g-Whitespace">     </span><span class="mi">27</span> <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="ne">---&gt; </span><span class="mi">29</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.reaction_calculator</span> <span class="kn">import</span> <span class="n">Reaction</span><span class="p">,</span> <span class="n">ReactionError</span>
-<span class="g g-Whitespace">     </span><span class="mi">30</span> <span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">DummySpecies</span><span class="p">,</span> <span class="n">Element</span><span class="p">,</span> <span class="n">get_el_sp</span>
-<span class="g g-Whitespace">     </span><span class="mi">31</span> <span class="kn">from</span> <span class="nn">pymatgen.core.composition</span> <span class="kn">import</span> <span class="n">Composition</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.10.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">reaction_calculator</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">15</span>
-<span class="g g-Whitespace">     </span><span class="mi">12</span> <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MontyDecoder</span><span class="p">,</span> <span class="n">MSONable</span>
-<span class="g g-Whitespace">     </span><span class="mi">13</span> <span class="kn">from</span> <span class="nn">uncertainties</span> <span class="kn">import</span> <span class="n">ufloat</span>
-<span class="ne">---&gt; </span><span class="mi">15</span> <span class="kn">from</span> <span class="nn">pymatgen.core.composition</span> <span class="kn">import</span> <span class="n">Composition</span>
-<span class="g g-Whitespace">     </span><span class="mi">16</span> <span class="kn">from</span> <span class="nn">pymatgen.entries.computed_entries</span> <span class="kn">import</span> <span class="n">ComputedEntry</span>
-<span class="g g-Whitespace">     </span><span class="mi">18</span> <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.10.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">core</span><span class="o">/</span><span class="fm">__init__</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">13</span>
-<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="kn">from</span> <span class="nn">ruamel.yaml</span> <span class="kn">import</span> <span class="n">YAML</span>
-<span class="g g-Whitespace">     </span><span class="mi">12</span> <span class="kn">from</span> <span class="nn">pymatgen.core.composition</span> <span class="kn">import</span> <span class="n">Composition</span>
-<span class="ne">---&gt; </span><span class="mi">13</span> <span class="kn">from</span> <span class="nn">pymatgen.core.lattice</span> <span class="kn">import</span> <span class="n">Lattice</span>
-<span class="g g-Whitespace">     </span><span class="mi">14</span> <span class="kn">from</span> <span class="nn">pymatgen.core.operations</span> <span class="kn">import</span> <span class="n">SymmOp</span>
-<span class="g g-Whitespace">     </span><span class="mi">15</span> <span class="kn">from</span> <span class="nn">pymatgen.core.periodic_table</span> <span class="kn">import</span> <span class="n">DummySpecie</span><span class="p">,</span> <span class="n">DummySpecies</span><span class="p">,</span> <span class="n">Element</span><span class="p">,</span> <span class="n">Species</span><span class="p">,</span> <span class="n">get_el_sp</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.10.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">core</span><span class="o">/</span><span class="n">lattice</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">21</span>
-<span class="g g-Whitespace">     </span><span class="mi">18</span> <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MSONable</span>
-<span class="g g-Whitespace">     </span><span class="mi">19</span> <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">Voronoi</span>
-<span class="ne">---&gt; </span><span class="mi">21</span> <span class="kn">from</span> <span class="nn">pymatgen.util.coord</span> <span class="kn">import</span> <span class="n">pbc_shortest_vectors</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span> <span class="kn">from</span> <span class="nn">pymatgen.util.due</span> <span class="kn">import</span> <span class="n">Doi</span><span class="p">,</span> <span class="n">due</span>
-<span class="g g-Whitespace">     </span><span class="mi">24</span> <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-
-<span class="n">File</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">hostedtoolcache</span><span class="o">/</span><span class="n">Python</span><span class="o">/</span><span class="mf">3.10.14</span><span class="o">/</span><span class="n">x64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.10</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">util</span><span class="o">/</span><span class="n">coord</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">15</span>
-<span class="g g-Whitespace">     </span><span class="mi">12</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="g g-Whitespace">     </span><span class="mi">13</span> <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MSONable</span>
-<span class="ne">---&gt; </span><span class="mi">15</span> <span class="kn">from</span> <span class="nn">pymatgen.util</span> <span class="kn">import</span> <span class="n">coord_cython</span>
-<span class="g g-Whitespace">     </span><span class="mi">17</span> <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-<span class="g g-Whitespace">     </span><span class="mi">18</span>     <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
-
-<span class="nn">File pymatgen/util/coord_cython.pyx:1,</span> in <span class="ni">init pymatgen.util.coord_cython</span><span class="nt">()</span>
-
-<span class="ne">ImportError</span>: numpy.core.multiarray failed to import (auto-generated because you didn&#39;t call &#39;numpy.import_array()&#39; after cimporting numpy; use &#39;&lt;void&gt;numpy._import_array&#39; to disable if you are certain you don&#39;t need it).
-</pre></div>
-</div>
-</div>
 </div>
 <section id="getting-the-elemental-chemical-potentials">
 <h2>Getting the Elemental Chemical Potentials<a class="headerlink" href="#getting-the-elemental-chemical-potentials" title="Link to this heading">#</a></h2>
@@ -653,6 +524,22 @@ The points of interest are usually vertex points in the constrained chemical pot
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Limits for the chemical potential changes for point 0
+Δμ_Mg = -1.49 eV
+Δμ_Ga = -1.75 eV
+Δμ_N = 0.00 eV
+Limits for the chemical potential changes for point 1
+Δμ_Mg = -0.35 eV
+Δμ_Ga = -0.03 eV
+Δμ_N = -1.71 eV
+Limits for the chemical potential changes for point 2
+Δμ_Mg = -0.44 eV
+Δμ_Ga = 0.00 eV
+Δμ_N = -1.75 eV
+</pre></div>
+</div>
+</div>
 </div>
 </section>
 <section id="finite-size-corrections">
@@ -678,6 +565,14 @@ The intermediate analysis (planar-averaged potentials) for calculating the Freys
 <span class="n">plot_plnr_avg</span><span class="p">(</span><span class="n">plot_data</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Lattice Direction 3&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;Axes: title={&#39;center&#39;: &#39;Lattice Direction 3&#39;}, xlabel=&#39;distance along axis ($\\AA$)&#39;, ylabel=&#39;Potential (V)&#39;&gt;
+</pre></div>
+</div>
+<img alt="../_images/7e0d9aab093753fe65b519c8d3f445784d3bb82ea4602dfd84caa9dcf82adbd5.png" src="../_images/7e0d9aab093753fe65b519c8d3f445784d3bb82ea4602dfd84caa9dcf82adbd5.png" />
+<img alt="../_images/c11b2dd5746269c8dcb2882c91f43fa464858b624c9aa1de26a91b5f579609e2.png" src="../_images/c11b2dd5746269c8dcb2882c91f43fa464858b624c9aa1de26a91b5f579609e2.png" />
+<img alt="../_images/ffbe99822a209e4ea5acec972523c59a4bf0ac668da7a7b4de7649043b25fd57.png" src="../_images/ffbe99822a209e4ea5acec972523c59a4bf0ac668da7a7b4de7649043b25fd57.png" />
 </div>
 </div>
 </section>
