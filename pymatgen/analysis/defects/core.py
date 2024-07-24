@@ -226,6 +226,7 @@ class Defect(MSONable, metaclass=ABCMeta):
             min_length: Minimum length of the smallest supercell lattice vector.
             force_diagonal: If True, return a transformation with a diagonal transformation matrix.
             relax_radius: Relax the supercell atoms to a sphere of this radius around the defect site.
+                If 'auto' the radius will be set to half the minimum plane spacing.
             perturb: The amount to perturb the sites in the supercell. Only perturb the sites with
                 selective dynamics set to True. So this setting only works with `relax_radius`.
             target_frac_coords: If set, defect will be placed at the closest equivalent site to these
@@ -968,7 +969,8 @@ def _set_selective_dynamics(
     Args:
         structure: The structure to set the selective dynamics.
         site_pos: The center of the relaxation sphere.
-        relax_radius: The radius of the relaxation sphere.
+        relax_radius: The radius of the relaxation sphere. if 'auto' the radius
+            will be set to half the minimum plane spacing
     """
     if relax_radius is None:
         return
