@@ -1148,3 +1148,48 @@ def get_plane_spacing(lattice: npt.NDArray) -> list[float]:
         v_perp_subspace = lattice[idir] - sum(idir_proj)
         spacing.append(np.linalg.norm(v_perp_subspace))
     return spacing
+
+
+def get_weighted_average_position(
+    lattice: Lattice,
+    frac_positions: npt.ArrayLike,
+    weights: npt.ArrayLike | None = None,
+) -> npt.NDArray:
+    """Get the weighted average position of a set of positions in frac coordinates.
+
+    The algorithm starts at position with the highest weight, and gradually moves
+    the average point by finding the closest image of each additional position to the
+    average point. This can be used to find the center of mass of a group of sites in a
+    molecule in CH3NH3PbI3 (Note: Since the average positions in periodic system is not
+    unique, this algorithm only works if the collection of positions is significantly
+    smaller than the unit cell.)
+
+    Args:
+    -------
+        lattice (Lattice): The lattice of the structure.
+        frac_positions (Nx3 array-like): The positions to average.
+        weights (1xN array-like): The weights of the positions.
+
+    Returns:
+    -------
+        NDArray: (3x1 array): The weighted average position in fractional coordinates.
+    """
+    if weights is None:
+        weights = [1.0] * len(frac_positions)
+    if len(frac_positions) != len(weights):
+        msg = "The number of positions and weights must be the same."
+        raise ValueError(msg)
+
+    # TODO: can be replaced with the zip(..., strict=True) syntax in Python 3.10
+    pos_weights = list(zip(frac_positions, weights))
+    pos_weights.sort(key=lambda x: x[1], reverse=True)
+
+    # initial guess at the center with zero weight
+    p_guess = np.ones(3) * 0.5
+    w_sum = 0
+
+    for p, w in pos_weights:
+        _, jimage = lattice.get_distance_and_image(p_guess, p)
+        p_guess = (w_sum * p_guess + w * (p + jimage)) / (w_sum + w)
+        w_sum += w
+    return p_guess
