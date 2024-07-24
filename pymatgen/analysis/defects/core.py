@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 import numpy as np
 from monty.json import MSONable
 from pymatgen.analysis.defects.supercells import get_sc_fromstruct
-from pymatgen.analysis.defects.utils import get_weighted_average_position
 from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.core import Element, PeriodicSite, Species
 from pymatgen.core.periodic_table import DummySpecies
@@ -781,10 +780,7 @@ class DefectComplex(Defect):
         self.structure = self.defects[0].structure
         self.oxi_state = self._guess_oxi_state() if oxi_state is None else oxi_state
         defect_sites = [d.site for d in self.defects]
-        fcoords = [site.frac_coords for site in defect_sites]
-        center_of_mass = get_weighted_average_position(
-            lattice=self.structure.lattice, frac_positions=fcoords
-        )
+        center_of_mass = np.mean([s.coords for s in defect_sites], axis=0)
         self.site = PeriodicSite(
             species=DummySpecies(),
             coords=center_of_mass,
