@@ -425,7 +425,8 @@ The standard practice is to simulate the isolated defects by using a larger simu
 This means that the same defect can be simulated with different simulation cells.
 Ideally, if you want to build a computational defects database that lasts many years, you cannot rely on user-supplied provenance to aggregate the data.
 You must have the external method for tracking whether two calculations are for the same defect.</p>
-<div class="alert alert-block alert-info"><b>Note:</b> This is only important for large database building. For an example of this please see the Materials Project battery database which only relies on structure matching to arrive at the list of insertion electrodes.
+<div class="alert alert-block alert-info"><b>Note:</b> 
+This is only important for large database building. For an example of this please see the Materials Project battery database which only relies on structure matching to arrive at the list of insertion electrodes.
 </div>
 <p>A core concept in this package is that a defect is defined independently of the simulation cell.
 All of the information about which defect we are simulating is captured by the <code class="docutils literal notranslate"><span class="pre">Defect</span></code> object.
@@ -559,6 +560,9 @@ However, there are two distinct Mg_Ga+V_N complexes in the structure:</p>
 </ul>
 <p>Since our defect complex definition accounts for an effective <em>Center of Mass</em> site, we can properly account for periodic boundary conditions. the two defect complexes will be considered not equal.
 For complexes, we recommend checking the structure with the center of mass (<code class="docutils literal notranslate"><span class="pre">defect_structure_with_com</span></code>) to make sure you understand exactly what will be simulated in the supercell.</p>
+<div class="alert alert-block alert-info"><b>Note:</b> 
+Users should be careful when defining defects and always keep in mind that if a defect complex consisting of two sites at `[0.9, 0.9, 0.9]` and `[0.1, 0.1, 0.1]` is fundamentally different than the same two sites placed at `[0.9, 0.9, 0.9]` and `[1.1, 1.1, 1.1]`.
+</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">assert</span> <span class="n">def_comp0</span> <span class="o">!=</span> <span class="n">def_comp2</span>
