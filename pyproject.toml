@@ -36,14 +36,6 @@ docs = [
   "jupyter-book>=0.13.1",
 ]
 optional = ["pydefect", "dscribe>=2.0.0", "numba"]
-
-strict = [
-  "pymatgen==2024.5.1",
-  "dscribe==2.1.1",
-  "mp-pyrho==0.4.4",
-  "pydefect==0.9.4",
-]
-
 tests = ["pytest>=8.2.1", "pytest-cov>=5.0.0", "nbmake>=1.5.3"]
 
 [tool.setuptools.dynamic]
