@@ -16,5 +16,6 @@
       get_mQn
       get_mn
       herm
+      njit
       pchip_eval
    
