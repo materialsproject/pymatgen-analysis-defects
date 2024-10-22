@@ -18,7 +18,7 @@ import numpy as np
 from monty.dev import deprecated
 from monty.json import MSONable
 from numpy.linalg import norm
-from pymatgen.analysis.local_env import cn_opt_params
+from pymatgen.analysis.local_env import CN_OPT_PARAMS
 from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Element, get_el_sp
@@ -60,7 +60,7 @@ invang_to_ev = 3.80986
 kumagai_to_V = 1.809512739e2  # = Electron charge * 1e10 / VacuumPermittivity Constant
 
 motif_cn_op = {}
-for cn, di in cn_opt_params.items():
+for cn, di in CN_OPT_PARAMS.items():
     for motif, li in di.items():
         motif_cn_op[motif] = {"cn": int(cn), "optype": li[0]}
         motif_cn_op[motif]["params"] = deepcopy(li[1]) if len(li) > 1 else None
