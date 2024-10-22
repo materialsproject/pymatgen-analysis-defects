@@ -170,9 +170,14 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">API References</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api_ref/index.html">Overview of the API.</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.core.html">pymatgen.analysis.defects.core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.generators.html">pymatgen.analysis.defects.generators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.thermo.html">pymatgen.analysis.defects.thermo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.ccd.html">pymatgen.analysis.defects.ccd</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.finder.html">pymatgen.analysis.defects.finder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.recombination.html">pymatgen.analysis.defects.recombination</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.supercells.html">pymatgen.analysis.defects.supercells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.utils.html">pymatgen.analysis.defects.utils</a></li>
 </ul>
 </details></li>
 </ul>
@@ -410,30 +415,6 @@
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.core</span> <span class="kn">import</span> <span class="vm">__file__</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">defects</span><span class="o">/</span><span class="n">core</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">19</span>
-<span class="g g-Whitespace">     </span><span class="mi">16</span> <span class="kn">from</span> <span class="nn">pymatgen.core.periodic_table</span> <span class="kn">import</span> <span class="n">DummySpecies</span>
-<span class="g g-Whitespace">     </span><span class="mi">17</span> <span class="kn">from</span> <span class="nn">pymatgen.symmetry.analyzer</span> <span class="kn">import</span> <span class="n">SpacegroupAnalyzer</span>
-<span class="ne">---&gt; </span><span class="mi">19</span> <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">get_plane_spacing</span>
-<span class="g g-Whitespace">     </span><span class="mi">21</span> <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span>     <span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">defects</span><span class="o">/</span><span class="n">utils</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">21</span>
-<span class="g g-Whitespace">     </span><span class="mi">19</span> <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MSONable</span>
-<span class="g g-Whitespace">     </span><span class="mi">20</span> <span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>
-<span class="ne">---&gt; </span><span class="mi">21</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.local_env</span> <span class="kn">import</span> <span class="n">cn_opt_params</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.structure_matcher</span> <span class="kn">import</span> <span class="n">StructureMatcher</span>
-<span class="g g-Whitespace">     </span><span class="mi">23</span> <span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">Structure</span>
-
-<span class="ne">ImportError</span>: cannot import name &#39;cn_opt_params&#39; from &#39;pymatgen.analysis.local_env&#39; (/opt/hostedtoolcache/Python/3.10.15/x64/lib/python3.10/site-packages/pymatgen/analysis/local_env.py)
-</pre></div>
-</div>
-</div>
 </div>
 <p>and look at the <code class="docutils literal notranslate"><span class="pre">__file__</span></code> variable to make sure that it is accessing the code from <code class="docutils literal notranslate"><span class="pre">pymatgen-analysis-defect</span></code> and not <code class="docutils literal notranslate"><span class="pre">pymatgen</span></code>.</p>
 </section>
@@ -469,10 +450,32 @@ Since the bulk primitive structure is, in principle, unique up to arbitrary tran
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Mg subsitituted on the Ga site at at site #0
+</pre></div>
+</div>
+</div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mg_ga</span><span class="o">.</span><span class="n">defect_structure</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Structure Summary
+Lattice
+    abc : 3.2162901334217344 3.2162901334217344 5.239962
+ angles : 90.0 90.0 120.00000274450079
+ volume : 46.9428220153705
+      A : 1.608145 -2.785389 0.0
+      B : 1.608145 2.785389 0.0
+      C : 0.0 0.0 5.239962
+    pbc : True True True
+PeriodicSite: Mg (1.608, -0.9285, 2.615) [0.6667, 0.3333, 0.4991]
+PeriodicSite: Ga (Ga3+) (1.608, 0.9285, 5.235) [0.3333, 0.6667, 0.9991]
+PeriodicSite: N (N3-) (1.608, -0.9285, 4.59) [0.6667, 0.3333, 0.8759]
+PeriodicSite: N (N3-) (1.608, 0.9285, 1.97) [0.3333, 0.6667, 0.3759]
 </pre></div>
 </div>
 </div>
@@ -519,6 +522,64 @@ As long as the <code class="docutils literal notranslate"><span class="pre">vasp
     <span class="n">pd_entries</span><span class="o">=</span><span class="n">ents</span><span class="p">,</span>
     <span class="n">dielectric</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
 <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">line</span> <span class="mi">12</span>
+<span class="g g-Whitespace">     </span><span class="mi">10</span> <span class="c1"># ents = MPRester().get_entries_in_chemsys(&quot;Mg-Ga-N&quot;) # Query from MPRester</span>
+<span class="g g-Whitespace">     </span><span class="mi">11</span> <span class="n">ents</span> <span class="o">=</span> <span class="n">loadfn</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;Ga_Mg_N.json&quot;</span><span class="p">)</span>  <span class="c1"># Load from local</span>
+<span class="ne">---&gt; </span><span class="mi">12</span> <span class="n">fed</span> <span class="o">=</span> <span class="n">FormationEnergyDiagram</span><span class="o">.</span><span class="n">with_directories</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span>     <span class="n">directory_map</span><span class="o">=</span><span class="p">{</span>
+<span class="g g-Whitespace">     </span><span class="mi">14</span>         <span class="s2">&quot;bulk&quot;</span><span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;bulk_sc&quot;</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">15</span>         <span class="mi">0</span><span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;q=0&quot;</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">16</span>         <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;q=-1&quot;</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">17</span>         <span class="mi">1</span><span class="p">:</span> <span class="n">sc_dir</span> <span class="o">/</span> <span class="s2">&quot;q=1&quot;</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">18</span>     <span class="p">},</span>
+<span class="g g-Whitespace">     </span><span class="mi">19</span>     <span class="n">defect</span><span class="o">=</span><span class="n">mg_ga</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">20</span>     <span class="n">pd_entries</span><span class="o">=</span><span class="n">ents</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">21</span>     <span class="n">dielectric</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">22</span> <span class="p">)</span>
+
+<span class="nn">File ~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/thermo.py:450,</span> in <span class="ni">FormationEnergyDiagram.with_directories</span><span class="nt">(cls, directory_map, defect, pd_entries, dielectric, vbm, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">443</span>     <span class="n">q_entry</span><span class="p">,</span> <span class="n">q_locpot</span> <span class="o">=</span> <span class="n">_read_dir</span><span class="p">(</span><span class="n">q_dir</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">444</span>     <span class="n">q_d_entry</span> <span class="o">=</span> <span class="n">DefectEntry</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">445</span>         <span class="n">defect</span><span class="o">=</span><span class="n">defect</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">446</span>         <span class="n">charge_state</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">qq</span><span class="p">),</span>
+<span class="g g-Whitespace">    </span><span class="mi">447</span>         <span class="n">sc_entry</span><span class="o">=</span><span class="n">q_entry</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">448</span>     <span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">450</span>     <span class="n">q_d_entry</span><span class="o">.</span><span class="n">get_freysoldt_correction</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">451</span>         <span class="n">defect_locpot</span><span class="o">=</span><span class="n">q_locpot</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">452</span>         <span class="n">bulk_locpot</span><span class="o">=</span><span class="n">bulk_locpot</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">453</span>         <span class="n">dielectric</span><span class="o">=</span><span class="n">dielectric</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">454</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">455</span>     <span class="n">def_entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q_d_entry</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">456</span> <span class="k">if</span> <span class="n">vbm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+<span class="nn">File ~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/thermo.py:148,</span> in <span class="ni">DefectEntry.get_freysoldt_correction</span><span class="nt">(self, defect_locpot, bulk_locpot, dielectric, defect_struct, bulk_struct, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">143</span>     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">144</span>         <span class="n">msg</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">145</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">147</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sc_defect_frac_coords</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">148</span>     <span class="n">finder</span> <span class="o">=</span> <span class="n">DefectSiteFinder</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">149</span>     <span class="n">defect_fpos</span> <span class="o">=</span> <span class="n">finder</span><span class="o">.</span><span class="n">get_defect_fpos</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">150</span>         <span class="n">defect_structure</span><span class="o">=</span><span class="n">defect_struct</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">151</span>         <span class="n">base_structure</span><span class="o">=</span><span class="n">bulk_struct</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">152</span>     <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">153</span>     <span class="bp">self</span><span class="o">.</span><span class="n">sc_defect_frac_coords</span> <span class="o">=</span> <span class="n">defect_fpos</span>
+
+<span class="nn">File ~/work/pymatgen-analysis-defects/pymatgen-analysis-defects/pymatgen/analysis/defects/finder.py:61,</span> in <span class="ni">DefectSiteFinder.__init__</span><span class="nt">(self, symprec, angle_tolerance)</span>
+<span class="g g-Whitespace">     </span><span class="mi">59</span> <span class="k">if</span> <span class="n">SOAP</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">60</span>     <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;dscribe is required to use DefectSiteFinder. Install with ``pip install dscribe``.&quot;</span>
+<span class="ne">---&gt; </span><span class="mi">61</span>     <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+<span class="g g-Whitespace">     </span><span class="mi">62</span>         <span class="n">msg</span><span class="p">,</span>
+<span class="g g-Whitespace">     </span><span class="mi">63</span>     <span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">64</span> <span class="bp">self</span><span class="o">.</span><span class="n">symprec</span> <span class="o">=</span> <span class="n">symprec</span>
+<span class="g g-Whitespace">     </span><span class="mi">65</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle_tolerance</span> <span class="o">=</span> <span class="n">angle_tolerance</span>
+
+<span class="ne">ImportError</span>: dscribe is required to use DefectSiteFinder. Install with ``pip install dscribe``.
 </pre></div>
 </div>
 </div>

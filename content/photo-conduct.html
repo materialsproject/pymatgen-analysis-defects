@@ -170,9 +170,14 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">API References</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api_ref/index.html">Overview of the API.</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.core.html">pymatgen.analysis.defects.core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.generators.html">pymatgen.analysis.defects.generators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.thermo.html">pymatgen.analysis.defects.thermo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.ccd.html">pymatgen.analysis.defects.ccd</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.finder.html">pymatgen.analysis.defects.finder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.recombination.html">pymatgen.analysis.defects.recombination</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.supercells.html">pymatgen.analysis.defects.supercells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.utils.html">pymatgen.analysis.defects.utils</a></li>
 </ul>
 </details></li>
 </ul>
@@ -430,31 +435,6 @@ This essentially allows us to calculate the optical response for (defect)→(con
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Numba not installed. Install Numba for better performance.
 </pre></div>
 </div>
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">2</span>
-<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="ne">----&gt; </span><span class="mi">2</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.ccd</span> <span class="kn">import</span> <span class="n">HarmonicDefect</span><span class="p">,</span> <span class="n">get_SRH_coefficient</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="kn">from</span> <span class="nn">pymatgen.io.vasp.optics</span> <span class="kn">import</span> <span class="n">DielectricFunctionCalculator</span><span class="p">,</span> <span class="n">Spin</span><span class="p">,</span> <span class="n">Vasprun</span><span class="p">,</span> <span class="n">Waveder</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">defects</span><span class="o">/</span><span class="n">ccd</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">19</span>
-<span class="g g-Whitespace">     </span><span class="mi">17</span> <span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="n">AMU2KG</span><span class="p">,</span> <span class="n">ANGS2M</span><span class="p">,</span> <span class="n">EV2J</span><span class="p">,</span> <span class="n">HBAR_EV</span><span class="p">,</span> <span class="n">KB</span>
-<span class="g g-Whitespace">     </span><span class="mi">18</span> <span class="kn">from</span> <span class="nn">.recombination</span> <span class="kn">import</span> <span class="n">get_SRH_coef</span>
-<span class="ne">---&gt; </span><span class="mi">19</span> <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">get_localized_states</span><span class="p">,</span> <span class="n">get_zfile</span><span class="p">,</span> <span class="n">sort_positive_definite</span>
-<span class="g g-Whitespace">     </span><span class="mi">21</span> <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span>     <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">defects</span><span class="o">/</span><span class="n">utils</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">21</span>
-<span class="g g-Whitespace">     </span><span class="mi">19</span> <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MSONable</span>
-<span class="g g-Whitespace">     </span><span class="mi">20</span> <span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>
-<span class="ne">---&gt; </span><span class="mi">21</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.local_env</span> <span class="kn">import</span> <span class="n">cn_opt_params</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.structure_matcher</span> <span class="kn">import</span> <span class="n">StructureMatcher</span>
-<span class="g g-Whitespace">     </span><span class="mi">23</span> <span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">Structure</span>
-
-<span class="ne">ImportError</span>: cannot import name &#39;cn_opt_params&#39; from &#39;pymatgen.analysis.local_env&#39; (/opt/hostedtoolcache/Python/3.10.15/x64/lib/python3.10/site-packages/pymatgen/analysis/local_env.py)
-</pre></div>
-</div>
 </div>
 </div>
 <p>To compute the optical response of a defect we can use the <code class="docutils literal notranslate"><span class="pre">HarmonicDefect</span></code> object again.
@@ -468,6 +448,12 @@ Since the <code class="docutils literal notranslate"><span class="pre">PROCAR</s
 <span class="c1"># but not required for the dielectric function calculation.</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The defect band is </span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The vibrational frequency is omega=</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">omega</span><span class="si">}</span><span class="s2"> in this case is gibberish.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The defect band is [(138, 0, 1), (138, 1, 1)]
+The vibrational frequency is omega=1.0 in this case is gibberish.
 </pre></div>
 </div>
 </div>
@@ -513,6 +499,21 @@ The user can refine the definition of the defect band by passing in a list of <c
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>band s=0,k=0  s=0,k=1  s=1,k=0  s=1,k=1
+134  3.46880  3.77960  3.86670  4.22680
+135  3.58800  4.06530  4.04520  4.26400
+136  3.70270  4.25190  4.62880  4.79700
+137  3.89660  4.28290  4.94740  4.98330
+138  4.11920  4.34290  5.5338*  5.7531*
+139  7.98830  6.26990  8.08180  6.35690
+140  8.71050  8.44200  8.81040  8.53660
+141  8.80880  8.55270  8.86150  8.60610
+142  9.12240  8.76330  9.16820  8.86680
+143  9.12980  9.35840  9.17690  9.36620
+</pre></div>
+</div>
+</div>
 </div>
 <p>From the eigenvalues above, we can see that the isolated defect band is <code class="docutils literal notranslate"><span class="pre">[(138,</span> <span class="pre">0,</span> <span class="pre">1),</span> <span class="pre">(138,</span> <span class="pre">1,</span> <span class="pre">1)]</span></code> which matches with starred values determined by the data from the inverse participation ratio (IPR) analysis.</p>
 </section>
@@ -541,6 +542,9 @@ Which requires the <code class="docutils literal notranslate"><span class="pre">
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<img alt="../_images/b6c90f4f95041d405255dbd22ecbc9126d1ec57cb9f857395b9b9a9dea547570.png" src="../_images/b6c90f4f95041d405255dbd22ecbc9126d1ec57cb9f857395b9b9a9dea547570.png" />
+</div>
 </div>
 <p>From the dielectric function above we see that this particular defect (the Ga vacancy in the neutral <code class="docutils literal notranslate"><span class="pre">q=0</span></code> state) is much better at capturing electrons from the valence band via dipole transitions than it is at emitting electrons to the conduction band via dipole transitions.</p>
 <p>Of course for a complete picture of photoconductivity, the Frank-Condon type of vibrational state transition should also be considered, but we are already pushing the limits of what is acceptable in the independent-particle picture so we will leave that for another time.</p>
@@ -564,6 +568,12 @@ The function returns a summary <code class="docutils literal notranslate"><span 
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[Text(0, 0, &#39;Kpoint-0&#39;), Text(3, 0, &#39;Kpoint-1&#39;)]
+</pre></div>
+</div>
+<img alt="../_images/2fb8482a852ff3337bfe6b304ceecdcf83f31c80c34bc8b78aa6c8b94f6457c0.png" src="../_images/2fb8482a852ff3337bfe6b304ceecdcf83f31c80c34bc8b78aa6c8b94f6457c0.png" />
+</div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> object containing the dipole matrix elements can also be examined directly.</p>
 <div class="cell docutils container">
@@ -572,6 +582,136 @@ The function returns a summary <code class="docutils literal notranslate"><span 
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>ib</th>
+      <th>jb</th>
+      <th>eig</th>
+      <th>M.E.</th>
+      <th>kpt</th>
+      <th>spin</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>138</td>
+      <td>133</td>
+      <td>4.1236</td>
+      <td>1.609275e-02</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>138</td>
+      <td>134</td>
+      <td>4.2268</td>
+      <td>1.410720e-03</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>138</td>
+      <td>135</td>
+      <td>4.2640</td>
+      <td>2.241202e-02</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>138</td>
+      <td>136</td>
+      <td>4.7970</td>
+      <td>2.813621e-01</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>138</td>
+      <td>137</td>
+      <td>4.9833</td>
+      <td>1.568267e-01</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>138</td>
+      <td>138</td>
+      <td>5.7531</td>
+      <td>5.113538e-07</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>138</td>
+      <td>139</td>
+      <td>6.3569</td>
+      <td>8.702555e+00</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>138</td>
+      <td>140</td>
+      <td>8.5366</td>
+      <td>9.436302e-03</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>138</td>
+      <td>141</td>
+      <td>8.6061</td>
+      <td>3.507030e-02</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>138</td>
+      <td>142</td>
+      <td>8.8668</td>
+      <td>2.571771e-01</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>138</td>
+      <td>143</td>
+      <td>9.3662</td>
+      <td>2.854711e-03</td>
+      <td>1</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
 </div>
 </section>
 </section>

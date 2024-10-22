@@ -170,9 +170,14 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">API References</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api_ref/index.html">Overview of the API.</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.core.html">pymatgen.analysis.defects.core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.generators.html">pymatgen.analysis.defects.generators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.thermo.html">pymatgen.analysis.defects.thermo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.ccd.html">pymatgen.analysis.defects.ccd</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.finder.html">pymatgen.analysis.defects.finder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.recombination.html">pymatgen.analysis.defects.recombination</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.supercells.html">pymatgen.analysis.defects.supercells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.utils.html">pymatgen.analysis.defects.utils</a></li>
 </ul>
 </details></li>
 </ul>
@@ -434,28 +439,7 @@ As along as the database or any algorithm keeps track of this <code class="docut
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
-<span class="ne">----&gt; </span><span class="mi">1</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.core</span> <span class="kn">import</span> <span class="n">DefectComplex</span><span class="p">,</span> <span class="n">Substitution</span><span class="p">,</span> <span class="n">Vacancy</span>
-<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">PeriodicSite</span><span class="p">,</span> <span class="n">Species</span><span class="p">,</span> <span class="n">Structure</span>
-<span class="g g-Whitespace">      </span><span class="mi">4</span> <span class="n">bulk</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;GaN.vasp&quot;</span><span class="p">)</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">defects</span><span class="o">/</span><span class="n">core</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">19</span>
-<span class="g g-Whitespace">     </span><span class="mi">16</span> <span class="kn">from</span> <span class="nn">pymatgen.core.periodic_table</span> <span class="kn">import</span> <span class="n">DummySpecies</span>
-<span class="g g-Whitespace">     </span><span class="mi">17</span> <span class="kn">from</span> <span class="nn">pymatgen.symmetry.analyzer</span> <span class="kn">import</span> <span class="n">SpacegroupAnalyzer</span>
-<span class="ne">---&gt; </span><span class="mi">19</span> <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">get_plane_spacing</span>
-<span class="g g-Whitespace">     </span><span class="mi">21</span> <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span>     <span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">defects</span><span class="o">/</span><span class="n">utils</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">21</span>
-<span class="g g-Whitespace">     </span><span class="mi">19</span> <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MSONable</span>
-<span class="g g-Whitespace">     </span><span class="mi">20</span> <span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>
-<span class="ne">---&gt; </span><span class="mi">21</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.local_env</span> <span class="kn">import</span> <span class="n">cn_opt_params</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.structure_matcher</span> <span class="kn">import</span> <span class="n">StructureMatcher</span>
-<span class="g g-Whitespace">     </span><span class="mi">23</span> <span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">Structure</span>
-
-<span class="ne">ImportError</span>: cannot import name &#39;cn_opt_params&#39; from &#39;pymatgen.analysis.local_env&#39; (/opt/hostedtoolcache/Python/3.10.15/x64/lib/python3.10/site-packages/pymatgen/analysis/local_env.py)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The bulk unit cell is the unique primitive WS cell
 </pre></div>
 </div>
 </div>
@@ -480,6 +464,11 @@ As along as the database or any algorithm keeps track of this <code class="docut
 <span class="n">mg_ga_defect1</span> <span class="o">=</span> <span class="n">Substitution</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">bulk</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">mg_site1</span><span class="p">)</span>
 <span class="k">if</span> <span class="n">mg_ga_defect0</span> <span class="o">==</span> <span class="n">mg_ga_defect1</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The two Mg_Ga defects are equivalent.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The two Mg_Ga defects are equivalent.
 </pre></div>
 </div>
 </div>
@@ -509,6 +498,12 @@ As along as the database or any algorithm keeps track of this <code class="docut
     <span class="nb">print</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;The two vacancies </span><span class="si">{</span><span class="n">vac_defect2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">vac_defect1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> are equivalent.&quot;</span>
     <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The two vacancies v_Ga and v_N are not equivalent.
+The two vacancies v_N and v_N are equivalent.
 </pre></div>
 </div>
 </div>
@@ -560,6 +555,11 @@ If a valid supercell is not discovered this way, ASE’s <code class="docutils l
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>128
+</pre></div>
+</div>
+</div>
 </div>
 <p>The supercell generated with default settings looks like this:</p>
 <img src="https://raw.githubusercontent.com/materialsproject/pymatgen-analysis-defects/main/docs/source/_static/img/defect_mg_ga_sc.png" width="300"/>
@@ -595,12 +595,38 @@ However, the recommended method to create interstitial defects is to use the <co
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>H intersitial site at [0.00,0.00,0.00]
+H intersitial site at [0.38,0.38,0.38]
+</pre></div>
+</div>
+</div>
 </div>
 <p>You can geneate all native defects in an atomic structure using the <code class="docutils literal notranslate"><span class="pre">generate_all_native_defects</span></code> function.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="n">generate_all_native_defects</span><span class="p">(</span><span class="n">chgcar</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">defect</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fe Vacancy defect at site #0
+Fe Vacancy defect at site #1
+Fe Vacancy defect at site #3
+O Vacancy defect at site #6
+O Vacancy defect at site #7
+Fe subsitituted on the O site at at site #6
+Fe subsitituted on the O site at at site #7
+O subsitituted on the Fe site at at site #0
+O subsitituted on the Fe site at at site #1
+O subsitituted on the Fe site at at site #3
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>O intersitial site at [0.00,0.00,0.00]
+O intersitial site at [0.38,0.38,0.38]
+Fe intersitial site at [0.00,0.00,0.00]
+Fe intersitial site at [0.38,0.38,0.38]
 </pre></div>
 </div>
 </div>

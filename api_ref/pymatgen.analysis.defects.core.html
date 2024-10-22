@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pymatgen.analysis.defects.finder &#8212; pymatgen-analysis-defects</title>
+    <title>pymatgen.analysis.defects.core &#8212; pymatgen-analysis-defects</title>
   
   
   
@@ -60,12 +60,12 @@
     <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'api_ref/pymatgen.analysis.defects.finder';</script>
-    <link rel="canonical" href="https://materialsproject.github.io/pymatgen-analysis-defects/api_ref/pymatgen.analysis.defects.finder.html" />
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api_ref/pymatgen.analysis.defects.core';</script>
+    <link rel="canonical" href="https://materialsproject.github.io/pymatgen-analysis-defects/api_ref/pymatgen.analysis.defects.core.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pymatgen.analysis.defects.recombination" href="pymatgen.analysis.defects.recombination.html" />
-    <link rel="prev" title="pymatgen.analysis.defects.ccd" href="pymatgen.analysis.defects.ccd.html" />
+    <link rel="next" title="pymatgen.analysis.defects.generators" href="pymatgen.analysis.defects.generators.html" />
+    <link rel="prev" title="Overview of the API." href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -170,11 +170,11 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">API References</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Overview of the API.</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.core.html">pymatgen.analysis.defects.core</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">pymatgen.analysis.defects.core</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.generators.html">pymatgen.analysis.defects.generators</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.thermo.html">pymatgen.analysis.defects.thermo</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.ccd.html">pymatgen.analysis.defects.ccd</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">pymatgen.analysis.defects.finder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.finder.html">pymatgen.analysis.defects.finder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.recombination.html">pymatgen.analysis.defects.recombination</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.supercells.html">pymatgen.analysis.defects.supercells</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pymatgen.analysis.defects.utils.html">pymatgen.analysis.defects.utils</a></li>
@@ -251,7 +251,7 @@
       
       
       
-      <li><a href="https://github.com/materialsproject/pymatgen-analysis-defects/edit/main/docs/api_ref/pymatgen.analysis.defects.finder.rst" target="_blank"
+      <li><a href="https://github.com/materialsproject/pymatgen-analysis-defects/edit/main/docs/api_ref/pymatgen.analysis.defects.core.rst" target="_blank"
    class="btn btn-sm btn-source-edit-button dropdown-item"
    title="Suggest edit"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -268,7 +268,7 @@
       
       
       
-      <li><a href="https://github.com/materialsproject/pymatgen-analysis-defects/issues/new?title=Issue%20on%20page%20%2Fapi_ref/pymatgen.analysis.defects.finder.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/materialsproject/pymatgen-analysis-defects/issues/new?title=Issue%20on%20page%20%2Fapi_ref/pymatgen.analysis.defects.core.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -298,7 +298,7 @@
       
       
       
-      <li><a href="../_sources/api_ref/pymatgen.analysis.defects.finder.rst" target="_blank"
+      <li><a href="../_sources/api_ref/pymatgen.analysis.defects.core.rst" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Download source file"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -372,7 +372,7 @@
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>pymatgen.analysis.defects.finder</h1>
+    <h1>pymatgen.analysis.defects.core</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -386,29 +386,26 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-pymatgen.analysis.defects.finder">
-<span id="pymatgen-analysis-defects-finder"></span><h1>pymatgen.analysis.defects.finder<a class="headerlink" href="#module-pymatgen.analysis.defects.finder" title="Link to this heading">#</a></h1>
-<p>Defect position identification without prior knowledge.</p>
+  <section id="module-pymatgen.analysis.defects.core">
+<span id="pymatgen-analysis-defects-core"></span><h1>pymatgen.analysis.defects.core<a class="headerlink" href="#module-pymatgen.analysis.defects.core" title="Link to this heading">#</a></h1>
+<p>Classes representing defects.</p>
 <p class="rubric">Functions</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">best_match</span></code>(sv, sgs)</p></td>
-<td><p>Find the best match for a site in the defect structure.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">center_structure</span></code>(structure, ref_fpos)</p></td>
+<td><p>Shift the sites around a center.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cosine_similarity</span></code>(vec1, vec2)</p></td>
-<td><p>Cosine similarity between two vectors.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_element</span></code>(sp_el)</p></td>
+<td><p>Get the element from a species or element.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_site_groups</span></code>(struct[, symprec, ...])</p></td>
-<td><p>Group the sites in the structure by symmetry.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_vacancy</span></code>(structure, isite, **kwargs)</p></td>
+<td><p>Get a vacancy defect from a structure and site index.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_site_vecs</span></code>(struct)</p></td>
-<td><p>Get the SiteVec representation of each site in the structure.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">perturb_sites</span></code>(structure, distance[, ...])</p></td>
+<td><p>Performs a random perturbation.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_soap_vec</span></code>(struct)</p></td>
-<td><p>Get the SOAP vector for each site in the structure.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_weighted_average_position</span></code>(lattice, ...)</p></td>
-<td><p>Get the weighted average position of a set of positions in frac coordinates.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_structure</span></code>(structure, site, defect_type)</p></td>
+<td><p>Update the structure with the defect site.</p></td>
 </tr>
 </tbody>
 </table>
@@ -416,14 +413,29 @@
 <p class="rubric">Classes</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DefectSiteFinder</span></code>([symprec, angle_tolerance])</p></td>
-<td><p>Find the location of a defect with no pior knowledge.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Adsorbate</span></code>(structure, site[, multiplicity, ...])</p></td>
+<td><p>Subclass of Interstitial with a different name.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SiteGroup</span></code>(species, similar_sites, vec)</p></td>
-<td><p>NamedTuple representing a group of symmetrically equivalent sites.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Defect</span></code>(structure, site[, multiplicity, ...])</p></td>
+<td><p>Abstract class for a single point defect.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SiteVec</span></code>(species, site, vec)</p></td>
-<td><p>NamedTuple representing a site in the defect structure.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DefectComplex</span></code>(defects[, oxi_state])</p></td>
+<td><p>A complex of defects.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DefectType</span></code>(value)</p></td>
+<td><p>Defect type, for sorting purposes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Interstitial</span></code>(structure, site[, ...])</p></td>
+<td><p>Interstitial Defect.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">NamedDefect</span></code>(name, bulk_formula, element_changes)</p></td>
+<td><p>Class for defect definition without the UC structure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Substitution</span></code>(structure, site[, ...])</p></td>
+<td><p>Single-site substitutional defects.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Vacancy</span></code>(structure, site[, multiplicity, ...])</p></td>
+<td><p>Class representing a vacancy defect.</p></td>
 </tr>
 </tbody>
 </table>
@@ -461,20 +473,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="pymatgen.analysis.defects.ccd.html"
+       href="index.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">pymatgen.analysis.defects.ccd</p>
+        <p class="prev-next-title">Overview of the API.</p>
       </div>
     </a>
     <a class="right-next"
-       href="pymatgen.analysis.defects.recombination.html"
+       href="pymatgen.analysis.defects.generators.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">pymatgen.analysis.defects.recombination</p>
+        <p class="prev-next-title">pymatgen.analysis.defects.generators</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

@@ -172,9 +172,14 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">API References</span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api_ref/index.html">Overview of the API.</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.core.html">pymatgen.analysis.defects.core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.generators.html">pymatgen.analysis.defects.generators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.thermo.html">pymatgen.analysis.defects.thermo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.ccd.html">pymatgen.analysis.defects.ccd</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.finder.html">pymatgen.analysis.defects.finder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.recombination.html">pymatgen.analysis.defects.recombination</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.supercells.html">pymatgen.analysis.defects.supercells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api_ref/pymatgen.analysis.defects.utils.html">pymatgen.analysis.defects.utils</a></li>
 </ul>
 </details></li>
 </ul>
@@ -419,30 +424,6 @@ Additional developments have been made to better integrate the methodology with 
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Numba not installed. Install Numba for better performance.
 </pre></div>
 </div>
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">ImportError</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span> <span class="mi">7</span>
-<span class="g g-Whitespace">      </span><span class="mi">5</span> <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="g g-Whitespace">      </span><span class="mi">6</span> <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="ne">----&gt; </span><span class="mi">7</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.ccd</span> <span class="kn">import</span> <span class="n">HarmonicDefect</span><span class="p">,</span> <span class="n">get_SRH_coefficient</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">defects</span><span class="o">/</span><span class="n">ccd</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">19</span>
-<span class="g g-Whitespace">     </span><span class="mi">17</span> <span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="n">AMU2KG</span><span class="p">,</span> <span class="n">ANGS2M</span><span class="p">,</span> <span class="n">EV2J</span><span class="p">,</span> <span class="n">HBAR_EV</span><span class="p">,</span> <span class="n">KB</span>
-<span class="g g-Whitespace">     </span><span class="mi">18</span> <span class="kn">from</span> <span class="nn">.recombination</span> <span class="kn">import</span> <span class="n">get_SRH_coef</span>
-<span class="ne">---&gt; </span><span class="mi">19</span> <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">get_localized_states</span><span class="p">,</span> <span class="n">get_zfile</span><span class="p">,</span> <span class="n">sort_positive_definite</span>
-<span class="g g-Whitespace">     </span><span class="mi">21</span> <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span>     <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
-
-<span class="n">File</span> <span class="o">~/</span><span class="n">work</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">-</span><span class="n">analysis</span><span class="o">-</span><span class="n">defects</span><span class="o">/</span><span class="n">pymatgen</span><span class="o">/</span><span class="n">analysis</span><span class="o">/</span><span class="n">defects</span><span class="o">/</span><span class="n">utils</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">21</span>
-<span class="g g-Whitespace">     </span><span class="mi">19</span> <span class="kn">from</span> <span class="nn">monty.json</span> <span class="kn">import</span> <span class="n">MSONable</span>
-<span class="g g-Whitespace">     </span><span class="mi">20</span> <span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>
-<span class="ne">---&gt; </span><span class="mi">21</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.local_env</span> <span class="kn">import</span> <span class="n">cn_opt_params</span>
-<span class="g g-Whitespace">     </span><span class="mi">22</span> <span class="kn">from</span> <span class="nn">pymatgen.analysis.structure_matcher</span> <span class="kn">import</span> <span class="n">StructureMatcher</span>
-<span class="g g-Whitespace">     </span><span class="mi">23</span> <span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">Structure</span>
-
-<span class="ne">ImportError</span>: cannot import name &#39;cn_opt_params&#39; from &#39;pymatgen.analysis.local_env&#39; (/opt/hostedtoolcache/Python/3.10.15/x64/lib/python3.10/site-packages/pymatgen/analysis/local_env.py)
-</pre></div>
-</div>
 </div>
 </div>
 <div class="cell docutils container">
@@ -471,6 +452,13 @@ The relaxed structure will be taken from the <code class="docutils literal notra
     <span class="sa">f</span><span class="s2">&quot;The spin channel (</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">spin</span><span class="si">}</span><span class="s2">) is also automaticalliy determined by the &quot;</span>
     <span class="s2">&quot;IPR, by taking the spin channel who&#39;s defect states have the lowest average IPR across the different k-points.&quot;</span>
 <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The relaxed structure is in dirs01[1]
+HarmonicDefect(omega=0.033 eV, charge=0.0, relaxed_index=1, spin=1, defect_band=[(138, 0, 1), (138, 1, 1)])
+The spin channel (-1) is also automaticalliy determined by the IPR, by taking the spin channel who&#39;s defect states have the lowest average IPR across the different k-points.
 </pre></div>
 </div>
 </div>
@@ -503,6 +491,9 @@ Please report any issues you encounter to the github issue tracker.
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<img alt="../_images/21884e149b0340170ac8f925eb7ae69b9bbbdf39928854f42f9cb444ac289183.png" src="../_images/21884e149b0340170ac8f925eb7ae69b9bbbdf39928854f42f9cb444ac289183.png" />
+</div>
 </div>
 <p>The band structure of the relaxed structure has a state that can be identified as the defect state using the inverse participation ratio.</p>
 <div class="cell docutils container">
@@ -517,6 +508,9 @@ Please report any issues you encounter to the github issue tracker.
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Energy Level Spin:</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">spin</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/2def823160a977f7b8be60720874160d338c86126fed7476401363d9df28215e.png" src="../_images/2def823160a977f7b8be60720874160d338c86126fed7476401363d9df28215e.png" />
 </div>
 </div>
 </section>
@@ -550,6 +544,14 @@ As an example, we will use the three <code class="docutils literal notranslate">
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The parsed WSWQ files are: [&#39;WSWQ.2&#39;, &#39;WSWQ.0&#39;, &#39;WSWQ.1&#39;]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Parsed 3 WSWQ files.
+</pre></div>
+</div>
+</div>
 </div>
 <p>The epME is computed by the <code class="docutils literal notranslate"><span class="pre">HarmonicDefect.get_elph_me</span></code> method, which requires the defect band index.
 Since we know the band edge state is at the Gamma point from analyzing the bulk cell and that the second kpoint index is Gamma in our supercell calculations, can pass the <code class="docutils literal notranslate"><span class="pre">ikpt</span> <span class="pre">=</span> <span class="pre">1</span></code> defect electronic state into the <code class="docutils literal notranslate"><span class="pre">get_elph_me</span></code> method.</p>
@@ -560,6 +562,12 @@ Since we know the band edge state is at the Gamma point from analyzing the bulk 
 <span class="n">epME</span> <span class="o">=</span> <span class="n">hd0</span><span class="o">.</span><span class="n">get_elph_me</span><span class="p">(</span><span class="n">defect_state</span><span class="o">=</span><span class="p">(</span><span class="mi">138</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The resulting array of shape </span><span class="si">{</span><span class="n">epME</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> contains the matrix elements from the &quot;</span>
     <span class="s2">&quot;defect state to all other states at the same k-point.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The automatically determined defect electronic states are: [(138, 0, 1), (138, 1, 1)] (with [band, k-point, spin] indexing).
+The resulting array of shape (216,) contains the matrix elements from the defect state to all other states at the same k-point.
 </pre></div>
 </div>
 </div>
@@ -589,6 +597,9 @@ Since we know the band edge state is at the Gamma point from analyzing the bulk 
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;SRH coefficient [cm$^{-3}$s$^{-1}$]&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/aae24634d8358289bf221499b1a1ae1ab2229a19b9f8d13a3431eea8e1721e44.png" src="../_images/aae24634d8358289bf221499b1a1ae1ab2229a19b9f8d13a3431eea8e1721e44.png" />
 </div>
 </div>
 </section>
