@@ -708,7 +708,7 @@ class Interstitial(Defect):
         struct: Structure = self.structure.copy()
         # use the highest value oxidation state among the two most popular ones
         # found in the ICSD
-        inter_states = self.site.specie.icsd_oxidation_states[:2]
+        inter_states = self.site.specie.icsd_oxidation_states
         if len(inter_states) == 0:
             _logger.warning(
                 "No oxidation states found for %s. "
