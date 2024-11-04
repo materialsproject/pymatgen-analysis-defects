@@ -119,8 +119,8 @@ def test_interstitial(gan_struct) -> None:
     inter_fpos = [0, 0, 0.75]
     n_site = PeriodicSite(Specie("N"), inter_fpos, s.lattice)
     inter = Interstitial(s, n_site)
-    assert inter.oxi_state == 3
-    assert inter.get_charge_states() == [-1, 0, 1, 2, 3, 4]
+    assert inter.oxi_state == 5
+    assert inter.get_charge_states() == [-1, 0, 1, 2, 3, 4, 5, 6]
     assert np.allclose(inter.defect_structure[0].frac_coords, inter_fpos)
     sc = inter.get_supercell_structure()
     assert sc.formula == "Ga64 N65"
