@@ -25,7 +25,7 @@ try:
     from labellines import labelLines
 except ImportError:
 
-    def labelLines(*args, **kwargs) -> None:  # noqa: ARG001, ANN002
+    def labelLines(*args, **kwargs) -> None:  # noqa: ANN002
         """Dummy function if labellines is not installed."""
 
 
