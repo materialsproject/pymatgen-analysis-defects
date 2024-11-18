@@ -54,6 +54,7 @@ def test_antisite_generator(gan_struct) -> None:
     def_names = [defect.name for defect in anti_gen]
     assert sorted(def_names) == ["Ga_N", "N_Ga"]
 
+
 def test_mixed_valence_antisite_generator(mixed_valence_struct) -> None:
     anti_gen = AntiSiteGenerator().get_defects(mixed_valence_struct)
     def_names = [defect.name for defect in anti_gen]

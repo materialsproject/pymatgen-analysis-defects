@@ -23,6 +23,7 @@ def test_dir():
 def gan_struct(test_dir):
     return Structure.from_file(test_dir / "GaN.vasp")
 
+
 @pytest.fixture(scope="session")
 def mixed_valence_struct(test_dir):
     return Structure(
