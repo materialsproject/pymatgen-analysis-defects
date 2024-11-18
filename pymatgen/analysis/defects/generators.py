@@ -103,10 +103,10 @@ class VacancyGenerator(DefectGenerator):
         Returns:
             Generator[Vacancy, None, None]: Generator that yields a list of ``Vacancy`` objects.
         """
-        all_species = [*map(_element_str, structure.composition.elements)]
-        rm_species = all_species if rm_species is None else [*map(str, rm_species)]
+        all_species = {*map(_element_str, structure.composition.elements)}
+        rm_species = all_species if rm_species is None else {*map(str, rm_species)}
 
-        if not set(rm_species).issubset(all_species):
+        if not rm_species.issubset(all_species):
             msg = f"rm_species({rm_species}) must be a subset of the structure's species ({all_species})."
             raise ValueError(
                 msg,
@@ -235,7 +235,7 @@ class AntiSiteGenerator(DefectGenerator):
             structure: The bulk structure the anti-site defects are generated from.
             **kwargs: Additional keyword arguments for the ``Substitution.generate`` function.
         """
-        all_species = [*map(_element_str, structure.composition.elements)]
+        all_species = {*map(_element_str, structure.composition.elements)}
         subs = collections.defaultdict(list)
         for u, v in combinations(all_species, 2):
             subs[u].append(v)

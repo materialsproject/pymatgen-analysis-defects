@@ -55,6 +55,13 @@ def test_antisite_generator(gan_struct) -> None:
     assert sorted(def_names) == ["Ga_N", "N_Ga"]
 
 
+def test_mixed_valence_antisite_generator(mixed_valence_struct) -> None:
+    anti_gen = AntiSiteGenerator().get_defects(mixed_valence_struct)
+    def_names = [defect.name for defect in anti_gen]
+    assert "Cu_Cu" not in def_names
+    assert set(def_names) == {"Cu_O", "O_Cu"}
+
+
 def test_interstitial_generator(gan_struct) -> None:
     gen = InterstitialGenerator().get_defects(
         gan_struct, insertions={"Mg": [[0, 0, 0]]}
