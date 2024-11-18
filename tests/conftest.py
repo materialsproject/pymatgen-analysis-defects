@@ -1,5 +1,6 @@
 from collections import defaultdict
 from pathlib import Path
+import numpy as np
 
 import pytest
 from monty.serialization import loadfn
@@ -21,6 +22,14 @@ def test_dir():
 @pytest.fixture(scope="session")
 def gan_struct(test_dir):
     return Structure.from_file(test_dir / "GaN.vasp")
+
+@pytest.fixture(scope="session")
+def mixed_valence_struct(test_dir):
+    return Structure(
+        lattice=np.array([[3.0, 0.0, 0.0], [0.0, 3.0, 0.0], [0.0, 0.0, 3.0]]),
+        species=["Cu+", "Cu+", "Cu2+", "O2-"],
+        coords=[[0.0, 0.0, 0.0], [0.5, 0.5, 0.5], [0.5, 0.5, 0.0], [0.5, 0.0, 0.5]],
+    )
 
 
 @pytest.fixture(scope="session")
