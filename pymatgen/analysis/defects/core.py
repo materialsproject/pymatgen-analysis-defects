@@ -716,7 +716,7 @@ class Interstitial(Defect):
                 self.site.specie.symbol,
             )
             inter_states = self.site.specie.oxidation_states
-        inter_oxi = max(inter_states, key=abs)
+        inter_oxi = max(inter_states + (0,), key=abs)
         int_specie = Species(self.site.specie.symbol, inter_oxi)
         struct.insert(
             0,
