@@ -711,7 +711,7 @@ class Interstitial(Defect):
         inter_states = self.site.specie.common_oxidation_states
         if len(inter_states) == 0:
             _logger.warning(
-                "No oxidation states found for %s. "
+                "No oxidation states found for %s "
                 "in ICSD using `oxidation_states` without frequency ranking.",
                 self.site.specie.symbol,
             )
