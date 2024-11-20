@@ -711,12 +711,12 @@ class Interstitial(Defect):
         inter_states = self.site.specie.common_oxidation_states
         if len(inter_states) == 0:
             _logger.warning(
-                "No oxidation states found for %s. "
+                "No oxidation states found for %s "
                 "in ICSD using `oxidation_states` without frequency ranking.",
                 self.site.specie.symbol,
             )
             inter_states = self.site.specie.oxidation_states
-        inter_oxi = max(inter_states, key=abs)
+        inter_oxi = max((*inter_states, 0), key=abs)
         int_specie = Species(self.site.specie.symbol, inter_oxi)
         struct.insert(
             0,
