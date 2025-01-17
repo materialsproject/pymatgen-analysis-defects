@@ -90,7 +90,7 @@ class VacancyGenerator(DefectGenerator):
     def generate(
         self,
         structure: Structure,
-        rm_species: list[str | Species] | None = None,
+        rm_species: set[str | Species] | list[str | Species] | None = None,
         **kwargs,
     ) -> Generator[Vacancy, None, None]:
         """Generate a vacancy defects.
