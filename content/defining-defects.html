@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,10 +27,10 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
@@ -39,10 +39,10 @@
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
@@ -188,9 +188,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -418,7 +423,7 @@ As along as the database or any algorithm keeps track of this <code class="docut
 <h2>Basic Example Using GaN<a class="headerlink" href="#basic-example-using-gan" title="Link to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../../../tests/test_files&quot;</span><span class="p">)</span>
 </pre></div>
@@ -427,8 +432,8 @@ As along as the database or any algorithm keeps track of this <code class="docut
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.core</span> <span class="kn">import</span> <span class="n">DefectComplex</span><span class="p">,</span> <span class="n">Substitution</span><span class="p">,</span> <span class="n">Vacancy</span>
-<span class="kn">from</span> <span class="nn">pymatgen.core</span> <span class="kn">import</span> <span class="n">PeriodicSite</span><span class="p">,</span> <span class="n">Species</span><span class="p">,</span> <span class="n">Structure</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.analysis.defects.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefectComplex</span><span class="p">,</span> <span class="n">Substitution</span><span class="p">,</span> <span class="n">Vacancy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">PeriodicSite</span><span class="p">,</span> <span class="n">Species</span><span class="p">,</span> <span class="n">Structure</span>
 
 <span class="n">bulk</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;GaN.vasp&quot;</span><span class="p">)</span>
 <span class="k">if</span> <span class="p">(</span>
@@ -474,7 +479,7 @@ As along as the database or any algorithm keeps track of this <code class="docut
 </div>
 </div>
 <p>Equivalence here is determined using the standard StructureMatcher settings.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__o</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__o</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Equality operator.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">__o</span><span class="p">,</span> <span class="n">Defect</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Can only compare Defects to Defects&quot;</span><span class="p">)</span>
@@ -582,11 +587,11 @@ However, the recommended method to create interstitial defects is to use the <co
 <p>For more details on how the intersitial site identification works, check out this <a class="reference external" href="https://www.nature.com/articles/s41524-020-00422-3">paper</a>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymatgen.analysis.defects.generators</span> <span class="kn">import</span> <span class="p">(</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.analysis.defects.generators</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">ChargeInterstitialGenerator</span><span class="p">,</span>
     <span class="n">generate_all_native_defects</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">pymatgen.io.vasp</span> <span class="kn">import</span> <span class="n">Chgcar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.io.vasp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chgcar</span>
 
 <span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;CHGCAR.Fe3O4.vasp&quot;</span><span class="p">)</span>
 <span class="n">cig</span> <span class="o">=</span> <span class="n">ChargeInterstitialGenerator</span><span class="p">()</span>
@@ -616,17 +621,17 @@ Fe Vacancy defect at site #1
 Fe Vacancy defect at site #3
 O Vacancy defect at site #6
 O Vacancy defect at site #7
-Fe subsitituted on the O site at at site #6
-Fe subsitituted on the O site at at site #7
 O subsitituted on the Fe site at at site #0
 O subsitituted on the Fe site at at site #1
 O subsitituted on the Fe site at at site #3
+Fe subsitituted on the O site at at site #6
+Fe subsitituted on the O site at at site #7
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>O intersitial site at [0.00,0.00,0.00]
-O intersitial site at [0.38,0.38,0.38]
-Fe intersitial site at [0.00,0.00,0.00]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Fe intersitial site at [0.00,0.00,0.00]
 Fe intersitial site at [0.38,0.38,0.38]
+O intersitial site at [0.00,0.00,0.00]
+O intersitial site at [0.38,0.38,0.38]
 </pre></div>
 </div>
 </div>
@@ -634,7 +639,7 @@ Fe intersitial site at [0.38,0.38,0.38]
 <p>If you have access the to materials project charge density API,
 you can obtain the data from the API directly:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
-<span class="kn">from</span> <span class="nn">pymatgen.ext.matproj</span> <span class="kn">import</span> <span class="n">MPRester</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.ext.matproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPRester</span>
 <span class="k">with</span> <span class="n">MPRester</span><span class="p">()</span> <span class="k">as</span> <span class="n">mpr</span><span class="p">:</span>
     <span class="n">chgcar</span> <span class="o">=</span> <span class="n">mpr</span><span class="o">.</span><span class="n">get_charge_density_from_material_id</span><span class="p">(</span><span class="s2">&quot;mp-804&quot;</span><span class="p">)</span>
     
@@ -762,8 +767,8 @@ By Jimmy-Xuan Shen
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
   </footer>
