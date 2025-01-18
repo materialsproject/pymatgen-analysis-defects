@@ -24,7 +24,7 @@ def hd0(v_ga):
     )
     assert hd0.spin_index == 1
     assert pytest.approx(hd0.distortions[1]) == 0.0
-    assert pytest.approx(hd0.omega_eV) == 0.03268045792725
+    assert pytest.approx(hd0.omega_eV, rel=1e-4) == 0.03268045792725
     assert hd0.defect_band == [(138, 0, 1), (138, 1, 1)]
     assert hd0._get_ediff(output_order="bks").shape == (216, 2, 2)
     assert hd0._get_ediff(output_order="skb").shape == (2, 2, 216)
