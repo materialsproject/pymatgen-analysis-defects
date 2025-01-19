@@ -563,7 +563,6 @@ For a 144-atom cell, the positions of the defect is visually obvious.
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the output of sxdefectalign&quot;&quot;&quot;</span>
     <span class="n">fname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">DEFECT_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;q=</span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">/corr_align.out&quot;</span><span class="p">)</span>
     <span class="n">gen</span> <span class="o">=</span> <span class="n">reverse_readfile</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
-    <span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
     <span class="n">line</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">3</span><span class="p">])</span>
 </pre></div>
