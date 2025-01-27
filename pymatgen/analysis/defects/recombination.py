@@ -278,7 +278,7 @@ def pchip_eval(
     return (
         interp_func(x)
         * np.sum(y_coarse)
-        / np.trapz(np.nan_to_num(interp_func(interp_domain)), x=interp_domain)
+        / np.trapezoid(np.nan_to_num(interp_func(interp_domain)), x=interp_domain)
     )
 
 
