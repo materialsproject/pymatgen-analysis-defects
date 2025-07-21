@@ -428,7 +428,7 @@ class NamedDefect(MSONable):
 
     def __repr__(self) -> str:
         """String representation of the NamedDefect."""
-        return f'{self.bulk_formula}:{"+".join(sorted(self.name.split("+")))}'
+        return f"{self.bulk_formula}:{'+'.join(sorted(self.name.split('+')))}"
 
 
 class Vacancy(Defect):

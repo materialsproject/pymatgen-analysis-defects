@@ -161,9 +161,9 @@ def genrecip(
     # create list of recip space vectors that satisfy |i*b1+j*b2+k*b3|<=encut
     G_cut = eV_to_k(encut)
     # Figure out max in all recipricol lattice directions
-    i_max = int(math.ceil(G_cut / norm(b1)))
-    j_max = int(math.ceil(G_cut / norm(b2)))
-    k_max = int(math.ceil(G_cut / norm(b3)))
+    i_max = math.ceil(G_cut / norm(b1))
+    j_max = math.ceil(G_cut / norm(b2))
+    k_max = math.ceil(G_cut / norm(b3))
 
     # Build index list
     i = np.arange(-i_max, i_max)
