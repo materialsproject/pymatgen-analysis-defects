@@ -145,3 +145,4 @@ docs.old/_build/
 docs.old/
 
 docs/source/api_ref/pymatgen.*.rst
+.envrc
