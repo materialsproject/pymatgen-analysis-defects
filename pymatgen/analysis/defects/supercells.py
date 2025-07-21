@@ -194,7 +194,10 @@ def _ase_cubic(
     Returns:
         3x3 matrix: supercell matrix
     """
-    from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape
+    from ase.build import (
+        find_optimal_cell_shape,
+        get_deviation_from_optimal_cell_shape,
+    )
     from pymatgen.io.ase import AseAtomsAdaptor
 
     _logger.warning("ASE cubic supercell generation.")

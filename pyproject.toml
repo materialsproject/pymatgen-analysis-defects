@@ -100,7 +100,7 @@ select = ["ALL"]
 ignore = [
   "E203", "E501", "N", "PLR", "SLF",
   "TRY", "COM812", "ISC001", "ERA001", 
-  "FBT", "C", "FIX", "TD", "ANN003"]
+  "FBT", "C", "FIX", "TD", "ANN003", "T201", "PLC0415", "PLW1641"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
@@ -124,3 +124,6 @@ line-ending = "auto"
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"*.ipynb" = ["S101", "E402", "ANN001", "ANN201", "PTH123", "D419"]
