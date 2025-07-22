@@ -432,8 +432,8 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
             multiplicity[lab] = 1
             equiv_fpos[lab] = [fpos]
 
-        for key in insert_sites:
-            yield insert_sites[key], multiplicity[key], equiv_fpos[key]
+        for key, site in insert_sites.items():
+            yield site, multiplicity[key], equiv_fpos[key]
 
 
 class ChargeInterstitialGenerator(InterstitialGenerator):

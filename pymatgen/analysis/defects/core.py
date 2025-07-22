@@ -332,7 +332,7 @@ class Defect(MSONable, metaclass=ABCMeta):
         )
         return sga.get_symmetrized_structure()
 
-    def __eq__(self, __o: object) -> bool:
+    def __eq__(self, __o: object, /) -> bool:
         """Equality operator."""
         if not isinstance(__o, Defect):  # pragma: no cover
             msg = "Can only compare Defects to Defects"
@@ -419,7 +419,7 @@ class NamedDefect(MSONable):
             l_names.append(rf"{root}$_{{\rm {suffix}}}$")
         return " + ".join(l_names)
 
-    def __eq__(self, __value: object) -> bool:
+    def __eq__(self, __value: object, /) -> bool:
         """Only need to compare names."""
         if not isinstance(__value, NamedDefect):  # pragma: no cover
             msg = "Can only compare NamedDefects to NamedDefects"
@@ -428,7 +428,7 @@ class NamedDefect(MSONable):
 
     def __repr__(self) -> str:
         """String representation of the NamedDefect."""
-        return f'{self.bulk_formula}:{"+".join(sorted(self.name.split("+")))}'
+        return f"{self.bulk_formula}:{'+'.join(sorted(self.name.split('+')))}"
 
 
 class Vacancy(Defect):
@@ -792,7 +792,7 @@ class DefectComplex(Defect):
         """Representation of a complex defect."""
         return f"Complex defect containing: {[d.name for d in self.defects]}"
 
-    def __eq__(self, __o: object) -> bool:
+    def __eq__(self, __o: object, /) -> bool:
         """Check if  are equal."""
         if not isinstance(__o, Defect):
             msg = "Can only compare Defects to Defects"

@@ -21,6 +21,8 @@ from pymatgen.analysis.defects.utils import (
 from pymatgen.io.vasp.outputs import Locpot, VolumetricData
 from scipy import stats
 
+_logger = logging.getLogger(__name__)
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
@@ -224,7 +226,7 @@ def perform_es_corr(
     _logger.debug("defect lattice constants are (in angstroms) %s", str(lattice.abc))
 
     [a1, a2, a3] = ang_to_bohr * np.array(lattice.get_cartesian_coords(1))
-    logging.debug("In atomic units, lat consts are (in bohr): %s", str([a1, a2, a3]))
+    _logger.debug("In atomic units, lat consts are (in bohr): %s", str([a1, a2, a3]))
     vol = np.dot(a1, np.cross(a2, a3))  # vol in bohr^3
 
     def e_iso(encut: float) -> float:
@@ -303,7 +305,7 @@ def perform_pot_corr(
         (float) Potential Alignment shift required to make the short range potential
         zero far from the defect.  (-C) in the Freysoldt paper.
     """
-    logging.debug("run Freysoldt potential alignment method for axis %s", str(axis))
+    _logger.debug("run Freysoldt potential alignment method for axis %s", str(axis))
     nx = len(axis_grid)
 
     # shift these planar averages to have defect at origin
