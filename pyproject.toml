@@ -18,7 +18,7 @@ classifiers = [
 dependencies = [
   "pymatgen>=2024.10.22",
   "scikit-image>=0.19.3",
-  "numpy<2",
+  "numpy>=2.0.0,<3.0.0",
   "mp-pyrho>=0.4.4",
 ]
 description = "Pymatgen extension for defects analysis"
