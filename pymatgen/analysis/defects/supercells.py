@@ -84,7 +84,7 @@ def get_matched_structure_mapping_old(
     s1, s2 = sm._process_species([uc_struct, sc_struct])
     fu, _ = sm._get_supercell_size(s1, s2)
     try:
-        val, dist, sc_m, total_t, mapping = sm._strict_match(
+        _val, _dist, sc_m, total_t, _mapping = sm._strict_match(
             s1,
             s2,
             fu=fu,

@@ -383,7 +383,7 @@ def cluster_nodes(
             else:
                 fcoord = fcoords[j]
                 # We need the image to combine the frac_coords properly.
-                d, image = lattice.get_distance_and_image(frac_coords[0], fcoord)
+                _d, image = lattice.get_distance_and_image(frac_coords[0], fcoord)
                 frac_coords.append(fcoord + image)
         merged_fcoords.append(np.average(frac_coords, axis=0))
 
