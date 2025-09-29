@@ -692,7 +692,7 @@ def plot_pes(
     if ax is None:
         from matplotlib import pyplot as plt
 
-        fig, ax = plt.subplots()
+        _fig, ax = plt.subplots()
     ax.plot(
         np.array(hd.distortions) + x_shift,
         (np.array(hd.energies) - hd.energies[hd.relaxed_index]) + y_shift,
