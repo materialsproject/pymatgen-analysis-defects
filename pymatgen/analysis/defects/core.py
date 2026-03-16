@@ -86,7 +86,7 @@ class Defect(MSONable, metaclass=ABCMeta):
             multiplicity if multiplicity is not None else self.get_multiplicity()
         )
         self.equivalent_sites = equivalent_sites if equivalent_sites is not None else []
-        self.user_charges = user_charges if user_charges else []
+        self.user_charges = user_charges or []
         if oxi_state is None:
             # Try to use the reduced cell first since oxidation state assignment
             # scales poorly with systems size.
