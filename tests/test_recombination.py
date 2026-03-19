@@ -47,7 +47,7 @@ def test_pchip_eval() -> None:
     y_c = np.sin(x_c) + 1
     xx = np.linspace(-3, 3, 1000)
     fx = pchip_eval(xx, x_coarse=x_c, y_coarse=y_c)
-    int_val = np.trapz(np.nan_to_num(fx), x=xx)
+    int_val = np.trapezoid(np.nan_to_num(fx), x=xx)
     int_ref = np.sum(y_c)
     assert int_val == pytest.approx(int_ref, rel=1e-3)
 
