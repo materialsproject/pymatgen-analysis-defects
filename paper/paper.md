@@ -63,7 +63,7 @@ A basic example of creating a full list of defects is shown below:
 
 ```python
 from pymatgen.analysis.defects.generators import generate_all_native_defects
-from pymatgen.ext.matproj import MPRester
+from mp_api.client import MPRester
 
 with MPRester() as mpr:
     chgcar = mpr.get_charge_density_from_material_id("mp-804")
@@ -98,7 +98,7 @@ A basic example of integration with the `atomate2` workflow framework is provide
 from atomate2.vasp.flows.defect import FormationEnergyMaker
 from jobflow import Flow
 from pymatgen.analysis.defects.generators import generate_all_native_defects
-from pymatgen.ext.matproj import MPRester
+from mp_api.client import MPRester
 
 with MPRester() as mpr:
     chgcar = mpr.get_charge_density_from_material_id("mp-804")

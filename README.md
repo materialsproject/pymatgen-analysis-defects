@@ -27,7 +27,7 @@ directly from the Materials Project API.
 
 ``` python
 from pymatgen.analysis.defects.generators import ChargeInterstitialGenerator, generate_all_native_defects
-from pymatgen.ext.matproj import MPRester
+from mp_api.client import MPRester
 with MPRester() as mpr:
 chgcar = mpr.get_charge_density_from_material_id("mp-804")
 for defect in generate_all_native_defects(chgcar):
