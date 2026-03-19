@@ -1225,7 +1225,7 @@ def plot_formation_energy_diagrams(
     elif isinstance(formation_energy_diagrams, FormationEnergyDiagram):
         formation_energy_diagrams = [formation_energy_diagrams]
 
-    filterfunction = filterfunction if filterfunction else lambda _x: True
+    filterfunction = filterfunction or (lambda _x: True)
     formation_energy_diagrams = list(filter(filterfunction, formation_energy_diagrams))
 
     band_gap = formation_energy_diagrams[0].band_gap
@@ -1258,10 +1258,8 @@ def plot_formation_energy_diagrams(
     color_line_gen = _get_line_color_and_style(colors, linestyle)
     for _fid, (fed_name, single_fed) in enumerate(named_feds):
         cur_color, cur_style = next(color_line_gen)
-        chempots_ = (
-            chempots
-            if chempots
-            else single_fed.get_chempots(rich_element=Element(rich_element))
+        chempots_ = chempots or single_fed.get_chempots(
+            rich_element=Element(rich_element)
         )
         lines = single_fed._get_lines(chempots=chempots_)
         lowerlines = get_lower_envelope(lines)
