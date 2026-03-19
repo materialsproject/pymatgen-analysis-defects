@@ -88,6 +88,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[docs]
       - name: Build
+        if: github.ref == 'refs/heads/develop'
+        # This line below is wrong and needs to be updated
         run: jupyter-book build --path-output docs docs/source
         # Develop branch only
       - name: Deploy
