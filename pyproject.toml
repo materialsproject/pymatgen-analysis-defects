@@ -24,7 +24,7 @@ dependencies = [
 description = "Pymatgen extension for defects analysis"
 dynamic = ["version"]
 keywords = ["high-throughput", "automated", "dft", "defects"]
-license = { text = "modified BSD" }
+license = "BSD-3-Clause-LBNL"
 name = "pymatgen-analysis-defects"
 readme = "README.md"
 requires-python = '>=3.9'

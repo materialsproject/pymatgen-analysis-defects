@@ -169,8 +169,8 @@ def test_dielectric_func(test_dir) -> None:
     )
     hd0.waveder = Waveder.from_binary(dir0_opt / "WAVEDER")
     energy, eps_vbm, eps_cbm = hd0.get_dielectric_function(idir=0, jdir=0)
-    inter_vbm = np.trapz(np.imag(eps_vbm[:100]), energy[:100])
-    inter_cbm = np.trapz(np.imag(eps_cbm[:100]), energy[:100])
+    inter_vbm = np.trapezoid(np.imag(eps_vbm[:100]), energy[:100])
+    inter_cbm = np.trapezoid(np.imag(eps_cbm[:100]), energy[:100])
     assert pytest.approx(inter_vbm, abs=0.01) == 6.31
     assert pytest.approx(inter_cbm, abs=0.01) == 0.27
 

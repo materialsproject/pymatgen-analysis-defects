@@ -20,7 +20,7 @@ non-equivalent defect objects directly from the Materials Project API.
 
 .. code-block:: python
     from pymatgen.analysis.defects.generators import ChargeInterstitialGenerator, generate_all_native_defects
-    from pymatgen.ext.matproj import MPRester
+    from mp_api.client import MPRester
     with MPRester() as mpr:
         chgcar = mpr.get_charge_density_from_material_id("mp-804")
         
