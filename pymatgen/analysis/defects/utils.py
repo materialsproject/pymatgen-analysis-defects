@@ -18,8 +18,8 @@ import numpy as np
 from monty.dev import deprecated
 from monty.json import MSONable
 from numpy.linalg import norm
-from pymatgen.analysis.local_env import CN_OPT_PARAMS
-from pymatgen.analysis.structure_matcher import StructureMatcher
+from pymatgen.core.local_env import CN_OPT_PARAMS
+from pymatgen.core.structure_matcher import StructureMatcher
 from pymatgen.core import Structure
 from pymatgen.core.periodic_table import Element, get_el_sp
 from pymatgen.electronic_structure.core import Spin

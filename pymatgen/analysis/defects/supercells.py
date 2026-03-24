@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 from monty.dev import deprecated
-from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
+from pymatgen.core.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.core import Lattice
 from pymatgen.util.coord_cython import pbc_shortest_vectors
 

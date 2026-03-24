@@ -6,8 +6,6 @@ requires = ["setuptools >= 42", "versioningit >= 1,< 4", "wheel"]
 authors = [{ name = "Jimmy-Xuan Shen", email = "jmmshn@gmail.com" }]
 classifiers = [
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Science/Research",
@@ -16,7 +14,7 @@ classifiers = [
   "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-  "pymatgen>=2024.10.22",
+  "pymatgen-core>=2026.4.7",
   "scikit-image>=0.19.3",
   "numpy>=2.0.0,<3.0.0",
   "mp-pyrho>=0.4.4",
@@ -27,7 +25,7 @@ keywords = ["high-throughput", "automated", "dft", "defects"]
 license = "BSD-3-Clause-LBNL"
 name = "pymatgen-analysis-defects"
 readme = "README.md"
-requires-python = '>=3.9'
+requires-python = '>=3.11'
 
 [project.optional-dependencies]
 finder = ["dscribe>=2.0.0"]

@@ -20,10 +20,10 @@ from pymatgen.analysis.defects.finder import DefectSiteFinder
 from pymatgen.analysis.defects.supercells import get_closest_sc_mat
 from pymatgen.analysis.defects.utils import get_zfile, group_docs
 from pymatgen.analysis.phase_diagram import PhaseDiagram
-from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
+from pymatgen.core.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.core import Composition, Element
 from pymatgen.electronic_structure.dos import FermiDos
-from pymatgen.entries.computed_entries import ComputedEntry
+from pymatgen.core.entries import ComputedEntry
 from pymatgen.io.vasp import Locpot, Vasprun, VolumetricData
 from pyrho.charge_density import get_volumetric_like_sc
 from scipy.constants import value as _cd

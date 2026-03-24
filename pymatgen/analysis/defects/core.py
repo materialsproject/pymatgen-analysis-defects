@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from monty.json import MSONable
 from pymatgen.analysis.defects.supercells import get_sc_fromstruct
-from pymatgen.analysis.structure_matcher import ElementComparator, StructureMatcher
+from pymatgen.core.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.core import Element, PeriodicSite, Species
 from pymatgen.core.periodic_table import DummySpecies
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
