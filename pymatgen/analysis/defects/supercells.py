@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 from monty.dev import deprecated
-from pymatgen.core.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.core import Lattice
+from pymatgen.core.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.util.coord_cython import pbc_shortest_vectors
 
 # from ase.build import find_optimal_cell_shape, get_deviation_from_optimal_cell_shape

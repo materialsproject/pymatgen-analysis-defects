@@ -388,7 +388,9 @@ class VoronoiInterstitialGenerator(InterstitialGenerator):
             raise ValueError(msg)
         cand_sites_mul_and_equiv_fpos = [*self._get_candidate_sites(structure)]
         for species in insert_species:
-            cand_sites, multiplicity, equiv_fpos = zip(*cand_sites_mul_and_equiv_fpos)
+            cand_sites, multiplicity, equiv_fpos = zip(
+                *cand_sites_mul_and_equiv_fpos, strict=False
+            )
 
             yield from super().generate(
                 structure,
@@ -490,7 +492,9 @@ class ChargeInterstitialGenerator(InterstitialGenerator):
             raise ValueError(msg)
         cand_sites_mul_and_equiv_fpos = [*self._get_candidate_sites(chgcar)]
         for species in insert_species:
-            cand_sites, multiplicity, equiv_fpos = zip(*cand_sites_mul_and_equiv_fpos)
+            cand_sites, multiplicity, equiv_fpos = zip(
+                *cand_sites_mul_and_equiv_fpos, strict=False
+            )
             if self.max_insertions is not None:
                 cand_sites = cand_sites[: self.max_insertions]
                 multiplicity = multiplicity[: self.max_insertions]

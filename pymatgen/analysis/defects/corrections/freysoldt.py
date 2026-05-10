@@ -162,6 +162,7 @@ def get_freysoldt_correction(
         list_bulk_plnr_avg_esp,
         list_defect_plnr_avg_esp,
         [0, 1, 2],
+        strict=False,
     ):
         alignment_corr, md = perform_pot_corr(
             axis_grid=x,

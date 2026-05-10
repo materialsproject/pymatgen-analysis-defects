@@ -7,7 +7,7 @@ import logging
 from dataclasses import dataclass, field
 from itertools import chain, groupby
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -20,10 +20,10 @@ from pymatgen.analysis.defects.finder import DefectSiteFinder
 from pymatgen.analysis.defects.supercells import get_closest_sc_mat
 from pymatgen.analysis.defects.utils import get_zfile, group_docs
 from pymatgen.analysis.phase_diagram import PhaseDiagram
-from pymatgen.core.structure_matcher import ElementComparator, StructureMatcher
 from pymatgen.core import Composition, Element
-from pymatgen.electronic_structure.dos import FermiDos
 from pymatgen.core.entries import ComputedEntry
+from pymatgen.core.structure_matcher import ElementComparator, StructureMatcher
+from pymatgen.electronic_structure.dos import FermiDos
 from pymatgen.io.vasp import Locpot, Vasprun, VolumetricData
 from pyrho.charge_density import get_volumetric_like_sc
 from scipy.constants import value as _cd
@@ -31,7 +31,7 @@ from scipy.optimize import bisect
 from scipy.spatial import ConvexHull
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Sequence
+    from collections.abc import Callable, Generator, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
@@ -523,7 +523,7 @@ class FormationEnergyDiagram(MSONable):
     def chempot_limits(self) -> list[dict[Element, float]]:
         """Return the chemical potential limits in dictionary format."""
         return [
-            dict(zip(self.chempot_diagram.elements, vertex))
+            dict(zip(self.chempot_diagram.elements, vertex, strict=False))
             for vertex in self._chempot_limits_arr
         ]
 
@@ -535,7 +535,9 @@ class FormationEnergyDiagram(MSONable):
         res = []
         for pt in self._chempot_limits_arr:
             competing_phases = {}
-            for hp_ent, hp in zip(cd._hyperplane_entries, cd._hyperplanes):
+            for hp_ent, hp in zip(
+                cd._hyperplane_entries, cd._hyperplanes, strict=False
+            ):
                 if hp_ent.composition.reduced_formula == bulk_formula:
                     continue
                 if _is_on_hyperplane(pt, hp):
