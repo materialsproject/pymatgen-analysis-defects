@@ -124,7 +124,10 @@ class DefectSiteFinder(MSONable):
             (in fractional coordinates)
         """
         distored_sites, distortions = list(
-            zip(*self.get_most_distorted_sites(defect_structure, base_structure)),
+            zip(
+                *self.get_most_distorted_sites(defect_structure, base_structure),
+                strict=False,
+            ),
         )
         positions = [defect_structure[isite].frac_coords for isite in distored_sites]
         return get_weighted_average_position(
@@ -370,7 +373,7 @@ def get_weighted_average_position(
         raise ValueError(msg)
 
     # TODO: can be replaced with the zip(..., strict=True) syntax in Python 3.10
-    pos_weights = list(zip(frac_positions, weights))
+    pos_weights = list(zip(frac_positions, weights, strict=False))
     pos_weights.sort(key=lambda x: x[1], reverse=True)
 
     # initial guess at the center with zero weight

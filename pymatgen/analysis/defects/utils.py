@@ -12,16 +12,16 @@ from collections import defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from monty.dev import deprecated
 from monty.json import MSONable
 from numpy.linalg import norm
-from pymatgen.analysis.local_env import CN_OPT_PARAMS
-from pymatgen.analysis.structure_matcher import StructureMatcher
 from pymatgen.core import Structure
+from pymatgen.core.local_env import CN_OPT_PARAMS
 from pymatgen.core.periodic_table import Element, get_el_sp
+from pymatgen.core.structure_matcher import StructureMatcher
 from pymatgen.electronic_structure.core import Spin
 from pymatgen.io.vasp.sets import get_valid_magmom_struct
 from pymatgen.util.coord import pbc_diff
@@ -30,7 +30,7 @@ from scipy.spatial import ConvexHull, Voronoi
 from scipy.spatial.distance import squareform
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Sequence
+    from collections.abc import Callable, Generator, Sequence
     from pathlib import Path
 
     from numpy import typing as npt
@@ -178,7 +178,7 @@ def genrecip(
     radii = np.sqrt(np.einsum("ij,ij->i", vecs, vecs))
 
     # Yield based on radii
-    for vec, r in zip(vecs, radii):
+    for vec, r in zip(vecs, radii, strict=False):
         if r < G_cut and r != 0:
             yield vec
 
@@ -963,13 +963,13 @@ def sort_positive_definite(
     D0 = dist(ref1, ref2)
 
     d_vs_s = []
-    for q1, q2, el in zip(d1, d2, list_in):
+    for q1, q2, el in zip(d1, d2, list_in, strict=False):
         sign = +1
         if q1 < q2 and q2 > D0:
             sign = -1
         d_vs_s.append((sign * q1, el))
     d_vs_s.sort()
-    distances, sorted_list = list(zip(*d_vs_s))
+    distances, sorted_list = list(zip(*d_vs_s, strict=False))
     return sorted_list, distances
 
 
@@ -1035,7 +1035,7 @@ def get_labeled_inserted_structure(
 
     # Label the groups by structure matching
     site_labels = generic_group_labels(inserted_structs, comp=sm.fit)
-    return [*zip(sites.tolist(), site_labels)]
+    return [*zip(sites.tolist(), site_labels, strict=False)]
 
 
 @dataclass
