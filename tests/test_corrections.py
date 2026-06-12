@@ -1,3 +1,5 @@
+import math
+
 import pytest
 from pymatgen.analysis.defects.corrections.freysoldt import (
     get_freysoldt_correction,
@@ -85,10 +87,52 @@ def test_kumagai(test_dir):
     )
     assert res0.correction_energy == pytest.approx(0, abs=1e-4)
 
+    # Bug-fix invariant (GH#219): pre-fix code returned a positive value
+    # because defect/bulk site potentials were swapped at extraction. The
+    # corrected wrapper must yield a finite, negative value for this q=+1
+    # antisite fixture.
     res1 = get_efnv_correction(
         1, sd1, sb, dielectric_tensor=[[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     )
-    assert res1.correction_energy > 0
+    assert math.isfinite(res1.correction_energy)
+    assert res1.correction_energy < 0
+
+    # Snapshot value generated 2026-06-12 against the bundled Mg_Ga fixture.
+    # Locks in pydefect numerics for regression detection only; not compared
+    # against an external reference. Note the identity dielectric tensor —
+    # chosen for fixture stability, not physical realism. Update if pydefect
+    # numerics drift.
+    assert res1.correction_energy == pytest.approx(-0.4898778, abs=1e-4)
+
+
+def test_kumagai_vacancy(test_dir):
+    """Regression test for GH#219: site potentials must not be swapped.
+
+    With antisite defects (defect.num_sites == bulk.num_sites) the swap of
+    `defect_structure` and `bulk_structure` on the `site.properties["potential"]`
+    extraction is silent. With vacancies / interstitials the lengths differ and
+    the bug surfaces as an IndexError downstream in pydefect.
+
+    We synthesize a vacancy by removing a single site from the antisite q=0
+    Mg_Ga test structure, so the defect has 31 sites and bulk has 32. The
+    correction itself is meaningless for this synthetic input, but the call
+    must not raise IndexError, and the potentials must be sourced from the
+    correct structure.
+    """
+    sb = get_structure_with_pot(test_dir / "Mg_Ga" / "bulk_sc")
+    sd0 = get_structure_with_pot(test_dir / "Mg_Ga" / "q=0")
+    # Synthesize a vacancy: drop one site from the defect structure.
+    sd_vac = sd0.copy()
+    sd_vac.remove_sites([0])
+    assert len(sd_vac) != len(sb), "test setup invalid: lengths must differ"
+
+    # With the swap bug, building `defect_potentials` from `bulk_structure`
+    # produces a 32-element array while `defect_structure` only has 31 sites,
+    # which raises IndexError inside pydefect's make_efnv_correction. The
+    # bug is fixed if this call returns without raising.
+    get_efnv_correction(
+        0, sd_vac, sb, dielectric_tensor=[[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    )
 
 
 def test_kumagai_missing():
