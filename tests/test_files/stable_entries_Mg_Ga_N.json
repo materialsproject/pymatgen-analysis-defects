@@ -1,6 +1,6 @@
 [
     {
-        "@module": "pymatgen.entries.computed_entries",
+        "@module": "pymatgen.core.entries",
         "@class": "ComputedEntry",
         "energy": -38.42229507,
         "composition": {
@@ -35,7 +35,7 @@
         "@version": null
     },
     {
-        "@module": "pymatgen.entries.computed_entries",
+        "@module": "pymatgen.core.entries",
         "@class": "ComputedEntry",
         "energy": -29.86997198,
         "composition": {
@@ -70,7 +70,7 @@
         "@version": null
     },
     {
-        "@module": "pymatgen.entries.computed_entries",
+        "@module": "pymatgen.core.entries",
         "@class": "ComputedEntry",
         "energy": -201.83378403,
         "composition": {
@@ -81,18 +81,13 @@
         "correction": -5.776,
         "energy_adjustments": [
             {
-                "@module": "pymatgen.entries.computed_entries",
+                "@module": "pymatgen.core.entries",
                 "@class": "CompositionEnergyAdjustment",
                 "@version": null,
                 "adj_per_atom": -0.361,
                 "n_atoms": 16.0,
                 "uncertainty_per_atom": 0.0093,
                 "name": "MP2020 anion correction (N)",
-                "cls": {
-                    "@module": "pymatgen.entries.compatibility",
-                    "@class": "MaterialsProject2020Compatibility",
-                    "@version": null
-                },
                 "description": "Composition-based energy adjustment"
             }
         ],
@@ -124,7 +119,7 @@
         "@version": null
     },
     {
-        "@module": "pymatgen.entries.computed_entries",
+        "@module": "pymatgen.core.entries",
         "@class": "ComputedEntry",
         "energy": -39.4000992,
         "composition": {
@@ -159,7 +154,7 @@
         "@version": null
     },
     {
-        "@module": "pymatgen.entries.computed_entries",
+        "@module": "pymatgen.core.entries",
         "@class": "ComputedEntry",
         "energy": -39.83410568,
         "composition": {
@@ -194,7 +189,7 @@
         "@version": null
     },
     {
-        "@module": "pymatgen.entries.computed_entries",
+        "@module": "pymatgen.core.entries",
         "@class": "ComputedEntry",
         "energy": -12.11235968,
         "composition": {
@@ -225,7 +220,7 @@
         "@version": null
     },
     {
-        "@module": "pymatgen.entries.computed_entries",
+        "@module": "pymatgen.core.entries",
         "@class": "ComputedEntry",
         "energy": -4.79068775,
         "composition": {
@@ -256,7 +251,7 @@
         "@version": null
     },
     {
-        "@module": "pymatgen.entries.computed_entries",
+        "@module": "pymatgen.core.entries",
         "@class": "ComputedEntry",
         "energy": -245.82917071,
         "composition": {
@@ -291,7 +286,7 @@
         "@version": null
     },
     {
-        "@module": "pymatgen.entries.computed_entries",
+        "@module": "pymatgen.core.entries",
         "@class": "ComputedEntry",
         "energy": -24.63444937,
         "composition": {
@@ -302,18 +297,13 @@
         "correction": -0.722,
         "energy_adjustments": [
             {
-                "@module": "pymatgen.entries.computed_entries",
+                "@module": "pymatgen.core.entries",
                 "@class": "CompositionEnergyAdjustment",
                 "@version": null,
                 "adj_per_atom": -0.361,
                 "n_atoms": 2.0,
                 "uncertainty_per_atom": 0.0093,
                 "name": "MP2020 anion correction (N)",
-                "cls": {
-                    "@module": "pymatgen.entries.compatibility",
-                    "@class": "MaterialsProject2020Compatibility",
-                    "@version": null
-                },
                 "description": "Composition-based energy adjustment"
             }
         ],
@@ -345,7 +335,7 @@
         "@version": null
     },
     {
-        "@module": "pymatgen.entries.computed_entries",
+        "@module": "pymatgen.core.entries",
         "@class": "ComputedEntry",
         "energy": -66.69195172,
         "composition": {

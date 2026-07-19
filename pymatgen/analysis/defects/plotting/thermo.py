@@ -59,7 +59,7 @@ def _plot_line(
     Returns:
         None, modifies the fig object in place.
     """
-    x_pos, y_pos = tuple(zip(*pts))
+    x_pos, y_pos = tuple(zip(*pts, strict=False))
     trace_ = go.Scatter(
         x=x_pos,
         y=y_pos,
@@ -108,13 +108,13 @@ def _label_slopes(fig: go.Figure) -> None:
         fig: A plotly figure object.
     """
     for data_ in filter(lambda x: x.meta.get("formation_energy_plot", False), fig.data):
-        transitions_arr_ = np.array(tuple(zip(data_.x, data_.y)))
+        transitions_arr_ = np.array(tuple(zip(data_.x, data_.y, strict=False)))
         diff_arr = transitions_arr_[1:] - transitions_arr_[:-1]
         slopes = tuple(
             int(slope) for slope in np.round(diff_arr[:, 1] / diff_arr[:, 0])
         )
         pos = (transitions_arr_[:-1] + transitions_arr_[1:]) / 2.0
-        x_pos, y_pos = tuple(zip(*pos))
+        x_pos, y_pos = tuple(zip(*pos, strict=False))
         fig.add_trace(
             go.Scatter(
                 x=x_pos,
@@ -203,6 +203,7 @@ def get_plot_data(
         grouped_feds,
         get_line_style_and_color_sequence(PLOTLY_COLORS, PLOTLY_STYLES),
         x_annos_,
+        strict=False,
     ):
         if chempot is None:
             cation_el_ = fed.chempot_diagram.elements[0]

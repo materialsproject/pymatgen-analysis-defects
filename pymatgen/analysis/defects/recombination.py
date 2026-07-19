@@ -7,12 +7,15 @@ from __future__ import annotations
 
 import itertools
 import logging
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy.interpolate import PchipInterpolator
 
 from .constants import AMU2KG, ANGS2M, EV2J, HBAR_EV, HBAR_J, KB, LOOKUP_TABLE
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 _logger = logging.getLogger(__name__)
 

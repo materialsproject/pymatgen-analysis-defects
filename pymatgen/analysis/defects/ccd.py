@@ -184,7 +184,7 @@ class HarmonicDefect(MSONable):
             energy_struct[-1],
             lambda x, y: get_dQ(x[1], y[1]),
         )
-        energies, structures = list(zip(*sorted_list))
+        energies, structures = list(zip(*sorted_list, strict=False))
 
         if not np.allclose(unsorted_e, energies, atol=1e-99):  # pragma: no cover
             msg = "The vaspruns should already be in order."
@@ -347,7 +347,8 @@ class HarmonicDefect(MSONable):
                 msg,
             )
         self.wswqs = [
-            {"Q": d, "wswq": WSWQ.from_file(f)} for d, f in zip(distortions, wswq_files)
+            {"Q": d, "wswq": WSWQ.from_file(f)}
+            for d, f in zip(distortions, wswq_files, strict=False)
         ]
 
     def get_elph_me(self, defect_state: tuple) -> npt.ArrayLike:
@@ -574,7 +575,7 @@ def get_dQ(ground: Structure, excited: Structure) -> float:
         np.sum(
             [
                 x[0].distance(x[1]) ** 2 * x[0].specie.atomic_mass
-                for x in zip(ground, excited)
+                for x in zip(ground, excited, strict=False)
             ],
         ),
     )
@@ -631,7 +632,12 @@ def _get_wswq_slope(distortions: list[float], wswqs: list[WSWQ]) -> npt.NDArray:
             Since there is always ambiguity in the phase, we require that the output
             is always positive.
     """
-    yy = np.stack([np.abs(ww.data) * np.sign(qq) for qq, ww in zip(distortions, wswqs)])
+    yy = np.stack(
+        [
+            np.abs(ww.data) * np.sign(qq)
+            for qq, ww in zip(distortions, wswqs, strict=False)
+        ]
+    )
     _, *oldshape = yy.shape
     return np.polyfit(distortions, yy.reshape(yy.shape[0], -1), deg=1)[0].reshape(
         *oldshape,

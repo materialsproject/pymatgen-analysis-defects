@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13"]
 
     env:
       PMG_MAPI_KEY: ${{ secrets.PMG_MAPI_KEY }}
@@ -59,7 +59,7 @@ jobs:
         run: pytest --nbmake ./docs/source/content
 
       - uses: codecov/codecov-action@v4
-        if: matrix.python-version == '3.10'
+        if: matrix.python-version == '3.13'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml
@@ -79,7 +79,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.13"
           cache: pip
           cache-dependency-path: pyproject.toml
 
@@ -88,10 +88,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[docs]
       - name: Build
-        if: github.ref == 'refs/heads/develop'
-        # This line below is wrong and needs to be updated
         run: jupyter-book build --path-output docs docs/source
-        # Develop branch only
       - name: Deploy
         if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4
