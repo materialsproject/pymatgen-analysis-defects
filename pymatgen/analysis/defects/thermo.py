@@ -1357,13 +1357,16 @@ def plot_formation_energy_diagrams(
         else:
             handle, leg = [], []
 
-        axis.legend(
-            handles=artists + handle,
-            labels=legends_txt + leg,
-            fontsize=lg_fontsize * ax_fontsize,
-            ncol=3,
-            loc=legend_loc,
-        )
+        combined_handles = artists + handle
+        combined_labels = legends_txt + leg
+        if combined_handles and combined_labels:
+            axis.legend(
+                handles=combined_handles,
+                labels=combined_labels,
+                fontsize=lg_fontsize * ax_fontsize,
+                ncol=3,
+                loc=legend_loc,
+            )
 
     if save:
         save = save if isinstance(save, str) else "formation_energy_diagram.png"
