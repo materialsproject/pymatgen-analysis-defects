@@ -178,7 +178,7 @@ def test_dielectric_func(test_dir) -> None:
     assert isinstance(df, pd.DataFrame)
     assert len(df) == 11
 
-    df, cmap, norm = plot_optical_transitions(
+    df, _cmap, _norm = plot_optical_transitions(
         hd0,
         kpt_index=-100,
         band_window=5,
