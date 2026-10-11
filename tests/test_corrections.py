@@ -3,12 +3,15 @@ import math
 import pytest
 from pymatgen.analysis.defects.corrections.freysoldt import (
     get_freysoldt_correction,
+    perform_es_corr,
     plot_plnr_avg,
 )
 from pymatgen.analysis.defects.corrections.kumagai import (
     get_efnv_correction,
     get_structure_with_pot,
 )
+from pymatgen.analysis.defects.utils import QModel
+from pymatgen.core import Lattice
 
 
 def test_freysoldt(data_Mg_Ga) -> None:
@@ -75,6 +78,22 @@ def test_freysoldt_sxdefect_compare(v_N_GaN) -> None:
     }
     for q in range(-1, 3):
         assert results[q] == pytest.approx(references[q], abs=1e-3)
+
+
+def test_freysoldt_anisotropic_dielectric() -> None:
+    """Test anisotropic dielectric tensors in the Freysoldt correction.
+
+    With the tensor treated as in ``sxdefectalign --tensor``, the point-charge energy
+    matches the anisotropic point-charge Ewald energy (Kumagai & Oba, PRB 89, 195205
+    (2014)) of 0.167 eV.
+    """
+    lattice = Lattice.cubic(10.0)
+    es_corr = perform_es_corr(lattice, 1, [15, 15, 3], QModel())
+    assert es_corr == pytest.approx(0.167, abs=5e-3)
+    # isotropic tensors match scalar input
+    assert perform_es_corr(lattice, 1, [10, 10, 10], QModel()) == perform_es_corr(
+        lattice, 1, 10, QModel()
+    )
 
 
 def test_kumagai(test_dir):
