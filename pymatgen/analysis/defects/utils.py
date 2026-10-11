@@ -113,7 +113,8 @@ class QModel(MSONable):
         Returns:
             Charge density at the reciprocal vector magnitude
         """
-        return self.expnorm / np.sqrt(1 + self.gamma2 * g2) + (
+        # (normalised) Fourier transform of exp(-r/gamma) is 1/(1 + gamma^2 g^2)^2:
+        return self.expnorm / (1 + self.gamma2 * g2) ** 2 + (
             1 - self.expnorm
         ) * np.exp(-0.25 * self.beta2 * g2)
 
