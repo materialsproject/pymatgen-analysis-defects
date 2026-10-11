@@ -271,7 +271,9 @@ def perform_es_corr(
 
     def e_per(encut: float) -> float:
         eper = 0.0
-        for g in genrecip(a1, a2, a3, encut):  # times avg_eps; divided by avg_eps below:
+        for g in genrecip(
+            a1, a2, a3, encut
+        ):  # times avg_eps; divided by avg_eps below:
             eper += avg_eps * q_model.rho_rec(g @ g) ** 2 / (g @ dielectric_tensor @ g)
         eper *= (q**2) * 2 * round(np.pi, 6) / vol
         eper += (q**2) * 4 * round(np.pi, 6) * q_model.rho_rec_limit0 / vol
