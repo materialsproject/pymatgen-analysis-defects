@@ -74,9 +74,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install pandoc
-        run: sudo apt-get install pandoc
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
@@ -86,12 +83,17 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[docs]
+          pip install -e .[docs,finder]
       - name: Build
-        run: jupyter-book build --path-output docs docs/source
+        working-directory: docs/source
+        env:
+          BASE_URL: /pymatgen-analysis-defects
+        run: |
+          jupyter-book build --html --execute --strict --ci
+          pdoc pymatgen.analysis.defects -d google -o _build/html/api
       - name: Deploy
         if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4
         with:
           deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-          publish_dir: ./docs/_build/html
+          publish_dir: ./docs/source/_build/html
