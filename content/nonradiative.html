@@ -469,7 +469,7 @@ Additional developments have been made to better integrate the methodology with 
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># disable warnings</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">)</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -486,7 +486,7 @@ Additional developments have been made to better integrate the methodology with 
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../../../tests/test_files/v_Ga/&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"../../../tests/test_files/v_Ga/"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -499,16 +499,16 @@ This will look into each directory for a <code class="docutils literal notransla
 The relaxed structure will be taken from the <code class="docutils literal notranslate"><span class="pre">relaxed_index</span></code> entry from this list and the electronic structure from this entry will be parsed to help identify the defect band in the band structure.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dirs01</span> <span class="o">=</span> <span class="p">[</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dirs01</span> <span class="o">=</span> <span class="p">[</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">"ccd_0_-1"</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
 <span class="n">hd0</span> <span class="o">=</span> <span class="n">HarmonicDefect</span><span class="o">.</span><span class="n">from_directories</span><span class="p">(</span>
     <span class="n">directories</span><span class="o">=</span><span class="n">dirs01</span><span class="p">,</span>
     <span class="n">store_bandstructure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The relaxed structure is in dirs01[</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">relaxed_index</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The relaxed structure is in dirs01[</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">relaxed_index</span><span class="si">}</span><span class="s2">]"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">hd0</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;The spin channel (</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">spin</span><span class="si">}</span><span class="s2">) is also automaticalliy determined by the &quot;</span>
-    <span class="s2">&quot;IPR, by taking the spin channel who&#39;s defect states have the lowest average IPR across the different k-points.&quot;</span>
+    <span class="sa">f</span><span class="s2">"The spin channel (</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">spin</span><span class="si">}</span><span class="s2">) is also automaticalliy determined by the "</span>
+    <span class="s2">"IPR, by taking the spin channel who's defect states have the lowest average IPR across the different k-points."</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -516,7 +516,7 @@ The relaxed structure will be taken from the <code class="docutils literal notra
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The relaxed structure is in dirs01[1]
 HarmonicDefect(omega=0.033 eV, charge=0.0, relaxed_index=1, spin=1, defect_band=[(138, 0, 1), (138, 1, 1)])
-The spin channel (-1) is also automaticalliy determined by the IPR, by taking the spin channel who&#39;s defect states have the lowest average IPR across the different k-points.
+The spin channel (-1) is also automaticalliy determined by the IPR, by taking the spin channel who's defect states have the lowest average IPR across the different k-points.
 </pre></div>
 </div>
 </div>
@@ -538,19 +538,19 @@ Please report any issues you encounter to the github issue tracker.
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
     <span class="n">hd0</span><span class="o">.</span><span class="n">distortions</span><span class="p">,</span>
     <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hd0</span><span class="o">.</span><span class="n">energies</span><span class="p">)</span> <span class="o">-</span> <span class="n">hd0</span><span class="o">.</span><span class="n">energies</span><span class="p">[</span><span class="n">hd0</span><span class="o">.</span><span class="n">relaxed_index</span><span class="p">])</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">,</span>
-    <span class="s2">&quot;o&quot;</span><span class="p">,</span>
+    <span class="s2">"o"</span><span class="p">,</span>
     <span class="n">ms</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
 <span class="n">yy</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">hd0</span><span class="o">.</span><span class="n">omega</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">xx</span><span class="o">**</span><span class="mi">2</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Q [amu$^{1/2}$Å]&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Energy [meV]&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Q [amu$^{1/2}$Å]"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"Energy [meV]"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/952884e5067eece28a6e636df7baee808c2b220c4a69dc76803d7d43218b50c4.png" src="../_images/952884e5067eece28a6e636df7baee808c2b220c4a69dc76803d7d43218b50c4.png" />
+<img alt="../_images/687c66ecb193d510d704f8c6f94080418f4ff755428a8449cf8376f7486f3097.png" src="../_images/687c66ecb193d510d704f8c6f94080418f4ff755428a8449cf8376f7486f3097.png" />
 </div>
 </div>
 <p>The band structure of the relaxed structure has a state that can be identified as the defect state using the inverse participation ratio.</p>
@@ -560,15 +560,15 @@ Please report any issues you encounter to the github issue tracker.
 <span class="n">eigs</span> <span class="o">=</span> <span class="n">bs</span><span class="o">.</span><span class="n">bands</span><span class="p">[</span><span class="n">hd0</span><span class="o">.</span><span class="n">spin</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">]</span>
 <span class="n">eigs_ref_efermi</span> <span class="o">=</span> <span class="n">eigs</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">hlines</span><span class="p">([</span><span class="n">eigs_ref_efermi</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">eigs_ref_efermi</span><span class="p">[</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band_index</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">eigs_ref_efermi</span><span class="p">[</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band_index</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s2">"red"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">efermi</span> <span class="o">-</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">bs</span><span class="o">.</span><span class="n">efermi</span> <span class="o">+</span> <span class="mf">2.5</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">([])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Energy Level Spin:</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">spin</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Energy Level Spin:</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">spin</span><span class="si">}</span><span class="s2">"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/5a7e908fe62bcce04fcf61c7a25c1acb8902e713b32f7715df10f8b04a686fd1.png" src="../_images/5a7e908fe62bcce04fcf61c7a25c1acb8902e713b32f7715df10f8b04a686fd1.png" />
+<img alt="../_images/5972cd9a6e4eb3bbb3e4ead8e88184e4ac38a9a2577102f7091b4cc5077ce6f9.png" src="../_images/5972cd9a6e4eb3bbb3e4ead8e88184e4ac38a9a2577102f7091b4cc5077ce6f9.png" />
 </div>
 </div>
 </section>
@@ -595,15 +595,15 @@ The <code class="docutils literal notranslate"><span class="pre">HarmonicDefect.
 As an example, we will use the three <code class="docutils literal notranslate"><span class="pre">WSWQ</span></code> files generated by the three displaces in <code class="docutils literal notranslate"><span class="pre">hd0</span></code></p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wswq_dir</span> <span class="o">=</span> <span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="s2">&quot;wswqs&quot;</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The parsed WSWQ files are: </span><span class="si">{</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">wswq_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;WSWQ*&#39;</span><span class="p">)]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="n">hd0</span><span class="o">.</span><span class="n">read_wswqs</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="s2">&quot;wswqs&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parsed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hd0</span><span class="o">.</span><span class="n">wswqs</span><span class="p">)</span><span class="si">}</span><span class="s2"> WSWQ files.&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wswq_dir</span> <span class="o">=</span> <span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">"ccd_0_-1"</span> <span class="o">/</span> <span class="s2">"wswqs"</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The parsed WSWQ files are: </span><span class="si">{</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">wswq_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">'WSWQ*'</span><span class="p">)]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">hd0</span><span class="o">.</span><span class="n">read_wswqs</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">"ccd_0_-1"</span> <span class="o">/</span> <span class="s2">"wswqs"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Parsed </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hd0</span><span class="o">.</span><span class="n">wswqs</span><span class="p">)</span><span class="si">}</span><span class="s2"> WSWQ files."</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The parsed WSWQ files are: [&#39;WSWQ.0&#39;, &#39;WSWQ.2&#39;, &#39;WSWQ.1&#39;]
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The parsed WSWQ files are: ['WSWQ.2', 'WSWQ.0', 'WSWQ.1']
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Parsed 3 WSWQ files.
@@ -616,13 +616,13 @@ Since we know the band edge state is at the Gamma point from analyzing the bulk 
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;The automatically determined defect electronic states are: </span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band</span><span class="si">}</span><span class="s2"> &quot;</span>
-    <span class="s2">&quot;(with [band, k-point, spin] indexing).&quot;</span>
+    <span class="sa">f</span><span class="s2">"The automatically determined defect electronic states are: </span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band</span><span class="si">}</span><span class="s2"> "</span>
+    <span class="s2">"(with [band, k-point, spin] indexing)."</span>
 <span class="p">)</span>
 <span class="n">epME</span> <span class="o">=</span> <span class="n">hd0</span><span class="o">.</span><span class="n">get_elph_me</span><span class="p">(</span><span class="n">defect_state</span><span class="o">=</span><span class="p">(</span><span class="mi">138</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;The resulting array of shape </span><span class="si">{</span><span class="n">epME</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> contains the matrix elements from the &quot;</span>
-    <span class="s2">&quot;defect state to all other states at the same k-point.&quot;</span>
+    <span class="sa">f</span><span class="s2">"The resulting array of shape </span><span class="si">{</span><span class="n">epME</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> contains the matrix elements from the "</span>
+    <span class="s2">"defect state to all other states at the same k-point."</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -640,7 +640,7 @@ The resulting array of shape (216,) contains the matrix elements from the defect
 <p>To calculate the Shockley-Read-Hall (SRH) capture coefficient, we also need the potential energy surface of the final state.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dirs10</span> <span class="o">=</span> <span class="p">[</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_-1_0&quot;</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dirs10</span> <span class="o">=</span> <span class="p">[</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">"ccd_-1_0"</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
 <span class="n">hd1</span> <span class="o">=</span> <span class="n">HarmonicDefect</span><span class="o">.</span><span class="n">from_directories</span><span class="p">(</span>
     <span class="n">directories</span><span class="o">=</span><span class="n">dirs10</span><span class="p">,</span>
     <span class="n">store_bandstructure</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -657,13 +657,13 @@ The resulting array of shape (216,) contains the matrix elements from the defect
     <span class="n">initial_state</span><span class="o">=</span><span class="n">hd0</span><span class="p">,</span> <span class="n">final_state</span><span class="o">=</span><span class="n">hd1</span><span class="p">,</span> <span class="n">defect_state</span><span class="o">=</span><span class="p">(</span><span class="mi">138</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">T</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="n">dE</span><span class="o">=</span><span class="mf">0.3</span>
 <span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">srh_c</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Temperature [K]&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;SRH coefficient [cm$^{-3}$s$^{-1}$]&quot;</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Temperature [K]"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">"SRH coefficient [cm$^{-3}$s$^{-1}$]"</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/1f1330b340f94b14408426dec21f46eb086d83d748a41cc57db05516c653423a.png" src="../_images/1f1330b340f94b14408426dec21f46eb086d83d748a41cc57db05516c653423a.png" />
+<img alt="../_images/0d415d9d2e92af940cf5dcf8ce5d51877e42ee91eca187ad229b10df9ead2487.png" src="../_images/0d415d9d2e92af940cf5dcf8ce5d51877e42ee91eca187ad229b10df9ead2487.png" />
 </div>
 </div>
 </section>

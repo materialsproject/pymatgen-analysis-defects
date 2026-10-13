@@ -476,7 +476,7 @@ As along as the database or any algorithm keeps track of this <code class="docut
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../../../tests/test_files&quot;</span><span class="p">)</span>
+<span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"../../../tests/test_files"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -486,11 +486,11 @@ As along as the database or any algorithm keeps track of this <code class="docut
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.analysis.defects.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefectComplex</span><span class="p">,</span> <span class="n">Substitution</span><span class="p">,</span> <span class="n">Vacancy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">PeriodicSite</span><span class="p">,</span> <span class="n">Species</span><span class="p">,</span> <span class="n">Structure</span>
 
-<span class="n">bulk</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;GaN.vasp&quot;</span><span class="p">)</span>
+<span class="n">bulk</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">"GaN.vasp"</span><span class="p">)</span>
 <span class="k">if</span> <span class="p">(</span>
     <span class="n">bulk</span><span class="o">.</span><span class="n">lattice</span> <span class="o">==</span> <span class="n">bulk</span><span class="o">.</span><span class="n">get_primitive_structure</span><span class="p">()</span><span class="o">.</span><span class="n">lattice</span>
 <span class="p">):</span>  <span class="c1"># check that you have the primitive structure</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The bulk unit cell is the unique primitive WS cell&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"The bulk unit cell is the unique primitive WS cell"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -508,8 +508,8 @@ As along as the database or any algorithm keeps track of this <code class="docut
 <span class="n">n_site0</span> <span class="o">=</span> <span class="n">bulk</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 <span class="n">n_site1</span> <span class="o">=</span> <span class="n">bulk</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
 
-<span class="n">mg_site0</span> <span class="o">=</span> <span class="n">PeriodicSite</span><span class="p">(</span><span class="n">Species</span><span class="p">(</span><span class="s2">&quot;Mg&quot;</span><span class="p">),</span> <span class="n">ga_site0</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">,</span> <span class="n">bulk</span><span class="o">.</span><span class="n">lattice</span><span class="p">)</span>
-<span class="n">mg_site1</span> <span class="o">=</span> <span class="n">PeriodicSite</span><span class="p">(</span><span class="n">Species</span><span class="p">(</span><span class="s2">&quot;Mg&quot;</span><span class="p">),</span> <span class="n">ga_site1</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">,</span> <span class="n">bulk</span><span class="o">.</span><span class="n">lattice</span><span class="p">)</span>
+<span class="n">mg_site0</span> <span class="o">=</span> <span class="n">PeriodicSite</span><span class="p">(</span><span class="n">Species</span><span class="p">(</span><span class="s2">"Mg"</span><span class="p">),</span> <span class="n">ga_site0</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">,</span> <span class="n">bulk</span><span class="o">.</span><span class="n">lattice</span><span class="p">)</span>
+<span class="n">mg_site1</span> <span class="o">=</span> <span class="n">PeriodicSite</span><span class="p">(</span><span class="n">Species</span><span class="p">(</span><span class="s2">"Mg"</span><span class="p">),</span> <span class="n">ga_site1</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">,</span> <span class="n">bulk</span><span class="o">.</span><span class="n">lattice</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -519,7 +519,7 @@ As along as the database or any algorithm keeps track of this <code class="docut
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mg_ga_defect0</span> <span class="o">=</span> <span class="n">Substitution</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">bulk</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">mg_site0</span><span class="p">)</span>
 <span class="n">mg_ga_defect1</span> <span class="o">=</span> <span class="n">Substitution</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">bulk</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">mg_site1</span><span class="p">)</span>
 <span class="k">if</span> <span class="n">mg_ga_defect0</span> <span class="o">==</span> <span class="n">mg_ga_defect1</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The two Mg_Ga defects are equivalent.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"The two Mg_Ga defects are equivalent."</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -531,9 +531,9 @@ As along as the database or any algorithm keeps track of this <code class="docut
 </div>
 <p>Equivalence here is determined using the standard StructureMatcher settings.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__o</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Equality operator.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Equality operator."""</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">__o</span><span class="p">,</span> <span class="n">Defect</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Can only compare Defects to Defects&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Can only compare Defects to Defects"</span><span class="p">)</span>
         <span class="n">sm</span> <span class="o">=</span> <span class="n">StructureMatcher</span><span class="p">(</span><span class="n">comparator</span><span class="o">=</span><span class="n">ElementComparator</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">sm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defect_structure</span><span class="p">,</span> <span class="n">__o</span><span class="o">.</span><span class="n">defect_structure</span><span class="p">)</span>
 </pre></div>
@@ -547,12 +547,12 @@ As along as the database or any algorithm keeps track of this <code class="docut
 <span class="n">vac_defect2</span> <span class="o">=</span> <span class="n">Vacancy</span><span class="p">(</span><span class="n">structure</span><span class="o">=</span><span class="n">bulk</span><span class="p">,</span> <span class="n">site</span><span class="o">=</span><span class="n">n_site1</span><span class="p">)</span>
 <span class="k">if</span> <span class="n">vac_defect0</span> <span class="o">!=</span> <span class="n">vac_defect1</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;The two vacancies </span><span class="si">{</span><span class="n">vac_defect0</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">vac_defect1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> are not equivalent.&quot;</span>
+        <span class="sa">f</span><span class="s2">"The two vacancies </span><span class="si">{</span><span class="n">vac_defect0</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">vac_defect1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> are not equivalent."</span>
     <span class="p">)</span>
 
 <span class="k">if</span> <span class="n">vac_defect2</span> <span class="o">==</span> <span class="n">vac_defect1</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;The two vacancies </span><span class="si">{</span><span class="n">vac_defect2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">vac_defect1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> are equivalent.&quot;</span>
+        <span class="sa">f</span><span class="s2">"The two vacancies </span><span class="si">{</span><span class="n">vac_defect2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">vac_defect1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> are equivalent."</span>
     <span class="p">)</span>
 </pre></div>
 </div>
@@ -644,9 +644,9 @@ However, the recommended method to create interstitial defects is to use the <co
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.io.vasp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chgcar</span>
 
-<span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;CHGCAR.Fe3O4.vasp&quot;</span><span class="p">)</span>
+<span class="n">chgcar</span> <span class="o">=</span> <span class="n">Chgcar</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">"CHGCAR.Fe3O4.vasp"</span><span class="p">)</span>
 <span class="n">cig</span> <span class="o">=</span> <span class="n">ChargeInterstitialGenerator</span><span class="p">()</span>
-<span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="n">cig</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">chgcar</span><span class="p">,</span> <span class="n">insert_species</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">]):</span>
+<span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="n">cig</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">chgcar</span><span class="p">,</span> <span class="n">insert_species</span><span class="o">=</span><span class="p">[</span><span class="s2">"H"</span><span class="p">]):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">defect</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -692,7 +692,7 @@ you can obtain the data from the API directly:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mp_api.client</span><span class="w"> </span><span class="kn">import</span> <span class="n">MPRester</span>
 <span class="k">with</span> <span class="n">MPRester</span><span class="p">()</span> <span class="k">as</span> <span class="n">mpr</span><span class="p">:</span>
-    <span class="n">chgcar</span> <span class="o">=</span> <span class="n">mpr</span><span class="o">.</span><span class="n">get_charge_density_from_material_id</span><span class="p">(</span><span class="s2">&quot;mp-804&quot;</span><span class="p">)</span>
+    <span class="n">chgcar</span> <span class="o">=</span> <span class="n">mpr</span><span class="o">.</span><span class="n">get_charge_density_from_material_id</span><span class="p">(</span><span class="s2">"mp-804"</span><span class="p">)</span>
     
 <span class="k">for</span> <span class="n">defect</span> <span class="ow">in</span> <span class="n">generate_all_native_defects</span><span class="p">(</span><span class="n">chgcar</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">defect</span><span class="p">)</span>

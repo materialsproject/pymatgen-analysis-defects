@@ -472,7 +472,7 @@ This essentially allows us to calculate the optical response for (defect)→(con
 <span class="c1"># disable warnings</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">)</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -488,7 +488,7 @@ This essentially allows us to calculate the optical response for (defect)→(con
 <span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.analysis.defects.ccd</span><span class="w"> </span><span class="kn">import</span> <span class="n">HarmonicDefect</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.io.vasp.optics</span><span class="w"> </span><span class="kn">import</span> <span class="n">Spin</span><span class="p">,</span> <span class="n">Waveder</span>
 
-<span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;../../../tests/test_files/v_Ga/&quot;</span><span class="p">)</span>
+<span class="n">TEST_FILES</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"../../../tests/test_files/v_Ga/"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -503,12 +503,12 @@ However, this time, since we don’t need to consider the vibrational modes of t
 Since the <code class="docutils literal notranslate"><span class="pre">PROCAR</span></code> file is also present in the directory, the <code class="docutils literal notranslate"><span class="pre">(band,</span> <span class="pre">kpoint,</span> <span class="pre">spin)</span></code> indices representing the singular, most localized, state will be automatically determined.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dir0</span> <span class="o">=</span> <span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">&quot;ccd_0_-1&quot;</span> <span class="o">/</span> <span class="s2">&quot;optics&quot;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dir0</span> <span class="o">=</span> <span class="n">TEST_FILES</span> <span class="o">/</span> <span class="s2">"ccd_0_-1"</span> <span class="o">/</span> <span class="s2">"optics"</span>
 <span class="n">hd0</span> <span class="o">=</span> <span class="n">HarmonicDefect</span><span class="o">.</span><span class="n">from_directories</span><span class="p">(</span><span class="n">directories</span><span class="o">=</span><span class="p">[</span><span class="n">dir0</span><span class="p">],</span> <span class="n">store_bandstructure</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="c1"># Note the `store_bandstructure=True` argument is required for the matrix element plotting later in the notebook.</span>
 <span class="c1"># but not required for the dielectric function calculation.</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The defect band is </span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The vibrational frequency is omega=</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">omega</span><span class="si">}</span><span class="s2"> in this case is gibberish.&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The defect band is </span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The vibrational frequency is omega=</span><span class="si">{</span><span class="n">hd0</span><span class="o">.</span><span class="n">omega</span><span class="si">}</span><span class="s2"> in this case is gibberish."</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -527,13 +527,13 @@ The user can refine the definition of the defect band by passing in a list of <c
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">print_eigs</span><span class="p">(</span><span class="n">vr</span><span class="p">,</span> <span class="n">bwind</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">defect_bands</span><span class="o">=</span><span class="p">()):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Print the eigenvalues in a small band window around the Fermi level.</span>
+<span class="w">    </span><span class="sd">"""Print the eigenvalues in a small band window around the Fermi level.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        vr (Vasprun): The Vasprun object.</span>
 <span class="sd">        bwind (int): The number of bands above and below the Fermi level to print.</span>
 <span class="sd">        defect_bands (list): A list of tuples of the form (band index, kpt index, spin index)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_spin_idx</span><span class="p">(</span><span class="n">spin</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">spin</span> <span class="o">==</span> <span class="n">Spin</span><span class="o">.</span><span class="n">up</span><span class="p">:</span>
@@ -549,11 +549,11 @@ The user can refine the definition of the defect band by passing in a list of <c
             <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">fermi_idx</span> <span class="o">-</span> <span class="n">bwind</span><span class="p">,</span> <span class="n">fermi_idx</span> <span class="o">+</span> <span class="n">bwind</span><span class="p">):</span>
                 <span class="n">e</span><span class="p">,</span> <span class="n">_o</span> <span class="o">=</span> <span class="n">spin_eigs</span><span class="p">[</span><span class="n">kpt</span><span class="p">,</span> <span class="n">ib</span><span class="p">,</span> <span class="p">:]</span>
                 <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">ib</span><span class="p">,</span> <span class="n">kpt</span><span class="p">,</span> <span class="n">spin_idx</span><span class="p">)</span>
-                <span class="n">e_out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e</span><span class="si">:</span><span class="s2">7.4f</span><span class="si">}</span><span class="s2">*&quot;</span> <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">defect_bands</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e</span><span class="si">:</span><span class="s2">8.5f</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">e_out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">e</span><span class="si">:</span><span class="s2">7.4f</span><span class="si">}</span><span class="s2">*"</span> <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">defect_bands</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">e</span><span class="si">:</span><span class="s2">8.5f</span><span class="si">}</span><span class="s2">"</span>
                 <span class="n">output</span><span class="p">[(</span><span class="n">ib</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e_out</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;band s=0,k=0  s=0,k=1  s=1,k=0  s=1,k=1&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"band s=0,k=0  s=0,k=1  s=1,k=0  s=1,k=1"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ib</span><span class="p">,</span> <span class="n">eigs</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ib</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">eigs</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ib</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">eigs</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 
 <span class="n">print_eigs</span><span class="p">(</span><span class="n">vr</span><span class="o">=</span><span class="n">hd0</span><span class="o">.</span><span class="n">vrun</span><span class="p">,</span> <span class="n">defect_bands</span><span class="o">=</span><span class="n">hd0</span><span class="o">.</span><span class="n">defect_band</span><span class="p">)</span>
@@ -584,7 +584,7 @@ The user can refine the definition of the defect band by passing in a list of <c
 Which requires the <code class="docutils literal notranslate"><span class="pre">waveder</span></code> attribute of the <code class="docutils literal notranslate"><span class="pre">HarmonicDefect</span></code> object to be set.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hd0</span><span class="o">.</span><span class="n">waveder</span> <span class="o">=</span> <span class="n">Waveder</span><span class="o">.</span><span class="n">from_binary</span><span class="p">(</span><span class="n">dir0</span> <span class="o">/</span> <span class="s2">&quot;WAVEDER&quot;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hd0</span><span class="o">.</span><span class="n">waveder</span> <span class="o">=</span> <span class="n">Waveder</span><span class="o">.</span><span class="n">from_binary</span><span class="p">(</span><span class="n">dir0</span> <span class="o">/</span> <span class="s2">"WAVEDER"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -594,17 +594,17 @@ Which requires the <code class="docutils literal notranslate"><span class="pre">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">energy</span><span class="p">,</span> <span class="n">eps_vbm</span><span class="p">,</span> <span class="n">eps_cbm</span> <span class="o">=</span> <span class="n">hd0</span><span class="o">.</span><span class="n">get_dielectric_function</span><span class="p">(</span><span class="n">idir</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">jdir</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="c1"># plotting</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">eps_vbm</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;VBM&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">eps_cbm</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;CBM&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Photon Energy (eV)&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\varepsilon_{\rm imag}$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">eps_vbm</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">"VBM"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">energy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">eps_cbm</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">"CBM"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">"Photon Energy (eV)"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$\varepsilon_{\rm imag}$"</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/008aa95bf13afb8f471d368c7bd36ac27285a3285ca196a34fb9d9a75501ac91.png" src="../_images/008aa95bf13afb8f471d368c7bd36ac27285a3285ca196a34fb9d9a75501ac91.png" />
+<img alt="../_images/e0efc2bb79d20cb42049708c122b2c762b3a688a3bf2bd023b0e298da6aad6ff.png" src="../_images/e0efc2bb79d20cb42049708c122b2c762b3a688a3bf2bd023b0e298da6aad6ff.png" />
 </div>
 </div>
 <p>From the dielectric function above we see that this particular defect (the Ga vacancy in the neutral <code class="docutils literal notranslate"><span class="pre">q=0</span></code> state) is much better at capturing electrons from the valence band via dipole transitions than it is at emitting electrons to the conduction band via dipole transitions.</p>
@@ -627,18 +627,18 @@ The function returns a summary <code class="docutils literal notranslate"><span 
 <span class="n">df_k1</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">plot_optical_transitions</span><span class="p">(</span>
     <span class="n">hd0</span><span class="p">,</span> <span class="n">kpt_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">band_window</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span>
 <span class="p">)</span>
-<span class="n">mpl</span><span class="o">.</span><span class="n">colorbar</span><span class="o">.</span><span class="n">ColorbarBase</span><span class="p">(</span><span class="n">cm_ax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Energy (eV)&quot;</span><span class="p">)</span>
+<span class="n">mpl</span><span class="o">.</span><span class="n">colorbar</span><span class="o">.</span><span class="n">ColorbarBase</span><span class="p">(</span><span class="n">cm_ax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">"vertical"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Energy (eV)"</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">&quot;Kpoint-0&quot;</span><span class="p">,</span> <span class="s2">&quot;Kpoint-1&quot;</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">([</span><span class="s2">"Kpoint-0"</span><span class="p">,</span> <span class="s2">"Kpoint-1"</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[Text(0, 0, &#39;Kpoint-0&#39;), Text(3, 0, &#39;Kpoint-1&#39;)]
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[Text(0, 0, 'Kpoint-0'), Text(3, 0, 'Kpoint-1')]
 </pre></div>
 </div>
-<img alt="../_images/5c1b8316300f02472dccfe258ae8eea3d7488ac6b1153385fd87610d3c702128.png" src="../_images/5c1b8316300f02472dccfe258ae8eea3d7488ac6b1153385fd87610d3c702128.png" />
+<img alt="../_images/034d739e9d83a454045459c0d8db449660949ba0b1112c64d580e9893c9b9bac.png" src="../_images/034d739e9d83a454045459c0d8db449660949ba0b1112c64d580e9893c9b9bac.png" />
 </div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> object containing the dipole matrix elements can also be examined directly.</p>
