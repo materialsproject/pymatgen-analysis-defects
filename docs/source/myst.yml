@@ -7,9 +7,6 @@ project:
   github: materialsproject/pymatgen-analysis-defects
   bibliography:
     - references.bib
-  exclude:
-    - _build
-    - '**.ipynb_checkpoints'
   toc:
     - file: intro.md
     - title: Documentation

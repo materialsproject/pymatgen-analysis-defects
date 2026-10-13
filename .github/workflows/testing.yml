@@ -89,7 +89,7 @@ jobs:
         env:
           BASE_URL: /pymatgen-analysis-defects
         run: |
-          jupyter-book build --html --execute --strict --ci
+          jupyter-book build --html --execute --strict
           pdoc pymatgen.analysis.defects -d google -o _build/html/api
       - name: Deploy
         if: github.ref == 'refs/heads/main'
