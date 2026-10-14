@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="http://localhost:3000/sitemap_style.xsl" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>http://localhost:3000</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/content/quickstart</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/content/defining-defects</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/content/defect-finder</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/content/nonradiative</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/content/photo-conduct</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/content/formation-energy</loc>
+  </url>
+  <url>
+    <loc>http://localhost:3000/content/freysoldt-correction</loc>
+  </url>
+</urlset>
