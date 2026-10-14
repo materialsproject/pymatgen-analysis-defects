@@ -3,8 +3,8 @@ revision = 5
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
-    "python_full_version == '3.13.*' and sys_platform == 'win32'",
     "python_full_version >= '3.14' and sys_platform != 'win32'",
+    "python_full_version == '3.13.*' and sys_platform == 'win32'",
     "python_full_version == '3.13.*' and sys_platform != 'win32'",
     "python_full_version < '3.13' and sys_platform == 'win32'",
     "python_full_version < '3.13' and sys_platform != 'win32'",
@@ -2895,20 +2895,18 @@ wheels = [
 name = "pymatgen-analysis-defects"
 source = { editable = "." }
 dependencies = [
+    { name = "matplotlib" },
+    { name = "monty" },
     { name = "mp-pyrho" },
     { name = "numpy" },
+    { name = "pandas" },
+    { name = "plotly" },
     { name = "pymatgen-core" },
     { name = "scikit-image" },
+    { name = "scipy" },
 ]
 
 [package.optional-dependencies]
-dev = [
-    { name = "pre-commit" },
-]
-docs = [
-    { name = "jupyter-book" },
-    { name = "pdoc" },
-]
 finder = [
     { name = "dscribe" },
 ]
@@ -2917,7 +2915,20 @@ optional = [
     { name = "numba" },
     { name = "pydefect" },
 ]
-tests = [
+
+[package.dev-dependencies]
+dev = [
+    { name = "nbmake" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "pytest-xdist" },
+]
+docs = [
+    { name = "jupyter-book" },
+    { name = "pdoc" },
+]
+test = [
     { name = "nbmake" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -2926,23 +2937,40 @@ tests = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dscribe", marker = "extra == 'finder'", specifier = ">=2.0.0" },
-    { name = "dscribe", marker = "extra == 'optional'", specifier = ">=2.0.0" },
-    { name = "jupyter-book", marker = "extra == 'docs'", specifier = ">=2,<3" },
+    { name = "dscribe", marker = "extra == 'finder'", specifier = ">=2.1.1" },
+    { name = "dscribe", marker = "extra == 'optional'", specifier = ">=2.1.1" },
+    { name = "matplotlib", specifier = ">=3.9" },
+    { name = "monty", specifier = ">=2026.7.16" },
     { name = "mp-pyrho", specifier = ">=0.4.5" },
-    { name = "nbmake", marker = "extra == 'tests'", specifier = ">=1.5.5" },
-    { name = "numba", marker = "extra == 'optional'", specifier = ">=0.60" },
-    { name = "numpy", specifier = ">=2.0.0,<3.0.0" },
-    { name = "pdoc", marker = "extra == 'docs'", specifier = ">=16" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4" },
-    { name = "pydefect", marker = "extra == 'optional'", specifier = ">=0.9" },
-    { name = "pymatgen-core", specifier = ">=2026.10.2" },
-    { name = "pytest", marker = "extra == 'tests'", specifier = ">=9" },
-    { name = "pytest-cov", marker = "extra == 'tests'", specifier = ">=7" },
-    { name = "pytest-xdist", marker = "extra == 'tests'", specifier = ">=3.8" },
-    { name = "scikit-image", specifier = ">=0.24" },
+    { name = "numba", marker = "extra == 'optional'", specifier = ">=0.61" },
+    { name = "numpy", specifier = ">=2.1" },
+    { name = "pandas", specifier = ">=2.2.2" },
+    { name = "plotly", specifier = ">=5.24" },
+    { name = "pydefect", marker = "extra == 'optional'", specifier = ">=0.9.9" },
+    { name = "pymatgen-core", specifier = ">=2026.7.31" },
+    { name = "scikit-image", specifier = ">=0.25" },
+    { name = "scipy", specifier = ">=1.14.1" },
 ]
-provides-extras = ["finder", "dev", "docs", "optional", "tests"]
+provides-extras = ["finder", "optional"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "nbmake", specifier = ">=1.5.5" },
+    { name = "pre-commit", specifier = ">=4" },
+    { name = "pytest", specifier = ">=9" },
+    { name = "pytest-cov", specifier = ">=7" },
+    { name = "pytest-xdist", specifier = ">=3.8" },
+]
+docs = [
+    { name = "jupyter-book", specifier = ">=2,<3" },
+    { name = "pdoc", specifier = ">=16" },
+]
+test = [
+    { name = "nbmake", specifier = ">=1.5.5" },
+    { name = "pytest", specifier = ">=9" },
+    { name = "pytest-cov", specifier = ">=7" },
+    { name = "pytest-xdist", specifier = ">=3.8" },
+]
 
 [[package]]
 name = "pymatgen-core"
