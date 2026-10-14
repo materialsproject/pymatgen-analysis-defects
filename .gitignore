@@ -68,8 +68,8 @@ instance/
 # Scrapy stuff:
 .scrapy
 
-# Sphinx documentation
-docs/_build/
+# Jupyter Book build output
+docs/source/_build/
 
 # PyBuilder
 target/
@@ -144,5 +144,4 @@ docs.old/_build/
 
 docs.old/
 
-docs/source/api_ref/pymatgen.*.rst
 .envrc
