@@ -16,9 +16,14 @@ classifiers = [
   "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-  "pymatgen-core>=2026.10.2",
-  "scikit-image>=0.24",
-  "numpy>=2.0.0,<3.0.0",
+  "pymatgen-core>=2026.7.31",
+  "numpy>=2.1",
+  "scipy>=1.14.1",
+  "matplotlib>=3.9",
+  "monty>=2026.7.16",
+  "pandas>=2.2.2",
+  "plotly>=5.24",
+  "scikit-image>=0.25",
   "mp-pyrho>=0.4.5",
 ]
 description = "Pymatgen extension for defects analysis"
@@ -30,14 +35,13 @@ readme = "README.md"
 requires-python = ">=3.12"
 
 [project.optional-dependencies]
-finder = ["dscribe>=2.0.0"]
-dev = ["pre-commit>=4"]
-docs = [
-  "jupyter-book>=2,<3",
-  "pdoc>=16",
-]
-optional = ["pydefect>=0.9", "dscribe>=2.0.0", "numba>=0.60"]
-tests = ["pytest>=9", "pytest-cov>=7", "pytest-xdist>=3.8", "nbmake>=1.5.5"]
+finder = ["dscribe>=2.1.1"]
+optional = ["pydefect>=0.9.9", "dscribe>=2.1.1", "numba>=0.61"]
+
+[dependency-groups]
+test = ["pytest>=9", "pytest-cov>=7", "pytest-xdist>=3.8", "nbmake>=1.5.5"]
+docs = ["jupyter-book>=2,<3", "pdoc>=16"]
+dev = ["pre-commit>=4", { include-group = "test" }]
 
 [tool.setuptools.dynamic]
 readme = { file = ["README.md"] }

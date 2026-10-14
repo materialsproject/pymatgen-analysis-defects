@@ -105,7 +105,7 @@ And run these commands for testing:
 
 .. code-block:: bash
 
-    $ uv sync --extra tests --extra optional
+    $ uv sync --extra optional
     $ uv run pytest -n auto --cov=pymatgen
     $ uv run pytest -n auto --nbmake ./docs/source/content
 

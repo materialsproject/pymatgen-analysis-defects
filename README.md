@@ -107,7 +107,7 @@ $ uvx pre-commit run --all-files
 And run these commands for testing:
 
 ``` bash
-$ uv sync --extra tests --extra optional
+$ uv sync --extra optional
 $ uv run pytest -n auto --cov=pymatgen
 $ uv run pytest -n auto --nbmake ./docs/source/content
 ```
