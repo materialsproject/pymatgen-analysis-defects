@@ -99,6 +99,9 @@ def get_freysoldt_correction(
     (:func:`get_spherically_averaged_dielectric`) used for the isolated energy and
     the G=0 (alignment) term of the model potential.
 
+    The ``step`` argument has been removed: the isolated energy is now integrated
+    from :math:`g=0` (the integrand is finite there), changing results by <0.1 meV.
+
     Args:
         q:
             Charge state of defect
@@ -237,6 +240,9 @@ def perform_es_corr(
     dielectric tensors, the periodic energy is screened by the full tensor
     (:math:`G^T \epsilon G`), while the isolated energy and G=0 term are screened
     by the spherically-averaged dielectric constant, as in ``sxdefectalign``.
+
+    The ``step`` argument has been removed: the isolated energy is now integrated
+    from :math:`g=0` (the integrand is finite there), changing results by <0.1 meV.
 
     Args:
         lattice: Pymatgen lattice object

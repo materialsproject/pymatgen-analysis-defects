@@ -103,7 +103,7 @@ class QModel(MSONable):
             raise ValueError(msg)
 
     def rho_rec(self, g2: float) -> float:
-        """Reciprocal space model charge value.
+        r"""Reciprocal space model charge value.
 
         Reciprocal space model charge value, for input squared reciprocal vector.
 
@@ -112,6 +112,14 @@ class QModel(MSONable):
 
         Returns:
             Charge density at the reciprocal vector magnitude
+
+        Note:
+            Earlier versions used :math:`1/\sqrt{1 + \gamma^2 g^2}` for the
+            exponential term, which is not the Fourier transform of
+            :math:`\exp(-r/\gamma)` and disagreed with :attr:`rho_rec_limit0`.
+            Corrections using an exponential tail (``expnorm > 0``) change as a result,
+            e.g. by ~4% for ``QModel(expnorm=0.5, gamma=1.5)`` in a 10 Angstrom cubic cell.
+            The default Gaussian model (``expnorm=0``) is unaffected.
         """
         # (normalised) Fourier transform of exp(-r/gamma) is 1/(1 + gamma^2 g^2)^2:
         return self.expnorm / (1 + self.gamma2 * g2) ** 2 + (1 - self.expnorm) * np.exp(
