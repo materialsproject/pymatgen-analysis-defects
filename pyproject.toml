@@ -14,7 +14,7 @@ classifiers = [
   "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-  "pymatgen-core>=2026.4.7",
+  "pymatgen-core>=2026.10.2",
   "scikit-image>=0.19.3",
   "numpy>=2.0.0,<3.0.0",
   "mp-pyrho>=0.4.4",
