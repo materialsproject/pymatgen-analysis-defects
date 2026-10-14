@@ -40,6 +40,11 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.12", "3.13", "3.14"]
+        resolution: [locked]
+        include:
+          # Check the lower bounds in pyproject.toml still work
+          - python-version: "3.12"
+            resolution: lowest-direct
 
     env:
       PMG_MAPI_KEY: ${{ secrets.PMG_MAPI_KEY }}
@@ -53,7 +58,7 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv sync --locked --no-dev --group test --extra optional
+        run: uv sync ${{ matrix.resolution == 'lowest-direct' && '--resolution lowest-direct' || '--locked' }} --no-dev --group test --extra optional
 
       - name: Test Modules
         run: pytest -n auto --cov=pymatgen --cov-report=xml
