@@ -1,5 +1,6 @@
 import math
 
+import numpy as np
 import pytest
 from pymatgen.analysis.defects.corrections.freysoldt import (
     get_freysoldt_correction,
@@ -94,6 +95,41 @@ def test_freysoldt_anisotropic_dielectric() -> None:
     assert perform_es_corr(lattice, 1, [10, 10, 10], QModel()) == perform_es_corr(
         lattice, 1, 10, QModel()
     )
+
+
+def test_freysoldt_anisotropic_potential(v_N_GaN) -> None:
+    """Test anisotropic dielectric tensors in the potential alignment.
+
+    The planar-averaged model potential along each axis is screened by the dielectric
+    constant along that axis, so it matches the isotropic model potential up to a
+    constant (the G=0 term, screened by the spherically-averaged dielectric constant).
+    """
+    bulk_locpot = v_N_GaN["bulk_locpot"]
+    defect_locpot = v_N_GaN["defect_locpots"][1]
+
+    def get_correction(dielectric):
+        return get_freysoldt_correction(
+            q=1,
+            dielectric=dielectric,
+            bulk_locpot=bulk_locpot,
+            defect_locpot=defect_locpot,
+        )
+
+    # isotropic tensors match scalar input
+    scalar = get_correction(5).correction_energy
+    assert get_correction([5, 5, 5]).correction_energy == pytest.approx(scalar)
+    assert get_correction(5 * np.eye(3)).correction_energy == pytest.approx(scalar)
+
+    # GaN is hexagonal, so axes 0 and 1 are in-plane and axis 2 is along c
+    anisotropic = get_correction([5, 5, 10]).metadata["plot_data"]
+    isotropic = {5: get_correction(5).metadata["plot_data"]}
+    isotropic[10] = get_correction(10).metadata["plot_data"]
+    for axis, eps in [(0, 5), (1, 5), (2, 10)]:
+        diff = np.subtract(
+            anisotropic[axis]["pot_plot_data"]["Vr"],
+            isotropic[eps][axis]["pot_plot_data"]["Vr"],
+        )
+        assert np.ptp(diff) == pytest.approx(0, abs=1e-10)
 
 
 def test_kumagai(test_dir):

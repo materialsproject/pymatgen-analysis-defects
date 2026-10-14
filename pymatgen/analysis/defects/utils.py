@@ -192,28 +192,6 @@ def genrecip(
             yield vec
 
 
-def generate_reciprocal_vectors_squared(
-    a1: npt.ArrayLike, a2: npt.ArrayLike, a3: npt.ArrayLike, encut: float
-) -> Generator[float, None, None]:
-    """Generate Reciprocal vectors squared.
-
-    Generate reciprocal vector magnitudes within the cutoff along the specified
-    lattice vectors.
-
-    Args:
-        a1: Lattice vector a (in Bohrs)
-        a2: Lattice vector b (in Bohrs)
-        a3: Lattice vector c (in Bohrs)
-        encut: Reciprocal vector energy cutoff
-
-    Returns:
-        [[g1^2], [g2^2], ...] Square of reciprocal vectors (1/Bohr)^2
-        determined by a1, a2, a3 and whose magntidue is less than gcut^2.
-    """
-    for vec in genrecip(a1, a2, a3, encut):
-        yield np.dot(vec, vec)
-
-
 def converge(f: Callable, step: float, tol: float, max_h: float) -> float:
     """Simple newton iteration based convergence function.
 
