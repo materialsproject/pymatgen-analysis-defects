@@ -3458,18 +3458,18 @@ requires-dist = [
     { name = "dscribe", marker = "extra == 'finder'", specifier = ">=2.0.0" },
     { name = "dscribe", marker = "extra == 'optional'", specifier = ">=2.0.0" },
     { name = "jupyter-book", marker = "extra == 'docs'", specifier = ">=2,<3" },
-    { name = "mp-pyrho", specifier = ">=0.4.4" },
+    { name = "mp-pyrho", specifier = ">=0.4.5" },
     { name = "nbmake", marker = "extra == 'tests'", specifier = ">=1.5.5" },
-    { name = "numba", marker = "extra == 'optional'" },
+    { name = "numba", marker = "extra == 'optional'", specifier = ">=0.60" },
     { name = "numpy", specifier = ">=2.0.0,<3.0.0" },
     { name = "pdoc", marker = "extra == 'docs'", specifier = ">=16" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4" },
-    { name = "pydefect", marker = "extra == 'optional'" },
+    { name = "pydefect", marker = "extra == 'optional'", specifier = ">=0.9" },
     { name = "pymatgen-core", specifier = ">=2026.10.2" },
     { name = "pytest", marker = "extra == 'tests'", specifier = ">=9" },
     { name = "pytest-cov", marker = "extra == 'tests'", specifier = ">=7" },
     { name = "pytest-xdist", marker = "extra == 'tests'", specifier = ">=3.8" },
-    { name = "scikit-image", specifier = ">=0.19.3" },
+    { name = "scikit-image", specifier = ">=0.24" },
 ]
 provides-extras = ["finder", "dev", "docs", "optional", "tests"]
 

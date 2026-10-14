@@ -18,9 +18,9 @@ classifiers = [
 ]
 dependencies = [
   "pymatgen-core>=2026.10.2",
-  "scikit-image>=0.19.3",
+  "scikit-image>=0.24",
   "numpy>=2.0.0,<3.0.0",
-  "mp-pyrho>=0.4.4",
+  "mp-pyrho>=0.4.5",
 ]
 description = "Pymatgen extension for defects analysis"
 dynamic = ["version"]
@@ -37,7 +37,7 @@ docs = [
   "jupyter-book>=2,<3",
   "pdoc>=16",
 ]
-optional = ["pydefect", "dscribe>=2.0.0", "numba"]
+optional = ["pydefect>=0.9", "dscribe>=2.0.0", "numba>=0.60"]
 tests = ["pytest>=9", "pytest-cov>=7", "pytest-xdist>=3.8", "nbmake>=1.5.5"]
 
 [tool.setuptools.dynamic]
