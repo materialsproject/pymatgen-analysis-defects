@@ -56,10 +56,10 @@ jobs:
         run: uv pip install -e .[tests,optional]
 
       - name: Test Modules
-        run: pytest -n auto --cov=pymatgen --cov-report=xml
+        run: pytest -n logical --cov=pymatgen --cov-report=xml
 
       - name: Test Notebooks
-        run: pytest -n auto --nbmake ./docs/source/content
+        run: pytest -n logical --nbmake ./docs/source/content
 
       - uses: codecov/codecov-action@v4
         if: matrix.python-version == '3.13'
