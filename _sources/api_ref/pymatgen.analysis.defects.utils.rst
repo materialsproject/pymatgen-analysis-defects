@@ -12,7 +12,6 @@
       cluster_nodes
       converge
       eV_to_k
-      generate_reciprocal_vectors_squared
       generic_group_labels
       genrecip
       get_avg_chg
