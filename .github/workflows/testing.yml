@@ -53,7 +53,7 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv pip install -e .[tests,optional]
+        run: uv sync --locked --extra tests --extra optional
 
       - name: Test Modules
         run: pytest -n auto --cov=pymatgen --cov-report=xml
@@ -100,7 +100,7 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv pip install -e .[docs,finder]
+        run: uv sync --locked --extra docs --extra finder
       - name: Build
         working-directory: docs/source
         env:
