@@ -15,11 +15,12 @@ from pymatgen.analysis.defects.utils import (
     ang_to_bohr,
     converge,
     eV_to_k,
-    generate_reciprocal_vectors_squared,
+    genrecip,
     hart_to_ev,
 )
 from pymatgen.io.vasp.outputs import Locpot, VolumetricData
 from scipy import stats
+from scipy.special import elliprf
 
 _logger = logging.getLogger(__name__)
 
@@ -42,9 +43,46 @@ Rewritten to be functional instead of object oriented.
 """
 
 
+def _get_dielectric_tensor(dielectric: float | ArrayLike) -> np.ndarray:
+    """Convert a scalar, 3-vector (diagonal) or 3x3 dielectric to a 3x3 tensor."""
+    dielectric = np.asarray(dielectric, dtype=float)
+    if dielectric.shape in {(), (3,)}:
+        return np.diag(np.broadcast_to(dielectric, (3,)))
+    if dielectric.shape == (3, 3):
+        return dielectric
+    msg = f"Dielectric constant must be a scalar, 3-vector or 3x3 matrix, but got shape {dielectric.shape}"
+    raise ValueError(msg)
+
+
+def get_spherically_averaged_dielectric(dielectric: float | ArrayLike) -> float:
+    r"""Get the spherically-averaged (isotropic) dielectric constant of a dielectric tensor.
+
+    Defined as :math:`1/\bar{\epsilon} = \langle 1/(\hat{g}^T \epsilon \hat{g}) \rangle`,
+    averaged over unit vectors :math:`\hat{g}`, as used by ``sxdefectalign`` for the
+    isolated energy and potential alignment (G=0) terms with anisotropic screening.
+    This is exact for the spherically-averaged potential of a point charge
+    (:math:`q/\bar{\epsilon}r`), and so for the self-energy of a spherical model
+    charge. It lies between the harmonic and arithmetic means of the eigenvalues
+    :math:`\lambda_i`, and is evaluated as
+    :math:`\sqrt{\det\epsilon} / R_F(1/\lambda_1, 1/\lambda_2, 1/\lambda_3)`, with
+    :math:`R_F` the Carlson symmetric elliptic integral.
+
+    Args:
+        dielectric: Dielectric constant (scalar), diagonal (3-vector) or 3x3 tensor.
+
+    Returns:
+        float: The spherically-averaged dielectric constant.
+    """
+    dielectric_tensor = _get_dielectric_tensor(dielectric)
+    if np.array_equal(dielectric_tensor, dielectric_tensor[0, 0] * np.eye(3)):
+        return float(dielectric_tensor[0, 0])  # isotropic
+    eigvals = np.linalg.eigvalsh((dielectric_tensor + dielectric_tensor.T) / 2)
+    return float(np.sqrt(np.prod(eigvals)) / elliprf(*(1 / eigvals)))
+
+
 def get_freysoldt_correction(
     q: int,
-    dielectric: float,
+    dielectric: float | ArrayLike,
     defect_locpot: Locpot,
     bulk_locpot: Locpot,
     defect_frac_coords: ArrayLike | None = None,
@@ -52,9 +90,17 @@ def get_freysoldt_correction(
     energy_cutoff: float = 520,
     mad_tol: float = 1e-4,
     q_model: QModel | None = None,
-    step: float = 1e-4,
 ) -> CorrectionResult:
     """Gets the Freysoldt correction for a defect entry.
+
+    Anisotropic dielectric tensors are treated as in ``sxdefectalign``: the full tensor
+    is used for the periodic energy and the (planar-averaged) long-range model
+    potential along each axis, with the spherically-averaged dielectric constant
+    (:func:`get_spherically_averaged_dielectric`) used for the isolated energy and
+    the G=0 (alignment) term of the model potential.
+
+    The ``step`` argument has been removed: the isolated energy is now integrated
+    from :math:`g=0` (the integrand is finite there), changing results by <0.1 meV.
 
     Args:
         q:
@@ -76,8 +122,6 @@ def get_freysoldt_correction(
             Convergence criteria for the Madelung energy for potential correction
         q_model:
             QModel object to use for Freysoldt correction. If None, then uses default
-        step:
-            Step size for numerical integration.
 
     Returns:
         CorrectionResult: Correction summary object. The metadata contains
@@ -93,19 +137,7 @@ def get_freysoldt_correction(
             base_structure=bulk_locpot.structure,
         )
 
-    # dielectric has to be a float
-    if isinstance(dielectric, (int, float)):
-        dielectric = float(dielectric)
-    elif np.ndim(dielectric) == 1:  # pragma: no cover
-        dielectric = float(np.mean(dielectric))
-    elif np.ndim(dielectric) == 2:  # pragma: no cover
-        dielectric = float(np.mean(dielectric.diagonal()))
-    else:  # pragma: no cover
-        msg = f"Dielectric constant cannot be converted into a scalar. Currently of type {type(dielectric)}"
-        raise ValueError(
-            msg,
-        )
-
+    dielectric = _get_dielectric_tensor(dielectric)
     q_model = QModel() if q_model is None else q_model
 
     if isinstance(defect_locpot, VolumetricData):
@@ -151,7 +183,6 @@ def get_freysoldt_correction(
         q_model=q_model,
         energy_cutoff=energy_cutoff,
         mad_tol=mad_tol,
-        step=step,
     )
 
     alignment_corrs = {}
@@ -198,15 +229,20 @@ def get_freysoldt_correction(
 def perform_es_corr(
     lattice: Lattice,
     q: float,
-    dielectric: float,
+    dielectric: float | ArrayLike,
     q_model: QModel,
     energy_cutoff: float = 520,
     mad_tol: float = 1e-4,
-    step: float = 1e-4,
 ) -> float:
-    """Perform Electrostatic Freysoldt Correction.
+    r"""Perform Electrostatic Freysoldt Correction.
 
-    Perform the electrostatic Freysoldt correction for a defect.
+    Perform the electrostatic Freysoldt correction for a defect. For anisotropic
+    dielectric tensors, the periodic energy is screened by the full tensor
+    (:math:`G^T \epsilon G`), while the isolated energy and G=0 term are screened
+    by the spherically-averaged dielectric constant, as in ``sxdefectalign``.
+
+    The ``step`` argument has been removed: the isolated energy is now integrated
+    from :math:`g=0` (the integrand is finite there), changing results by <0.1 meV.
 
     Args:
         lattice: Pymatgen lattice object
@@ -215,7 +251,6 @@ def perform_es_corr(
         q_model: QModel object to use for Freysoldt correction. If None, uses default
         energy_cutoff: Maximum energy in eV in reciprocal space to perform integration
         mad_tol: Convergence criteria for the Madelung energy for potential correction
-        step: Step size for numerical integration
 
     Return:
         float:
@@ -229,19 +264,23 @@ def perform_es_corr(
     [a1, a2, a3] = ang_to_bohr * np.array(lattice.get_cartesian_coords(1))
     _logger.debug("In atomic units, lat consts are (in bohr): %s", str([a1, a2, a3]))
     vol = np.dot(a1, np.cross(a2, a3))  # vol in bohr^3
+    dielectric_tensor = _get_dielectric_tensor(dielectric)
+    avg_eps = get_spherically_averaged_dielectric(dielectric_tensor)
 
     def e_iso(encut: float) -> float:
         gcut = eV_to_k(encut)  # gcut is in units of 1/A
         return (
-            scipy.integrate.quad(lambda g: q_model.rho_rec(g * g) ** 2, step, gcut)[0]
+            scipy.integrate.quad(lambda g: q_model.rho_rec(g * g) ** 2, 0, gcut)[0]
             * (q**2)
             / np.pi
         )
 
     def e_per(encut: float) -> float:
         eper = 0.0
-        for g2 in generate_reciprocal_vectors_squared(a1, a2, a3, encut):
-            eper += (q_model.rho_rec(g2) ** 2) / g2
+        for g in genrecip(
+            a1, a2, a3, encut
+        ):  # times avg_eps; divided by avg_eps below:
+            eper += avg_eps * q_model.rho_rec(g @ g) ** 2 / (g @ dielectric_tensor @ g)
         eper *= (q**2) * 2 * round(np.pi, 6) / vol
         eper += (q**2) * 4 * round(np.pi, 6) * q_model.rho_rec_limit0 / vol
         return eper
@@ -255,7 +294,7 @@ def perform_es_corr(
     _logger.info("difference (periodic-iso) is %f hartree", round(eper - eiso, 6))
     _logger.info("difference in (eV) is %f", round((eper - eiso) * hart_to_ev, 4))
 
-    es_corr = round((eiso - eper) / dielectric * hart_to_ev, 6)
+    es_corr = round((eiso - eper) / avg_eps * hart_to_ev, 6)
     _logger.info("Defect Correction without alignment %f (eV): ", es_corr)
     return es_corr
 
@@ -268,12 +307,19 @@ def perform_pot_corr(
     q: float,
     defect_frac_coords: ArrayLike,
     axis: Axes,
-    dielectric: float,
+    dielectric: float | ArrayLike,
     q_model: QModel,
     mad_tol: float = 1e-4,
     widthsample: float = 1.0,
 ) -> tuple[float, dict]:
-    """For performing planar averaging potential alignment.
+    r"""For performing planar averaging potential alignment.
+
+    For anisotropic dielectric tensors, the planar-averaged long-range model
+    potential along the axis is screened by the effective dielectric constant
+    :math:`\hat{b}^T \epsilon \hat{b}` along the corresponding reciprocal lattice
+    vector :math:`\hat{b}` (the only G-vectors contributing to the planar average),
+    with the G=0 term screened by the spherically-averaged dielectric constant, as in
+    ``sxdefectalign``.
 
     Args:
         axis_grid:
@@ -296,7 +342,7 @@ def perform_pot_corr(
         q (float or int): charge of the defect
         defect_frac_coords: Fractional Coordinates of the defect in the supercell
         axis (int): axis for performing the Freysoldt correction on.
-        dielectric (float): dielectric constant of the bulk.
+        dielectric (float or ArrayLike): dielectric constant of the bulk
         q_model (QModel): QModel object to use for Freysoldt correction. If None, uses default.
         mad_tol (float): convergence criteria for the Madelung energy for potential correction.
         widthsample (float): width (in Angstroms) of the region in between defects
@@ -331,12 +377,18 @@ def perform_pot_corr(
     dg = reci_latt.abc[axis]
     dg /= ang_to_bohr  # convert to bohr to do calculation in atomic units
 
+    dielectric_tensor = _get_dielectric_tensor(dielectric)
+    avg_eps = get_spherically_averaged_dielectric(dielectric_tensor)
+    # only G parallel to the reciprocal lattice vector contribute to the planar average:
+    b_vec = reci_latt.matrix[axis]
+    eps_axis = float(b_vec @ dielectric_tensor @ b_vec / (b_vec @ b_vec))
+
     # Build background charge potential with defect at origin
     v_G = np.empty(len(axis_grid), np.dtype("c16"))
-    v_G[0] = 4 * np.pi * -q / dielectric * q_model.rho_rec_limit0
+    v_G[0] = 4 * np.pi * -q / avg_eps * q_model.rho_rec_limit0
     g = np.roll(np.arange(-nx // 2, nx // 2, 1, dtype=int), int(nx // 2)) * dg
     g2 = np.multiply(g, g)[1:]
-    v_G[1:] = 4 * np.pi / (dielectric * g2) * -q * q_model.rho_rec(g2)
+    v_G[1:] = 4 * np.pi / (eps_axis * g2) * -q * q_model.rho_rec(g2)
     v_G[nx // 2] = 0 if not (nx % 2) else v_G[nx // 2]
 
     # Get the real space potential via fft and grabbing the imaginary portion
