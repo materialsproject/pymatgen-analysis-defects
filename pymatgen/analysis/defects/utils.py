@@ -103,7 +103,7 @@ class QModel(MSONable):
             raise ValueError(msg)
 
     def rho_rec(self, g2: float) -> float:
-        """Reciprocal space model charge value.
+        r"""Reciprocal space model charge value.
 
         Reciprocal space model charge value, for input squared reciprocal vector.
 
@@ -112,10 +112,19 @@ class QModel(MSONable):
 
         Returns:
             Charge density at the reciprocal vector magnitude
+
+        Note:
+            Earlier versions used :math:`1/\sqrt{1 + \gamma^2 g^2}` for the
+            exponential term, which is not the Fourier transform of
+            :math:`\exp(-r/\gamma)` and disagreed with :attr:`rho_rec_limit0`.
+            Corrections using an exponential tail (``expnorm > 0``) change as a result,
+            e.g. by ~4% for ``QModel(expnorm=0.5, gamma=1.5)`` in a 10 Angstrom cubic cell.
+            The default Gaussian model (``expnorm=0``) is unaffected.
         """
-        return self.expnorm / np.sqrt(1 + self.gamma2 * g2) + (
-            1 - self.expnorm
-        ) * np.exp(-0.25 * self.beta2 * g2)
+        # (normalised) Fourier transform of exp(-r/gamma) is 1/(1 + gamma^2 g^2)^2:
+        return self.expnorm / (1 + self.gamma2 * g2) ** 2 + (1 - self.expnorm) * np.exp(
+            -0.25 * self.beta2 * g2
+        )
 
     @property
     def rho_rec_limit0(self) -> float:
@@ -181,28 +190,6 @@ def genrecip(
     for vec, r in zip(vecs, radii, strict=False):
         if r < G_cut and r != 0:
             yield vec
-
-
-def generate_reciprocal_vectors_squared(
-    a1: npt.ArrayLike, a2: npt.ArrayLike, a3: npt.ArrayLike, encut: float
-) -> Generator[float, None, None]:
-    """Generate Reciprocal vectors squared.
-
-    Generate reciprocal vector magnitudes within the cutoff along the specified
-    lattice vectors.
-
-    Args:
-        a1: Lattice vector a (in Bohrs)
-        a2: Lattice vector b (in Bohrs)
-        a3: Lattice vector c (in Bohrs)
-        encut: Reciprocal vector energy cutoff
-
-    Returns:
-        [[g1^2], [g2^2], ...] Square of reciprocal vectors (1/Bohr)^2
-        determined by a1, a2, a3 and whose magntidue is less than gcut^2.
-    """
-    for vec in genrecip(a1, a2, a3, encut):
-        yield np.dot(vec, vec)
 
 
 def converge(f: Callable, step: float, tol: float, max_h: float) -> float:

@@ -7,6 +7,9 @@ authors = [{ name = "Jimmy-Xuan Shen", email = "jmmshn@gmail.com" }]
 classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Science/Research",
   "Operating System :: OS Independent",
@@ -14,10 +17,15 @@ classifiers = [
   "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-  "pymatgen-core>=2026.4.7",
-  "scikit-image>=0.19.3",
-  "numpy>=2.0.0,<3.0.0",
-  "mp-pyrho>=0.4.4",
+  "pymatgen-core>=2026.7.31",
+  "numpy>=2.1",
+  "scipy>=1.14.1",
+  "matplotlib>=3.9",
+  "monty>=2026.7.16",
+  "pandas>=2.2.2",
+  "plotly>=5.24",
+  "scikit-image>=0.25",
+  "mp-pyrho>=0.4.5",
 ]
 description = "Pymatgen extension for defects analysis"
 dynamic = ["version"]
@@ -25,16 +33,16 @@ keywords = ["high-throughput", "automated", "dft", "defects"]
 license = "BSD-3-Clause-LBNL"
 name = "pymatgen-analysis-defects"
 readme = "README.md"
-requires-python = '>=3.11'
+requires-python = ">=3.11"
 
 [project.optional-dependencies]
-finder = ["dscribe>=2.0.0"]
-dev = ["pre-commit>=2.12.1"]
-docs = [
-  "jupyter-book>=0.13.1,<2",
-]
-optional = ["pydefect", "dscribe>=2.0.0", "numba"]
-tests = ["pytest>=8.2.1", "pytest-cov>=5.0.0", "nbmake>=1.5.3"]
+finder = ["dscribe>=2.1.1"]
+optional = ["pydefect>=0.9.9", "dscribe>=2.1.1", "numba>=0.61"]
+
+[dependency-groups]
+test = ["pytest>=9", "pytest-cov>=7", "pytest-xdist>=3.8", "nbmake>=1.5.5"]
+docs = ["jupyter-book>=2,<3", "pdoc>=16"]
+dev = ["pre-commit>=4", { include-group = "test" }]
 
 [tool.setuptools.dynamic]
 readme = { file = ["README.md"] }

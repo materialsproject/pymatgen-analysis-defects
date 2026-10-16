@@ -98,22 +98,19 @@ Specifically, please make sure to run the following commands for linting:
 
 .. code-block:: bash
 
-    $ pip install -e .[strict]
-    $ pip install -e .[dev]
-    $ pre-commit install
-    $ pre-commit run --all-files
+    $ uvx pre-commit install
+    $ uvx pre-commit run --all-files
 
 And run these commands for testing:
 
 .. code-block:: bash
 
-    $ pip install -e .[strict]
-    $ pip install -e .[tests]
-    $ pytest --cov=pymatgen
-    $ pytest --nbmake ./docs/source/content
+    $ uv sync --extra optional
+    $ uv run pytest -n auto --cov=pymatgen
+    $ uv run pytest -n auto --nbmake ./docs/source/content
 
-For more details about what is actually installed with each of the ``pip install .[arg]`` commands, please inspect the
-``pyproject.toml`` file.
+Dependencies are pinned in ``uv.lock``; after changing them in ``pyproject.toml``,
+run ``uv lock`` and commit the result (CI installs with ``uv sync --locked``).
 
 Contributors
 ------------

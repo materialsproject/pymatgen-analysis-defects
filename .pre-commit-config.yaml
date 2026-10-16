@@ -39,5 +39,5 @@ repos:
       args: [
         --drop-empty-cells,
         --strip-init-cells,
-        --extra-keys=metadata.kernelspec,
+        --keep-id,
         ]
