@@ -1,9 +1,15 @@
-# One-click release: test, tag vYYYY.M.D, create the GitHub release, publish to PyPI.
+# Release: tag vYYYY.M.D, create the GitHub release, publish to PyPI.
+# Runs on the button (tests first, always releases) or after testing passes on a push to main
+# (releases that exact commit, only if a feat/fix/perf commit touched the package since the last tag).
 # Keep this filename: it is the workflow registered as the PyPI trusted publisher.
 name: Release
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: [testing]
+    types: [completed]
+    branches: [main]
 
 # Not `${{ github.workflow }}-...`: testing.yml uses that group and inherits this workflow's name.
 concurrency:
@@ -14,19 +20,68 @@ permissions:
   contents: read
 
 jobs:
+  gate:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.check.outputs.sha }}
+      release: ${{ steps.check.outputs.release }}
+    steps:
+      # The verified commit, even if main has moved on since.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Check release-worthiness
+        id: check
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          sha="$(git rev-parse HEAD)"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT" = workflow_dispatch ]; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          range="$sha"
+          if last="$(git describe --tags --abbrev=0 --match 'v*' "$sha" 2>/dev/null)"; then
+            range="$last..$sha"
+          fi
+          echo "Package commits in $range:"
+          subjects="$(git log --format=%s "$range" -- pymatgen pyproject.toml)"
+          echo "$subjects"
+          if echo "$subjects" | grep -Eq '^(feat|fix|perf)(\([^)]*\))?!?:'; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No feat/fix/perf package changes; skipping release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # workflow_run already has passing tests for this commit.
   tests:
-    if: github.ref == 'refs/heads/main'
+    needs: gate
+    if: github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/testing.yml
     secrets: inherit
 
   build:
-    needs: tests
+    needs: [gate, tests]
+    if: >-
+      !cancelled() && needs.gate.outputs.release == 'true' &&
+      (needs.tests.result == 'success' ||
+       (github.event_name == 'workflow_run' && needs.tests.result == 'skipped'))
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ needs.gate.outputs.sha }}
           fetch-depth: 0  # versioningit derives the version from git tags
       - uses: astral-sh/setup-uv@v10.2.0
 
@@ -66,8 +121,10 @@ jobs:
           name: dist
           path: dist/
 
+  # !cancelled(): plain success() would see the skipped tests job upstream and skip these.
   release:
-    needs: build
+    needs: [gate, build]
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -80,15 +137,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.build.outputs.tag }}
+          SHA: ${{ needs.gate.outputs.sha }}
         run: |
           gh release create "$TAG" dist/* \
             --repo "$GITHUB_REPOSITORY" \
-            --target "$GITHUB_SHA" \
+            --target "$SHA" \
             --title "$TAG" \
             --generate-notes
 
   publish:
     needs: release
+    if: ${{ !cancelled() && needs.release.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
