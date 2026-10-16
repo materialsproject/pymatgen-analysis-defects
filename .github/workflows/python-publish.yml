@@ -1,7 +1,7 @@
 # Release flow: a standing release PR (branch release/next), then tag + GitHub release + PyPI on merge.
-# - After testing passes on a push to main: if that push merged the release PR, release that commit;
-#   otherwise, if a feat/fix/perf commit touched the package since the last tag, open or refresh
-#   the release PR (CHANGELOG.md section for the commits since the last tag).
+# - On a push to main: if that push merged the release PR, release that commit; otherwise, if a
+#   feat/fix/perf commit touched the package since the last tag, open or refresh the release PR
+#   (CHANGELOG.md section for the commits since the last tag).
 # - Daily: refresh the release PR so its date stays current. Button: refresh it even if nothing qualifies.
 # Logic lives in .github/scripts/release.py.
 # Keep this filename: it is the workflow registered as the PyPI trusted publisher.
@@ -11,9 +11,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "5 0 * * *"
-  workflow_run:
-    workflows: [testing]
-    types: [completed]
+  push:
     branches: [main]
 
 permissions:
@@ -24,19 +22,15 @@ env:
 
 jobs:
   gate:
-    if: >-
-      github.event_name != 'workflow_run' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     outputs:
       sha: ${{ steps.check.outputs.sha }}
       action: ${{ steps.check.outputs.action }}
     steps:
-      # The verified commit, even if main has moved on since.
+      # The pushed commit, even if main has moved on since; cron and the button use main.
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha || 'main' }}
+          ref: ${{ github.event_name == 'push' && github.sha || 'main' }}
           fetch-depth: 0
 
       # action: release (this push merged the release PR), refresh (update the PR), or none.
@@ -50,7 +44,7 @@ jobs:
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
           merged="$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/pulls" --jq \
             "[.[] | select(.head.ref == \"$RELEASE_BRANCH\" and .merged_at != null)] | length")"
-          if [ "$EVENT" = workflow_run ] && [ "$merged" != 0 ]; then
+          if [ "$EVENT" = push ] && [ "$merged" != 0 ]; then
             if git tag --points-at "$sha" | grep -q '^v'; then
               echo "::notice::$sha is already tagged; nothing to do."
               action=none
@@ -70,9 +64,10 @@ jobs:
     needs: gate
     if: needs.gate.outputs.action == 'refresh'
     runs-on: ubuntu-latest
+    # A newer push supersedes an older refresh; releases have their own group below.
     concurrency:
       group: release-pr
-      cancel-in-progress: false
+      cancel-in-progress: true
     permissions:
       contents: write
       pull-requests: write
