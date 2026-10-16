@@ -1,29 +1,209 @@
-name: Upload Python Package
+# Release flow: a standing release PR (branch release/next), then tag + GitHub release + PyPI on merge.
+# - After testing passes on a push to main: if that push merged the release PR, release that commit;
+#   otherwise, if a feat/fix/perf commit touched the package since the last tag, open or refresh
+#   the release PR (CHANGELOG.md section for the commits since the last tag).
+# - Daily: refresh the release PR so its date stays current. Button: refresh it even if nothing qualifies.
+# Logic lives in .github/scripts/release.py.
+# Keep this filename: it is the workflow registered as the PyPI trusted publisher.
+name: Release
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
+  schedule:
+    - cron: "5 0 * * *"
+  workflow_run:
+    workflows: [testing]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: read
-  id-token: write
+
+env:
+  RELEASE_BRANCH: release/next
 
 jobs:
-  deploy:
-
+  gate:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
-
+    outputs:
+      sha: ${{ steps.check.outputs.sha }}
+      action: ${{ steps.check.outputs.action }}
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.13'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install build
-    - name: Build package
-      run: python -m build
-    - name: Publish package
-      uses: pypa/gh-action-pypi-publish@release/v1
+      # The verified commit, even if main has moved on since.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || 'main' }}
+          fetch-depth: 0
+
+      # action: release (this push merged the release PR), refresh (update the PR), or none.
+      - name: Decide
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          sha="$(git rev-parse HEAD)"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          merged="$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/pulls" --jq \
+            "[.[] | select(.head.ref == \"$RELEASE_BRANCH\" and .merged_at != null)] | length")"
+          if [ "$EVENT" = workflow_run ] && [ "$merged" != 0 ]; then
+            if git tag --points-at "$sha" | grep -q '^v'; then
+              echo "::notice::$sha is already tagged; nothing to do."
+              action=none
+            else
+              action=release
+            fi
+          elif [ "$EVENT" = workflow_dispatch ] || [ "$(python3 .github/scripts/release.py worthy "$sha")" = true ]; then
+            action=refresh
+          else
+            echo "No feat/fix/perf package changes since the last tag."
+            action=none
+          fi
+          echo "action=$action" >> "$GITHUB_OUTPUT"
+          echo "Action: $action"
+
+  release-pr:
+    needs: gate
+    if: needs.gate.outputs.action == 'refresh'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: release-pr
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.gate.outputs.sha }}
+          fetch-depth: 0
+
+      - name: Commit the CHANGELOG section
+        id: changelog
+        run: |
+          tag="$(python3 .github/scripts/release.py next-tag)"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          git switch -C "$RELEASE_BRANCH"
+          python3 .github/scripts/release.py prepend HEAD "$tag" "$GITHUB_REPOSITORY" > section.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: release $tag" -- CHANGELOG.md
+
+      - name: Push and open or update the PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.changelog.outputs.tag }}
+        run: |
+          {
+            echo "Merging this PR tags the merge commit (calver date taken at merge time),"
+            echo "creates the GitHub release with the notes below, and publishes to PyPI."
+            echo
+            echo "PRs opened by GitHub Actions do not trigger CI: close and reopen this PR to run it."
+            echo
+            cat section.md
+          } > body.md
+          if [ "$(git rev-parse -q --verify "origin/$RELEASE_BRANCH^{tree}")" != "$(git rev-parse "HEAD^{tree}")" ]; then
+            git push --force origin "HEAD:refs/heads/$RELEASE_BRANCH"
+          fi
+          pr="$(gh pr list --head "$RELEASE_BRANCH" --base main --state open --json number --jq '.[].number')"
+          if [ -n "$pr" ]; then
+            gh pr edit "$pr" --title "chore: release $TAG" --body-file body.md
+          else
+            gh pr create --base main --head "$RELEASE_BRANCH" --title "chore: release $TAG" --body-file body.md
+          fi
+
+  build:
+    needs: gate
+    if: needs.gate.outputs.action == 'release'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.gate.outputs.sha }}
+          fetch-depth: 0  # versioningit derives the version from git tags
+      - uses: astral-sh/setup-uv@v10.2.0
+
+      - name: Compute release tag
+        id: tag
+        run: |
+          tag="$(python3 .github/scripts/release.py next-tag)"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Release tag: $tag"
+          if ! head -n 3 CHANGELOG.md | grep -qx "## $tag"; then
+            echo "::warning::CHANGELOG.md's newest section is not '## $tag'; releasing as $tag anyway."
+          fi
+          python3 .github/scripts/release.py notes > notes.md
+
+      # Local only, so versioningit sees it; `gh release create` pushes the real tag.
+      - name: Tag locally and check the version
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          git tag "$TAG"
+          version="$(uvx --from 'versioningit>=1,<4' versioningit .)"
+          if [ "$version" != "${TAG#v}" ]; then
+            echo "::error::versioningit gives '$version', expected '${TAG#v}'"
+            exit 1
+          fi
+
+      - name: Build sdist and wheel
+        run: uv build
+
+      - name: Check package metadata
+        run: uvx twine check --strict dist/*
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: notes
+          path: notes.md
+
+  release:
+    needs: [gate, build]
+    runs-on: ubuntu-latest
+    concurrency:
+      group: release-publish
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: actions/download-artifact@v4
+        with:
+          name: notes
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.build.outputs.tag }}
+          SHA: ${{ needs.gate.outputs.sha }}
+        run: |
+          gh release create "$TAG" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$SHA" \
+            --title "$TAG" \
+            --notes-file notes.md
+
+  publish:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
