@@ -5,14 +5,21 @@ updates:
   schedule:
     interval: weekly
   open-pull-requests-limit: 5
+  # Bump uv.lock only: pyproject.toml keeps tested floors and no caps (checked by the lowest-direct CI job).
+  versioning-strategy: lockfile-only
   allow:
   - dependency-type: direct
   - dependency-type: indirect
-  ignore:
-    - dependency-name: mistune
-    - dependency-name: numpy
+  groups:
+    # One PR for all minor/patch bumps; majors still get their own PR each.
+    uv-minor-patch:
+      patterns: ["*"]
+      update-types: [minor, patch]
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
     interval: weekly
   open-pull-requests-limit: 5
+  groups:
+    github-actions:
+      patterns: ["*"]
