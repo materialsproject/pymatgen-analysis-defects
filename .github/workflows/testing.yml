@@ -8,6 +8,7 @@ on:
   pull_request:
     branches:
       - main
+  workflow_call:  # run by the Release workflow (python-publish.yml) before tagging
 
 # A new push to a PR cancels its older runs; runs on main always finish (they deploy docs).
 concurrency:
