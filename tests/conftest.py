@@ -1,7 +1,7 @@
 from collections import defaultdict
 from pathlib import Path
-import numpy as np
 
+import numpy as np
 import pytest
 from monty.serialization import loadfn
 from pymatgen.analysis.defects.core import PeriodicSite, Substitution
@@ -90,8 +90,8 @@ def defect_entries_and_plot_data_Mg_Ga(data_Mg_Ga, defect_Mg_Ga):
         )
         return def_entry, frey_summary
 
-    defect_entries = dict()
-    plot_data = dict()
+    defect_entries = {}
+    plot_data = {}
     for qq in [-2, -1, 0, 1]:
         defect_entry, frey_summary = get_data(qq)
         defect_entries[qq] = defect_entry
@@ -106,7 +106,7 @@ def chgcar_fe3o4(test_dir):
 
 @pytest.fixture(scope="session")
 def v_ga(test_dir):
-    res = dict()
+    res = {}
     for q1, q2 in [(0, -1), (-1, 0)]:
         ccd_dir = test_dir / f"v_Ga/ccd_{q1}_{q2}"
         vaspruns = [Vasprun(ccd_dir / f"{i}/vasprun.xml") for i in [0, 1, 2]]
