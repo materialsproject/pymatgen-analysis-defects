@@ -122,7 +122,7 @@ jobs:
         with:
           ref: ${{ needs.gate.outputs.sha }}
           fetch-depth: 0  # versioningit derives the version from git tags
-      - uses: astral-sh/setup-uv@v10.3.0
+      - uses: astral-sh/setup-uv@v10.3.2
 
       - name: Compute release tag
         id: tag
