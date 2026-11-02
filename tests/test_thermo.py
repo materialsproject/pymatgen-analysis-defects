@@ -226,7 +226,7 @@ def test_formation_energy_diagram_numerical(formation_energy_diagram) -> None:
 
 def test_competing_phases(formation_energy_diagram) -> None:
     fed = copy.deepcopy(formation_energy_diagram)
-    cp_at_point = dict()
+    cp_at_point = {}
     for chempot_, competing_phases_ in zip(fed.chempot_limits, fed.competing_phases):
         key = ",".join([f"{k}:{v:0.2f}" for k, v in chempot_.items()])
         cp_at_point[key] = set(competing_phases_.keys())
@@ -247,7 +247,7 @@ def test_multi(
     bulk_dos = bulk_vasprun.complete_dos
     _, vbm = bulk_dos.get_cbm_vbm()
     bulk_entry = bulk_vasprun.get_computed_entry(inc_structure=False)
-    defect_entries, plot_data = defect_entries_and_plot_data_Mg_Ga
+    defect_entries, _plot_data = defect_entries_and_plot_data_Mg_Ga
     def_ent_list = list(defect_entries.values())
 
     with pytest.raises(
@@ -306,7 +306,7 @@ def test_formation_from_directory(
     for q in [-1, 0, 1]:
         qq.append(q)
         dmap = {"bulk": sc_dir / "bulk_sc"}
-        dmap.update(zip(qq, map(lambda x: sc_dir / f"q={x}", qq)))
+        dmap.update(zip(qq, (sc_dir / f"q={x}" for x in qq)))
         assert len(dmap) == len(qq) + 1
         fed = FormationEnergyDiagram.with_directories(
             directory_map=dmap,
