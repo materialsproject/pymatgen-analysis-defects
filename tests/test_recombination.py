@@ -35,7 +35,7 @@ def test_get_vibronic_matrix_elements() -> None:
     for m, n in itertools.product(range(Ni), range(Nf)):
         ovl[m, n] = analytic_overlap_NM(dQ, omega_i, omega_f, m, n)
 
-    e, matel = get_mQn(
+    _e, matel = get_mQn(
         omega_i=omega_i, omega_f=omega_f, m_init=0, Nf=Nf, dQ=dQ, ovl=ovl
     )
     ref_result = [0.0, 3984589.0407885523, 0.0, 0.0, 0.0]
