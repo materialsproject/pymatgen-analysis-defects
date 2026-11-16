@@ -11,8 +11,8 @@ from pymatgen.analysis.defects.utils import (
     get_plane_spacing,
     group_docs,
 )
-from pymatgen.core.structure_matcher import StructureMatcher
 from pymatgen.core.periodic_table import Specie
+from pymatgen.core.structure_matcher import StructureMatcher
 from pymatgen.io.vasp.outputs import Chgcar
 
 
