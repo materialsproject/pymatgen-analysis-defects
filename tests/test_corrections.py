@@ -11,6 +11,7 @@ from pymatgen.analysis.defects.corrections.kumagai import (
     get_efnv_correction,
     get_structure_with_pot,
 )
+from pymatgen.analysis.defects.finder import DefectSiteFinder
 from pymatgen.analysis.defects.utils import QModel
 from pymatgen.core import Lattice
 
@@ -42,8 +43,12 @@ def test_freysoldt(data_Mg_Ga) -> None:
         defect_frac_coords=[0.5, 0.5, 0.5],
     )
 
-    defect_locpot_dict = {str(k): defect_locpot.get_axis_grid(k) for k in [0, 1, 2]}
-    bulk_locpot_dict = {str(k): bulk_locpot.get_axis_grid(k) for k in [0, 1, 2]}
+    defect_locpot_dict = {
+        str(k): defect_locpot.get_average_along_axis(k) for k in [0, 1, 2]
+    }
+    bulk_locpot_dict = {
+        str(k): bulk_locpot.get_average_along_axis(k) for k in [0, 1, 2]
+    }
     freysoldt_summary = get_freysoldt_correction(
         q=0,
         dielectric=14,
@@ -79,6 +84,39 @@ def test_freysoldt_sxdefect_compare(v_N_GaN) -> None:
     }
     for q in range(-1, 3):
         assert results[q] == pytest.approx(references[q], abs=1e-3)
+
+
+def test_freysoldt_planar_average_input(v_N_GaN) -> None:
+    """Planar-averaged potentials (dict input) must match the ``Locpot`` input."""
+    bulk_locpot = v_N_GaN["bulk_locpot"]
+    for q in (-1, 2):
+        defect_locpot = v_N_GaN["defect_locpots"][q]
+        kwargs = {
+            "q": q,
+            "dielectric": 5,
+            "lattice": defect_locpot.structure.lattice,
+            "defect_frac_coords": DefectSiteFinder().get_defect_fpos(
+                defect_locpot.structure, bulk_locpot.structure
+            ),
+        }
+        from_locpots = get_freysoldt_correction(
+            defect_locpot=defect_locpot, bulk_locpot=bulk_locpot, **kwargs
+        )
+        from_dicts = get_freysoldt_correction(
+            defect_locpot={
+                k: defect_locpot.get_average_along_axis(k) for k in range(3)
+            },
+            bulk_locpot={k: bulk_locpot.get_average_along_axis(k) for k in range(3)},
+            **kwargs,
+        )
+        assert from_dicts.correction_energy == pytest.approx(
+            from_locpots.correction_energy, abs=1e-10
+        )
+        for axis in range(3):
+            np.testing.assert_array_equal(
+                from_dicts.metadata["plot_data"][axis]["pot_plot_data"]["x"],
+                defect_locpot.get_axis_grid(axis),
+            )
 
 
 def test_freysoldt_anisotropic_dielectric() -> None:
