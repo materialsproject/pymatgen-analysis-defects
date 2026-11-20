@@ -141,7 +141,6 @@ def get_freysoldt_correction(
     q_model = QModel() if q_model is None else q_model
 
     if isinstance(defect_locpot, VolumetricData):
-        list_axis_grid = [*map(defect_locpot.get_axis_grid, [0, 1, 2])]
         list_defect_plnr_avg_esp = [
             *map(defect_locpot.get_average_along_axis, [0, 1, 2]),
         ]
@@ -155,17 +154,14 @@ def get_freysoldt_correction(
     elif isinstance(defect_locpot, dict):
         defect_locpot_ = {int(k): v for k, v in defect_locpot.items()}
         list_defect_plnr_avg_esp = [defect_locpot_[i] for i in range(3)]
-        list_axis_grid = [
-            *map(
-                np.linspace,
-                [0, 0, 0],
-                lattice.abc,
-                [len(i) for i in list_defect_plnr_avg_esp],
-            ),
-        ]
     else:
         msg = "defect_locpot must be of type Locpot or dict"
         raise ValueError(msg)
+
+    list_axis_grid = [  # equivalent to ``VolumetricData.get_axis_grid``
+        np.arange(len(avg)) / len(avg) * length
+        for avg, length in zip(list_defect_plnr_avg_esp, lattice.abc, strict=True)
+    ]
 
     if isinstance(bulk_locpot, VolumetricData):
         list_bulk_plnr_avg_esp = [*map(bulk_locpot.get_average_along_axis, [0, 1, 2])]
