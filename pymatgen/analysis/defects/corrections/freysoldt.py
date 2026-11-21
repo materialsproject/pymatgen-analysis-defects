@@ -351,21 +351,14 @@ def perform_pot_corr(
     _logger.debug("run Freysoldt potential alignment method for axis %s", str(axis))
     nx = len(axis_grid)
 
-    # shift these planar averages to have defect at origin
-    axfracval = defect_frac_coords[axis]
-    axbulkval = axfracval * lattice.abc[axis]
-    if axbulkval < 0:
-        axbulkval += lattice.abc[axis]
-    elif axbulkval > lattice.abc[axis]:
-        axbulkval -= lattice.abc[axis]
-
-    if axbulkval:
-        for i in range(nx):
-            if axbulkval < axis_grid[i]:
-                break
-        rollind = len(axis_grid) - i
-        pureavg = np.roll(pureavg, rollind)
-        defavg = np.roll(defavg, rollind)
+    # shift these planar averages to have the grid plane nearest the defect at the
+    # origin, with ``offset`` the remaining (sub-grid, fractional) distance of the
+    # defect from this plane, at which the model charge is then placed:
+    defect_grid_coord = defect_frac_coords[axis] * nx
+    rollind = -int(np.floor(defect_grid_coord + 0.5))
+    offset = (defect_grid_coord + rollind) / nx
+    pureavg = np.roll(pureavg, rollind)
+    defavg = np.roll(defavg, rollind)
 
     # if not self._silence:
     _logger.debug("calculating lr part along planar avg axis")
@@ -379,12 +372,14 @@ def perform_pot_corr(
     b_vec = reci_latt.matrix[axis]
     eps_axis = float(b_vec @ dielectric_tensor @ b_vec / (b_vec @ b_vec))
 
-    # Build background charge potential with defect at origin
+    # Build background charge potential with defect at ``offset`` from the origin
     v_G = np.empty(len(axis_grid), np.dtype("c16"))
     v_G[0] = 4 * np.pi * -q / avg_eps * q_model.rho_rec_limit0
-    g = np.roll(np.arange(-nx // 2, nx // 2, 1, dtype=int), int(nx // 2)) * dg
+    g_idx = np.fft.fftfreq(nx, 1 / nx)  # (integer) reciprocal grid indices
+    g = g_idx * dg
     g2 = np.multiply(g, g)[1:]
     v_G[1:] = 4 * np.pi / (eps_axis * g2) * -q * q_model.rho_rec(g2)
+    v_G *= np.exp(2j * np.pi * g_idx * offset)
     v_G[nx // 2] = 0 if not (nx % 2) else v_G[nx // 2]
 
     # Get the real space potential via fft and grabbing the imaginary portion
@@ -406,7 +401,7 @@ def perform_pot_corr(
     mid = int(len(short) / 2)
 
     tmppot = [short[i] for i in range(mid - checkdis, mid + checkdis + 1)]
-    _logger.debug("shifted defect position on axis (%s) to origin", repr(axbulkval))
+    _logger.debug("shifted defect position on axis (%s) to origin", repr(axis))
     _logger.debug(
         "means sampling region is (%f,%f)",
         axis_grid[mid - checkdis],

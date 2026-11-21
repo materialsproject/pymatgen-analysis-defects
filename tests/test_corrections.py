@@ -68,10 +68,10 @@ def test_freysoldt_sxdefect_compare(v_N_GaN) -> None:
     bulk_locpot = v_N_GaN["bulk_locpot"]
     defect_locpots = v_N_GaN["defect_locpots"]
     references = {
-        -1: 0.366577,
+        -1: 0.361113,
         0: 0.0,
-        1: 0.179924,
-        2: 0.772761,
+        1: 0.179934,
+        2: 0.749072,
     }
     results = {
         q: get_freysoldt_correction(
@@ -117,6 +117,38 @@ def test_freysoldt_planar_average_input(v_N_GaN) -> None:
                 from_dicts.metadata["plot_data"][axis]["pot_plot_data"]["x"],
                 defect_locpot.get_axis_grid(axis),
             )
+
+
+def test_freysoldt_translation_invariance(v_N_GaN) -> None:
+    """The correction must not depend on where the defect is in the supercell.
+
+    Shifting the potentials by whole grid planes, and the defect coordinates
+    accordingly, is the same calculation with a different choice of origin.
+    """
+    bulk_locpot = v_N_GaN["bulk_locpot"]
+    defect_locpot = v_N_GaN["defect_locpots"][2]
+    planar_averages = [
+        {k: locpot.get_average_along_axis(k) for k in range(3)}
+        for locpot in (defect_locpot, bulk_locpot)
+    ]
+    defect_fpos = DefectSiteFinder().get_defect_fpos(
+        defect_locpot.structure, bulk_locpot.structure
+    )
+    for frac_coords in (np.zeros(3), defect_fpos):  # on and between grid planes
+        corrections = [
+            get_freysoldt_correction(
+                2,
+                5,
+                *[
+                    {k: np.roll(avg[k], shift[k]) for k in range(3)}
+                    for avg in planar_averages
+                ],
+                defect_frac_coords=frac_coords + np.array(shift) / defect_locpot.dim,
+                lattice=defect_locpot.structure.lattice,
+            ).correction_energy
+            for shift in ([0, 0, 0], [5, 11, 17], [-91, -85, 150])
+        ]
+        assert corrections[1:] == pytest.approx([corrections[0]] * 2, abs=1e-3)
 
 
 def test_freysoldt_anisotropic_dielectric() -> None:
